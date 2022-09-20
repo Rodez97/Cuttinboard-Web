@@ -1,0 +1,4 @@
+build
+.firebase
+.vscode
+node_modules

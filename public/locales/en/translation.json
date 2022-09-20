@@ -1,0 +1,16 @@
+{
+  "auth/email-already-in-use": "Email already in use",
+  "auth/user-not-found": "User not found",
+  "auth/wrong-password": "Wrong password",
+  "auth/too-many-requests": "Too many requests",
+  "auth/account-exists-with-different-credential": "This phone number is associated with another account",
+  "auth/invalid-phone-number": "Invalid phone number",
+  "PUBLIC": "Open for Everyone",
+  "POSITIONS": "Linked to positions",
+  "PRIVATE": "Private",
+  "STAFF": "Staff",
+  "GENERAL_MANAGER": "General Manager",
+  "MANAGER": "Manager",
+  "OWNER": "Owner",
+  "past_due": "Past Due"
+}

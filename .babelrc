@@ -1,0 +1,24 @@
+{
+  "presets": [
+    "@babel/preset-react",
+    "@babel/preset-typescript",
+    "@babel/preset-env",
+    [
+      "@babel/preset-react",
+      { "runtime": "automatic", "importSource": "@emotion/react" }
+    ]
+  ],
+  "plugins": [
+    "@babel/plugin-syntax-jsx",
+    [
+      "import",
+      {
+        "libraryName": "antd",
+        "libraryDirectory": "lib",
+        "style": true // or 'css'
+      }
+    ],
+    "inline-react-svg",
+    "@emotion/babel-plugin"
+  ]
+}
