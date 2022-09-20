@@ -159,7 +159,7 @@ function Employees() {
     <Layout>
       <PageHeader
         className="site-page-header-responsive"
-        onBack={() => navigate(-1)}
+        onBack={() => navigate(`/location/${location.id}/apps`)}
         avatar={{ icon: <Icon component={AccountGroupOutline} /> }}
         title={t("Employees")}
         subTitle={`${usage.employeesCount} / ${usage.employeesLimit}`}

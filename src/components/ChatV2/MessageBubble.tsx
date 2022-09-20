@@ -7,21 +7,8 @@ import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
 import { useInView } from "react-intersection-observer";
 import { Message, MessageType } from "@cuttinboard/cuttinboard-library/models";
 import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import {
-  useChatRTDB,
-  useConversations,
-  useDMs,
-} from "@cuttinboard/cuttinboard-library/services";
-import {
-  Avatar,
-  Button,
-  Comment,
-  Divider,
-  Dropdown,
-  Popover,
-  Tooltip,
-  Typography,
-} from "antd";
+import { useChatRTDB, useDMs } from "@cuttinboard/cuttinboard-library/services";
+import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
 import mdiArrowDownLeft from "@mdi/svg/svg/arrow-down-left.svg";
 import mdiReply from "@mdi/svg/svg/reply.svg";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -162,6 +149,7 @@ function MessageBubble({
                   size={20}
                   src={currentMessage.replyTarget.sender?.avatar}
                   alt={currentMessage.replyTarget.sender?.name}
+                  icon={<UserOutlined />}
                 />
               </div>
               <div
@@ -216,6 +204,7 @@ function MessageBubble({
                 size={40}
                 src={currentMessage.sender?.avatar}
                 alt={currentMessage.sender?.name}
+                icon={<UserOutlined />}
               />
             )}
           </div>

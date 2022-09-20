@@ -13,7 +13,6 @@ import { GrayPageHeader } from "../../components/PageHeaders";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 
 function DMMain() {
-  const { boardId } = useParams();
   const navigate = useNavigate();
   const { removeDMBadge } = useNotificationsBadges();
   const { selectedChat } = useDMs();
@@ -22,9 +21,9 @@ function DMMain() {
 
   useEffect(() => {
     return () => {
-      if (boardId) removeDMBadge(boardId);
+      if (selectedChat.id) removeDMBadge(selectedChat.id);
     };
-  }, [boardId]);
+  }, [selectedChat]);
 
   const recipient = useMemo(() => {
     const { members } = selectedChat;
@@ -32,12 +31,12 @@ function DMMain() {
       (id) => id !== Auth.currentUser.uid
     );
     return getUniqAllEmployees().find(({ id }) => id === other);
-  }, [boardId, selectedChat, getEmployees, getOrgEmployees]);
+  }, [selectedChat.id, selectedChat, getEmployees, getOrgEmployees]);
 
   return (
     <ChatRTDBProvider
       chatType="chats"
-      chatId={boardId}
+      chatId={selectedChat.id}
       members={Object.keys(selectedChat.members)}
     >
       <GrayPageHeader
@@ -53,7 +52,7 @@ function DMMain() {
             : "Removed Employee"
         }
       />
-      <ChatMain type="chats" chatId={boardId} canUse />
+      <ChatMain type="chats" chatId={selectedChat.id} canUse />
     </ChatRTDBProvider>
   );
 }

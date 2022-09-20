@@ -77,9 +77,7 @@ export const SummaryCell = ({ key, weekDay, data }: SummaryCellProps) => {
     <Table.Summary.Cell key={key} index={key}>
       <Space direction="vertical" size="small">
         <Typography.Text>{totalHours}</Typography.Text>
-        <Typography.Text>{`${totalEmployees} ${t(
-          "employees"
-        )}`}</Typography.Text>
+        <Typography.Text>{totalEmployees}</Typography.Text>
         <Typography.Text>
           {timeAndWages.wage.toLocaleString("en-US", {
             style: "currency",
