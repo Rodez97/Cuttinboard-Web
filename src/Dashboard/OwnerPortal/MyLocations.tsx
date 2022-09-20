@@ -10,14 +10,19 @@ import { jsx } from "@emotion/react";
 import {
   Alert,
   Button,
+  Input,
   Layout,
   Modal,
   PageHeader,
   Space,
   Typography,
 } from "antd";
+import SplitButton from "components/SplitButton";
 import dayjs from "dayjs";
 import { deleteDoc } from "firebase/firestore";
+import { orderBy } from "lodash";
+import { matchSorter } from "match-sorter";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
@@ -31,6 +36,14 @@ function MyLocations() {
   const { locations } = useOwner();
   const navigate = useNavigate();
   const { organization, subscriptionDocument } = useDashboard();
+  const [orderData, setOrderData] = useState<{
+    index: number;
+    order: "desc" | "asc";
+  }>({
+    index: 0,
+    order: "asc",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const deleteLocation = (loc: Location) => {
     Modal.confirm({
@@ -51,8 +64,38 @@ function MyLocations() {
     });
   };
 
+  const getOrderedLocations = useMemo(() => {
+    let ordered: Location[] = [];
+    switch (orderData.index) {
+      case 0:
+        ordered = orderBy(locations, "name", orderData.order);
+        break;
+      case 1:
+        ordered = orderBy(locations, "address.city", orderData.order);
+        break;
+      case 2:
+        ordered = orderBy(locations, "intId", orderData.order);
+        break;
+
+      default:
+        ordered = locations;
+        break;
+    }
+    switch (orderData.index) {
+      case 0:
+        return matchSorter(ordered, searchQuery, { keys: ["name"] });
+      case 1:
+        return matchSorter(ordered, searchQuery, { keys: ["address.city"] });
+      case 2:
+        return matchSorter(ordered, searchQuery, { keys: ["intId"] });
+
+      default:
+        return ordered;
+    }
+  }, [locations, orderData, searchQuery]);
+
   return (
-    <Layout.Content>
+    <Layout>
       <PageHeader
         backIcon={false}
         title={t("My Locations")}
@@ -74,7 +117,7 @@ function MyLocations() {
           </Button>,
         ]}
       />
-      <div css={{ gap: "16px", padding: "20px" }}>
+      <div css={{ padding: "5px 20px" }}>
         {organization.subscriptionStatus !== "canceled" &&
           !subscriptionDocument?.default_payment_method && (
             <Alert
@@ -108,9 +151,36 @@ function MyLocations() {
             showIcon
           />
         )}
+      </div>
+      <Layout.Content css={{ padding: "5px 20px" }}>
+        <Space
+          wrap
+          size="large"
+          css={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: 10,
+          }}
+        >
+          <SplitButton
+            options={[t("Name"), t("City"), t("ID")]}
+            selectedIndex={orderData.index}
+            order={orderData.order}
+            onChageOrder={(order) =>
+              setOrderData((prev) => ({ ...prev, order }))
+            }
+            onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
+          />
+          <Input.Search
+            placeholder={t("Search")}
+            css={{ width: 250 }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          />
+        </Space>
 
         {locations?.length > 0 ? (
-          <Space wrap size="large" css={{ padding: "10px" }}>
+          <Space wrap size="large">
             {locations.map((loc) => (
               <LocationCard
                 key={loc.id}
@@ -140,12 +210,20 @@ function MyLocations() {
             ))}
           </Space>
         ) : (
-          <Typography.Title>
-            {t("You haven't created any location.")}
-          </Typography.Title>
+          <div
+            css={{
+              display: "flex",
+              justifyContent: "center",
+              paddingTop: "20px",
+            }}
+          >
+            <Typography.Text type="secondary" css={{ fontSize: 18 }}>
+              {t("You haven't created any location.")}
+            </Typography.Text>
+          </div>
         )}
-      </div>
-    </Layout.Content>
+      </Layout.Content>
+    </Layout>
   );
 }
 

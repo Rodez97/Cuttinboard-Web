@@ -45,6 +45,11 @@ function UserMenu({ color }: { color?: string }) {
       onClick={onMenuClick}
       items={[
         {
+          key: "email",
+          label: Auth.currentUser.email,
+          disabled: true,
+        },
+        {
           key: "dashboard",
           label: t("Dashboard"),
           icon: <DashboardOutlined />,

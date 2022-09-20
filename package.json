@@ -25,7 +25,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@charkour/react-reactions": "^0.8.0",
-    "@cuttinboard/cuttinboard-library": "^6.3.7",
+    "@cuttinboard/cuttinboard-library": "^6.3.8",
     "@date-io/dayjs": "^2.15.0",
     "@emotion/babel-preset-css-prop": "^11.10.0",
     "@fontsource/roboto": "^4.5.8",
