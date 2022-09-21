@@ -1,67 +1,42 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import { httpsCallable } from "firebase/functions";
 import { capitalize } from "lodash";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import { doc } from "firebase/firestore";
-import PageLoading from "../components/PageLoading";
-import PageError from "../components/PageError";
 import { recordError } from "../utils/utils";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
-import {
-  Firestore,
-  Functions,
-} from "@cuttinboard/cuttinboard-library/firebase";
+import { Functions } from "@cuttinboard/cuttinboard-library/firebase";
 import { useDashboard } from "./DashboardProvider";
 import { Alert, Button, Descriptions, Space, Typography } from "antd";
 import { CreditCardTwoTone } from "@ant-design/icons";
+import { useHttpsCallable } from "react-firebase-hooks/functions";
 
 function Subscription() {
-  const { user } = useCuttinboard();
   const { subscriptionDocument, organization } = useDashboard();
   const { t } = useTranslation();
-  const [isRunning, setIsRunning] = useState(false);
-  const [subDoc, loadingSubDoc, subDocError] = useDocumentData(
-    doc(Firestore, "Organizations", user.uid)
-  );
+  const [createBillingSession, running, error] = useHttpsCallable<
+    string,
+    string
+  >(Functions, "stripe-createBillingSession");
 
   const createManageSubSession = async () => {
-    setIsRunning(true);
     try {
-      const createBillingSession = httpsCallable<
-        { return_url: string },
-        string
-      >(Functions, "stripe-createBillingSession");
-      const { data } = await createBillingSession({
-        return_url: window.location.href,
-      });
+      const { data } = await createBillingSession(window.location.href);
       location.assign(data);
     } catch (error) {
       recordError(error);
     }
-    setIsRunning(false);
   };
 
   const getPrice = useMemo(
     () =>
       (
-        Number(subDoc?.locations) *
+        Number(organization?.locations) *
         (Number(subscriptionDocument?.items[0].price.unit_amount) / 100)
       ).toLocaleString("EN-us", {
         style: "currency",
         currency: "USD",
       }),
-    [subscriptionDocument, subDoc]
+    [subscriptionDocument, organization]
   );
-
-  if (loadingSubDoc) {
-    return <PageLoading />;
-  }
-
-  if (subDocError) {
-    return <PageError error={subDocError} />;
-  }
 
   return (
     <Space
@@ -91,7 +66,7 @@ function Subscription() {
           )}
         </Descriptions.Item>
         <Descriptions.Item label={t("Locations")}>
-          {Number(subDoc?.locations)}
+          {Number(organization?.locations)}
         </Descriptions.Item>
 
         <Descriptions.Item label={t("Billing")}>{getPrice}</Descriptions.Item>
@@ -152,11 +127,13 @@ function Subscription() {
         type="primary"
         icon={<CreditCardTwoTone />}
         onClick={createManageSubSession}
-        loading={isRunning}
+        loading={running}
         style={{ marginTop: 10 }}
       >
         {t("Manage Billing")}
       </Button>
+
+      {error && <Alert message={t(error.message)} type="error" showIcon />}
     </Space>
   );
 }
