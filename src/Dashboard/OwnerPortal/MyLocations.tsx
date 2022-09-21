@@ -179,9 +179,9 @@ function MyLocations() {
           />
         </Space>
 
-        {locations?.length > 0 ? (
+        {getOrderedLocations?.length > 0 ? (
           <Space wrap size="large">
-            {locations.map((loc) => (
+            {getOrderedLocations.map((loc) => (
               <LocationCard
                 key={loc.id}
                 location={loc}
