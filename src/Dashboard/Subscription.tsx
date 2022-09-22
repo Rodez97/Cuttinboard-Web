@@ -3,11 +3,7 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash";
 import { recordError } from "../utils/utils";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Firestore,
-  Functions,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "./DashboardProvider";
 import { Alert, Button, Descriptions, Space, Typography } from "antd";
 import { CreditCardTwoTone } from "@ant-design/icons";
