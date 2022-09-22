@@ -154,10 +154,10 @@ function LocationInfo() {
         <Form.Item label={t("Address")} name="address">
           <Input.Group>
             <Form.Item name={["address", "streetNumber"]}>
-              <Input placeholder={t("Street Number")} />
+              <Input placeholder={t("Address Line 1")} />
             </Form.Item>
             <Form.Item name={["address", "street"]}>
-              <Input placeholder={t("Street")} />
+              <Input placeholder={t("Address Line 2")} />
             </Form.Item>
             <Form.Item name={["address", "city"]}>
               <Input placeholder={t("City")} />
