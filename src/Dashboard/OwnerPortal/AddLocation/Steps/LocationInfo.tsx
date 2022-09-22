@@ -1,18 +1,12 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAddLocation } from "../AddLocation";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Button, Checkbox, Form, Input, message, Space } from "antd";
-import {
-  EditFilled,
-  MinusOutlined,
-  PlusOutlined,
-  SaveFilled,
-} from "@ant-design/icons";
-import LocationEditor from "components/LocationEditor";
+import { Button, Checkbox, Form, Input, message } from "antd";
+import { EditFilled, SaveFilled } from "@ant-design/icons";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
 type locFormType = Partial<Location> & {
