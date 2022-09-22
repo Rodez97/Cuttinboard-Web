@@ -5,36 +5,37 @@ import { useTranslation } from "react-i18next";
 import { useAddLocation } from "../AddLocation";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Button, Form, Input, message, Space } from "antd";
+import { Button, Checkbox, Form, Input, message, Space } from "antd";
 import {
   EditFilled,
   MinusOutlined,
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
+import LocationEditor from "components/LocationEditor";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+
+type locFormType = Partial<Location> & {
+  gm: {
+    name: string;
+    lastName: string;
+    email: string;
+  };
+};
 
 function LocationInfo() {
-  const [form] = Form.useForm();
+  const [locationForm] = Form.useForm<locFormType>();
   const { t } = useTranslation();
   const { location, setLocation, setGeneralManager } = useAddLocation();
   const { user } = useCuttinboard();
   const [saved, setSaved] = useState(false);
+  const [addGM, setAddGM] = useState(false);
 
-  const onFinish = async (
-    values: Location & {
-      gmName: string;
-      gmLastName: string;
-      gmEmail: string;
-    }
-  ) => {
-    const { gmName, gmLastName, gmEmail, ...rest } = values;
-    setLocation(rest);
-    if (gmName && gmLastName && gmEmail) {
-      setGeneralManager({
-        name: gmName,
-        lastName: gmLastName,
-        email: gmEmail,
-      });
+  const onFinish = async (values: locFormType) => {
+    const { gm, ...locData } = values;
+    setLocation(locData);
+    if (addGM) {
+      setGeneralManager(gm);
     }
     setSaved(true);
     message.success(t("Changes saved"));
@@ -45,175 +46,141 @@ function LocationInfo() {
       css={{
         display: "flex",
         minWidth: 300,
-        maxWidth: 500,
         margin: "auto",
         flexDirection: "column",
-        gap: 16,
       }}
     >
-      <Form
+      <Form<locFormType>
+        form={locationForm}
         layout="vertical"
-        form={form}
         initialValues={{
           ...location,
         }}
-        disabled={saved}
         onFinish={onFinish}
+        disabled={saved}
         size="small"
       >
-        <Form.List name="gm">
-          {(fields, { add, remove }) => (
-            <React.Fragment>
-              {fields.map(({ key, name, ...restField }) => (
-                <Space
-                  key={key}
-                  css={{
-                    border: "1px dotted #ff000024",
-                    display: "flex",
-                    padding: 10,
-                  }}
-                  direction="vertical"
-                >
-                  <Form.Item
-                    {...restField}
-                    name="gmName"
-                    rules={[
-                      { max: 50, message: t("Name is too long") },
-                      { required: true, message: "" },
-                    ]}
-                  >
-                    <Input placeholder={t("Name")} />
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name="gmLastName"
-                    dependencies={["gmAdd"]}
-                    rules={[
-                      { max: 50, message: t("Last Name is too long") },
-                      { required: true, message: "" },
-                    ]}
-                  >
-                    <Input placeholder={t("Last Name")} />
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name="gmEmail"
-                    rules={[
-                      { type: "email", message: t("Must be a valid email") },
-                      {
-                        max: 255,
-                        message: t("Email is too long"),
-                      },
-                      { required: true, message: "" },
-                      () => ({
-                        validator(_, value) {
-                          if (value && value === user.email) {
-                            return Promise.reject(
-                              new Error(t("You can't be the GM"))
-                            );
-                          }
-                          return Promise.resolve();
-                        },
-                      }),
-                    ]}
-                  >
-                    <Input type="email" placeholder={t("Email")} />
-                  </Form.Item>
-                </Space>
-              ))}
-
-              <Form.Item>
-                {fields.length === 1 ? (
-                  <Button
-                    type="dashed"
-                    onClick={() => remove(0)}
-                    block
-                    icon={<MinusOutlined />}
-                  >
-                    {t("Remove General Manager")}
-                  </Button>
-                ) : (
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    {t("Add General Manager")}
-                  </Button>
-                )}
-              </Form.Item>
-            </React.Fragment>
-          )}
-        </Form.List>
+        <Form.Item>
+          <Checkbox
+            checked={addGM}
+            onChange={(e) => setAddGM(e.target.checked)}
+          >
+            {t("Add General Manager?")}
+          </Checkbox>
+        </Form.Item>
+        <Form.Item
+          name="gm"
+          css={{
+            display: addGM ? "block" : "none",
+            border: "1px dotted #00000025",
+            padding: 5,
+          }}
+        >
+          <Input.Group>
+            <Form.Item
+              name={["gm", "name"]}
+              rules={[
+                {
+                  validator(_, value) {
+                    if (!value && addGM) {
+                      return Promise.reject();
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <Input placeholder={t("Name")} />
+            </Form.Item>
+            <Form.Item
+              name={["gm", "lastName"]}
+              rules={[
+                {
+                  validator(_, value) {
+                    if (!value && addGM) {
+                      return Promise.reject();
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <Input placeholder={t("Last Name")} />
+            </Form.Item>
+            <Form.Item
+              name={["gm", "email"]}
+              rules={[
+                {
+                  validator(_, value) {
+                    if (!value && addGM) {
+                      return Promise.reject();
+                    }
+                    if (value && addGM && value === Auth.currentUser.email) {
+                      return Promise.reject(
+                        new Error(t("You can't be the GM"))
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+                { type: "email", message: t("Must be a valid email") },
+              ]}
+            >
+              <Input placeholder={t("Email")} />
+            </Form.Item>
+          </Input.Group>
+        </Form.Item>
 
         <Form.Item
-          label={t("Name")}
+          required
           name="name"
-          rules={[
-            { required: true, message: "" },
-            { max: 50, message: t("Name is too long") },
-          ]}
+          rules={[{ required: true, message: "" }]}
         >
-          <Input />
+          <Input maxLength={50} showCount placeholder={t("Name")} />
         </Form.Item>
         <Form.Item
-          label={t("Description")}
-          name="description"
-          rules={[{ max: 200, message: t("Description is too long") }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={t("Address")}
-          name="address"
-          rules={[
-            {
-              max: 200,
-              message: t("Address is too long"),
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={t("Email")}
           name="email"
-          rules={[
-            { type: "email", message: t("Must be a valid email") },
-            {
-              max: 255,
-              message: t("Email is too long"),
-            },
-          ]}
+          rules={[{ type: "email", message: t("Must be a valid email") }]}
         >
-          <Input type="email" />
+          <Input type="email" maxLength={100} placeholder={t("Email")} />
         </Form.Item>
-        <Form.Item
-          label={t("Phone Number")}
-          name="phoneNumber"
-          rules={[
-            {
-              max: 20,
-              message: t("Phone number is too long"),
-            },
-          ]}
-        >
-          <Input type="tel" />
+        <Form.Item name="phoneNumber">
+          <Input
+            type="phoneNumber"
+            maxLength={30}
+            placeholder={t("Phone Number")}
+          />
         </Form.Item>
-        <Form.Item
-          label={t("Internal Id")}
-          name="intId"
-          rules={[
-            {
-              max: 20,
-              message: t("Internal ID is too long"),
-            },
-          ]}
-        >
-          <Input />
+        <Form.Item name="intId">
+          <Input maxLength={90} placeholder={t("Internal ID")} />
+        </Form.Item>
+        <Form.Item name="description">
+          <Input maxLength={255} showCount placeholder={t("Description")} />
+        </Form.Item>
+        <Form.Item label={t("Address")} name="address">
+          <Input.Group>
+            <Form.Item name={["address", "streetNumber"]}>
+              <Input placeholder={t("Street Number")} />
+            </Form.Item>
+            <Form.Item name={["address", "street"]}>
+              <Input placeholder={t("Street")} />
+            </Form.Item>
+            <Form.Item name={["address", "city"]}>
+              <Input placeholder={t("City")} />
+            </Form.Item>
+            <Form.Item name={["address", "state"]}>
+              <Input placeholder={t("State")} />
+            </Form.Item>
+            <Form.Item name={["address", "country"]}>
+              <Input placeholder={t("Country")} />
+            </Form.Item>
+            <Form.Item name={["address", "zip"]}>
+              <Input placeholder={t("Zip")} />
+            </Form.Item>
+          </Input.Group>
         </Form.Item>
       </Form>
+
       {saved ? (
         <Button
           type="dashed"
@@ -226,7 +193,7 @@ function LocationInfo() {
       ) : (
         <Button
           type="primary"
-          onClick={form.submit}
+          onClick={locationForm.submit}
           icon={<SaveFilled />}
           block
         >
