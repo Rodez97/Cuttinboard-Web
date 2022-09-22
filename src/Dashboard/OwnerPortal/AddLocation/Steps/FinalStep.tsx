@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import { useAddLocation } from "../AddLocation";
@@ -11,10 +11,13 @@ import PageError from "../../../../components/PageError";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "../../../DashboardProvider";
-import { Descriptions, Space, Typography } from "antd";
+import { List, Typography } from "antd";
+import { ShopOutlined, UserOutlined } from "@ant-design/icons";
 
-const SummaryNewLocationContainer = styled(Space)`
+const SummaryNewLocationContainer = styled.div`
   display: flex;
+  flex-direction: column;
+  gap: 16px;
   border-radius: 5px;
   padding: 10px;
   box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.8),
@@ -23,9 +26,23 @@ const SummaryNewLocationContainer = styled(Space)`
     linear,
     left top,
     left bottom,
-    from(#8693ab),
-    to(#bdd4e7)
+    from(#000000),
+    to(#434343)
   );
+  color: #fff !important;
+  & .ant-list-item-meta-title {
+    color: #fff;
+  }
+  & .ant-list-item-meta-description {
+    color: #ffffff80;
+  }
+  & .ant-typography {
+    color: #fff;
+    text-align: center;
+  }
+  & .ant-typography-secondary {
+    color: #ffffff80;
+  }
 `;
 
 function FinalStep() {
@@ -73,24 +90,26 @@ function FinalStep() {
         height: "100%",
       }}
     >
-      <SummaryNewLocationContainer
-        align="center"
-        direction="vertical"
-        size="large"
-      >
+      <SummaryNewLocationContainer>
         <Typography.Title level={4}>
           {t("A new location will be added")}
         </Typography.Title>
-        <Descriptions bordered size="small">
-          <Descriptions.Item label={t("Name")}>
-            {location.name}
-          </Descriptions.Item>
+
+        <div css={{ border: "1px solid #ffffff80", padding: 5, gap: 8 }}>
+          <List.Item.Meta
+            avatar={<ShopOutlined />}
+            title={t("Name")}
+            description={location.name}
+          />
           {generalManager && (
-            <Descriptions.Item label={t("General Manager")}>
-              {generalManager.name}
-            </Descriptions.Item>
+            <List.Item.Meta
+              avatar={<UserOutlined />}
+              title={t("General Manager")}
+              description={generalManager.name}
+            />
           )}
-        </Descriptions>
+        </div>
+
         <Typography.Title level={5}>
           {t("Your new bill will be:")}
         </Typography.Title>
