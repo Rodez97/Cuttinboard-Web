@@ -1,9 +1,9 @@
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useConversations,
   useEmployeesList,
-} from "@cuttinboard/cuttinboard-library/services";
-import { PrivacyLevel } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ManageMembers from "../../components/ManageApp/ManageMembers";

@@ -1,4 +1,4 @@
-import { useLocation } from "@cuttinboard/cuttinboard-library/services";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import AppsView from "./AppsView";

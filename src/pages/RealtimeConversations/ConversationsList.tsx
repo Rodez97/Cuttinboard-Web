@@ -7,11 +7,11 @@ import {
   useCuttinboard,
   useLocation,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Colors,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { useNavigate } from "react-router-dom";
 import { matchSorter } from "match-sorter";
 import Icon, { MessageOutlined, PlusOutlined } from "@ant-design/icons";

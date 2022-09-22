@@ -1,10 +1,10 @@
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
-import { Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   ModuleFirestoreConverter,
   Utensil,
-} from "@cuttinboard/cuttinboard-library/models";
-import { useLocation } from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { collection } from "@firebase/firestore";
 import { Button, Empty, Input, Layout, List, PageHeader, Space } from "antd";
 import { orderBy } from "lodash";

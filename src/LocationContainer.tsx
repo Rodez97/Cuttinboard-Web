@@ -14,7 +14,7 @@ import {
   useCuttinboard,
   useLocation,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Badge, Button, Layout, Menu, PageHeader } from "antd";
 import { useTranslation } from "react-i18next";
 import Icon, { SettingOutlined, SwapOutlined } from "@ant-design/icons";

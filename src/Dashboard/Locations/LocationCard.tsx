@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboard,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Badge, Card, message, Modal, Spin, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import useSelectedLocation from "../../hooks/useSelectedLocation";
 import { recordError } from "../../utils/utils";
 import { ReactNode, useState } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { Functions } from "@cuttinboard/cuttinboard-library/firebase";
+import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
 const { Meta } = Card;
 

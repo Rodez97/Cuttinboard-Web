@@ -5,9 +5,15 @@ import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
 import { useInView } from "react-intersection-observer";
-import { Message, MessageType } from "@cuttinboard/cuttinboard-library/models";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import { useChatRTDB, useDMs } from "@cuttinboard/cuttinboard-library/services";
+import {
+  Message,
+  MessageType,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import {
+  useChatRTDB,
+  useDMs,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
 import mdiArrowDownLeft from "@mdi/svg/svg/arrow-down-left.svg";
 import mdiReply from "@mdi/svg/svg/reply.svg";

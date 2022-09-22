@@ -8,7 +8,7 @@ import {
   ChatRTDBProvider,
   useConversations,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";

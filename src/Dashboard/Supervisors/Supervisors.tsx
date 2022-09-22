@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { ArrowRightOutlined, PlusOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   Colors,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { jsx } from "@emotion/react";
 import { Button, Col, Layout, List, PageHeader, Row, Tag } from "antd";
 import { useTranslation } from "react-i18next";

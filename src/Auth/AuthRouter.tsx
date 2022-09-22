@@ -1,4 +1,4 @@
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import FirebaseLogin from "./FirebaseLogin";

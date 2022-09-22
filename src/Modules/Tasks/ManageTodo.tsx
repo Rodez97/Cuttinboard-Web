@@ -2,13 +2,13 @@ import { addDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useRef, useState } from "react";
 import QuickTodo, { QuickTodoRef } from "../../components/QuickTodo";
 import { useTranslation } from "react-i18next";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Employee,
   Todo,
   Todo_Task,
-} from "@cuttinboard/cuttinboard-library/models";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import AssignUser from "./AssignUser";
 import { recordError } from "../../utils/utils";

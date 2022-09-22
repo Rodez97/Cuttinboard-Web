@@ -4,9 +4,9 @@ import React, { useMemo, useState } from "react";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
 import SimpleTodo from "../../components/SimpleTodo";
-import { Todo } from "@cuttinboard/cuttinboard-library/models";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { recordError } from "../../utils/utils";
 import { Button, Col, Collapse, Input, Modal, Row, Tag, Tooltip } from "antd";
 import {

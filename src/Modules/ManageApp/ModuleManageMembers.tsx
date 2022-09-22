@@ -1,8 +1,8 @@
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
   useEmployeesList,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import React from "react";
 import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";

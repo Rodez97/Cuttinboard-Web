@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { GithubSelector } from "@charkour/react-reactions";
-import { useChatRTDB } from "@cuttinboard/cuttinboard-library/services";
+import { useChatRTDB } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { useState } from "react";
 import { recordError } from "../../utils/utils";
 import mdiHeartMinus from "@mdi/svg/svg/heart-minus.svg";

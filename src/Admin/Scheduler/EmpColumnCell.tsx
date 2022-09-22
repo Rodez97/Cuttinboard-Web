@@ -1,8 +1,11 @@
-import { Employee, Shift } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Employee,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   getShiftDate,
   useSchedule,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import dayjs from "dayjs";
 import React, { useCallback } from "react";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";

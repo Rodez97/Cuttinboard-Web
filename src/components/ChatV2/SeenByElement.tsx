@@ -2,9 +2,12 @@
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import mdiCheckAll from "@mdi/svg/svg/check-all.svg";
-import { Message, MessageType } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Message,
+  MessageType,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import Icon from "@ant-design/icons";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function SeenByElement({
   message,

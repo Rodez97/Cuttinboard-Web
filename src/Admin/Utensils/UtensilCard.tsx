@@ -4,9 +4,9 @@ import {
   FileTextOutlined,
   HistoryOutlined,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard/cuttinboard-library/models";
-import { useLocation } from "@cuttinboard/cuttinboard-library/services";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
 import { deleteDoc } from "@firebase/firestore";
 import { Button, List, Progress, Tooltip } from "antd";

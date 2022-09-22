@@ -6,7 +6,7 @@ import duration from "dayjs/plugin/duration";
 import {
   getShiftDate,
   useSchedule,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { ShiftsTable } from "./Scheduler";
 import { Space, Table, Typography } from "antd";
 

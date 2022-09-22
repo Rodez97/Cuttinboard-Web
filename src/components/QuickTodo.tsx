@@ -1,4 +1,4 @@
-import { Todo_Task } from "@cuttinboard/cuttinboard-library";
+import { Todo_Task } from "@cuttinboard-solutions/cuttinboard-library";
 import { Timestamp } from "@firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { nanoid } from "nanoid";

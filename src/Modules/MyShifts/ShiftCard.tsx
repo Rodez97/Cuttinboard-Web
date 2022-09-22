@@ -5,10 +5,13 @@ import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { useTranslation } from "react-i18next";
 import SimpleTodo from "../../components/SimpleTodo";
-import { Shift, Todo_Task } from "@cuttinboard/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard/cuttinboard-library/services";
+import {
+  Shift,
+  Todo_Task,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, List, Modal, Space, Tag } from "antd";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Icon, { OrderedListOutlined, RetweetOutlined } from "@ant-design/icons";
 import { Note } from "../Notes/notesIcons";
 import { recordError } from "../../utils/utils";

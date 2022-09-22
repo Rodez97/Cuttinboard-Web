@@ -8,12 +8,12 @@ import { useNavigate } from "react-router-dom";
 import {
   useCuttinboard,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import OverflowLayout from "../components/OverflowLayout";
 import { Button, Divider, Layout, message, Modal, PageHeader } from "antd";
 import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import LocationEditor from "../components/LocationEditor";
-import { Location } from "@cuttinboard/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 
 function LocationSettings() {
   const { t } = useTranslation();

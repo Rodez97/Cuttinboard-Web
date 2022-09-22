@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next";
 import { httpsCallable } from "firebase/functions";
 import FinalStep from "./Steps/FinalStep";
 import LocationInfo from "./Steps/LocationInfo";
-import { Location } from "@cuttinboard/cuttinboard-library/models";
-import { Functions } from "@cuttinboard/cuttinboard-library/firebase";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   Button,
   Layout,

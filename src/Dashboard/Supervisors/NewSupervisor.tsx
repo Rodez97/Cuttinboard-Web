@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Location } from "@cuttinboard/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import {
   Alert,
@@ -16,8 +16,11 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import LocationsPicker from "./LocationsPicker";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { Auth, Functions } from "@cuttinboard/cuttinboard-library/firebase";
-import { RoleAccessLevels } from "@cuttinboard/cuttinboard-library/utils";
+import {
+  Auth,
+  Functions,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
 
 const { Step } = Steps;

@@ -1,4 +1,4 @@
-import { RoleAccessLevels } from "@cuttinboard/cuttinboard-library/utils";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 /**
  * Get the role access level for the given employee as string (e.g. "owner", "manager", "employee")

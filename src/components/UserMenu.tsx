@@ -7,7 +7,7 @@ import {
   QuestionCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Auth } from "@cuttinboard/cuttinboard-library";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library";
 import { Avatar, Dropdown, Menu, MenuProps, Space } from "antd";
 import { signOut } from "firebase/auth";
 import React from "react";

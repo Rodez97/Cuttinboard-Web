@@ -7,12 +7,12 @@ import {
   useDMs,
   useEmployeesList,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useNavigate } from "react-router-dom";
 import { matchSorter } from "match-sorter";
 import { Avatar, Badge, Button, Input, Menu, Space } from "antd";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
 import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";

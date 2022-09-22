@@ -1,5 +1,5 @@
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { useSchedule } from "@cuttinboard/cuttinboard-library/services";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import styled from "@emotion/styled";
 import { Button, Descriptions, InputNumber, Modal, Typography } from "antd";
 import dayjs from "dayjs";

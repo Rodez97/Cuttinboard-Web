@@ -3,8 +3,8 @@ import { jsx } from "@emotion/react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAddLocation } from "../AddLocation";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
-import { Location } from "@cuttinboard/cuttinboard-library/models";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Button, Form, Input, message, Space } from "antd";
 import {
   EditFilled,

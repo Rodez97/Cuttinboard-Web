@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
-import { Cuttinboard_File } from "@cuttinboard/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import useFileItem from "./useFileItem";
 import { Dropdown, Input, Menu, Modal, Space, Tooltip, Typography } from "antd";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Icon, {
   CopyOutlined,
   DeleteOutlined,

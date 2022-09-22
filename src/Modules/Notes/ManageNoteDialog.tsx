@@ -1,7 +1,7 @@
 import { SaveFilled } from "@ant-design/icons";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import { Note } from "@cuttinboard/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Form, Input, Modal } from "antd";
 import { addDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";

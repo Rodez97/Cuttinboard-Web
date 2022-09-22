@@ -3,11 +3,11 @@ import {
   EditFilled,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { useLocation } from "@cuttinboard/cuttinboard-library/services";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   PrivacyLevel,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Button,
   Card,

@@ -1,4 +1,8 @@
-import { Auth, Firestore, Todo_Task } from "@cuttinboard/cuttinboard-library";
+import {
+  Auth,
+  Firestore,
+  Todo_Task,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import {
   PhoneAuthProvider,

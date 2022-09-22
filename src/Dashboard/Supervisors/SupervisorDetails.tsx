@@ -8,9 +8,15 @@ import {
   PlusSquareOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
-import { Employee, Location } from "@cuttinboard/cuttinboard-library/models";
-import { RoleAccessLevels } from "@cuttinboard/cuttinboard-library/utils";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import {
+  Employee,
+  Location,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Alert,
   Avatar,

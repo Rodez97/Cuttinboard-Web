@@ -2,17 +2,17 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 import { useNavigate } from "react-router-dom";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboard,
   useEmployeesManager,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Colors,
   CompareRoles,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, List, Modal, Space, Tag } from "antd";
 import {
   DeleteOutlined,

@@ -9,7 +9,7 @@ import mdiFileVideo from "@mdi/svg/svg/file-video.svg";
 import mdiFileWordBox from "@mdi/svg/svg/file-word-box.svg";
 import mdiTextBox from "@mdi/svg/svg/text-box.svg";
 import Icon from "@ant-design/icons";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { CustomIconComponentProps } from "@ant-design/icons/lib/components/Icon";
 
 interface IFileTypeIcons {

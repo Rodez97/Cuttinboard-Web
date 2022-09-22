@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { UserOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Layout, PageHeader, Tabs } from "antd";
 import React, { useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,7 @@ import EmployeeRolePanel from "./EmployeeRolePanel";
 import {
   useEmployeesList,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 
 function EmployeeProfile() {
   const { getEmployees } = useEmployeesList();

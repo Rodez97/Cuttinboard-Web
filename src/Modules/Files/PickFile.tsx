@@ -12,13 +12,13 @@ import { InboxOutlined } from "@ant-design/icons";
 import {
   useCuttinboardModule,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { nanoid } from "nanoid";
 import {
   Auth,
   Firestore,
   Storage,
-} from "@cuttinboard/cuttinboard-library/firebase";
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { recordError } from "../../utils/utils";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 

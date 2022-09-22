@@ -4,7 +4,7 @@ import {
   useLocation,
   CuttinboardModuleProvider,
   Firestore,
-} from "@cuttinboard/cuttinboard-library";
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { Layout } from "antd";
 import { collection } from "firebase/firestore";
 import { useTranslation } from "react-i18next";

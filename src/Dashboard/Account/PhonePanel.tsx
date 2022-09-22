@@ -1,8 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Card, Form, Input, InputNumber, message, Space } from "antd";
 import {
   PhoneAuthProvider,

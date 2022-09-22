@@ -1,7 +1,7 @@
 import { DeleteFilled, EditFilled, UserOutlined } from "@ant-design/icons";
-import { Note } from "@cuttinboard/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Modal, Tag, Typography } from "antd";
 import Linkify from "linkify-react";
 import React from "react";

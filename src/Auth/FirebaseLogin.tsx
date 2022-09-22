@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import { getAnalytics, logEvent } from "firebase/analytics";
 import { recordError } from "../utils/utils";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { Alert, Button, Form, Input, Typography } from "antd";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 //= ===========================|| FIREBASE - LOGIN ||============================//
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Cuttinboard_File } from "@cuttinboard/cuttinboard-library/models";
+import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import fileSize from "filesize";
 import dayjs from "dayjs";

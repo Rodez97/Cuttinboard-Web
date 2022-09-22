@@ -1,6 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Message, MessageType } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Message,
+  MessageType,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Typography } from "antd";
 import AudioMessage from "components/ChatV2/CustomMessages/AudioMessage";
 import FileMessage from "components/ChatV2/CustomMessages/FileMessage";

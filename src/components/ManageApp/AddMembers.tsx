@@ -1,5 +1,5 @@
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Checkbox, Col, List, Row } from "antd";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";

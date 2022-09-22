@@ -1,5 +1,8 @@
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
-import { Organization } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Organization } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { doc, DocumentData, DocumentReference } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";

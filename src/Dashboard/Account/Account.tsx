@@ -5,7 +5,7 @@ import LangSelect from "./LangSelect";
 import PasswordPanel from "./PasswordPanel";
 import PhonePanel from "./PhonePanel";
 import ProfilePanel from "./ProfilePanel";
-import { useCuttinboardAuth } from "@cuttinboard/cuttinboard-library/services";
+import { useCuttinboardAuth } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Input, Layout, message, Modal, Typography } from "antd";
 import {
   ExclamationCircleOutlined,

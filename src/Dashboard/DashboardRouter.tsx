@@ -1,4 +1,4 @@
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import VerifyEmail from "../Auth/VerifyEmail";

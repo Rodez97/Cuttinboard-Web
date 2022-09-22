@@ -6,7 +6,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import {
   WEEKFORMAT,
   weekToDate,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Space, Typography } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 dayjs.extend(isoWeek);

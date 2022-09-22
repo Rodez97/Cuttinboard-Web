@@ -4,12 +4,12 @@ import { setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getRoleTextByNumber } from "./employee-utils";
-import { useLocation } from "@cuttinboard/cuttinboard-library/services";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   Positions,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
 import {
   AutoComplete,

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { StickyNoteCard } from "./StickyNoteCard";
 import Linkify from "linkify-react";
 import { ManageNoteDialogRef } from "./ManageNoteDialog";
-import { Note } from "@cuttinboard/cuttinboard-library/models";
+import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Card, Modal, Tooltip, Typography } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";

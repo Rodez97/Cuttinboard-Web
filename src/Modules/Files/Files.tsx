@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   CuttinboardModuleProvider,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { collection } from "@firebase/firestore";
 import { Layout } from "antd";
 import { Navigate, Route, Routes } from "react-router-dom";

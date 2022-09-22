@@ -1,9 +1,9 @@
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useDMs,
   useEmployeesList,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Spin } from "antd";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";

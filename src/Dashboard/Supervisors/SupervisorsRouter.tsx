@@ -1,9 +1,12 @@
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   Employee,
   ModuleFirestoreConverter,
-} from "@cuttinboard/cuttinboard-library/models";
-import { RoleAccessLevels } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { collection, query, where } from "firebase/firestore";
 import React from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";

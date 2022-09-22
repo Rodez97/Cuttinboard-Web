@@ -8,11 +8,11 @@ import { doc } from "firebase/firestore";
 import PageLoading from "../components/PageLoading";
 import PageError from "../components/PageError";
 import { recordError } from "../utils/utils";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Firestore,
   Functions,
-} from "@cuttinboard/cuttinboard-library/firebase";
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "./DashboardProvider";
 import { Alert, Button, Descriptions, Space, Typography } from "antd";
 import { CreditCardTwoTone } from "@ant-design/icons";

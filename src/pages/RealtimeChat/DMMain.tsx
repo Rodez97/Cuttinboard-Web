@@ -1,11 +1,11 @@
 import { UserOutlined } from "@ant-design/icons";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   ChatRTDBProvider,
   useDMs,
   useEmployeesList,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ChatMain from "../../components/ChatV2/ChatMain";

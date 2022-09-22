@@ -1,9 +1,9 @@
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   ModuleFirestoreConverter,
   Todo,
-} from "@cuttinboard/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Result } from "antd";
 import { query, where } from "firebase/firestore";
 import React, { useLayoutEffect } from "react";

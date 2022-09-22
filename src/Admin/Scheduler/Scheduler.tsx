@@ -23,15 +23,18 @@ import ProjectedSalesRow from "./ProjectedSalesRow";
 import RosterView from "./RosterView";
 import ScheduleSummary from "./ScheduleSummary";
 import WeekNavigator from "./WeekNavigator";
-import { Employee, Shift } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Employee,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   getShiftDate,
   useCuttinboard,
   useEmployeesList,
   useLocation,
   useSchedule,
-} from "@cuttinboard/cuttinboard-library/services";
-import { Positions } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Positions } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Table, { ColumnsType } from "antd/lib/table";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";

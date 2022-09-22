@@ -1,5 +1,5 @@
-import { Conversation } from "@cuttinboard/cuttinboard-library/models";
-import { useConversations } from "@cuttinboard/cuttinboard-library/services";
+import { Conversation } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React from "react";
 import ManageBase from "../../components/ManageApp/ManageBase";
 import { recordError } from "../../utils/utils";

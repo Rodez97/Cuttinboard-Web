@@ -5,13 +5,16 @@ import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash";
 import { useScheduler } from "./Scheduler";
 import ReadonlyShiftDialog from "./ReadonlyShiftDialog";
-import { Employee, Shift } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Employee,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   getShiftDate,
   useLocation,
   useSchedule,
-} from "@cuttinboard/cuttinboard-library/services";
-import { RoleAccessLevels } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Avatar, Button, List, Modal, Popconfirm } from "antd";
 import {
   DeleteFilled,

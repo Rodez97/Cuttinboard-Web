@@ -1,11 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Storage } from "@cuttinboard/cuttinboard-library/firebase";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboard,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   deleteObject,
   getDownloadURL,
@@ -34,7 +34,7 @@ import {
   FileFilled,
   InboxOutlined,
 } from "@ant-design/icons";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
 
 const { Dragger } = Upload;

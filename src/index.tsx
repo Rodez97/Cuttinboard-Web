@@ -9,7 +9,7 @@ import "@fontsource/roboto/700.css";
 import { createRoot } from "react-dom/client";
 import MainAppRoot from "./MainAppRoot";
 import { enableIndexedDbPersistence } from "firebase/firestore";
-import { Firestore } from "@cuttinboard/cuttinboard-library";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "./utils/utils";
 
 export const MainApp = lazy(() => import("./App"));

@@ -1,4 +1,4 @@
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { List } from "antd";
 import styled from "@emotion/styled";
 

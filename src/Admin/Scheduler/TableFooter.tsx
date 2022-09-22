@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
-import { useSchedule } from "@cuttinboard/cuttinboard-library/services";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { ShiftsTable } from "./Scheduler";
 import { Space, Table, Typography } from "antd";
 import { SummaryCell } from "./SummaryCell";

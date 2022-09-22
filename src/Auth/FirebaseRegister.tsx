@@ -5,9 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { recordError } from "../utils/utils";
 import { Alert, Button, Checkbox, Form, Input, Typography } from "antd";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { Auth, Functions } from "@cuttinboard/cuttinboard-library/firebase";
+import {
+  Auth,
+  Functions,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 //= ==========================|| FIREBASE - REGISTER ||===========================//

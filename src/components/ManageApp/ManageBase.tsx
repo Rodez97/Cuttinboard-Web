@@ -1,4 +1,7 @@
-import { Positions, PrivacyLevel } from "@cuttinboard/cuttinboard-library";
+import {
+  Positions,
+  PrivacyLevel,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import {
   Button,
   Col,

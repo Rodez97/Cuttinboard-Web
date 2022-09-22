@@ -1,9 +1,12 @@
 /** @jsx jsx */
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   Location,
   LocationConverter,
-} from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import { Layout } from "antd";
 import { collection, query, where } from "firebase/firestore";

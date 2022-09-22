@@ -1,4 +1,4 @@
-import { useNotificationsBadges } from "@cuttinboard/cuttinboard-library/services";
+import { useNotificationsBadges } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Badge, Card, Tooltip } from "antd";
 import React, { ReactNode } from "react";
 import { useTranslation } from "react-i18next";

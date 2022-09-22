@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { DMsProvider } from "@cuttinboard/cuttinboard-library/services";
+import { DMsProvider } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Layout } from "antd";
 import PageError from "../../components/PageError";
 import PageLoading from "../../components/PageLoading";

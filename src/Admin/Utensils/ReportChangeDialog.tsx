@@ -4,9 +4,9 @@ import {
   MinusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard/cuttinboard-library/models";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, InputNumber, Modal, Space } from "antd";
 import TextArea from "antd/lib/input/TextArea";
 import {

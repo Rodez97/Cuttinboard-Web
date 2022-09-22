@@ -8,8 +8,8 @@ import { useTranslation } from "react-i18next";
 import {
   useCuttinboardModule,
   useNotificationsBadges,
-} from "@cuttinboard/cuttinboard-library/services";
-import { Todo } from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
 import { Button, Layout, Space } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";

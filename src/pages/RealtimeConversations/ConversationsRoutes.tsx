@@ -2,11 +2,14 @@ import React, { useCallback, useLayoutEffect } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import ConversationsMain from "./ConversationsMain";
 import ConvManageMembers from "./ConvManageMembers";
-import { useConversations } from "@cuttinboard/cuttinboard-library/services";
+import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
 import ManageBase from "../../components/ManageApp/ManageBase";
-import { Chat, Conversation } from "@cuttinboard/cuttinboard-library/models";
+import {
+  Chat,
+  Conversation,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { recordError } from "../../utils/utils";
-import { PrivacyLevel } from "@cuttinboard/cuttinboard-library/utils";
+import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import BaseInfo from "../../components/ManageApp/BaseInfo";
 import { Button, Result } from "antd";
 import { useTranslation } from "react-i18next";

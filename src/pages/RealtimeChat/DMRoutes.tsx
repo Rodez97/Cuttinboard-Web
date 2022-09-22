@@ -1,7 +1,7 @@
 import React, { useLayoutEffect } from "react";
 import DMMain from "./DMMain";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { useDMs } from "@cuttinboard/cuttinboard-library/services";
+import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Result } from "antd";
 import { useTranslation } from "react-i18next";
 

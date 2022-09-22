@@ -1,5 +1,5 @@
-import { Shift } from "@cuttinboard/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard/cuttinboard-library/services";
+import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Checkbox, Descriptions, Modal } from "antd";
 import { capitalize } from "lodash";
 import React from "react";

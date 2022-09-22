@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import PageError from "../../components/PageError";
 import { Layout } from "antd";
-import { ConversationsProvider } from "@cuttinboard/cuttinboard-library/services";
+import { ConversationsProvider } from "@cuttinboard-solutions/cuttinboard-library/services";
 import PageLoading from "../../components/PageLoading";
 import ConversationsRoutes from "./ConversationsRoutes";
 import ConversationsList from "./ConversationsList";

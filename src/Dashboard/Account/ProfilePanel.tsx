@@ -1,11 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Storage } from "@cuttinboard/cuttinboard-library/firebase";
+import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   useCuttinboard,
   useCuttinboardAuth,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Card, DatePicker, Form, Input, message, Space } from "antd";
 import dayjs from "dayjs";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";

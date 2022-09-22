@@ -1,9 +1,9 @@
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   useCuttinboardModule,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
-import { PrivacyLevel } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { serverTimestamp } from "firebase/firestore";
 import React from "react";
 import ManageBase, { BaseApp } from "../../components/ManageApp/ManageBase";

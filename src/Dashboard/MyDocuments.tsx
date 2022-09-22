@@ -5,9 +5,9 @@ import {
   FileFilled,
   InboxOutlined,
 } from "@ant-design/icons";
-import { Storage } from "@cuttinboard/cuttinboard-library/firebase";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Avatar,
   Card,

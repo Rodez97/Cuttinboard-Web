@@ -4,11 +4,11 @@ import { ContainerOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   useCuttinboardModule,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Colors,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Input, Menu, Space } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";

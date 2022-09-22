@@ -9,11 +9,11 @@ import {
   useEmployeesList,
   useEmployeesManager,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Positions,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Alert,
   AutoComplete,
@@ -34,7 +34,7 @@ import {
 } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { Functions } from "@cuttinboard/cuttinboard-library/firebase";
+import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
 type EmployeeData = {
   name: string;

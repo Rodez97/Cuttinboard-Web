@@ -5,13 +5,16 @@ import {
   PlusCircleOutlined,
   RetweetOutlined,
 } from "@ant-design/icons";
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   LocationCheckList,
   ModuleFirestoreConverter,
-} from "@cuttinboard/cuttinboard-library/models";
-import { useLocation } from "@cuttinboard/cuttinboard-library/services";
-import { RoleAccessLevels } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Col, Input, Layout, Row, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import { getAnalytics, logEvent } from "firebase/analytics";

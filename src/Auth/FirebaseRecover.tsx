@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next";
 import { useSendPasswordResetEmail } from "react-firebase-hooks/auth";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { Alert, Button, Form, Input, message, Typography } from "antd";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../utils/utils";
 
 const initialCounterTime = new Date();

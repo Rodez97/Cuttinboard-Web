@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Button, Card, Form, Input, message, Space } from "antd";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useState } from "react";

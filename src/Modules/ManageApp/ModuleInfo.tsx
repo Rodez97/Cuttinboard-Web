@@ -1,4 +1,4 @@
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library";
 import { deleteDoc } from "firebase/firestore";
 import React from "react";
 import BaseInfo from "../../components/ManageApp/BaseInfo";

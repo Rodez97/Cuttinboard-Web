@@ -5,13 +5,16 @@ import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
 import MessageBubble from "components/ChatV2/MessageBubble";
 import ChatInput from "components/ChatV2/ChatInput";
-import { Auth } from "@cuttinboard/cuttinboard-library/firebase";
-import { useChatRTDB } from "@cuttinboard/cuttinboard-library/services";
-import { Message, MessageType } from "@cuttinboard/cuttinboard-library/models";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useChatRTDB } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  Message,
+  MessageType,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import dayjs from "dayjs";
 import { Divider, Layout, Space, Spin, Typography } from "antd";
 import PageLoading from "../PageLoading";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 interface ChatMainProps {
   type: "chats" | "conversations";

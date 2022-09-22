@@ -8,8 +8,8 @@ import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc } from "firebase/firestore";
 import PageLoading from "../../../../components/PageLoading";
 import PageError from "../../../../components/PageError";
-import { useCuttinboard } from "@cuttinboard/cuttinboard-library/services";
-import { Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "../../../DashboardProvider";
 import { Descriptions, Space, Typography } from "antd";
 

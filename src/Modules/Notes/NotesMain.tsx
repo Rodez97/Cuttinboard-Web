@@ -8,11 +8,11 @@ import ManageNoteDialog, { ManageNoteDialogRef } from "./ManageNoteDialog";
 import NoteCard from "./NoteCard";
 import { useTranslation } from "react-i18next";
 import PageError from "../../components/PageError";
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   ModuleFirestoreConverter,
   Note,
-} from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
 import { Button, Empty, Layout, Space } from "antd";
 import PageLoading from "../../components/PageLoading";

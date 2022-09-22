@@ -3,9 +3,12 @@ import {
   OrderedListOutlined,
   RetweetOutlined,
 } from "@ant-design/icons";
-import { Employee, Shift } from "@cuttinboard/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard/cuttinboard-library/services";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import {
+  Employee,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
 import { Space, Typography } from "antd";
 import React, { useState } from "react";

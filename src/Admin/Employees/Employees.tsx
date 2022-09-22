@@ -17,12 +17,12 @@ import {
   useEmployeesList,
   useEmployeesManager,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Positions,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library/utils";
-import { Employee } from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   AutoComplete,
   Button,
@@ -41,7 +41,10 @@ import Icon from "@ant-design/icons";
 import AccountGroupOutline from "@mdi/svg/svg/account-group-outline.svg";
 import { recordError } from "../../utils/utils";
 import { deleteField, doc, setDoc } from "firebase/firestore";
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();

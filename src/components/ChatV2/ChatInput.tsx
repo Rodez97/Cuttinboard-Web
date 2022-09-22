@@ -3,9 +3,12 @@ import { jsx } from "@emotion/react";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
-import { useChatRTDB } from "@cuttinboard/cuttinboard-library/services";
-import { Message, MessageType } from "@cuttinboard/cuttinboard-library/models";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { useChatRTDB } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  Message,
+  MessageType,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Button,
   Dropdown,

@@ -3,8 +3,8 @@ import {
   ArrowUpOutlined,
   MinusOutlined,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard/cuttinboard-library/models";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Timestamp } from "@firebase/firestore";
 import { Avatar, Button, Empty, List, Modal, Typography } from "antd";
 import dayjs from "dayjs";

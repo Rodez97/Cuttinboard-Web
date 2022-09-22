@@ -1,5 +1,8 @@
-import { Employee, Shift } from "@cuttinboard/cuttinboard-library/models";
-import { useSchedule } from "@cuttinboard/cuttinboard-library/services";
+import {
+  Employee,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import dayjs from "dayjs";
 import React from "react";
 import { useScheduler } from "./Scheduler";

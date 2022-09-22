@@ -1,4 +1,4 @@
-import { Auth } from "@cuttinboard/cuttinboard-library";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library";
 import "@testing-library/jest-dom/extend-expect";
 import { signOut } from "firebase/auth";
 import puupeter from "puppeteer";

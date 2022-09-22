@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { UserOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard/cuttinboard-library";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library";
 import { Avatar, Descriptions, Modal } from "antd";
 import { useTranslation } from "react-i18next";
 

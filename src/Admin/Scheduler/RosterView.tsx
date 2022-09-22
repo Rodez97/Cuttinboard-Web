@@ -5,8 +5,11 @@ import { useScheduler } from "./Scheduler";
 import {
   getShiftDate,
   useSchedule,
-} from "@cuttinboard/cuttinboard-library/services";
-import { Employee, Shift } from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  Employee,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import Table, { ColumnsType } from "antd/lib/table";
 import { Button, Space, Typography } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";

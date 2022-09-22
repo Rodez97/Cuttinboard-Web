@@ -4,7 +4,7 @@ import {
   Auth,
   FIREBASE_CONFIG,
   useCuttinboard,
-} from "@cuttinboard/cuttinboard-library";
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";

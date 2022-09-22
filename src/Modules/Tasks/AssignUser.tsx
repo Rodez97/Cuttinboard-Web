@@ -1,13 +1,13 @@
-import { Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   Employee,
   EmployeeConverter,
-} from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
-import { PrivacyLevel } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Typography } from "antd";
 import {
   collection,

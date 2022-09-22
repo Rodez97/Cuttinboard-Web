@@ -1,4 +1,4 @@
-import { Attachment } from "@cuttinboard/cuttinboard-library/models";
+import { Attachment } from "@cuttinboard-solutions/cuttinboard-library/models";
 
 export interface BaseMediaProps {
   source: string;

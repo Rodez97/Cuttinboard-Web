@@ -12,12 +12,12 @@ import PageLoading from "../../components/PageLoading";
 import {
   Cuttinboard_File,
   ModuleFirestoreConverter,
-} from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
-import { Storage } from "@cuttinboard/cuttinboard-library/firebase";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import ToolBar from "../ToolBar";
 import FileItemRow from "./FileItemRow";
 import { Button, Col, Layout, List, Row, Segmented, Space } from "antd";

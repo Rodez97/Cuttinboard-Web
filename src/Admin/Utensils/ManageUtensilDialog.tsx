@@ -1,10 +1,10 @@
 import { SaveFilled } from "@ant-design/icons";
-import { Firestore } from "@cuttinboard/cuttinboard-library/firebase";
-import { Utensil } from "@cuttinboard/cuttinboard-library/models";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboard,
   useLocation,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
 import {
   addDoc,

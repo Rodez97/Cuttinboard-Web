@@ -3,7 +3,7 @@ import {
   Employee,
   useLocation,
   RoleAccessLevels,
-} from "@cuttinboard/cuttinboard-library";
+} from "@cuttinboard-solutions/cuttinboard-library";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";

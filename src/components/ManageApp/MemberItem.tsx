@@ -5,7 +5,7 @@ import {
   PrivacyLevel,
   COLORS,
   useLocation,
-} from "@cuttinboard/cuttinboard-library";
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, List } from "antd";
 import React, { useMemo } from "react";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";

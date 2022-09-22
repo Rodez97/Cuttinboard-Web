@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Layout, PageHeader } from "antd";
 import { updateDoc } from "firebase/firestore";
 import React, { useMemo, useState } from "react";

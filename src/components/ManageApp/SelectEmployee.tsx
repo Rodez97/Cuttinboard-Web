@@ -1,4 +1,4 @@
-import { COLORS, Employee } from "@cuttinboard/cuttinboard-library";
+import { COLORS, Employee } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, Checkbox, Col, List, Row } from "antd";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";

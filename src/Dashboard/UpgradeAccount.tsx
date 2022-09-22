@@ -14,7 +14,7 @@ import PageError from "../components/PageError";
 import {
   Firestore,
   Functions,
-} from "@cuttinboard/cuttinboard-library/firebase";
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Button, Checkbox, Layout, List, Space, Typography } from "antd";
 import {
   CreditCardOutlined,

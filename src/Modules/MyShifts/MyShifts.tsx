@@ -18,20 +18,23 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useTranslation } from "react-i18next";
 import PageLoading from "../../components/PageLoading";
-import { Auth, Firestore } from "@cuttinboard/cuttinboard-library/firebase";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   getShiftDate,
   useLocation,
   useNotificationsBadges,
   WEEKFORMAT,
   weekToDate,
-} from "@cuttinboard/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   ScheduleDoc,
   ScheduleDocConverter,
   Shift,
   ShiftConverter,
-} from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Col, Empty, Layout, PageHeader, Row, Space, Tabs } from "antd";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);

@@ -11,8 +11,8 @@ import {
   EmployeesProvider,
   LocationProvider,
   useCuttinboard,
-} from "@cuttinboard/cuttinboard-library/services";
-import { CuttinboardError } from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { CuttinboardError } from "@cuttinboard-solutions/cuttinboard-library/models";
 import DashboardProvider from "./Dashboard/DashboardProvider";
 import { Layout } from "antd";
 

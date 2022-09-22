@@ -1,4 +1,4 @@
-import { useCuttinboardModule } from "@cuttinboard/cuttinboard-library/services";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Result } from "antd";
 import React, { useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";

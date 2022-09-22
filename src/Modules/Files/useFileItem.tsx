@@ -1,5 +1,5 @@
-import { Storage } from "@cuttinboard/cuttinboard-library/firebase";
-import { Cuttinboard_File } from "@cuttinboard/cuttinboard-library/models";
+import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { message } from "antd";
 import { deleteDoc } from "firebase/firestore";
 import { getDownloadURL, ref } from "firebase/storage";

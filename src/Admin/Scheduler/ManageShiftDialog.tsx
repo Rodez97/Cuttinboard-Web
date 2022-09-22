@@ -18,14 +18,14 @@ import {
   Employee,
   Shift,
   Todo_Task,
-} from "@cuttinboard/cuttinboard-library/models";
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   getShiftDate,
   getShiftString,
   useLocation,
   useSchedule,
-} from "@cuttinboard/cuttinboard-library/services";
-import { Colors } from "@cuttinboard/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Button,
   Checkbox,

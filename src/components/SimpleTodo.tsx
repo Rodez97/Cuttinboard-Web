@@ -1,5 +1,5 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Todo_Task } from "@cuttinboard/cuttinboard-library";
+import { Todo_Task } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, Checkbox, List, Typography } from "antd";
 import React from "react";
 import { getOrderedTasks } from "../utils/utils";
