@@ -41,9 +41,12 @@ function VerifyEmail() {
     if (!sentTime) {
       resendVerificationEmail();
     }
-  }, []);
+  }, [sentTime]);
 
   const resendVerificationEmail = async () => {
+    if (count > 0 || sentTime) {
+      return;
+    }
     try {
       setSentTime(new Date(Date.now() + 120_000).toString());
       await sendEmailVerification();
@@ -96,6 +99,7 @@ function VerifyEmail() {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+        margin: "auto",
       }}
     >
       <div
