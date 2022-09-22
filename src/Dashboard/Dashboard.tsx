@@ -31,6 +31,8 @@ const { Header, Content, Footer, Sider } = Layout;
 const StyledContent = styled(Content)`
   min-width: 300px;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 `;
 
 function Dashboard() {

@@ -10,6 +10,8 @@ function PageLoading() {
         alignItems: "center",
         justifyContent: "center",
         flex: 1,
+        height: "100%",
+        width: "100%",
       }}
     >
       <Spin size="large" />

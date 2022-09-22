@@ -4,7 +4,6 @@ import { doc } from "firebase/firestore";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { httpsCallable } from "firebase/functions";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import styled from "@emotion/styled";
 import { recordError } from "../utils/utils";
@@ -15,7 +14,7 @@ import {
   Firestore,
   Functions,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Button, Checkbox, Layout, List, Space, Typography } from "antd";
+import { Alert, Button, Checkbox, Layout, List, Space, Typography } from "antd";
 import {
   CreditCardOutlined,
   FolderOpenOutlined,
@@ -23,6 +22,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
+import { useHttpsCallable } from "react-firebase-hooks/functions";
 
 const PlanCard = styled.div`
   background: #f7f7f7;
@@ -44,8 +44,9 @@ function UpgradeAccount() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [agreeWithTerms, setAgreeWithTerms] = useState(false);
-  const [product, loadingProduct, productError] = useDocumentData(
-    doc(Firestore, "Products", ProductID)
+  const [upgradeAccount, running, error] = useHttpsCallable<string, void>(
+    Functions,
+    "stripe-upgradeOwner"
   );
   const [price, loadingPrice, priceError] = useDocumentData(
     doc(Firestore, "Products", ProductID, "prices", PriceID)
@@ -67,23 +68,19 @@ function UpgradeAccount() {
 
   const upgradeToBusiness = async () => {
     try {
-      const upgradeAccount = httpsCallable<string, void>(
-        Functions,
-        "stripe-upgradeOwner"
-      );
       await upgradeAccount(PriceID);
-      navigate("/dashboard");
+      navigate("/dashboard/owner-portal");
     } catch (error) {
       recordError(error);
     }
   };
 
-  if (loadingProduct || loadingPrice) {
+  if (loadingPrice) {
     return <PageLoading />;
   }
 
-  if (productError || priceError) {
-    return <PageError error={productError ?? priceError} />;
+  if (priceError) {
+    return <PageError error={priceError} />;
   }
 
   const features = [
@@ -145,18 +142,26 @@ function UpgradeAccount() {
           </List.Item>
         )}
       />
-      <Checkbox checked={agreeWithTerms} onChange={handleCBChange}>
+      <Checkbox
+        checked={agreeWithTerms}
+        onChange={handleCBChange}
+        disabled={running}
+      >
         {t("I agree with these terms")}
       </Checkbox>
       <Space>
-        <Button onClick={handleBack}>{t("Cancel")}</Button>
+        <Button onClick={handleBack} disabled={running}>
+          {t("Cancel")}
+        </Button>
         <Button
           onClick={handleUpgrade}
           disabled={!agreeWithTerms}
+          loading={running}
           type="primary"
         >
           {t("Upgrade")}
         </Button>
+        {error && <Alert message={t(error.message)} type="error" showIcon />}
       </Space>
     </Layout>
   );
