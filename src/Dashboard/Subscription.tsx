@@ -10,7 +10,7 @@ import { CreditCardTwoTone } from "@ant-design/icons";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 
 function Subscription() {
-  const { subscriptionDocument, organization } = useDashboard();
+  const { subscriptionDocument, organization, userDocument } = useDashboard();
   const { t } = useTranslation();
   const [createBillingSession, running, error] = useHttpsCallable<
     string,
@@ -96,7 +96,8 @@ function Subscription() {
       )}
 
       {organization.subscriptionStatus !== "canceled" &&
-        !subscriptionDocument?.default_payment_method && (
+        (!userDocument?.paymentMethods ||
+          userDocument?.paymentMethods.length < 1) && (
           <Alert
             message={t(
               "No payment method saved. Declare a payment method to keep accessing the Owner plan."
