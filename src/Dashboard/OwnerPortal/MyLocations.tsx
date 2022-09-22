@@ -35,7 +35,7 @@ function MyLocations() {
   const { t } = useTranslation();
   const { locations } = useOwner();
   const navigate = useNavigate();
-  const { organization, subscriptionDocument } = useDashboard();
+  const { organization, subscriptionDocument, userDocument } = useDashboard();
   const [orderData, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
@@ -119,7 +119,8 @@ function MyLocations() {
       />
       <div css={{ padding: "5px 20px" }}>
         {organization.subscriptionStatus !== "canceled" &&
-          !subscriptionDocument?.default_payment_method && (
+          (!userDocument?.paymentMethods ||
+            userDocument?.paymentMethods.length < 1) && (
             <Alert
               message={t(
                 "No payment method saved. Declare a payment method to keep accessing the Owner plan."
