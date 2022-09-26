@@ -84,8 +84,6 @@ function ConvManageMembers() {
         (selectedChat?.positions ?? [])
       }
       hostId={selectedChat?.hostId ?? ""}
-      employees={getEmployees}
-      orgEmployees={getOrgEmployees}
     />
   );
 }

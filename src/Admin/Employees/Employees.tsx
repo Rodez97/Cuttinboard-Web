@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   TitleBoxBlue,
@@ -26,13 +26,10 @@ import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   AutoComplete,
   Button,
-  Col,
   Input,
   Layout,
   List,
   Modal,
-  PageHeader,
-  Row,
   Space,
   Tooltip,
 } from "antd";
@@ -45,6 +42,7 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { GrayPageHeader } from "components/PageHeaders";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();
@@ -160,8 +158,7 @@ function Employees() {
 
   return (
     <Layout>
-      <PageHeader
-        className="site-page-header-responsive"
+      <GrayPageHeader
         onBack={() => navigate(`/location/${location.id}/apps`)}
         avatar={{ icon: <Icon component={AccountGroupOutline} /> }}
         title={t("Employees")}
@@ -185,114 +182,114 @@ function Employees() {
           </Tooltip>,
         ]}
       />
-      <Space align="center" wrap css={{ justifyContent: "space-evenly" }}>
-        <Input.Search
-          placeholder={t("Search")}
-          allowClear
-          onChange={({ currentTarget }) => setSearchText(currentTarget.value)}
-          value={searchText}
-          css={{ width: 200 }}
-        />
-        <AutoComplete
-          css={{ width: 200 }}
-          onSearch={handleSearch}
-          placeholder={t("Filter by position")}
-          onSelect={setSelectedTag}
+      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+        <Space align="center" wrap css={{ justifyContent: "space-evenly" }}>
+          <Input.Search
+            placeholder={t("Search")}
+            allowClear
+            onChange={({ currentTarget }) => setSearchText(currentTarget.value)}
+            value={searchText}
+            css={{ width: 200 }}
+          />
+          <AutoComplete
+            css={{ width: 200 }}
+            onSearch={handleSearch}
+            placeholder={t("Filter by position")}
+            onSelect={setSelectedTag}
+          >
+            {result.map((position: string) => (
+              <AutoComplete.Option key={position} value={position}>
+                {position}
+              </AutoComplete.Option>
+            ))}
+          </AutoComplete>
+        </Space>
+        <div
+          css={{
+            minWidth: 300,
+            maxWidth: 700,
+            margin: "auto",
+            width: "100%",
+          }}
         >
-          {result.map((position: string) => (
-            <AutoComplete.Option key={position} value={position}>
-              {position}
-            </AutoComplete.Option>
-          ))}
-        </AutoComplete>
-      </Space>
+          <List css={{ padding: "20px 10px" }}>
+            {isOwner && !getEmployees?.some((e) => e.id === user.uid) && (
+              <Button type="dashed" onClick={addPrimaryOwner} block>
+                {t("Join this location")}
+              </Button>
+            )}
+            {isOwner && getEmployees?.some((e) => e.id === user.uid) && (
+              <Button type="dashed" danger onClick={removePrimaryOwner} block>
+                {t("Leave this location")}
+              </Button>
+            )}
 
-      <Layout.Content
-        css={{
-          paddingBottom: 30,
-        }}
-      >
-        <Row justify="center" css={{ paddingBottom: "50px" }}>
-          <Col xs={24} md={20} lg={16} xl={12}>
-            <List css={{ padding: "20px 10px" }}>
-              {isOwner && !getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" onClick={addPrimaryOwner} block>
-                  {t("Join this location")}
-                </Button>
-              )}
-              {isOwner && getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" danger onClick={removePrimaryOwner} block>
-                  {t("Leave this location")}
-                </Button>
-              )}
+            {getEmployeeByRole(RoleAccessLevels.OWNER)?.length > 0 && (
+              <TitleBoxOwner>
+                {t(getRoleTextByNumber(RoleAccessLevels.OWNER))}
+              </TitleBoxOwner>
+            )}
 
-              {getEmployeeByRole(RoleAccessLevels.OWNER)?.length > 0 && (
-                <TitleBoxOwner>
-                  {t(getRoleTextByNumber(RoleAccessLevels.OWNER))}
-                </TitleBoxOwner>
-              )}
+            {getEmployeeByRole(RoleAccessLevels.OWNER)?.map((emp, i) => (
+              <EmployeeCard key={i} employee={emp} />
+            ))}
 
-              {getEmployeeByRole(RoleAccessLevels.OWNER)?.map((emp, i) => (
+            {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
+              <Button type="dashed" onClick={joinSupervisor} block>
+                {t("Join this location")}
+              </Button>
+            )}
+            {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
+              <Button type="dashed" danger onClick={leaveSupervisor} block>
+                {t("Leave this location")}
+              </Button>
+            )}
+
+            {getEmployeeByRole(RoleAccessLevels.ADMIN)?.length > 0 && (
+              <TitleBoxOwner>
+                {t(getRoleTextByNumber(RoleAccessLevels.ADMIN))}
+              </TitleBoxOwner>
+            )}
+
+            {getEmployeeByRole(RoleAccessLevels.ADMIN)?.map((emp, i) => (
+              <EmployeeCard key={i} employee={emp} />
+            ))}
+
+            {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.length >
+              0 && (
+              <TitleBoxBlue>
+                {t(getRoleTextByNumber(RoleAccessLevels.GENERAL_MANAGER))}
+              </TitleBoxBlue>
+            )}
+
+            {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.map(
+              (emp, i) => (
                 <EmployeeCard key={i} employee={emp} />
-              ))}
+              )
+            )}
 
-              {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" onClick={joinSupervisor} block>
-                  {t("Join this location")}
-                </Button>
-              )}
-              {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" danger onClick={leaveSupervisor} block>
-                  {t("Leave this location")}
-                </Button>
-              )}
+            {getEmployeeByRole(RoleAccessLevels.MANAGER)?.length > 0 && (
+              <TitleBoxGreen>
+                {t(getRoleTextByNumber(RoleAccessLevels.MANAGER))}
+              </TitleBoxGreen>
+            )}
 
-              {getEmployeeByRole(RoleAccessLevels.ADMIN)?.length > 0 && (
-                <TitleBoxOwner>
-                  {t(getRoleTextByNumber(RoleAccessLevels.ADMIN))}
-                </TitleBoxOwner>
-              )}
+            {getEmployeeByRole(RoleAccessLevels.MANAGER)?.map((emp, i) => (
+              <EmployeeCard key={i} employee={emp} />
+            ))}
 
-              {getEmployeeByRole(RoleAccessLevels.ADMIN)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
+            {getEmployeeByRole(RoleAccessLevels.STAFF)?.length > 0 && (
+              <TitleBoxYellow>
+                {t(getRoleTextByNumber(RoleAccessLevels.STAFF))}
+              </TitleBoxYellow>
+            )}
 
-              {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.length >
-                0 && (
-                <TitleBoxBlue>
-                  {t(getRoleTextByNumber(RoleAccessLevels.GENERAL_MANAGER))}
-                </TitleBoxBlue>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.map(
-                (emp, i) => (
-                  <EmployeeCard key={i} employee={emp} />
-                )
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.MANAGER)?.length > 0 && (
-                <TitleBoxGreen>
-                  {t(getRoleTextByNumber(RoleAccessLevels.MANAGER))}
-                </TitleBoxGreen>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.MANAGER)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
-
-              {getEmployeeByRole(RoleAccessLevels.STAFF)?.length > 0 && (
-                <TitleBoxYellow>
-                  {t(getRoleTextByNumber(RoleAccessLevels.STAFF))}
-                </TitleBoxYellow>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.STAFF)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
-            </List>
-          </Col>
-        </Row>
-      </Layout.Content>
+            {getEmployeeByRole(RoleAccessLevels.STAFF)?.map((emp, i) => (
+              <EmployeeCard key={i} employee={emp} />
+            ))}
+          </List>
+        </div>
+      </div>
     </Layout>
   );
 }

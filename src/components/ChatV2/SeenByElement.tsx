@@ -13,7 +13,7 @@ function SeenByElement({
   message,
   members = [],
 }: {
-  message: Message & { type: MessageType };
+  message: Message & { type: "attachment" | "youtube" | "mediaUri" | "text" };
   members: string[];
 }) {
   const getAllSeen = useMemo(() => {

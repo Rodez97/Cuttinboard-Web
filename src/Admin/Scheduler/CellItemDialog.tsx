@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import { deleteDoc } from "firebase/firestore";
 import React, { useState } from "react";
@@ -15,7 +17,7 @@ import {
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Avatar, Button, List, Modal, Popconfirm } from "antd";
+import { Avatar, Button, List, Modal } from "antd";
 import {
   DeleteFilled,
   ExclamationCircleOutlined,
@@ -89,10 +91,10 @@ function CellItemDialog({
   };
 
   return (
-    <>
+    <React.Fragment>
       <Modal
         onCancel={handleOnClose}
-        visible={open}
+        open={open}
         title={capitalize(dayjs(column).format("MMMM DD, YYYY"))}
         footer={[
           <Button key="ok" onClick={onClose} type="primary">
@@ -137,7 +139,7 @@ function CellItemDialog({
             type="dashed"
             icon={<PlusCircleFilled />}
             onClick={handleOnAddShift}
-            style={{ width: "100%" }}
+            block
           >
             {t("Add")}
           </Button>
@@ -150,7 +152,7 @@ function CellItemDialog({
           onClose={() => setReadonlyShiftDialogOpen(false)}
         />
       )}
-    </>
+    </React.Fragment>
   );
 }
 

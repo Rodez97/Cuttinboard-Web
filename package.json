@@ -24,8 +24,7 @@
   "homepage": "https://github.com/cuttinboard/Cuttinboard-Web-App",
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@charkour/react-reactions": "^0.8.0",
-    "@cuttinboard-solutions/cuttinboard-library": "^0.0.2",
+    "@cuttinboard-solutions/cuttinboard-library": "^0.1.6",
     "@cuttinboard/cuttinboard-library": "^6.3.8",
     "@date-io/dayjs": "^2.15.0",
     "@emotion/babel-preset-css-prop": "^11.10.0",
@@ -64,12 +63,11 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-intersection-observer": "^9.4.0",
     "react-number-format": "^4.9.4",
+    "react-onesignal": "^2.0.4",
     "react-player": "^2.10.1",
     "react-router-dom": "^6.3.0",
     "react-transition-group": "^4.4.2",
-    "rooks": "^6.4.3",
-    "stream-chat": "^7.1.0",
-    "stream-chat-react": "^10.1.0"
+    "rooks": "^6.4.3"
   },
   "devDependencies": {
     "@babel/plugin-syntax-jsx": "^7.18.6",

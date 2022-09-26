@@ -1,13 +1,13 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import styled from "@emotion/styled";
-import { Button, Descriptions, InputNumber, Modal, Typography } from "antd";
+import { Button, Descriptions, InputNumber, Modal } from "antd";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
-
-const { Paragraph } = Typography;
 
 const ProjectedSalesTable = styled(Descriptions)`
   .ant-input-number {
@@ -15,7 +15,7 @@ const ProjectedSalesTable = styled(Descriptions)`
   }
 `;
 
-function ProjectedSalesRow({
+function ProjectedSalesDialog({
   visible,
   onClose,
 }: {
@@ -67,7 +67,7 @@ function ProjectedSalesRow({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       footer={[
         <Button key="back" onClick={handleCancelClick} disabled={saving}>
           {editing ? t("Cancel") : "OK"}
@@ -103,7 +103,7 @@ function ProjectedSalesRow({
               formatter={(value) => `$ ${value}`}
               onChange={(val) => handleInputChange(wd.getDay(), val)}
               disabled={!editing}
-              style={{ width: "100% !important" }}
+              css={{ width: "100% !important" }}
             />
           </Descriptions.Item>
         ))}
@@ -112,4 +112,4 @@ function ProjectedSalesRow({
   );
 }
 
-export default ProjectedSalesRow;
+export default ProjectedSalesDialog;

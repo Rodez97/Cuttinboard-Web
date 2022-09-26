@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import React, { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
@@ -108,11 +110,11 @@ function RosterView({ employees }: { employees: Employee[] }) {
   ]);
 
   return (
-    <>
+    <React.Fragment>
       <Space
         align="center"
         wrap
-        style={{ justifyContent: "center", padding: "10px 5px" }}
+        css={{ justifyContent: "center", padding: "10px 5px" }}
       >
         <Button
           onClick={() => setSelectedDateIndex((si) => (si === 0 ? 6 : si - 1))}
@@ -120,7 +122,7 @@ function RosterView({ employees }: { employees: Employee[] }) {
           icon={<LeftCircleOutlined />}
           type="text"
         />
-        <Typography.Text type="secondary" style={{ fontSize: 18 }}>
+        <Typography.Text type="secondary" css={{ fontSize: 18 }}>
           {dayjs(weekDays[selectedDateIndex]).format("dddd, MM/DD/YY")}
         </Typography.Text>
         <Button
@@ -142,8 +144,9 @@ function RosterView({ employees }: { employees: Employee[] }) {
           };
         }}
         pagination={false}
+        rowKey={(e) => e.shift.id}
       />
-    </>
+    </React.Fragment>
   );
 }
 

@@ -12,15 +12,15 @@ import {
   Colors,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { matchSorter } from "match-sorter";
-import Icon, { MessageOutlined, PlusOutlined } from "@ant-design/icons";
+import { MessageOutlined, PlusOutlined } from "@ant-design/icons";
 import { Badge, Button, Input, Menu, Space } from "antd";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
-import Forum from "@mdi/svg/svg/forum.svg";
 
 function ConversationsList() {
+  const { locationId } = useParams();
   const { locationAccessKey } = useLocation();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -58,9 +58,8 @@ function ConversationsList() {
       }}
     >
       <DarkPageHeader
-        backIcon={<Icon component={Forum} />}
         title={t("Conversations")}
-        onBack={() => false}
+        onBack={() => navigate(`/location/${locationId}`)}
         css={{ paddingBottom: 0, paddingTop: 0 }}
       />
       {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (

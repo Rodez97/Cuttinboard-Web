@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import PageLoading from "./components/PageLoading";
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense } from "react";
 import {
   Navigate,
   Route,
@@ -11,73 +11,34 @@ import {
   useParams,
 } from "react-router-dom";
 import {
-  useCuttinboard,
   useLocation,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Badge, Button, Layout, Menu, PageHeader } from "antd";
+import { Badge, Button, Layout } from "antd";
 import { useTranslation } from "react-i18next";
-import Icon, { SettingOutlined, SwapOutlined } from "@ant-design/icons";
+import Icon, {
+  SettingFilled,
+  SettingOutlined,
+  SwapOutlined,
+} from "@ant-design/icons";
 import Forum from "@mdi/svg/svg/forum.svg";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import Apps from "@mdi/svg/svg/apps.svg";
 import UserMenu from "./components/UserMenu";
 import { getRoleTextByNumber } from "./Admin/Employees/employee-utils";
+import { DarkPageHeader } from "components/PageHeaders";
 
 const LocationSettings = lazy(() => import("./Admin/LocationSettings"));
-const DM = lazy(() => import("./pages/RealtimeChat/DM"));
+const DM = lazy(() => import("./pages/DirectMessages/DM"));
 const AppsRouter = lazy(() => import("./Modules/AppsRouter"));
-const Conversations = lazy(() => import("./pages/RealtimeConversations/Conv"));
+const Conversations = lazy(() => import("./pages/Conversations/Conv"));
 
 export function LocationContainer() {
   const { locationId } = useParams();
   const { pathname } = useRouterLocation();
-  const { notifications } = useCuttinboard();
   const navigate = useNavigate();
   const { locationAccessKey, location } = useLocation();
   const { t } = useTranslation();
-  const { getBadgeByModule } = useNotificationsBadges();
-
-  const items = useMemo(
-    () => [
-      {
-        label: (
-          <Badge
-            dot
-            count={getBadgeByModule("sch") + getBadgeByModule("task")}
-            size="small"
-            css={{ color: "inherit" }}
-            offset={[10, 0]}
-          >
-            {t("Apps")}
-          </Badge>
-        ),
-        key: "apps",
-        icon: <Icon component={Apps} />,
-      },
-      {
-        label: (
-          <Badge
-            dot
-            count={getBadgeByModule("conv")}
-            size="small"
-            css={{ color: "inherit" }}
-            offset={[10, 0]}
-          >
-            {t("Conversations")}
-          </Badge>
-        ),
-        key: "conversations",
-        icon: <Icon component={Forum} />,
-      },
-      {
-        label: t("Chats"),
-        key: "chats",
-        icon: <Icon component={MessageTextLock} />,
-      },
-    ],
-    [notifications]
-  );
+  const { getBadgeByModule, getDMBadges } = useNotificationsBadges();
 
   if (!locationAccessKey || locationAccessKey.locId !== locationId) {
     return <Navigate to="/dashboard" />;
@@ -85,39 +46,64 @@ export function LocationContainer() {
 
   return (
     <Layout>
-      <PageHeader
+      <DarkPageHeader
         className="site-page-header"
         onBack={() => navigate("/dashboard")}
         backIcon={<SwapOutlined />}
         title={location.name}
         subTitle={t(getRoleTextByNumber(locationAccessKey.role))}
         extra={[
+          <Badge
+            dot
+            key="conversations"
+            count={getBadgeByModule("conv")}
+            size="small"
+            css={{ color: "inherit" }}
+            offset={[10, 0]}
+          >
+            <Button
+              icon={<Icon component={Forum} />}
+              type={
+                pathname.split("/")[3] === "conversations" ? "primary" : "text"
+              }
+              shape="circle"
+              onClick={() => navigate("conversations")}
+            />
+          </Badge>,
+
+          <Badge
+            key="directMessages"
+            count={getDMBadges}
+            size="small"
+            offset={[-20, 5]}
+          >
+            <Button
+              icon={<Icon component={MessageTextLock} />}
+              type={pathname.split("/")[3] === "chats" ? "primary" : "text"}
+              shape="circle"
+              onClick={() => navigate("chats")}
+            />
+          </Badge>,
           <Button
-            icon={<SettingOutlined />}
+            icon={<SettingFilled />}
             key="locSettings"
-            type="text"
+            type={pathname.split("/")[3] === "locSettings" ? "primary" : "text"}
             shape="circle"
             onClick={() => navigate("locSettings")}
             className="settings-btn"
+            css={{ marginRight: 15 }}
           />,
-          <UserMenu key="userMenu" color="#000" />,
+          <UserMenu key="userMenu" />,
         ]}
       />
-      <Menu
-        items={items}
-        css={{ justifyContent: "center" }}
-        mode="horizontal"
-        theme="dark"
-        selectedKeys={[pathname.split("/")[3]]}
-        onSelect={({ key }) => navigate(key)}
-      />
+
       <Layout.Content css={{ display: "flex" }}>
         <Routes>
           <Route
             path={`chats/*`}
             element={
               <Suspense fallback={<PageLoading />}>
-                <DM />
+                <DM locationId={locationId} />
               </Suspense>
             }
           />

@@ -25,7 +25,9 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
         </Space>
       </Table.Summary.Cell>
       {weekDays.map((wd, i) => {
-        return <SummaryCell key={i + 1} weekDay={wd} data={data} />;
+        return (
+          <SummaryCell index={i + 1} key={i + 1} weekDay={wd} data={data} />
+        );
       })}
     </Table.Summary.Row>
   );

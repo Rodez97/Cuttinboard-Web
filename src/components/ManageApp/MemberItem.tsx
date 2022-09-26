@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { DeleteFilled } from "@ant-design/icons";
 import {
   useCuttinboard,
@@ -7,7 +9,7 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, List } from "antd";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 
 interface IMemberItem {
@@ -26,13 +28,13 @@ function MemberItem({
   privacyLevel,
 }: IMemberItem) {
   const { user } = useCuttinboard();
-  const { isGeneralManager, isOwner } = useLocation();
+  const { isGeneralManager, isOwner, isAdmin } = useLocation();
 
   const haveSecondaryAction = useMemo(() => {
     if (readonly) {
       return false;
     }
-    if (isGeneralManager || isOwner) {
+    if (isGeneralManager || isOwner || isAdmin) {
       return true;
     }
     if (employee.id === hostId && employee.id === user.uid) {
@@ -48,13 +50,14 @@ function MemberItem({
     hostId,
     privacyLevel,
     user.uid,
+    isAdmin,
   ]);
 
   return (
     <List.Item
-      style={{
+      css={{
         backgroundColor: COLORS.MainOnWhite,
-        padding: 5,
+        padding: 10,
         margin: 5,
       }}
       actions={

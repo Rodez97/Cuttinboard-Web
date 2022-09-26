@@ -1,23 +1,20 @@
 import { UserOutlined } from "@ant-design/icons";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
-  ChatRTDBProvider,
+  DirectMessagesProvider,
   useDMs,
-  useEmployeesList,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getAvatarByUID } from "utils/utils";
 import ChatMain from "../../components/ChatV2/ChatMain";
 import { GrayPageHeader } from "../../components/PageHeaders";
-import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 
 function DMMain() {
   const navigate = useNavigate();
   const { removeDMBadge } = useNotificationsBadges();
   const { selectedChat } = useDMs();
-  const { getUniqAllEmployees, getEmployees, getOrgEmployees } =
-    useEmployeesList();
 
   useEffect(() => {
     return () => {
@@ -25,17 +22,8 @@ function DMMain() {
     };
   }, [selectedChat]);
 
-  const recipient = useMemo(() => {
-    const { members } = selectedChat;
-    const other = Object.keys(members).find(
-      (id) => id !== Auth.currentUser.uid
-    );
-    return getUniqAllEmployees().find(({ id }) => id === other);
-  }, [selectedChat.id, selectedChat, getEmployees, getOrgEmployees]);
-
   return (
-    <ChatRTDBProvider
-      chatType="chats"
+    <DirectMessagesProvider
       chatId={selectedChat.id}
       members={Object.keys(selectedChat.members)}
     >
@@ -43,17 +31,18 @@ function DMMain() {
         backIcon={false}
         avatar={{
           icon: <UserOutlined />,
-          src: <QuickUserDialogAvatar employee={recipient} />,
+          src: getAvatarByUID(selectedChat.recipient.id),
+          onClick: () => navigate("details"),
+          style: { cursor: "pointer" },
         }}
-        onBack={() => navigate("details")}
         title={
-          recipient
-            ? `${recipient.name} ${recipient.lastName}`
+          selectedChat.recipient
+            ? selectedChat.recipient.name
             : "Removed Employee"
         }
       />
       <ChatMain type="chats" chatId={selectedChat.id} canUse />
-    </ChatRTDBProvider>
+    </DirectMessagesProvider>
   );
 }
 

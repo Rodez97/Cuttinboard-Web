@@ -1,18 +1,16 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   Employee,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  getShiftDate,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import dayjs from "dayjs";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
-import { useScheduler } from "./Scheduler";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
-import { Card, List, Space, Typography } from "antd";
+import { Card } from "antd";
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
@@ -22,9 +20,6 @@ interface EmpColumnCellProps {
 }
 
 function EmpColumnCell({ employee, shifts }: EmpColumnCellProps) {
-  const { newShift } = useScheduler();
-  const { weekDays, isPublished } = useSchedule();
-
   const getSecondaryText = useCallback(() => {
     const durationTotal = shifts?.reduce<{
       time: duration.Duration;

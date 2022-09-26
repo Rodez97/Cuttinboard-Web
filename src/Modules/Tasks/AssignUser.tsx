@@ -1,97 +1,98 @@
-import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  Employee,
-  EmployeeConverter,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
+  useEmployeesList,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Typography } from "antd";
 import {
-  collection,
-  documentId,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
-import React, { useRef } from "react";
-import { useCollectionDataOnce } from "react-firebase-hooks/firestore";
+  Colors,
+  PrivacyLevel,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { Button, List } from "antd";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import SelectEmployee from "../../components/ManageApp/SelectEmployee";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
-import useExtendedCollectionOnceQuery from "../../hooks/useExtendedCollectionOnceQuery";
+import { GrayPageHeader } from "components/PageHeaders";
+import { TitleBoxGreen } from "theme/styledComponents";
+import { ArrowRightOutlined } from "@ant-design/icons";
+import { QuickUserDialogAvatar } from "components/QuickUserDialog";
 
 interface AssignUserProps {
-  initialSelected?: string;
   onSelectedEmployee: (employee: Employee) => void;
 }
 
-function AssignUser({ initialSelected, onSelectedEmployee }: AssignUserProps) {
+function AssignUser({ onSelectedEmployee }: AssignUserProps) {
   const navigate = useNavigate();
+  const { getEmployees } = useEmployeesList();
   const { t } = useTranslation();
-  const { locationId, location } = useLocation();
+  const { locationId } = useLocation();
   const { selectedApp } = useCuttinboardModule();
-  const baseQuery = useRef(
-    collection(
-      Firestore,
-      "Organizations",
-      location.organizationId,
-      "employees"
-    ).withConverter(EmployeeConverter)
-  );
 
-  const [employees, loadingEmployees, employeesError] =
-    selectedApp.privacyLevel === PrivacyLevel.PRIVATE
-      ? useExtendedCollectionOnceQuery(
-          baseQuery.current,
-          documentId(),
-          selectedApp.accessTags
-        )
-      : selectedApp.privacyLevel === PrivacyLevel.POSITIONS
-      ? useCollectionDataOnce(
-          query(
-            baseQuery.current,
-            where(
-              `locations.${locationId}.pos`,
-              "array-contains-any",
-              selectedApp.accessTags ?? []
+  const employees = useMemo(
+    () =>
+      selectedApp.privacyLevel === PrivacyLevel.PRIVATE
+        ? getEmployees?.filter((e) => selectedApp.accessTags?.includes(e.id))
+        : selectedApp.privacyLevel === PrivacyLevel.POSITIONS
+        ? getEmployees?.filter((e) =>
+            e.locations[locationId]?.pos?.some((p) =>
+              selectedApp.accessTags?.includes(p)
             )
           )
-        )
-      : useCollectionDataOnce(
-          query(baseQuery.current, orderBy(`locations.${locationId}`))
-        );
+        : getEmployees,
+    [getEmployees]
+  );
 
   const handleSelectEmployee = (emp: Employee) => {
     onSelectedEmployee(emp);
     navigate(-1);
   };
 
-  if (loadingEmployees) {
-    return <PageLoading />;
-  }
-  if (employeesError) {
-    return <PageError error={employeesError} />;
-  }
   return (
-    <>
-      <Typography.Title
-        level={4}
-        style={{ textAlign: "center", margin: "20px 0px" }}
-      >
-        {t("Assign tasks")}
-      </Typography.Title>
-      <SelectEmployee
-        employees={employees}
-        orgEmployees={[]}
-        onSelectedEmployee={handleSelectEmployee}
-        initialSelected={employees?.find((e) => e.id === initialSelected)}
-      />
-    </>
+    <div>
+      <GrayPageHeader onBack={() => navigate(-1)} title={t("Assign tasks")} />
+      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+        <div
+          css={{
+            minWidth: 300,
+            maxWidth: 600,
+            margin: "auto",
+            width: "100%",
+          }}
+        >
+          <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
+          <List
+            dataSource={employees}
+            renderItem={(emp) => {
+              return (
+                <List.Item
+                  key={emp.id}
+                  css={{
+                    backgroundColor: Colors.MainOnWhite,
+                    padding: 10,
+                    margin: 5,
+                  }}
+                  extra={
+                    <Button
+                      type="link"
+                      icon={<ArrowRightOutlined />}
+                      onClick={() => handleSelectEmployee(emp)}
+                    />
+                  }
+                >
+                  <List.Item.Meta
+                    avatar={<QuickUserDialogAvatar employee={emp} />}
+                    title={`${emp.name} ${emp.lastName}`}
+                    description={emp.email}
+                  />
+                </List.Item>
+              );
+            }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 

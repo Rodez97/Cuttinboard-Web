@@ -1,10 +1,11 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { addDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import QuickTodo, { QuickTodoRef } from "../../components/QuickTodo";
 import { useTranslation } from "react-i18next";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
-  Employee,
   Todo,
   Todo_Task,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
@@ -12,7 +13,7 @@ import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import AssignUser from "./AssignUser";
 import { recordError } from "../../utils/utils";
-import { Avatar, Button, Col, DatePicker, Form, Input, List, Row } from "antd";
+import { Avatar, Button, DatePicker, Form, Input, List } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import { DeleteOutlined, UserOutlined } from "@ant-design/icons";
 import moment from "moment";
@@ -95,38 +96,34 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
   };
 
   return (
-    <>
-      <GrayPageHeader
-        className="site-page-header-responsive"
-        onBack={() => navigate(-1)}
-        title={t(title)}
-      />
-
-      <Form<FormDataType>
-        onFinish={onFinish}
-        form={form}
-        initialValues={{
-          ...selectedTodo,
-          dueDate:
-            selectedTodo?.dueDate && moment(selectedTodo.dueDate?.toDate()),
-        }}
-        disabled={submitting}
-      >
-        <Routes>
-          <Route path="/">
-            <Route
-              index
-              element={
-                <Row justify="center">
-                  <Col
-                    xs={24}
-                    md={12}
-                    lg={8}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      paddingTop: "10px",
+    <Routes>
+      <Route path="/">
+        <Route
+          index
+          element={
+            <div>
+              <GrayPageHeader onBack={() => navigate(-1)} title={t(title)} />
+              <div
+                css={{ display: "flex", flexDirection: "column", padding: 20 }}
+              >
+                <div
+                  css={{
+                    minWidth: 300,
+                    maxWidth: 400,
+                    margin: "auto",
+                    width: "100%",
+                  }}
+                >
+                  <Form<FormDataType>
+                    onFinish={onFinish}
+                    form={form}
+                    initialValues={{
+                      ...selectedTodo,
+                      dueDate:
+                        selectedTodo?.dueDate &&
+                        moment(selectedTodo.dueDate?.toDate()),
                     }}
+                    disabled={submitting}
                   >
                     <Form.Item
                       name="name"
@@ -171,7 +168,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                         block
                         type="dashed"
                         onClick={() => navigate("assign")}
-                        style={{ marginBottom: "20px" }}
+                        css={{ marginBottom: "20px" }}
                         disabled={submitting}
                       >
                         {t("Assign")}
@@ -189,40 +186,36 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                     </Form.Item>
 
                     <Button
-                      onClick={handleClose}
-                      danger
-                      block
-                      type="dashed"
-                      style={{ margin: "20px 0px" }}
-                      disabled={submitting}
-                    >
-                      {t("Cancel")}
-                    </Button>
-                    <Button
                       htmlType="submit"
                       block
                       type="primary"
                       loading={submitting}
+                      css={{ margin: "20px 0px" }}
                     >
                       {t("Accept")}
                     </Button>
-                  </Col>
-                </Row>
-              }
-            />
-            <Route
-              path="assign"
-              element={
-                <AssignUser
-                  initialSelected={assignedTo?.id}
-                  onSelectedEmployee={setAssignedTo}
-                />
-              }
-            />
-          </Route>
-        </Routes>
-      </Form>
-    </>
+
+                    <Button
+                      onClick={handleClose}
+                      danger
+                      block
+                      type="dashed"
+                      disabled={submitting}
+                    >
+                      {t("Cancel")}
+                    </Button>
+                  </Form>
+                </div>
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="assign"
+          element={<AssignUser onSelectedEmployee={setAssignedTo} />}
+        />
+      </Route>
+    </Routes>
   );
 };
 

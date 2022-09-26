@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/src/styles.scss";
 import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps";
@@ -8,28 +8,31 @@ import FileMessage from "components/ChatV2/CustomMessages/FileMessage";
 import Linkify from "linkify-react";
 import { Space, Typography } from "antd";
 
-function AudioMessage({ source, message, ...otherProps }: BaseMediaProps) {
+function AudioMessage({ message }: BaseMediaProps) {
   const audio = useRef<AudioPlayer>(null);
-  const [supportsFormat, setSupportsFormat] = useState(null);
-
-  useEffect(() => {
-    const canPlay = canPlayAudio();
-    setSupportsFormat(canPlay);
-  }, []);
+  const [supportsFormat] = useState(() => canPlayAudio());
 
   const canPlayAudio = () => {
-    if (!otherProps?.attachment?.mimeType) {
+    if (message.type !== "attachment") {
       return false;
     }
     const aud = document.createElement("audio");
-    const isSupp = aud.canPlayType(otherProps.attachment.mimeType);
+    const isSupp = aud.canPlayType(message.attachment.mimeType);
     aud.remove();
     return isSupp === "probably" || isSupp === "maybe";
   };
 
   if (supportsFormat === false) {
-    return <FileMessage source={source} {...otherProps} />;
+    return <FileMessage message={message} />;
   }
+
+  const getSrc = () => {
+    if (message.type === "mediaUri") {
+      return message.sourceUrl;
+    } else {
+      return message.attachment.uri;
+    }
+  };
 
   return (
     <Space direction="vertical">
@@ -39,7 +42,7 @@ function AudioMessage({ source, message, ...otherProps }: BaseMediaProps) {
           autoPlay={false}
           autoPlayAfterSrcChange={false}
           customAdditionalControls={[]}
-          src={source}
+          src={getSrc()}
           // other props here
           css={{
             borderRadius: 5,
@@ -63,7 +66,7 @@ function AudioMessage({ source, message, ...otherProps }: BaseMediaProps) {
               className: "linkifyInnerStyle",
             }}
           >
-            {message}
+            {message.message}
           </Linkify>
         </Typography.Paragraph>
       )}

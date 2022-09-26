@@ -1,27 +1,29 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Checkbox, Col, List, Row } from "antd";
+import { Button, Checkbox, List } from "antd";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { TitleBoxBlue, TitleBoxGreen } from "../../theme/styledComponents";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 interface AddMembersProps {
   onSelectedEmployees: (employees: Employee[]) => void;
-  employees: Employee[];
-  orgEmployees: Employee[];
   initialSelected?: Employee[];
+  hostId?: string;
 }
 
 function AddMembers({
   onSelectedEmployees,
-  employees,
-  orgEmployees,
   initialSelected,
+  hostId,
 }: AddMembersProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { getEmployees, getOrgEmployees } = useEmployeesList();
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[] | null>(
     initialSelected
   );
@@ -42,7 +44,7 @@ function AddMembers({
   const handleAccept = () => {
     if (selectedEmployees.length > 0) {
       onSelectedEmployees(selectedEmployees);
-      handleClose();
+      navigate(-1);
     }
   };
 
@@ -53,33 +55,43 @@ function AddMembers({
 
   const getUniqEmployees = useMemo(
     () =>
-      employees.filter((emp) => !orgEmployees?.some((oe) => oe.id === emp.id)),
-    [employees, orgEmployees]
+      getEmployees.filter(
+        (emp) =>
+          !getOrgEmployees?.some((oe) => oe.id === emp.id) && emp.id !== hostId
+      ),
+    [getEmployees, getOrgEmployees, hostId]
   );
 
   return (
-    <Row justify="center" style={{ paddingBottom: "50px" }}>
-      <Col xs={24} md={20} lg={16} xl={12}>
-        {Boolean(orgEmployees?.length) && (
-          <>
+    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+      <div
+        css={{
+          minWidth: 300,
+          maxWidth: 600,
+          margin: "auto",
+          width: "100%",
+        }}
+      >
+        {Boolean(getOrgEmployees?.length) && (
+          <React.Fragment>
             <TitleBoxBlue>{t("Organization")}</TitleBoxBlue>
             <List
-              dataSource={orgEmployees}
+              dataSource={getOrgEmployees.filter((e) => e.id !== hostId)}
               renderItem={(emp) => {
                 return (
                   <List.Item
                     key={emp.id}
-                    style={{
+                    css={{
                       backgroundColor: Colors.MainOnWhite,
-                      padding: 5,
+                      padding: 10,
                       margin: 5,
                     }}
-                    actions={[
+                    extra={
                       <Checkbox
                         onChange={handleToggle(emp)}
                         checked={selectedEmployees.includes(emp)}
-                      />,
-                    ]}
+                      />
+                    }
                   >
                     <List.Item.Meta
                       avatar={<QuickUserDialogAvatar employee={emp} />}
@@ -90,7 +102,7 @@ function AddMembers({
                 );
               }}
             />
-          </>
+          </React.Fragment>
         )}
 
         <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
@@ -100,17 +112,17 @@ function AddMembers({
             return (
               <List.Item
                 key={emp.id}
-                style={{
+                css={{
                   backgroundColor: Colors.MainOnWhite,
-                  padding: 5,
+                  padding: 10,
                   margin: 5,
                 }}
-                actions={[
+                extra={
                   <Checkbox
                     onChange={handleToggle(emp)}
                     checked={selectedEmployees.includes(emp)}
-                  />,
-                ]}
+                  />
+                }
               >
                 <List.Item.Meta
                   avatar={<QuickUserDialogAvatar employee={emp} />}
@@ -121,20 +133,21 @@ function AddMembers({
             );
           }}
         />
+
         <Button
-          onClick={handleClose}
-          danger
+          onClick={handleAccept}
           block
-          type="dashed"
-          style={{ margin: "20px 0px" }}
+          type="primary"
+          css={{ margin: "20px 0px" }}
         >
-          {t("Cancel")}
-        </Button>
-        <Button onClick={handleAccept} block type="primary">
           {t("Accept")}
         </Button>
-      </Col>
-    </Row>
+
+        <Button onClick={handleClose} danger block type="dashed">
+          {t("Cancel")}
+        </Button>
+      </div>
+    </div>
   );
 }
 

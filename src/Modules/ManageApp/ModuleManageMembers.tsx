@@ -8,8 +8,6 @@ import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";
 
 function ModuleManageMembers() {
-  const { getEmployees, getOrgEmployees } = useEmployeesList();
-
   const {
     selectedApp,
     canManage,
@@ -74,8 +72,6 @@ function ModuleManageMembers() {
       privacyLevel={selectedApp.privacyLevel}
       positions={selectedApp.accessTags}
       hostId={selectedApp?.hostId}
-      employees={getEmployees}
-      orgEmployees={getOrgEmployees}
     />
   );
 }

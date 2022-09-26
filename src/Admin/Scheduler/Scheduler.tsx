@@ -19,7 +19,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useTranslation } from "react-i18next";
 import duration from "dayjs/plugin/duration";
 import { matchSorter } from "match-sorter";
-import ProjectedSalesRow from "./ProjectedSalesRow";
+import ProjectedSalesDialog from "./ProjectedSalesDialog";
 import RosterView from "./RosterView";
 import ScheduleSummary from "./ScheduleSummary";
 import WeekNavigator from "./WeekNavigator";
@@ -308,10 +308,11 @@ function Scheduler() {
             }))}
             summary={(pageData) => <TableFooter data={pageData} />}
             pagination={false}
+            rowKey={(e) => e.employee.id}
           />
         )}
 
-        <ProjectedSalesRow
+        <ProjectedSalesDialog
           visible={projectedSalesOpen}
           onClose={() => setProjectedSalesOpen(false)}
         />

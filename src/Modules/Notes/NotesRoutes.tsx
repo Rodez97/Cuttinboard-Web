@@ -41,7 +41,7 @@ function NotesRoutes() {
           <Route index element={<ModuleInfo />} />
           <Route
             path="edit"
-            element={<ManageModule title="Edit Board" baseApp={selectedApp} />}
+            element={<ManageModule title="Edit Board" edit />}
           />
         </Route>
       </Route>
