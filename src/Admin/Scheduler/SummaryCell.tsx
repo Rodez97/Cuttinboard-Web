@@ -11,12 +11,11 @@ import { ShiftsTable } from "./Scheduler";
 import { Space, Table, Typography } from "antd";
 
 interface SummaryCellProps {
-  key: number;
   weekDay: Date;
   data: readonly ShiftsTable[];
+  index: number;
 }
-export const SummaryCell = ({ key, weekDay, data }: SummaryCellProps) => {
-  const { t } = useTranslation();
+export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
   const { weekDays, shiftsCollection, scheduleDocument } = useSchedule();
 
   const { totalHours, totalEmployees, timeAndWages, laborPercent } =
@@ -74,7 +73,7 @@ export const SummaryCell = ({ key, weekDay, data }: SummaryCellProps) => {
     }, [weekDays, shiftsCollection, scheduleDocument, data]);
 
   return (
-    <Table.Summary.Cell key={key} index={key}>
+    <Table.Summary.Cell index={index}>
       <Space direction="vertical" size="small">
         <Typography.Text>{totalHours}</Typography.Text>
         <Typography.Text>{totalEmployees}</Typography.Text>

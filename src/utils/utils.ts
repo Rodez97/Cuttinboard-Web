@@ -66,3 +66,6 @@ export const changePhoneNumber = async (phoneNumber: string, user: User) => {
     throw error;
   }
 };
+
+export const getAvatarByUID = (uid: string) =>
+  `https://firebasestorage.googleapis.com/v0/b/cuttinboard-2021.appspot.com/o/users%2F${uid}%2Favatar?alt=media`;

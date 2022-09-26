@@ -32,7 +32,7 @@ const Conv = () => {
       openEdit={openEdit}
     >
       <Layout hasSider>
-        <Layout.Sider width={250}>
+        <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
           <ConversationsList />
         </Layout.Sider>
         <Layout.Content css={{ display: "flex", flexDirection: "column" }}>

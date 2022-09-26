@@ -80,7 +80,7 @@ function ProfilePanel() {
             }}
           >
             <EditableAvatar
-              defaultValue={user.photoURL}
+              initialValue={user.photoURL}
               size={100}
               align="center"
               value={form.getFieldValue("avatar")}

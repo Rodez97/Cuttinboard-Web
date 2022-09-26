@@ -5,8 +5,6 @@ import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
 import MessageBubble from "components/ChatV2/MessageBubble";
 import ChatInput from "components/ChatV2/ChatInput";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { useChatRTDB } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Message,
   MessageType,
@@ -15,6 +13,11 @@ import dayjs from "dayjs";
 import { Divider, Layout, Space, Spin, Typography } from "antd";
 import PageLoading from "../PageLoading";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  useDirectMessages,
+  useConversationMessages,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import DirectMessageBubble from "./DirectMessageBubble";
 
 interface ChatMainProps {
   type: "chats" | "conversations";
@@ -25,9 +28,9 @@ interface ChatMainProps {
 function ChatMain({ type, chatId, canUse }: ChatMainProps) {
   const { t } = useTranslation();
   const { fetchOlderMessages, allMessages, noMoreMessages, loading } =
-    useChatRTDB();
+    type === "chats" ? useDirectMessages() : useConversationMessages();
   const [replyTargetMessage, setReplyTargetMessage] = useState<
-    Message & { type: MessageType }
+    Message & { type: "attachment" | "youtube" | "mediaUri" | "text" }
   >(null);
 
   useEffect(() => {
@@ -98,6 +101,15 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
                   {dayjs(rm.createdAt).format("MM/DD/YYYY, h:mm a")}
                 </Divider>
               </div>
+            ) : type === "chats" ? (
+              <DirectMessageBubble
+                key={rm.id}
+                prevMessage={allMessages[index + 1]}
+                currentMessage={rm}
+                i={index}
+                allMessagesLength={allMessages?.length}
+                onReply={setReplyTargetMessage}
+              />
             ) : (
               <MessageBubble
                 key={rm.id}
@@ -106,7 +118,6 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
                 i={index}
                 allMessagesLength={allMessages?.length}
                 onReply={setReplyTargetMessage}
-                isChat={type === "chats"}
                 canUseApp={canUse}
               />
             )
@@ -118,6 +129,7 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
           onSendMessage={() => setReplyTargetMessage(null)}
           replyTargetMessage={replyTargetMessage}
           cancelReply={() => setReplyTargetMessage(null)}
+          type={type}
         />
       ) : (
         <Space

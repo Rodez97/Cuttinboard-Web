@@ -1,10 +1,13 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   PrivacyLevel,
   Employee,
   useLocation,
   RoleAccessLevels,
+  useEmployeesList,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { TitleBoxBlue, TitleBoxGreen } from "../../theme/styledComponents";
@@ -12,27 +15,14 @@ import AddMembers from "./AddMembers";
 import MemberItem from "./MemberItem";
 import SelectEmployee from "./SelectEmployee";
 import { differenceBy, indexOf, uniqBy } from "lodash";
-import {
-  Button,
-  Col,
-  Layout,
-  List,
-  Modal,
-  PageHeader,
-  Row,
-  Space,
-  Tag,
-  Tooltip,
-  Typography,
-} from "antd";
+import { Button, List, Modal, Space, Tag, Tooltip, Typography } from "antd";
 import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
+import { GrayPageHeader } from "components/PageHeaders";
 
 interface ManageMembersProps {
   readonly?: boolean;
   members: string[];
-  employees: Employee[];
-  orgEmployees: Employee[];
   removeMember: (employeeId: string) => void;
   addMembers: (addedEmployees: Employee[]) => void;
   setAppHost: (newHostUser: Employee) => void;
@@ -52,12 +42,11 @@ function ManageMembers({
   positions,
   hostId,
   members,
-  employees,
-  orgEmployees,
 }: ManageMembersProps) {
   const { t } = useTranslation();
   const { locationAccessKey, locationId } = useLocation();
   const navigate = useNavigate();
+  const { getEmployees, getOrgEmployees } = useEmployeesList();
 
   const handleAddMembers = (addedEmployees: Employee[]) => {
     addMembers(addedEmployees);
@@ -82,8 +71,8 @@ function ManageMembers({
   };
 
   const getMembers = useMemo(() => {
-    const empList = employees ?? [];
-    const orgEmpList = orgEmployees ?? [];
+    const empList = getEmployees ?? [];
+    const orgEmpList = getOrgEmployees ?? [];
     let membersList: Employee[] = [];
     if (privacyLevel === PrivacyLevel.PRIVATE) {
       membersList = uniqBy([...empList, ...orgEmpList], "id").filter(
@@ -101,11 +90,11 @@ function ManageMembers({
       );
     }
     return membersList.filter((m) => m.id !== hostId);
-  }, [orgEmployees, employees, privacyLevel, members, positions, hostId]);
+  }, [getOrgEmployees, getEmployees, privacyLevel, members, positions, hostId]);
 
   const hostUser = useMemo(() => {
-    const empList = employees ?? [];
-    const orgEmpList = orgEmployees ?? [];
+    const empList = getEmployees ?? [];
+    const orgEmpList = getOrgEmployees ?? [];
     return uniqBy([...empList, ...orgEmpList], "id").find(
       ({ id }) => id === hostId
     );
@@ -113,6 +102,7 @@ function ManageMembers({
 
   const handleSetHost = (newHost: Employee) => {
     setAppHost(newHost);
+    navigate(-1);
   };
 
   const handleRemoveHost = async () => {
@@ -139,9 +129,8 @@ function ManageMembers({
         <Route
           index
           element={
-            <Layout.Content>
-              <PageHeader
-                className="site-page-header-responsive"
+            <div>
+              <GrayPageHeader
                 onBack={() => navigate(-1)}
                 title={t("Members")}
                 extra={[
@@ -159,17 +148,15 @@ function ManageMembers({
                   </Tooltip>,
                 ]}
               />
-              <Row justify="center" style={{ paddingBottom: "50px" }}>
-                <Col
-                  xs={24}
-                  md={20}
-                  lg={16}
-                  xl={12}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "20px",
-                    paddingTop: "10px",
+              <div
+                css={{ display: "flex", flexDirection: "column", padding: 20 }}
+              >
+                <div
+                  css={{
+                    minWidth: 300,
+                    maxWidth: 600,
+                    margin: "auto",
+                    width: "100%",
                   }}
                 >
                   {/* 🛡 Host */}
@@ -206,8 +193,8 @@ function ManageMembers({
                   {privacyLevel === PrivacyLevel.PUBLIC && (
                     <Typography.Text
                       strong
-                      style={{
-                        fontSize: "20px",
+                      css={{
+                        fontSize: 20,
                         textAlign: "center",
                         display: "block",
                       }}
@@ -218,10 +205,12 @@ function ManageMembers({
 
                   {privacyLevel === PrivacyLevel.POSITIONS &&
                     positions?.length && (
-                      <Space size="large" wrap>
-                        {positions.map((pos, index) => (
-                          <Tag key={index}>{t(pos)}</Tag>
-                        ))}
+                      <Space wrap>
+                        {positions
+                          .filter((p) => !p.startsWith("hostId_"))
+                          .map((pos, index) => (
+                            <Tag key={index}>{t(pos)}</Tag>
+                          ))}
                       </Space>
                     )}
 
@@ -242,48 +231,37 @@ function ManageMembers({
                       />
                     )}
                   />
-                </Col>
-              </Row>
-            </Layout.Content>
+                </div>
+              </div>
+            </div>
           }
         />
         <Route
           path="add"
           element={
-            <>
-              <PageHeader
-                className="site-page-header-responsive"
+            <div>
+              <GrayPageHeader
                 onBack={() => navigate(-1)}
                 title={t("Add Members")}
               />
               <AddMembers
                 onSelectedEmployees={handleAddMembers}
-                employees={differenceBy(employees, [...getMembers, hostUser])}
-                orgEmployees={differenceBy(orgEmployees, [
-                  ...getMembers,
-                  hostUser,
-                ])}
+                hostId={hostId}
                 initialSelected={getMembers}
               />
-            </>
+            </div>
           }
         />
         <Route
           path="host"
           element={
-            <>
-              <PageHeader
-                className="site-page-header-responsive"
+            <div>
+              <GrayPageHeader
                 onBack={() => navigate(-1)}
                 title={t("Select Host")}
               />
-              <SelectEmployee
-                onSelectedEmployee={handleSetHost}
-                initialSelected={hostUser}
-                employees={employees}
-                orgEmployees={orgEmployees}
-              />
-            </>
+              <SelectEmployee onSelectedEmployee={handleSetHost} />
+            </div>
           }
         />
       </Route>

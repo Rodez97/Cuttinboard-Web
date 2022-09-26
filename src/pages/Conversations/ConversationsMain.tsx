@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ChatMain from "components/ChatV2/ChatMain";
 import {
-  ChatRTDBProvider,
+  ConversationMessagesProvider,
   useConversations,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
@@ -26,8 +26,7 @@ function ConversationsMain() {
   }, [selectedChat]);
 
   return (
-    <ChatRTDBProvider
-      chatType="conversations"
+    <ConversationMessagesProvider
       chatId={selectedChat.id}
       members={selectedChat.members}
     >
@@ -51,7 +50,7 @@ function ConversationsMain() {
         chatId={selectedChat.id}
         canUse={canUseApp}
       />
-    </ChatRTDBProvider>
+    </ConversationMessagesProvider>
   );
 }
 

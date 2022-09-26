@@ -1,6 +1,6 @@
 import { LoadingScreen } from "./components/LoadingScreen";
 import PageLoading from "./components/PageLoading";
-import React, { lazy, Suspense, useMemo } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import useSelectedLocation from "./hooks/useSelectedLocation";
 import { LocationContainer } from "./LocationContainer";
@@ -15,12 +15,24 @@ import {
 import { CuttinboardError } from "@cuttinboard-solutions/cuttinboard-library/models";
 import DashboardProvider from "./Dashboard/DashboardProvider";
 import { Layout } from "antd";
-
+import runOneSignal from "runOneSignal";
+import OneSignal from "react-onesignal";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 const Dashboard = lazy(() => import("./Dashboard/Dashboard"));
 
 function MainRouter() {
   const { organizationKey } = useCuttinboard();
   const { selectedLocation } = useSelectedLocation();
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!initialized) {
+      setInitialized(true);
+      runOneSignal().then(() => {
+        OneSignal.setExternalUserId(Auth.currentUser.uid);
+      });
+    }
+  }, [initialized]);
 
   const isLocationSelected = useMemo(() => {
     return organizationKey !== null && selectedLocation !== null;

@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   Positions,
   PrivacyLevel,
@@ -13,7 +15,9 @@ import {
   Row,
   Select,
   Space,
+  Spin,
 } from "antd";
+import { GrayPageHeader } from "components/PageHeaders";
 import { matchSorter } from "match-sorter";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -87,14 +91,12 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
     setResult(res);
   };
   return (
-    <Layout.Content>
-      <PageHeader
-        className="site-page-header-responsive"
-        onBack={() => navigate(-1)}
-        title={title}
-      />
-      <Row justify="center" style={{ paddingBottom: "50px" }}>
-        <Col xs={22} sm={18} md={12} lg={8} xl={6}>
+    <Spin spinning={isSubmitting}>
+      <GrayPageHeader onBack={() => navigate(-1)} title={title} />
+      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+        <div
+          css={{ minWidth: 270, maxWidth: 400, margin: "auto", width: "100%" }}
+        >
           <Form<FormType>
             form={form}
             layout="vertical"
@@ -176,7 +178,11 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
             )}
 
             <Space
-              style={{ display: "flex", justifyContent: "center", gap: "16px" }}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "16px",
+              }}
             >
               <Button danger disabled={isSubmitting} onClick={close}>
                 {t("Cancel")}
@@ -186,9 +192,9 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
               </Button>
             </Space>
           </Form>
-        </Col>
-      </Row>
-    </Layout.Content>
+        </div>
+      </div>
+    </Spin>
   );
 };
 

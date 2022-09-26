@@ -42,7 +42,7 @@ function FilesRoutes() {
           <Route index element={<ModuleInfo />} />
           <Route
             path="edit"
-            element={<ManageModule title="Edit Drawer" baseApp={selectedApp} />}
+            element={<ManageModule title="Edit Drawer" edit />}
           />
         </Route>
       </Route>

@@ -149,10 +149,7 @@ const webpackConfig = () => ({
     }),
     new ForkTsCheckerWebpackPlugin(),
     new CopyWebpackPlugin({
-      patterns: [
-        { from: "src/assets/images", to: "images/" },
-        { from: "public/locales", to: "locales/" },
-      ],
+      patterns: [{ from: "src/assets/images", to: "images/" }, "public"],
     }),
     new LodashModuleReplacementPlugin(),
     new AntdDayjsWebpackPlugin(),

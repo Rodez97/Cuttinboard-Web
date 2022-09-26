@@ -13,7 +13,7 @@ export const DarkPageHeader = styled(PageHeader)`
   & .ant-page-header-heading-sub-title {
     color: rgba(255, 255, 255, 0.65) !important;
   }
-  & .settings-btn {
+  & .ant-btn {
     color: #fff;
   }
 `;

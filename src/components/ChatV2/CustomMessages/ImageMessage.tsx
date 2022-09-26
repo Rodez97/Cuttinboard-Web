@@ -1,21 +1,22 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import Linkify from "linkify-react";
-import { useCallback, useState } from "react";
 import { BaseMediaProps } from "./BaseMediaProps";
 import Img from "react-cool-img";
 import { Space, Typography } from "antd";
 import PlaceholderImg from "../../../assets/images/placeholder_result_img.png";
 
-function ImageMessage({ source, message }: BaseMediaProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const handleImageLoaded = useCallback(() => {
-    setImageLoaded(true);
-  }, []);
+function ImageMessage({ message }: BaseMediaProps) {
+  const getSrc = () => {
+    if (message.type === "mediaUri") {
+      return message.sourceUrl;
+    } else {
+      return message.attachment.uri;
+    }
+  };
 
   const handleOpen = () => {
-    window.open(source, "_blanc");
+    window.open(getSrc(), "_blanc");
   };
 
   return (
@@ -23,7 +24,7 @@ function ImageMessage({ source, message }: BaseMediaProps) {
       <Img
         alt="Message Media"
         placeholder={PlaceholderImg}
-        src={source}
+        src={getSrc()}
         error={PlaceholderImg}
         width="100%"
         css={{
@@ -36,7 +37,7 @@ function ImageMessage({ source, message }: BaseMediaProps) {
         }}
         onClick={handleOpen}
       />
-      {message && message !== "🖼️ Image Message" && (
+      {message.message && message.message !== "🖼️ Image Message" && (
         <Typography.Paragraph
           css={{
             color: "inherit",
@@ -53,7 +54,7 @@ function ImageMessage({ source, message }: BaseMediaProps) {
               className: "linkifyInnerStyle",
             }}
           >
-            {message}
+            {message.message}
           </Linkify>
         </Typography.Paragraph>
       )}

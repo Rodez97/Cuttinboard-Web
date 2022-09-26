@@ -1,12 +1,8 @@
-import { Attachment } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  Attachment,
+  Message,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 
 export interface BaseMediaProps {
-  source: string;
-  uploaded: boolean;
-  onReply?: () => void;
-  name?: string;
-  attachment?: Attachment;
-  id?: string;
-  onUrlPress?: (url: string) => void;
-  message?: string;
+  message?: Message & { type: "attachment" | "mediaUri" };
 }

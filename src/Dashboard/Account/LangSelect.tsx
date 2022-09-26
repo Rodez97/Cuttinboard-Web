@@ -9,7 +9,7 @@ const languages = [
 ];
 
 function LangSelect() {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const handleChange = (value: string) => {
     i18n.changeLanguage(value);
     dayjs.locale(value);
@@ -17,7 +17,7 @@ function LangSelect() {
 
   return (
     <Select
-      defaultValue={i18n.language}
+      value={i18n.language}
       style={{ margin: 50, width: 150 }}
       options={languages}
       onChange={handleChange}

@@ -1,17 +1,16 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
 import {
-  PrivacyLevel,
-  RoleAccessLevels,
-  useCuttinboardModule,
+  useConversations,
   useEmployeesList,
   useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { jsx } from "@emotion/react";
+import { Avatar, Button, Divider, Space, Switch, Tag } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { recordError } from "utils/utils";
-import { Button, Divider, List, Space, Tag } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { List } from "antd";
 import {
   CrownOutlined,
   DeleteOutlined,
@@ -20,32 +19,41 @@ import {
   GlobalOutlined,
   InfoCircleOutlined,
   LockOutlined,
+  NotificationOutlined,
   TagsOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
-import { useMemo } from "react";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useCallback } from "react";
+import { recordError } from "utils/utils";
+import {
+  PrivacyLevel,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
-function ModuleInfo() {
-  const { selectedApp, deleteElement } = useCuttinboardModule();
-  const { locationAccessKey } = useLocation();
+function ConvDetails() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { selectedChat, toggleChatMute, deleteConversation } =
+    useConversations();
+  const { locationAccessKey } = useLocation();
   const { getUniqAllEmployees, getOrgEmployees, getEmployees } =
     useEmployeesList();
 
-  const handleDelete = async () => {
+  const deleteConv = useCallback(async () => {
     try {
-      await deleteElement(selectedApp);
+      await deleteConversation();
     } catch (error) {
       recordError(error);
     }
-  };
+  }, [selectedChat]);
 
   const host = useMemo(() => {
-    if (!selectedApp.hostId) {
+    if (!selectedChat.hostId) {
       return null;
     }
-    return getUniqAllEmployees().find((e) => e.id === selectedApp.hostId);
-  }, [getOrgEmployees, getEmployees, selectedApp]);
+    return getUniqAllEmployees().find((e) => e.id === selectedChat.hostId);
+  }, [getOrgEmployees, getEmployees, selectedChat]);
 
   return (
     <div>
@@ -64,22 +72,22 @@ function ModuleInfo() {
             <List.Item.Meta
               avatar={<FormOutlined />}
               title={t("Name")}
-              description={selectedApp.name}
+              description={selectedChat.name}
             />
           </List.Item>
           <List.Item>
             <List.Item.Meta
               avatar={
-                selectedApp.privacyLevel === PrivacyLevel.PRIVATE ? (
+                selectedChat.privacyLevel === PrivacyLevel.PRIVATE ? (
                   <LockOutlined />
-                ) : selectedApp.privacyLevel === PrivacyLevel.POSITIONS ? (
+                ) : selectedChat.privacyLevel === PrivacyLevel.POSITIONS ? (
                   <TagsOutlined />
                 ) : (
                   <GlobalOutlined />
                 )
               }
               title={t("Privacy Level")}
-              description={t(selectedApp.privacyLevel)}
+              description={t(selectedChat.privacyLevel)}
             />
           </List.Item>
           {host && (
@@ -96,14 +104,21 @@ function ModuleInfo() {
               avatar={<InfoCircleOutlined />}
               title={t("Description")}
               description={
-                Boolean(selectedApp.description)
-                  ? selectedApp.description
+                Boolean(selectedChat.description)
+                  ? selectedChat.description
                   : "---"
               }
             />
           </List.Item>
-          {selectedApp.privacyLevel === PrivacyLevel.POSITIONS &&
-            selectedApp.accessTags?.length && (
+          <List.Item>
+            <List.Item.Meta
+              avatar={<TeamOutlined />}
+              title={t("Members")}
+              description={selectedChat.members?.length ?? 0}
+            />
+          </List.Item>
+          {selectedChat.privacyLevel === PrivacyLevel.POSITIONS &&
+            selectedChat.positions?.length && (
               <Space
                 wrap
                 css={{
@@ -112,12 +127,25 @@ function ModuleInfo() {
                   padding: 10,
                 }}
               >
-                {selectedApp.accessTags.map((p) => (
+                {selectedChat.positions.map((p) => (
                   <Tag key={p}>{p}</Tag>
                 ))}
               </Space>
             )}
           <Divider />
+          <List.Item
+            extra={
+              <Switch
+                checked={selectedChat.muted?.includes(Auth.currentUser.uid)}
+                onChange={toggleChatMute}
+              />
+            }
+          >
+            <List.Item.Meta
+              avatar={<NotificationOutlined />}
+              title={t("Mute push notifications")}
+            />
+          </List.Item>
           {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
             <div
               css={{
@@ -133,16 +161,16 @@ function ModuleInfo() {
                 block
                 onClick={() => navigate("edit")}
               >
-                {t("Edit Board")}
+                {t("Edit Conversation")}
               </Button>
               <Button
                 icon={<DeleteOutlined />}
                 type="dashed"
                 danger
                 block
-                onClick={handleDelete}
+                onClick={deleteConv}
               >
-                {t("Delete Board")}
+                {t("Delete Conversation")}
               </Button>
             </div>
           )}
@@ -152,4 +180,4 @@ function ModuleInfo() {
   );
 }
 
-export default ModuleInfo;
+export default ConvDetails;

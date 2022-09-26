@@ -4,16 +4,18 @@ import AllWhiteLogo from "assets/images/allWhiteLogo.svg";
 import { useMemo } from "react";
 import UserMenu from "../components/UserMenu";
 import DashboardRouter from "./DashboardRouter";
-import { Layout, Menu, MenuProps, Typography } from "antd";
+import { Badge, Button, Layout, Menu, MenuProps, Typography } from "antd";
 import { useDashboard } from "./DashboardProvider";
 import {
   useNavigate,
   useLocation as useRouterLocation,
+  Routes,
+  Route,
 } from "react-router-dom";
 import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-import {
+import Icon, {
   CreditCardOutlined,
   DashboardOutlined,
   FolderOpenOutlined,
@@ -25,8 +27,11 @@ import {
   OwnerGoldContainer,
 } from "../components/BusinessPaper";
 import { DarkPageHeader } from "../components/PageHeaders";
+import mdiMessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
+import DM from "pages/DirectMessages/DM";
+import { useNotificationsBadges } from "@cuttinboard-solutions/cuttinboard-library/services";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 
 const StyledContent = styled(Content)`
   min-width: 300px;
@@ -40,6 +45,7 @@ function Dashboard() {
   const { t } = useTranslation();
   const { pathname } = useRouterLocation();
   const { userDocument, subscriptionDocument } = useDashboard();
+  const { getDMBadges } = useNotificationsBadges();
 
   const getTrialDays = useMemo(
     () =>
@@ -90,50 +96,78 @@ function Dashboard() {
       <DarkPageHeader
         className="site-page-header"
         title={<AllWhiteLogo width={150} />}
-        extra={[<UserMenu key="userMenu" />]}
+        extra={[
+          <Badge
+            key="directMessages"
+            count={getDMBadges}
+            size="small"
+            offset={[-20, 5]}
+          >
+            <Button
+              icon={<Icon component={mdiMessageTextLock} />}
+              type={
+                pathname.split("/")[2] === "directMessages" ? "primary" : "text"
+              }
+              shape="circle"
+              onClick={() => navigate("directMessages")}
+              css={{ marginRight: 15 }}
+            />
+          </Badge>,
+          <UserMenu key="userMenu" />,
+        ]}
       />
-      <Layout>
-        <Sider width={250} breakpoint="lg" collapsedWidth="0">
-          <Layout css={{ height: "100%" }}>
-            <Content css={{ backgroundColor: "#121432" }}>
-              <Menu
-                theme="dark"
-                mode="inline"
-                selectedKeys={[pathname.split("/")[2]]}
-                items={menuElements()}
-                onClick={(e) => navigate(e.key)}
-              />
-            </Content>
+      <Routes>
+        <Route path="directMessages/*" element={<DM />} />
+        <Route
+          path="/*"
+          element={
+            <Layout hasSider>
+              <Sider width={250} breakpoint="lg" collapsedWidth="0">
+                <Layout css={{ height: "100%" }}>
+                  <Content css={{ backgroundColor: "#121432" }}>
+                    <Menu
+                      theme="dark"
+                      mode="inline"
+                      selectedKeys={[pathname.split("/")[2]]}
+                      items={menuElements()}
+                      onClick={(e) => navigate(e.key)}
+                    />
+                  </Content>
 
-            <Footer
-              css={{
-                backgroundColor: "#121432",
-                padding: "3px",
-                justifyContent: "center",
-                display: "flex",
-              }}
-            >
-              {Boolean(userDocument?.subscriptionId) ? (
-                <OwnerGoldContainer>
-                  <AllWhiteLogo width={150} />
-                  {getTrialDays && (
-                    <Typography.Text css={{ color: "#fff" }}>
-                      {t("Trial ends in {{0}} day(s)", { 0: getTrialDays })}
-                    </Typography.Text>
-                  )}
-                </OwnerGoldContainer>
-              ) : (
-                <NormalContainer>
-                  <AllWhiteLogo width={150} />
-                </NormalContainer>
-              )}
-            </Footer>
-          </Layout>
-        </Sider>
-        <StyledContent>
-          <DashboardRouter />
-        </StyledContent>
-      </Layout>
+                  <Footer
+                    css={{
+                      backgroundColor: "#121432",
+                      padding: "3px",
+                      justifyContent: "center",
+                      display: "flex",
+                    }}
+                  >
+                    {Boolean(userDocument?.subscriptionId) ? (
+                      <OwnerGoldContainer>
+                        <AllWhiteLogo width={150} />
+                        {getTrialDays && (
+                          <Typography.Text css={{ color: "#fff" }}>
+                            {t("Trial ends in {{0}} day(s)", {
+                              0: getTrialDays,
+                            })}
+                          </Typography.Text>
+                        )}
+                      </OwnerGoldContainer>
+                    ) : (
+                      <NormalContainer>
+                        <AllWhiteLogo width={150} />
+                      </NormalContainer>
+                    )}
+                  </Footer>
+                </Layout>
+              </Sider>
+              <StyledContent>
+                <DashboardRouter />
+              </StyledContent>
+            </Layout>
+          }
+        />
+      </Routes>
     </Layout>
   );
 }

@@ -4,7 +4,7 @@ import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps"
 import Linkify from "linkify-react";
 import { getFileIconByType } from "../../../Modules/Files/FileTypeIcons";
 import { Avatar, List, Space, Typography } from "antd";
-import Icon from "@ant-design/icons";
+import Icon, { FileFilled } from "@ant-design/icons";
 import mdiOpenInNew from "@mdi/svg/svg/open-in-new.svg";
 import styled from "@emotion/styled";
 
@@ -14,9 +14,36 @@ const FileElementContainer = styled(List.Item)`
   padding: 10px;
 `;
 
-function FileMessage({ source, attachment, message }: BaseMediaProps) {
+function FileMessage({ message }: BaseMediaProps) {
+  const getSrc = () => {
+    if (message.type === "mediaUri") {
+      return message.sourceUrl;
+    } else {
+      return message.attachment.uri;
+    }
+  };
+
   const handleDownload = async () => {
-    window.open(source, "_blanc");
+    window.open(getSrc(), "_blanc");
+  };
+
+  const GetIcon = () => {
+    if (message.type === "mediaUri") {
+      return <FileFilled />;
+    } else {
+      const Icon = getFileIconByType(
+        message.attachment.fileName,
+        message.attachment.mimeType
+      );
+      return <Icon />;
+    }
+  };
+  const getText = () => {
+    if (message.type === "mediaUri") {
+      return null;
+    } else {
+      return message.attachment.fileName;
+    }
   };
   return (
     <Space direction="vertical" css={{ width: "100%" }}>
@@ -30,23 +57,13 @@ function FileMessage({ source, attachment, message }: BaseMediaProps) {
         onClick={handleDownload}
       >
         <List.Item.Meta
-          avatar={
-            <Avatar
-              icon={
-                <Icon
-                  component={getFileIconByType(
-                    attachment.filename,
-                    attachment?.mimeType
-                  )}
-                />
-              }
-              shape="square"
-            />
+          avatar={<Avatar icon={<Icon component={GetIcon} />} shape="square" />}
+          description={
+            message.type === "attachment" && message.attachment.fileName
           }
-          description={attachment.filename}
         />
       </FileElementContainer>
-      {message && message !== "📁 File Message" && (
+      {message && message.message !== "📁 File Message" && (
         <Typography.Paragraph
           css={{
             color: "inherit",
@@ -63,7 +80,7 @@ function FileMessage({ source, attachment, message }: BaseMediaProps) {
               className: "linkifyInnerStyle",
             }}
           >
-            {message ?? attachment.filename}
+            {getText()}
           </Linkify>
         </Typography.Paragraph>
       )}

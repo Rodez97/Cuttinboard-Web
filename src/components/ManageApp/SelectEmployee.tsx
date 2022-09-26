@@ -1,78 +1,64 @@
-import { COLORS, Employee } from "@cuttinboard-solutions/cuttinboard-library";
-import { Button, Checkbox, Col, List, Row } from "antd";
-import React, { useMemo, useState } from "react";
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
+import {
+  Colors,
+  Employee,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { Button, List } from "antd";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { TitleBoxBlue, TitleBoxGreen } from "../../theme/styledComponents";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
+import { ArrowRightOutlined } from "@ant-design/icons";
 
 interface AddMembersProps {
-  initialSelected?: Employee;
   onSelectedEmployee: (employee: Employee) => void;
-  employees: Employee[];
-  orgEmployees: Employee[];
 }
 
-function SelectEmployee({
-  onSelectedEmployee,
-  initialSelected,
-  employees,
-  orgEmployees,
-}: AddMembersProps) {
+function SelectEmployee({ onSelectedEmployee }: AddMembersProps) {
   const { t } = useTranslation();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-    initialSelected
-  );
-
-  const handleToggle = (emp: Employee) => () => {
-    const isSelected = Boolean(selectedEmployee === emp);
-
-    if (isSelected) {
-      setSelectedEmployee(null);
-    } else {
-      setSelectedEmployee(emp);
-    }
-  };
-
-  const handleAccept = () => {
-    if (selectedEmployee) {
-      onSelectedEmployee(selectedEmployee);
-    }
-  };
-
-  const handleClose = () => {
-    setSelectedEmployee(initialSelected);
-  };
+  const { getEmployees, getOrgEmployees } = useEmployeesList();
 
   const getUniqEmployees = useMemo(
     () =>
-      employees.filter((emp) => !orgEmployees?.some((oe) => oe.id === emp.id)),
-    [employees, orgEmployees]
+      getEmployees.filter(
+        (emp) => !getOrgEmployees?.some((oe) => oe.id === emp.id)
+      ),
+    [getEmployees, getOrgEmployees]
   );
 
   return (
-    <Row justify="center" style={{ paddingBottom: "50px" }}>
-      <Col xs={24} md={20} lg={16} xl={12}>
-        {Boolean(orgEmployees?.length) && (
-          <>
+    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+      <div
+        css={{
+          minWidth: 300,
+          maxWidth: 600,
+          margin: "auto",
+          width: "100%",
+        }}
+      >
+        {Boolean(getOrgEmployees?.length) && (
+          <React.Fragment>
             <TitleBoxBlue>{t("Organization")}</TitleBoxBlue>
             <List
-              dataSource={orgEmployees}
+              dataSource={getOrgEmployees}
               renderItem={(emp) => {
                 return (
                   <List.Item
                     key={emp.id}
-                    style={{
-                      backgroundColor: COLORS.MainOnWhite,
-                      padding: 5,
+                    css={{
+                      backgroundColor: Colors.MainOnWhite,
+                      padding: 10,
                       margin: 5,
                     }}
-                    actions={[
-                      <Checkbox
-                        onChange={handleToggle(emp)}
-                        checked={Boolean(selectedEmployee === emp)}
-                      />,
-                    ]}
+                    extra={
+                      <Button
+                        type="link"
+                        icon={<ArrowRightOutlined />}
+                        onClick={() => onSelectedEmployee(emp)}
+                      />
+                    }
                   >
                     <List.Item.Meta
                       avatar={<QuickUserDialogAvatar employee={emp} />}
@@ -83,7 +69,7 @@ function SelectEmployee({
                 );
               }}
             />
-          </>
+          </React.Fragment>
         )}
 
         <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
@@ -93,17 +79,18 @@ function SelectEmployee({
             return (
               <List.Item
                 key={emp.id}
-                style={{
-                  backgroundColor: COLORS.MainOnWhite,
-                  padding: 5,
+                css={{
+                  backgroundColor: Colors.MainOnWhite,
+                  padding: 10,
                   margin: 5,
                 }}
-                actions={[
-                  <Checkbox
-                    onChange={handleToggle(emp)}
-                    checked={Boolean(selectedEmployee === emp)}
-                  />,
-                ]}
+                extra={
+                  <Button
+                    type="link"
+                    icon={<ArrowRightOutlined />}
+                    onClick={() => onSelectedEmployee(emp)}
+                  />
+                }
               >
                 <List.Item.Meta
                   avatar={<QuickUserDialogAvatar employee={emp} />}
@@ -114,19 +101,8 @@ function SelectEmployee({
             );
           }}
         />
-        <Button
-          onClick={handleAccept}
-          block
-          type="primary"
-          style={{ margin: "20px 0px" }}
-        >
-          {t("Accept")}
-        </Button>
-        <Button onClick={handleClose} danger block type="dashed">
-          {t("Cancel")}
-        </Button>
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 }
 

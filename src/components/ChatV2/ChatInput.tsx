@@ -2,12 +2,11 @@
 import { jsx } from "@emotion/react";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { nanoid } from "nanoid";
-import { useChatRTDB } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
-  Message,
-  MessageType,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+  useConversationMessages,
+  useDirectMessages,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Button,
@@ -31,17 +30,22 @@ import { GrayPageHeader } from "../PageHeaders";
 import { recordError } from "../../utils/utils";
 
 interface ChatInputProps {
-  replyTargetMessage?: Message & { type: MessageType };
+  replyTargetMessage?: Message & {
+    type: "attachment" | "youtube" | "mediaUri" | "text";
+  };
   onSendMessage: () => void;
   cancelReply: () => void;
+  type: "chats" | "conversations";
 }
 
 function ChatInput({
   onSendMessage,
   replyTargetMessage,
   cancelReply,
+  type,
 }: ChatInputProps) {
-  const { sendMessage, attachFiles } = useChatRTDB();
+  const { sendMessage, attachFiles } =
+    type === "chats" ? useDirectMessages() : useConversationMessages();
   const [messageTxt, setMessageTxt] = useState("");
   const inputRef = useRef<InputRef>(null);
   const [sendingAttachment, setSendingAttachment] = useState(false);

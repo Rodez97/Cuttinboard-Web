@@ -70,9 +70,7 @@ function TasksRoutes() {
           <Route index element={<ModuleInfo />} />
           <Route
             path="edit"
-            element={
-              <ManageModule title="Edit to-do board" baseApp={selectedApp} />
-            }
+            element={<ManageModule title="Edit to-do board" edit />}
           />
         </Route>
         <Route

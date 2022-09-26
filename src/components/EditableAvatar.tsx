@@ -21,7 +21,7 @@ import {
 import { EditOutlined, PaperClipOutlined } from "@ant-design/icons";
 
 interface EditableAvatarProps {
-  defaultValue?: string;
+  initialValue?: string;
   value?: { url: string; file?: File };
   size?: number;
   align?: "left" | "center" | "right";
@@ -40,7 +40,7 @@ function EditableAvatar({
   onImageEdited,
   size,
   align,
-  defaultValue,
+  initialValue,
   imageBorderRadius = 150,
   compressSize = 130,
   disabled,
@@ -114,7 +114,7 @@ function EditableAvatar({
         }}
         size={size ?? 100}
         icon={<EditOutlined />}
-        src={value?.url ?? defaultValue}
+        src={value?.url ?? initialValue}
         onClick={() => !disabled && setEditOpen(true)}
       />
 

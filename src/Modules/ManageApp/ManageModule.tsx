@@ -12,15 +12,16 @@ import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
+import { GenericModule } from "@cuttinboard-solutions/cuttinboard-library/models";
 
 interface ManageModuleProps {
   title: string;
-  baseApp?: BaseApp;
+  edit?: boolean;
 }
 
 // TODO: Crear una cceso directo para manejar los miembros
 
-const ManageModule = ({ title, baseApp }: ManageModuleProps) => {
+const ManageModule = ({ title, edit }: ManageModuleProps) => {
   const { newElement, editElement, selectedApp } = useCuttinboardModule();
   const { locationId } = useLocation();
   const { pathname } = useRouterLocation();
@@ -39,10 +40,10 @@ const ManageModule = ({ title, baseApp }: ManageModuleProps) => {
     };
 
     if (newModuleData.privacyLevel === PrivacyLevel.POSITIONS) {
-      newAppObject.positions = positions;
+      newAppObject.accessTags = positions;
     }
     if (newModuleData.privacyLevel === PrivacyLevel.PRIVATE) {
-      newAppObject.members = members;
+      newAppObject.accessTags = members;
     }
 
     try {
@@ -58,13 +59,13 @@ const ManageModule = ({ title, baseApp }: ManageModuleProps) => {
     positions,
     ...moduleData
   }: BaseApp) => {
-    const editedData: any = { ...selectedApp, ...moduleData };
+    const editedData: GenericModule = { ...selectedApp, ...moduleData };
 
     if (moduleData.privacyLevel === PrivacyLevel.POSITIONS) {
-      editedData.positions = positions;
+      editedData.accessTags = positions;
     }
     if (moduleData.privacyLevel === PrivacyLevel.PRIVATE) {
-      editedData.members = members;
+      editedData.accessTags = members;
     }
     try {
       await editElement(editedData);
@@ -76,7 +77,15 @@ const ManageModule = ({ title, baseApp }: ManageModuleProps) => {
   return (
     <ManageBase
       title={title}
-      baseApp={baseApp}
+      baseApp={
+        edit
+          ? {
+              ...selectedApp,
+              members: selectedApp.accessTags,
+              positions: selectedApp.accessTags,
+            }
+          : null
+      }
       create={createModuleItem}
       edit={editModuleItem}
     />

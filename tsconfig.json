@@ -22,5 +22,10 @@
     "strict": false,
     "types": ["puppeteer", "jest-environment-puppeteer", "expect-puppeteer"]
   },
-  "include": ["src", "webpack.config.ts", "__tests__/Login.test.ts"]
+  "include": [
+    "src",
+    "webpack.config.ts",
+    "__tests__/Login.test.ts",
+    "public/OneSignalSDKWorker.js"
+  ]
 }

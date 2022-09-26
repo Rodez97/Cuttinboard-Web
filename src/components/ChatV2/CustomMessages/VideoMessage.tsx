@@ -1,20 +1,31 @@
 /** @jsx jsx */
+import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import { Space, Typography } from "antd";
-import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps";
 import Linkify from "linkify-react";
-import React from "react";
 import ReactPlayer from "react-player";
 
-function VideoMessage({ source, message }: BaseMediaProps) {
+function VideoMessage({
+  message,
+}: {
+  message?: Message & { type: "attachment" | "mediaUri" | "youtube" };
+}) {
+  const getSrc = () => {
+    if (message.type === "mediaUri" || message.type === "youtube") {
+      return message.sourceUrl;
+    } else {
+      return message.attachment.uri;
+    }
+  };
+
   const handleOpen = () => {
-    window.open(source, "_blanc");
+    window.open(getSrc(), "_blanc");
   };
 
   return (
     <Space direction="vertical">
       <ReactPlayer
-        url={source}
+        url={getSrc()}
         controls
         width="100%"
         height="auto"
@@ -25,7 +36,7 @@ function VideoMessage({ source, message }: BaseMediaProps) {
         }}
         onClick={handleOpen}
       />
-      {message && message !== "🎞️ Video Message" && (
+      {message && message.message !== "🎞️ Video Message" && (
         <Typography.Paragraph
           css={{
             color: "inherit",
@@ -42,7 +53,7 @@ function VideoMessage({ source, message }: BaseMediaProps) {
               className: "linkifyInnerStyle",
             }}
           >
-            {message}
+            {message.message}
           </Linkify>
         </Typography.Paragraph>
       )}

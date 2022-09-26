@@ -11,7 +11,6 @@ import {
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   useConversationMessages,
-  useConversations,
   useDirectMessages,
   useDMs,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
@@ -59,7 +58,7 @@ const MessageWrap = styled.div`
   }
 `;
 
-interface MessageBubbleProps {
+interface DirectMessageBubbleProps {
   prevMessage?: Message;
   currentMessage?: Message & {
     type: "attachment" | "youtube" | "mediaUri" | "text";
@@ -69,19 +68,27 @@ interface MessageBubbleProps {
   onReply: (
     message: Message & { type: "attachment" | "youtube" | "mediaUri" | "text" }
   ) => void;
-  canUseApp?: boolean;
 }
 
-function MessageBubble({
+function DirectMessageBubble({
   prevMessage,
   currentMessage,
   i = 0,
   allMessagesLength,
   onReply,
-  canUseApp,
-}: MessageBubbleProps) {
-  const { deleteMessage } = useConversationMessages();
-  const { selectedChat } = useConversations();
+}: DirectMessageBubbleProps) {
+  const { ref, inView } = useInView({
+    /* Optional options */
+    threshold: 1,
+  });
+  const { updateLastVisitedBy, deleteMessage } = useDirectMessages();
+  const { selectedChat } = useDMs();
+
+  useEffect(() => {
+    if (!Boolean(currentMessage?.seenBy?.[Auth.currentUser.uid]) && inView) {
+      updateLastVisitedBy(currentMessage.id);
+    }
+  }, [inView]);
 
   const handleReplyMsg = () => {
     onReply(currentMessage);
@@ -112,7 +119,7 @@ function MessageBubble({
     if (!currentMessage.replyTarget) {
       return null;
     }
-    const [rsId, rsName] = selectedChat.members.find(
+    const [rsId, rsName] = Object.entries(selectedChat.members).find(
       ([id]) => id === currentMessage.replyTarget.sender.id
     );
     return {
@@ -126,6 +133,7 @@ function MessageBubble({
 
   return (
     <div
+      ref={ref}
       css={{
         display: "flex",
         flexDirection: "column",
@@ -219,7 +227,7 @@ function MessageBubble({
           >
             {(showAvatar || showDate || currentMessage.replyTarget) && (
               <Typography.Text css={{ margin: "0px 2px", fontSize: "1rem" }}>
-                {currentMessage.sender?.name}
+                {currentMessage.sender.name}
                 <Tooltip
                   placement="top"
                   title={dayjs(currentMessage.createdAt).format(
@@ -249,35 +257,37 @@ function MessageBubble({
               }}
             >
               <MessageElement targetMsg={currentMessage} />
+              <SeenByElement
+                message={currentMessage}
+                members={Object.keys(selectedChat.members)}
+              />
             </div>
             <MessageReactionsElement reactions={currentMessage.reactions} />
           </div>
         </MessageContent>
-        {canUseApp && (
-          <Button.Group className="optionsBtn">
-            <Button
-              onClick={handleReplyMsg}
-              icon={<Icon component={mdiReply} />}
-            />
-            <MessageReactionPicker
-              messageId={currentMessage.id}
-              haveUserReaction={Boolean(
-                currentMessage.reactions?.[Auth.currentUser.uid]
-              )}
-              isChat={false}
-            />
-            {Auth.currentUser.uid === currentMessage?.sender?.id && (
-              <Button
-                onClick={() => deleteMessage(currentMessage.id)}
-                danger
-                icon={<DeleteFilled />}
-              />
+        <Button.Group className="optionsBtn">
+          <Button
+            onClick={handleReplyMsg}
+            icon={<Icon component={mdiReply} />}
+          />
+          <MessageReactionPicker
+            messageId={currentMessage.id}
+            haveUserReaction={Boolean(
+              currentMessage.reactions?.[Auth.currentUser.uid]
             )}
-          </Button.Group>
-        )}
+            isChat={true}
+          />
+          {Auth.currentUser.uid === currentMessage?.sender?.id && (
+            <Button
+              onClick={() => deleteMessage(currentMessage.id)}
+              danger
+              icon={<DeleteFilled />}
+            />
+          )}
+        </Button.Group>
       </MessageWrap>
     </div>
   );
 }
 
-export default React.memo(MessageBubble);
+export default React.memo(DirectMessageBubble);

@@ -104,7 +104,7 @@ function PhonePanel() {
             name="newPhoneNumber"
             dependencies={["phoneNumber"]}
             hasFeedback
-            help={t("Include country code first (+1XXXXXXXXXX)")}
+            extra={t("Include country code first (+1XXXXXXXXXX)")}
             rules={[
               { required: true, message: "" },
               ({ getFieldValue }) => ({
