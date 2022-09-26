@@ -133,15 +133,20 @@ function Scheduler() {
         async onOk() {
           try {
             await togglePublish();
-            if (!isPublished) {
-              message.success(t("Schedule published"));
-            }
+            message.warn(t("Schedule unpublished"));
           } catch (error) {
             recordError(error);
           }
         },
         onCancel() {},
       });
+    } else {
+      try {
+        await togglePublish();
+        message.success(t("Schedule published"));
+      } catch (error) {
+        recordError(error);
+      }
     }
   };
 
