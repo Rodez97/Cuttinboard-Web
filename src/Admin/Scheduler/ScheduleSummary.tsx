@@ -1,10 +1,12 @@
-import React, { useMemo } from "react";
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import dayjs from "dayjs";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Col, Divider, Row, Space, Statistic } from "antd";
+import { Divider, Space, Statistic } from "antd";
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
@@ -39,7 +41,7 @@ function ScheduleSummary() {
       size="large"
       wrap
       split={<Divider type="vertical" />}
-      style={{ backgroundColor: "#00000010" }}
+      css={{ backgroundColor: "#00000010", padding: "5px 10px" }}
     >
       <Statistic
         title={t("Est. Wages")}

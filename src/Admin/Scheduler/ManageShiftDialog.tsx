@@ -2,14 +2,12 @@ import dayjs from "dayjs";
 import React, {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
-  useMemo,
   useState,
 } from "react";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
-import { orderBy, uniq } from "lodash";
+import { orderBy } from "lodash";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -36,14 +34,11 @@ import {
   Modal,
   Row,
   Select,
-  Space,
-  Statistic,
   Switch,
   TimePicker,
   Typography,
 } from "antd";
 import moment from "moment";
-import styled from "@emotion/styled";
 import TextArea from "antd/lib/input/TextArea";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
@@ -54,7 +49,7 @@ dayjs.extend(customParseFormat);
 dayjs.extend(duration);
 
 export interface IManageShiftDialogRef {
-  openNew: (employee: Employee, column: Date, weekId: string) => void;
+  openNew: (employee: Employee, column: Date) => void;
   openEdit: (employee: Employee, shift: Shift) => void;
 }
 
@@ -71,8 +66,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const [form] = Form.useForm<FormDataType>();
   const position = Form.useWatch("position", form);
   const timeRange = Form.useWatch("timeRange", form);
-  const [initialValues, setInitialValues] = useState<FormDataType>(null);
-  const [baseShift, setbaseShift] = useState<Shift>(null);
+  const [baseShift, setBaseShift] = useState<Shift>(null);
   const [saving, setSaving] = useState(false);
   const { locationId } = useLocation();
   const { createShift, editShift, weekId, weekDays } = useSchedule();
@@ -87,7 +81,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     openEdit,
   }));
 
-  const openNew = (employee: Employee, date: Date, weekId: string) => {
+  const openNew = (employee: Employee, date: Date) => {
     const position =
       employee.role === "employee"
         ? employee.locations[locationId]?.mainPosition ??
@@ -96,26 +90,26 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
         : null;
     setIsNewShift(true);
     setEmployee(employee);
-    setInitialValues({
-      applyTo: [date.getDay()],
+    setBaseDate(date);
+    form.setFieldsValue({
+      applyTo: [dayjs(date).isoWeekday()],
       timeRange: [moment(date).add(8, "hours"), moment(date).add(16, "hours")],
       position,
       repeat: false,
     });
-    setBaseDate(date);
     setOpen(true);
   };
 
   const openEdit = (employee: Employee, shift: Shift) => {
     setIsNewShift(false);
     setEmployee(employee);
-    setbaseShift(shift);
-    setInitialValues({
+    setBaseShift(shift);
+    form.setFieldsValue({
       applyTo: [getShiftDate(shift.start).day()],
-      notes: shift.notes,
-      position: shift.position,
+      notes: shift.notes ?? "",
+      position: shift.position ?? "",
       repeat: Boolean(shift.altId === "repeat"),
-      tasks: Object.values(shift.tasks).map((tsk) => tsk.name),
+      tasks: Object.values(shift.tasks ?? {}).map((tsk) => tsk.name),
       timeRange: [
         moment(getShiftDate(shift.start).toDate()),
         moment(getShiftDate(shift.end).toDate()),
@@ -209,44 +203,43 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     [employee, locationId, position]
   );
 
-  if (!initialValues) {
+  if (!form) {
     return null;
   }
 
   return (
-    <Modal
-      visible={open}
-      onCancel={handleClose}
-      title={
-        <>
-          {t(isNewShift ? "Add Shift" : "Edit Shift")}
-          <Divider type="vertical" />
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            {getDuration()}
-          </Typography.Text>
-        </>
-      }
-      footer={[
-        <Button key="back" onClick={handleClose} disabled={saving}>
-          {t("Cancel")}
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={saving}
-          onClick={form?.submit}
-        >
-          {t("Accept")}
-        </Button>,
-      ]}
+    <Form<FormDataType>
+      form={form}
+      onFinish={onFinish}
+      disabled={saving}
+      size="small"
+      layout="vertical"
     >
-      <Form<FormDataType>
-        form={form}
-        initialValues={initialValues}
-        onFinish={onFinish}
-        disabled={saving}
-        size="small"
-        layout="vertical"
+      <Modal
+        open={open}
+        onCancel={handleClose}
+        title={
+          <>
+            {t(isNewShift ? "Add Shift" : "Edit Shift")}
+            <Divider type="vertical" />
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {getDuration()}
+            </Typography.Text>
+          </>
+        }
+        footer={[
+          <Button key="back" onClick={handleClose} disabled={saving}>
+            {t("Cancel")}
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={saving}
+            onClick={form.submit}
+          >
+            {t("Accept")}
+          </Button>,
+        ]}
       >
         <Form.Item
           name="timeRange"
@@ -272,8 +265,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           <Form.Item label={t("Apply to:")} name="applyTo">
             <Checkbox.Group>
               <Row>
-                {weekDays.map((wd) => (
-                  <Col xs={12} sm={8} md={6}>
+                {weekDays.map((wd, i) => (
+                  <Col xs={12} sm={8} md={6} key={i}>
                     <Checkbox
                       value={wd.getDay()}
                       disabled={Boolean(wd.getDay() === baseDate.getDay())}
@@ -377,8 +370,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
             </>
           )}
         </Form.List>
-      </Form>
-    </Modal>
+      </Modal>
+    </Form>
   );
 });
 

@@ -24,6 +24,15 @@ import {
   PlusCircleFilled,
   ScheduleFilled,
 } from "@ant-design/icons";
+import styled from "@emotion/styled";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+
+const HoverListItem = styled(List.Item)`
+  cursor: pointer;
+  :hover {
+    background-color: ${Colors.MainOnWhite};
+  }
+`;
 
 interface CellItemDialogProps {
   shifts: Shift[];
@@ -106,7 +115,7 @@ function CellItemDialog({
           dataSource={shifts}
           split
           renderItem={(shift, index) => (
-            <List.Item
+            <HoverListItem
               key={shift[0]}
               actions={
                 isPublished
@@ -130,12 +139,13 @@ function CellItemDialog({
                   .replace("m", "")}`}
                 description={shift.position}
               />
-            </List.Item>
+            </HoverListItem>
           )}
         />
 
         {isPublished || (
           <Button
+            css={{ marginTop: 10 }}
             type="dashed"
             icon={<PlusCircleFilled />}
             onClick={handleOnAddShift}

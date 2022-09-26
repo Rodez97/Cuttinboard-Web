@@ -60,6 +60,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
+import { GrayPageHeader } from "components/PageHeaders";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -146,7 +147,7 @@ function Scheduler() {
 
   const newShift = useCallback(
     (employee: Employee, column: Date) => {
-      manageShiftDialogRef.current?.openNew(employee, column, weekId);
+      manageShiftDialogRef.current?.openNew(employee, column);
     },
     [manageShiftDialogRef.current]
   );
@@ -214,8 +215,7 @@ function Scheduler() {
         }}
       >
         <ManageShiftDialog ref={manageShiftDialogRef} />
-        <PageHeader
-          className="site-page-header-responsive"
+        <GrayPageHeader
           onBack={handleBack}
           title={t("Schedule")}
           extra={[
@@ -258,7 +258,7 @@ function Scheduler() {
         <Space
           align="center"
           wrap
-          style={{ justifyContent: "space-between", padding: 10 }}
+          css={{ justifyContent: "space-between", padding: 10 }}
         >
           <WeekNavigator onChange={setWeekId} currentWeekId={weekId} />
           <Space align="center" wrap>
@@ -266,10 +266,10 @@ function Scheduler() {
               placeholder={t("Search")}
               allowClear
               onSearch={setSearchQuery}
-              style={{ width: 200 }}
+              css={{ width: 200 }}
             />
             <AutoComplete
-              style={{ width: 200 }}
+              css={{ width: 200 }}
               onSearch={handleSearch}
               placeholder={t("Filter by position")}
               onSelect={setSelectedTag}
