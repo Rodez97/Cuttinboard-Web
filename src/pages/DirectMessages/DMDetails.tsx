@@ -31,7 +31,7 @@ function DMDetails({
   const navigate = useNavigate();
   const { locationId } = useParams();
   const { t } = useTranslation();
-  const { toggleChatMute, selectedChat } = useDMs();
+  const { selectedChat } = useDMs();
   const [user, loading, error] = useDocumentData(
     !employee && doc(Firestore, "Users", userId)
   );
@@ -95,8 +95,10 @@ function DMDetails({
             <List.Item
               extra={
                 <Switch
-                  checked={selectedChat.muted?.includes(Auth.currentUser.uid)}
-                  onChange={toggleChatMute}
+                  checked={selectedChat.isMuted}
+                  onChange={() => {
+                    selectedChat.toggleMuteChat();
+                  }}
                 />
               }
             >
