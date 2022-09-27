@@ -54,12 +54,10 @@ export function LocationContainer() {
         subTitle={t(getRoleTextByNumber(locationAccessKey.role))}
         extra={[
           <Badge
-            dot
             key="conversations"
             count={getBadgeByModule("conv")}
             size="small"
-            css={{ color: "inherit" }}
-            offset={[10, 0]}
+            offset={[-20, 5]}
           >
             <Button
               icon={<Icon component={Forum} />}
