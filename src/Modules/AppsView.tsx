@@ -103,6 +103,7 @@ function AppsView() {
                 padding: "20px",
               }}
               align="center"
+              size="large"
             >
               {adminApps.map((app, index) => (
                 <AppCard key={index} {...app} />
@@ -119,6 +120,7 @@ function AppsView() {
             padding: "20px",
           }}
           align="center"
+          size="large"
         >
           {appsElements.map((app, index) => (
             <AppCard key={index} {...app} />
