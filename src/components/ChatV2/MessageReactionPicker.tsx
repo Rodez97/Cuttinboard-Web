@@ -42,6 +42,14 @@ function MessageReactionPicker({
       recordError(error);
     }
   };
+
+  const removeReactionFromMessage = async () => {
+    try {
+      await addReaction(messageId);
+    } catch (error) {
+      recordError(error);
+    }
+  };
   return (
     <Dropdown
       overlay={
@@ -53,10 +61,11 @@ function MessageReactionPicker({
           ))}
         </div>
       }
-      destroyPopupOnHide
       placement="topLeft"
+      open={haveUserReaction ? false : undefined}
     >
       <Button
+        onClick={haveUserReaction && removeReactionFromMessage}
         icon={
           haveUserReaction ? (
             <Icon component={mdiHeartMinus} css={{ color: "#ff5f02" }} />
