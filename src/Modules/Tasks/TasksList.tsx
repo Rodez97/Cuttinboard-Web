@@ -4,12 +4,13 @@ import { OrderedListOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   useCuttinboardModule,
   useLocation,
+  useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Colors,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Input, Menu, Space } from "antd";
+import { Badge, Button, Input, Menu, Space } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
@@ -23,11 +24,21 @@ function TasksList() {
   const { selectedApp, elements } = useCuttinboardModule();
   const { locationAccessKey, locationId } = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const { getModuleBadge } = useNotificationsBadges();
 
   const menuItems = useMemo(() => {
     const sorted = matchSorter(elements, searchQuery, { keys: ["name"] });
     return orderBy(sorted, "createdAt", "desc")?.map((el) => ({
-      label: el.name,
+      label: (
+        <Badge
+          count={getModuleBadge("task", el.id)}
+          size="small"
+          css={{ color: "inherit" }}
+          offset={[10, 0]}
+        >
+          <p>{el.name}</p>
+        </Badge>
+      ),
       value: el.id,
       icon: <OrderedListOutlined />,
       key: el.id,

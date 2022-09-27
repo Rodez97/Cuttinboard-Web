@@ -12,11 +12,12 @@ import {
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import AssignUser from "./AssignUser";
-import { recordError } from "../../utils/utils";
+import { getAvatarByUID, recordError } from "../../utils/utils";
 import { Avatar, Button, DatePicker, Form, Input, List } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import { DeleteOutlined, UserOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { Timestamp } from "firebase/firestore";
 
 export interface ManageTodoProps {
   todos: Todo[];
@@ -34,19 +35,14 @@ type FormDataType = {
 const ManageTodo = ({ todos, title }: ManageTodoProps) => {
   const { todoId } = useParams();
   const [form] = Form.useForm<FormDataType>();
-
   const tasks = Form.useWatch("tasks", form);
+  const assignedTo = Form.useWatch("assignedTo", form);
   const [selectedTodo] = useState(() => {
     if (!todoId) {
       return null;
     }
     return todos.find((td) => td.id === todoId);
   });
-  const [assignedTo, setAssignedTo] = useState<{
-    id: string;
-    name: string;
-    email: string;
-  } | null>(selectedTodo?.assignedTo);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const quickTodoRef = useRef<QuickTodoRef>(null);
@@ -59,23 +55,15 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
   };
 
   const handleClearEmployee = () => {
-    setAssignedTo(null);
+    form.setFieldValue("assignedTo", null);
   };
 
   const onFinish = async ({ dueDate, ...values }: FormDataType) => {
-    console.log(values);
     setSubmitting(true);
     quickTodoRef.current?.addTask();
-    const valuesToAdd: any = values;
-    if (assignedTo) {
-      valuesToAdd.assignedTo = {
-        id: assignedTo.id,
-        name: assignedTo.name,
-        email: assignedTo.email,
-      };
-    }
+    const valuesToAdd: Partial<Todo> = values;
     if (dueDate) {
-      valuesToAdd.dueDate = dueDate.toDate();
+      valuesToAdd.dueDate = Timestamp.fromDate(dueDate.toDate());
     }
     try {
       if (selectedTodo) {
@@ -96,34 +84,37 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
   };
 
   return (
-    <Routes>
-      <Route path="/">
-        <Route
-          index
-          element={
-            <div>
-              <GrayPageHeader onBack={() => navigate(-1)} title={t(title)} />
-              <div
-                css={{ display: "flex", flexDirection: "column", padding: 20 }}
-              >
+    <Form<FormDataType>
+      form={form}
+      onFinish={onFinish}
+      initialValues={{
+        ...selectedTodo,
+        dueDate:
+          selectedTodo?.dueDate && moment(selectedTodo.dueDate?.toDate()),
+      }}
+      disabled={submitting}
+    >
+      <Routes>
+        <Route path="/">
+          <Route
+            index
+            element={
+              <div>
+                <GrayPageHeader onBack={() => navigate(-1)} title={t(title)} />
                 <div
                   css={{
-                    minWidth: 300,
-                    maxWidth: 400,
-                    margin: "auto",
-                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: 20,
                   }}
                 >
-                  <Form<FormDataType>
-                    onFinish={onFinish}
-                    form={form}
-                    initialValues={{
-                      ...selectedTodo,
-                      dueDate:
-                        selectedTodo?.dueDate &&
-                        moment(selectedTodo.dueDate?.toDate()),
+                  <div
+                    css={{
+                      minWidth: 300,
+                      maxWidth: 400,
+                      margin: "auto",
+                      width: "100%",
                     }}
-                    disabled={submitting}
                   >
                     <Form.Item
                       name="name"
@@ -144,36 +135,43 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                         rows={3}
                       />
                     </Form.Item>
-                    {assignedTo ? (
-                      <List.Item
-                        actions={[
-                          <Button
-                            icon={<DeleteOutlined />}
-                            danger
-                            type="link"
-                            shape="circle"
-                            disabled={submitting}
-                            onClick={handleClearEmployee}
-                          />,
-                        ]}
-                      >
-                        <List.Item.Meta
-                          avatar={<Avatar icon={<UserOutlined />} />}
-                          title={assignedTo?.name}
-                          description={assignedTo.email}
-                        />
-                      </List.Item>
-                    ) : (
-                      <Button
-                        block
-                        type="dashed"
-                        onClick={() => navigate("assign")}
-                        css={{ marginBottom: "20px" }}
-                        disabled={submitting}
-                      >
-                        {t("Assign")}
-                      </Button>
-                    )}
+                    <Form.Item name="assignedTo">
+                      {assignedTo ? (
+                        <List.Item
+                          extra={
+                            <Button
+                              icon={<DeleteOutlined />}
+                              danger
+                              type="link"
+                              shape="circle"
+                              disabled={submitting}
+                              onClick={handleClearEmployee}
+                            />
+                          }
+                        >
+                          <List.Item.Meta
+                            avatar={
+                              <Avatar
+                                icon={<UserOutlined />}
+                                src={getAvatarByUID(assignedTo.id)}
+                              />
+                            }
+                            title={assignedTo?.name}
+                            description={assignedTo.email}
+                          />
+                        </List.Item>
+                      ) : (
+                        <Button
+                          block
+                          type="dashed"
+                          onClick={() => navigate("assign")}
+                          css={{ marginBottom: "20px" }}
+                          disabled={submitting}
+                        >
+                          {t("Assign")}
+                        </Button>
+                      )}
+                    </Form.Item>
                     <Form.Item name="dueDate">
                       <DatePicker showTime placeholder={t("Due Date")} />
                     </Form.Item>
@@ -204,18 +202,32 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                     >
                       {t("Cancel")}
                     </Button>
-                  </Form>
+                  </div>
                 </div>
               </div>
-            </div>
-          }
-        />
-        <Route
-          path="assign"
-          element={<AssignUser onSelectedEmployee={setAssignedTo} />}
-        />
-      </Route>
-    </Routes>
+            }
+          />
+
+          <Route
+            path="assign"
+            element={
+              <AssignUser
+                onSelectedEmployee={({ id, name, lastName, email }) => {
+                  console.log({ id, name, lastName, email });
+
+                  form.setFieldValue("assignedTo", {
+                    id,
+                    name: `${name} ${lastName}`,
+                    email,
+                  });
+                  console.log(form.getFieldsValue());
+                }}
+              />
+            }
+          />
+        </Route>
+      </Routes>
+    </Form>
   );
 };
 

@@ -27,21 +27,8 @@ interface TaskBlockProps {
 
 function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
   const { t } = useTranslation();
-  const [anchorElMenu, setAnchorElMenu] = useState<Element | null>(null);
   const [newTaskName, setNewTaskName] = useState("");
-  const [tasksCollapsed, setTasksCollapsed] = useState(true);
   const { canManage } = useCuttinboardModule();
-
-  const handleMoreOptionsClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    event.stopPropagation();
-    setAnchorElMenu(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorElMenu(null);
-  };
 
   const handleTaskChange = async (key: string, status: boolean) => {
     if (
@@ -131,7 +118,6 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
         } catch (error) {
           recordError(error);
         }
-        handleCloseMenu();
       },
       onCancel() {},
     });
@@ -139,79 +125,72 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
 
   const handleEdit = () => {
     onEdit();
-    handleCloseMenu();
   };
 
   return (
-    <Row justify="center" style={{ margin: "20px 0px" }}>
-      <Col xs={24} md={20} lg={16} xl={12}>
-        <GrayPageHeader
-          ghost={false}
-          backIcon={false}
-          title={taskBlock?.name}
-          subTitle={taskBlock?.description}
-          tags={[
-            getTasksSummary,
-            taskBlock?.assignedTo && (
-              <Tag key="assignedTo" icon={<UserOutlined />}>
-                {taskBlock.assignedTo.name}
-              </Tag>
-            ),
-          ]}
-          extra={[
-            taskBlock?.dueDate && (
-              <Tag icon={<CalendarOutlined />}>
-                {dayjs(taskBlock.dueDate.toDate()).format(
-                  "MMMM D, YYYY, hh:mm a"
-                )}
-              </Tag>
-            ),
-            <Tooltip key="delete" title={t("Delete")}>
-              <Button
-                danger
-                type="link"
-                onClick={handleDeleteTodoCard}
-                icon={<DeleteOutlined />}
-                disabled={!canManage}
-              />
-            </Tooltip>,
-            <Tooltip title={t("Edit")} key="edit">
-              <Button
-                type="link"
-                onClick={handleEdit}
-                icon={<EditOutlined />}
-                disabled={!canManage}
-              />
-            </Tooltip>,
-          ]}
-        >
-          <Collapse defaultActiveKey={["1"]} ghost>
-            <Collapse.Panel header={t("Tasks")} key="1">
-              {canManage && (
-                <Input
-                  placeholder={t("Add a task")}
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.code === "Enter") {
-                      e.preventDefault();
-                      handleAddTask();
-                    }
-                  }}
-                  addonAfter={<PlusCircleOutlined onClick={handleAddTask} />}
-                />
-              )}
-              <SimpleTodo
-                tasks={taskBlock.tasks}
-                canRemove={canManage}
-                onRemove={handleRemoveTask}
-                onChange={handleTaskChange}
-              />
-            </Collapse.Panel>
-          </Collapse>
-        </GrayPageHeader>
-      </Col>
-    </Row>
+    <GrayPageHeader
+      ghost={false}
+      backIcon={false}
+      title={taskBlock?.name}
+      subTitle={taskBlock?.description}
+      tags={[
+        getTasksSummary,
+        taskBlock?.assignedTo && (
+          <Tag key="assignedTo" icon={<UserOutlined />}>
+            {taskBlock.assignedTo.name}
+          </Tag>
+        ),
+      ]}
+      extra={[
+        taskBlock?.dueDate && (
+          <Tag icon={<CalendarOutlined />}>
+            {dayjs(taskBlock.dueDate.toDate()).format("MMMM D, YYYY, hh:mm a")}
+          </Tag>
+        ),
+        <Tooltip key="delete" title={t("Delete")}>
+          <Button
+            danger
+            type="link"
+            onClick={handleDeleteTodoCard}
+            icon={<DeleteOutlined />}
+            disabled={!canManage}
+          />
+        </Tooltip>,
+        <Tooltip title={t("Edit")} key="edit">
+          <Button
+            type="link"
+            onClick={handleEdit}
+            icon={<EditOutlined />}
+            disabled={!canManage}
+          />
+        </Tooltip>,
+      ]}
+    >
+      <Collapse defaultActiveKey={["1"]} ghost>
+        <Collapse.Panel header={t("Tasks")} key="1">
+          {canManage && (
+            <Input
+              placeholder={t("Add a task")}
+              value={newTaskName}
+              onChange={(e) => setNewTaskName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.code === "Enter") {
+                  e.preventDefault();
+                  handleAddTask();
+                }
+              }}
+              addonAfter={<PlusCircleOutlined onClick={handleAddTask} />}
+            />
+          )}
+          <SimpleTodo
+            tasks={taskBlock.tasks}
+            canRemove={canManage}
+            onRemove={handleRemoveTask}
+            onChange={handleTaskChange}
+          />
+        </Collapse.Panel>
+      </Collapse>
+    </GrayPageHeader>
   );
 }
 
