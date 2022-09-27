@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   DeleteFilled,
   DownloadOutlined,
@@ -7,16 +9,14 @@ import {
 } from "@ant-design/icons";
 import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
+  Alert,
   Avatar,
-  Card,
+  Button,
   Divider,
-  Empty,
   List,
   message,
   Modal,
-  Space,
   Typography,
   Upload,
   UploadProps,
@@ -29,9 +29,8 @@ import {
   StorageReference,
   uploadBytes,
 } from "firebase/storage";
-import React, { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import PageLoading from "../components/PageLoading";
 import { recordError } from "../utils/utils";
 
 const { Dragger } = Upload;
@@ -115,73 +114,75 @@ function MyDocuments() {
   };
 
   return (
-    <Space
-      direction="vertical"
-      style={{
-        display: "flex",
-        padding: 20,
-      }}
-      align="center"
-    >
-      <Typography.Title>{t("My Documents")}</Typography.Title>
-      <Typography.Title level={5} type="secondary">
-        {t(
-          "Employers will have access to the documents you upload in this section"
-        )}
-      </Typography.Title>
-      <Space
-        direction="vertical"
-        style={{
+    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+      <div
+        css={{
+          minWidth: 270,
           maxWidth: 500,
-          minWidth: 300,
+          margin: "auto",
           width: "100%",
-          marginBottom: 3,
         }}
       >
-        <Dragger {...props}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">{t("Upload Document")}</p>
-          <p className="ant-upload-hint">
-            {t("Click or drag file to this area to upload")}
-          </p>
-        </Dragger>
+        <Typography.Title css={{ textAlign: "center" }}>
+          {t("My Documents")}
+        </Typography.Title>
 
-        <Card>
-          <Divider>{t("Documents")}</Divider>
-          {loadingFiles ? (
-            <PageLoading />
-          ) : userFiles.length ? (
-            <List>
-              {userFiles.map((file, index) => (
-                <List.Item
-                  key={index}
-                  actions={[
-                    <DeleteFilled
-                      key="delete"
-                      onClick={handleDeleteFile(file)}
-                      style={{ color: Colors.Error.errorMain }}
-                    />,
-                    <DownloadOutlined
-                      key="download"
-                      onClick={handleFileClick(file)}
-                    />,
-                  ]}
-                >
-                  <List.Item.Meta
-                    avatar={<Avatar icon={<FileFilled />} />}
-                    description={file.name}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          ) : (
-            <Empty description={t("No documents")} />
-          )}
-        </Card>
-      </Space>
-    </Space>
+        <Alert
+          type="warning"
+          showIcon
+          css={{ marginBottom: 10 }}
+          message={
+            <Typography.Title level={5} type="secondary">
+              {t(
+                "Employers will have access to the documents you upload in this section"
+              )}
+            </Typography.Title>
+          }
+        />
+
+        <div>
+          <Dragger {...props}>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">{t("Upload Document")}</p>
+            <p className="ant-upload-hint">
+              {t("Click or drag file to this area to upload")}
+            </p>
+          </Dragger>
+        </div>
+
+        <Divider>{t("Documents")}</Divider>
+
+        <List loading={loadingFiles}>
+          {userFiles.map((file, index) => (
+            <List.Item
+              key={index}
+              actions={[
+                <Button
+                  key="delete"
+                  icon={<DeleteFilled />}
+                  onClick={handleDeleteFile(file)}
+                  type="link"
+                  danger
+                />,
+                <Button
+                  key="download"
+                  icon={<DownloadOutlined />}
+                  onClick={handleFileClick(file)}
+                  type="link"
+                />,
+              ]}
+            >
+              <List.Item.Meta
+                avatar={<Avatar icon={<FileFilled />} />}
+                description={file.name}
+              />
+            </List.Item>
+          ))}
+        </List>
+      </div>
+    </div>
   );
 }
 
