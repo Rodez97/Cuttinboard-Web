@@ -2,7 +2,11 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Organization } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  CuttinboardUser,
+  CuttinboardUserConverter,
+  Organization,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { doc, DocumentData, DocumentReference } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
@@ -10,7 +14,7 @@ import PageError from "../components/PageError";
 import PageLoading from "../components/PageLoading";
 
 interface DashboardContextProps {
-  userDocument: DocumentData;
+  userDocument: CuttinboardUser;
   subscriptionDocument: DocumentData;
   organization: Organization;
 }
@@ -21,7 +25,11 @@ const DashboardContext = createContext<DashboardContextProps>(
 
 function DashboardProvider({ children }: { children: ReactNode }) {
   const [userDocument, loadingUserDocument, userDocumentError] =
-    useDocumentData(doc(Firestore, "Users", Auth.currentUser.uid));
+    useDocumentData<CuttinboardUser>(
+      doc(Firestore, "Users", Auth.currentUser.uid).withConverter(
+        CuttinboardUserConverter
+      )
+    );
   const [subscriptionDocument, loadingSubscriptionDocument, SubDocumentError] =
     useDocumentData(
       doc(

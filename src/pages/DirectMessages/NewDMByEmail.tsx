@@ -1,7 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
-import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import {
+  Auth,
+  Firestore,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Avatar,
@@ -14,19 +17,18 @@ import {
   Spin,
   Typography,
 } from "antd";
-import {
-  collection,
-  DocumentData,
-  getDocs,
-  query,
-  QueryDocumentSnapshot,
-  where,
-} from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { recordError } from "utils/utils";
 import { GrayPageHeader } from "components/PageHeaders";
+import {
+  CuttinboardUser,
+  CuttinboardUserConverter,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useDashboard } from "Dashboard/DashboardProvider";
+import { intersection } from "lodash";
 
 function NewDMByEmail() {
   const { pathname } = useLocation();
@@ -34,22 +36,35 @@ function NewDMByEmail() {
   const { t } = useTranslation();
   const { startNewDMByEmail, chats } = useDMs();
   const [loading, setLoading] = useState(false);
-  const [targetUser, setTargetUser] =
-    useState<QueryDocumentSnapshot<DocumentData>>(null);
+  const { userDocument } = useDashboard();
+  const [targetUser, setTargetUser] = useState<CuttinboardUser>(null);
 
   const searchUser = async (email: string) => {
     setLoading(true);
     try {
-      const userSnap = await getDocs(
-        query(collection(Firestore, "Users"), where("email", "==", email))
+      const recipientSnap = await getDocs<CuttinboardUser>(
+        query(
+          collection(Firestore, "Users"),
+          where("email", "==", email)
+        ).withConverter(CuttinboardUserConverter)
       );
-      if (userSnap.size !== 1) {
+      if (recipientSnap.size !== 1) {
         message.warn(
           t("There is no eligible user associated with this email.")
         );
         setTargetUser(null);
+        return setLoading(false);
+      }
+      const recipient = recipientSnap.docs[0].data();
+      if (
+        intersection(userDocument.organizations, recipient.organizations).length
+      ) {
+        setTargetUser(recipient);
       } else {
-        setTargetUser(userSnap.docs[0]);
+        message.warn(
+          t("There is no eligible user associated with this email.")
+        );
+        setTargetUser(null);
       }
     } catch (error) {
       recordError(error);
@@ -82,7 +97,19 @@ function NewDMByEmail() {
             <Form.Item
               name="email"
               label={t("Start a chat with someone in your organizations")}
-              rules={[{ type: "email", message: t("Must be a valid email") }]}
+              rules={[
+                { type: "email", message: t("Must be a valid email") },
+                {
+                  validator(_, value) {
+                    if (value && value === Auth.currentUser.email) {
+                      return Promise.reject(
+                        new Error(t("You cannot enter your own email"))
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
               <Input.Search onSearch={searchUser} />
             </Form.Item>
@@ -101,15 +128,10 @@ function NewDMByEmail() {
             >
               <List.Item.Meta
                 avatar={
-                  <Avatar
-                    icon={<UserOutlined />}
-                    src={targetUser.get("avatar")}
-                  />
+                  <Avatar icon={<UserOutlined />} src={targetUser.avatar} />
                 }
-                title={`${targetUser.get("name")} ${targetUser.get(
-                  "lastName"
-                )}`}
-                description={targetUser.get("email")}
+                title={`${targetUser.name} ${targetUser.lastName}`}
+                description={targetUser.email}
               />
             </List.Item>
           ) : (

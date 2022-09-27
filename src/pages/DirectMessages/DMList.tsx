@@ -50,7 +50,6 @@ function DMList({
     });
 
     return orderBy(sorted, "getOrderTime", "desc")?.map((el) => {
-      console.log(el.recipient);
       const { id, name } = el.recipient;
       return {
         label: (
