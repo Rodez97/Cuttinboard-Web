@@ -11,7 +11,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
-import { Button, Layout, Space } from "antd";
+import { Button, Layout, List, Space } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import {
   InfoCircleOutlined,
@@ -84,9 +84,7 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   }, [todoCards, orderData]);
 
   return (
-    <Layout.Content
-      css={{ display: "flex", flexDirection: "column", height: "100%" }}
-    >
+    <Layout>
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={() => navigate("details")}
@@ -123,32 +121,47 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
         }
       />
       <br />
-      {getOrderedTasks.length ? (
-        <Space direction="vertical">
-          {getOrderedTasks?.map((todo) => (
-            <TaskBlock
-              key={todo.id}
-              taskBlock={todo}
-              onEdit={() => navigate(`edit-todo/${todo.id}`)}
+      <div
+        css={{
+          display: "flex",
+          flexDirection: "column",
+          padding: 20,
+        }}
+      >
+        <div
+          css={{
+            minWidth: 300,
+            maxWidth: 800,
+            margin: "auto",
+            width: "100%",
+          }}
+        >
+          {getOrderedTasks.length ? (
+            getOrderedTasks.map((todo) => (
+              <TaskBlock
+                key={todo.id}
+                taskBlock={todo}
+                onEdit={() => navigate(`edit-todo/${todo.id}`)}
+              />
+            ))
+          ) : (
+            <EmptyMainModule
+              description={
+                <span>
+                  No tasks. <a onClick={handleCreateTaskBlock}>Create one</a> or{" "}
+                  <a
+                    href="https://www.cuttinboard.com/help/understanding-the-notes-app"
+                    target="_blank"
+                  >
+                    learn more.
+                  </a>
+                </span>
+              }
             />
-          ))}
-        </Space>
-      ) : (
-        <EmptyMainModule
-          description={
-            <span>
-              No tasks. <a onClick={handleCreateTaskBlock}>Create one</a> or{" "}
-              <a
-                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
-                target="_blank"
-              >
-                learn more.
-              </a>
-            </span>
-          }
-        />
-      )}
-    </Layout.Content>
+          )}
+        </div>
+      </div>
+    </Layout>
   );
 }
 
