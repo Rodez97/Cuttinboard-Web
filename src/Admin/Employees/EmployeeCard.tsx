@@ -57,7 +57,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
     );
   }, [locationAccessKey, employee]);
 
-  const openManageDialog = () => navigate(`${employee.id}`);
+  const openManageDialog = () => navigate(employee.id);
   return (
     <Space
       direction="vertical"
@@ -73,12 +73,14 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
           employee.id !== user?.uid && compareRoles
             ? [
                 <Button
+                  key="manage"
                   type="text"
                   shape="circle"
                   onClick={openManageDialog}
                   icon={<InfoCircleOutlined />}
                 />,
                 <Button
+                  key="remove"
                   type="text"
                   shape="circle"
                   onClick={handleRemoveEmployee}
