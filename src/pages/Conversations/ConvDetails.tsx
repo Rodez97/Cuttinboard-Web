@@ -34,8 +34,7 @@ import {
 function ConvDetails() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedChat, toggleChatMute, deleteConversation } =
-    useConversations();
+  const { selectedChat, deleteConversation } = useConversations();
   const { locationAccessKey } = useLocation();
   const { getUniqAllEmployees, getOrgEmployees, getEmployees } =
     useEmployeesList();
@@ -136,8 +135,10 @@ function ConvDetails() {
           <List.Item
             extra={
               <Switch
-                checked={selectedChat.muted?.includes(Auth.currentUser.uid)}
-                onChange={toggleChatMute}
+                checked={selectedChat.isMuted}
+                onChange={() => {
+                  selectedChat.toggleMuteChat();
+                }}
               />
             }
           >

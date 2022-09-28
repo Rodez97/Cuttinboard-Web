@@ -11,23 +11,15 @@ import { recordError } from "../../utils/utils";
 
 function ConvManageMembers() {
   const navigate = useNavigate();
-  const { getEmployees, getOrgEmployees } = useEmployeesList();
 
-  const {
-    canManageApp,
-    selectedChat,
-    removeMember,
-    addMembers,
-    setAppHost,
-    removeHost,
-  } = useConversations();
+  const { canManageApp, selectedChat } = useConversations();
 
   const handleRemoveMember = async (employeeId: string) => {
     if (!selectedChat) {
       return;
     }
     try {
-      await removeMember(employeeId);
+      await selectedChat.removeMember(employeeId);
     } catch (error) {
       recordError(error);
     }
@@ -38,7 +30,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await addMembers(addedEmployees);
+      await selectedChat.addMember(addedEmployees);
     } catch (error) {
       recordError(error);
     }
@@ -49,7 +41,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await setAppHost(newHostUser);
+      await selectedChat.setHost(newHostUser);
       navigate(-1);
     } catch (error) {
       recordError(error);
@@ -61,7 +53,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await removeHost(host);
+      await selectedChat.removeHost(host);
     } catch (error) {
       recordError(error);
     }
