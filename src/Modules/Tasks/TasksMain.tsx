@@ -24,7 +24,7 @@ import { EmptyMainModule } from "../Notes/EmptyMainModule";
 function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [orderData, setOrderData] = useState<{
+  const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
     searchQuery?: string;
@@ -49,15 +49,15 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   const getOrderedTasks = useMemo(() => {
     let ordered: Todo[] = [];
 
-    switch (orderData.index) {
+    switch (index) {
       case 0:
-        ordered = orderBy(todoCards, "createdAt", orderData.order);
+        ordered = orderBy(todoCards, "createdAt", order);
         break;
       case 1:
-        ordered = orderBy(todoCards, "name", orderData.order);
+        ordered = orderBy(todoCards, "name", order);
         break;
       case 2:
-        ordered = orderBy(todoCards, "dueDate", orderData.order);
+        ordered = orderBy(todoCards, "dueDate", order);
         break;
       case 3:
         ordered = orderBy(
@@ -69,7 +69,7 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
             const totalTasks = Object.values(todo.tasks).length;
             return doneTasks / totalTasks;
           },
-          orderData.order
+          order
         );
         break;
 
@@ -78,10 +78,11 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
         break;
     }
 
-    return matchSorter(ordered, orderData.searchQuery, {
+    return matchSorter(ordered, searchQuery, {
       keys: ["name"],
+      sorter: (items) => items,
     });
-  }, [todoCards, orderData]);
+  }, [todoCards, index, order, searchQuery]);
 
   return (
     <Layout>
@@ -111,11 +112,11 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
       />
       <ToolBar
         options={["Creation", "Name", "Due date", "Completed"]}
-        index={orderData.index}
-        order={orderData.order}
+        index={index}
+        order={order}
         onChageOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
         onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
-        searchQuery={orderData.searchQuery}
+        searchQuery={searchQuery}
         onChangeSearchQuery={(sq) =>
           setOrderData((prev) => ({ ...prev, searchQuery: sq }))
         }

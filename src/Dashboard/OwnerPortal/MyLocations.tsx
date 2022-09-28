@@ -28,6 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
 import LocationCard from "../Locations/LocationCard";
+import { customOrderSorter } from "./customOrderSorter";
 import GoldTag from "./GoldTag";
 import { useOwner } from "./OwnerPortal";
 
@@ -35,8 +36,8 @@ function MyLocations() {
   const { t } = useTranslation();
   const { locations } = useOwner();
   const navigate = useNavigate();
-  const { organization, subscriptionDocument, userDocument } = useDashboard();
-  const [orderData, setOrderData] = useState<{
+  const { organization, userDocument } = useDashboard();
+  const [{ order, index }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
   }>({
@@ -65,34 +66,26 @@ function MyLocations() {
   };
 
   const getOrderedLocations = useMemo(() => {
-    let ordered: Location[] = [];
-    switch (orderData.index) {
+    switch (index) {
       case 0:
-        ordered = orderBy(locations, "name", orderData.order);
-        break;
+        return matchSorter(locations, searchQuery, {
+          keys: ["name"],
+          baseSort: customOrderSorter(order),
+        });
       case 1:
-        ordered = orderBy(locations, "address.city", orderData.order);
-        break;
+        return matchSorter(locations, searchQuery, {
+          keys: ["address.city"],
+          baseSort: customOrderSorter(order),
+        });
       case 2:
-        ordered = orderBy(locations, "intId", orderData.order);
-        break;
-
+        return matchSorter(locations, searchQuery, {
+          keys: ["intId"],
+          baseSort: customOrderSorter(order),
+        });
       default:
-        ordered = locations;
-        break;
+        return locations;
     }
-    switch (orderData.index) {
-      case 0:
-        return matchSorter(ordered, searchQuery, { keys: ["name"] });
-      case 1:
-        return matchSorter(ordered, searchQuery, { keys: ["address.city"] });
-      case 2:
-        return matchSorter(ordered, searchQuery, { keys: ["intId"] });
-
-      default:
-        return ordered;
-    }
-  }, [locations, orderData, searchQuery]);
+  }, [locations, order, index, searchQuery]);
 
   return (
     <Layout>
@@ -165,11 +158,11 @@ function MyLocations() {
         >
           <SplitButton
             options={[t("Name"), t("City"), t("ID")]}
-            selectedIndex={orderData.index}
-            order={orderData.order}
-            onChageOrder={(order) =>
-              setOrderData((prev) => ({ ...prev, order }))
-            }
+            selectedIndex={index}
+            order={order}
+            onChageOrder={(order) => {
+              setOrderData((prev) => ({ ...prev, order }));
+            }}
             onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
           />
           <Input.Search

@@ -16,6 +16,7 @@ import { useMemo, useState } from "react";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
+import { customOrderSorter } from "Dashboard/OwnerPortal/customOrderSorter";
 
 function LocationsPicker({
   selectedLocations,
@@ -25,7 +26,7 @@ function LocationsPicker({
   onSelectionChange: (locs: Location[]) => void;
 }) {
   const { t } = useTranslation();
-  const [orderData, setOrderData] = useState<{
+  const [{ order, index }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
   }>({
@@ -46,34 +47,26 @@ function LocationsPicker({
   };
 
   const getOrderedLocations = useMemo(() => {
-    let ordered: Location[] = [];
-    switch (orderData.index) {
+    switch (index) {
       case 0:
-        ordered = orderBy(locations, "name", orderData.order);
-        break;
+        return matchSorter(locations, searchQuery, {
+          keys: ["name"],
+          baseSort: customOrderSorter(order),
+        });
       case 1:
-        ordered = orderBy(locations, "address.city", orderData.order);
-        break;
+        return matchSorter(locations, searchQuery, {
+          keys: ["address.city"],
+          baseSort: customOrderSorter(order),
+        });
       case 2:
-        ordered = orderBy(locations, "intId", orderData.order);
-        break;
-
+        return matchSorter(locations, searchQuery, {
+          keys: ["intId"],
+          baseSort: customOrderSorter(order),
+        });
       default:
-        ordered = locations;
-        break;
+        return locations;
     }
-    switch (orderData.index) {
-      case 0:
-        return matchSorter(ordered, searchQuery, { keys: ["name"] });
-      case 1:
-        return matchSorter(ordered, searchQuery, { keys: ["address.city"] });
-      case 2:
-        return matchSorter(ordered, searchQuery, { keys: ["intId"] });
-
-      default:
-        return ordered;
-    }
-  }, [locations, orderData, searchQuery]);
+  }, [locations, index, order, searchQuery]);
 
   return (
     <Layout.Content
@@ -93,8 +86,8 @@ function LocationsPicker({
       >
         <SplitButton
           options={[t("Name"), t("City"), t("ID")]}
-          selectedIndex={orderData.index}
-          order={orderData.order}
+          selectedIndex={index}
+          order={order}
           onChageOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
           onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
         />
