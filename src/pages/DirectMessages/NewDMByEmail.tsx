@@ -111,7 +111,10 @@ function NewDMByEmail() {
                 },
               ]}
             >
-              <Input.Search onSearch={searchUser} />
+              <Input.Search
+                onSearch={searchUser}
+                placeholder={t("Type an email")}
+              />
             </Form.Item>
           </Form>
           <Typography>{t("Eligible Users:")}</Typography>
