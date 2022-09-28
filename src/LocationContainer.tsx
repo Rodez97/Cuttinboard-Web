@@ -16,16 +16,13 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Badge, Button, Layout } from "antd";
 import { useTranslation } from "react-i18next";
-import Icon, {
-  SettingFilled,
-  SettingOutlined,
-  SwapOutlined,
-} from "@ant-design/icons";
+import Icon, { SettingFilled, SwapOutlined } from "@ant-design/icons";
 import Forum from "@mdi/svg/svg/forum.svg";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import UserMenu from "./components/UserMenu";
 import { getRoleTextByNumber } from "./Admin/Employees/employee-utils";
 import { DarkPageHeader } from "components/PageHeaders";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 const LocationSettings = lazy(() => import("./Admin/LocationSettings"));
 const DM = lazy(() => import("./pages/DirectMessages/DM"));
@@ -83,6 +80,7 @@ export function LocationContainer() {
             />
           </Badge>,
           <Button
+            hidden={locationAccessKey.role > RoleAccessLevels.GENERAL_MANAGER}
             icon={<SettingFilled />}
             key="locSettings"
             type={pathname.split("/")[3] === "locSettings" ? "primary" : "text"}
@@ -121,14 +119,16 @@ export function LocationContainer() {
               </Suspense>
             }
           />
-          <Route
-            path={`locSettings`}
-            element={
-              <Suspense fallback={<PageLoading />}>
-                <LocationSettings />
-              </Suspense>
-            }
-          />
+          {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
+            <Route
+              path={`locSettings`}
+              element={
+                <Suspense fallback={<PageLoading />}>
+                  <LocationSettings />
+                </Suspense>
+              }
+            />
+          )}
           <Route path="*" element={<Navigate to="apps" />} />
         </Routes>
       </Layout.Content>
