@@ -11,6 +11,7 @@ import {
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library";
 import { Avatar, Button, List, Modal } from "antd";
 import { useTranslation } from "react-i18next";
+import { getAvatarByUID } from "utils/utils";
 
 interface QuickUserDialogProps {
   employee: Employee;
@@ -23,7 +24,7 @@ function UserInfoElement({ employee }: QuickUserDialogProps) {
     <List>
       <List.Item css={{ justifyContent: "center" }}>
         <Avatar
-          src={employee.avatar}
+          src={getAvatarByUID(employee.id)}
           size={60}
           alt={employee.name}
           icon={<UserOutlined />}
@@ -83,7 +84,7 @@ export function QuickUserDialogAvatar({ employee }: { employee: Employee }) {
   };
   return (
     <Avatar
-      src={employee.avatar}
+      src={getAvatarByUID(employee.id)}
       onClick={handleOpen}
       css={{ cursor: "pointer" }}
       icon={<UserOutlined />}
