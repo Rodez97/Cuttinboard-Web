@@ -89,10 +89,6 @@ function LocationCard({ location, actions }: LocationCardProps) {
     setLoadingLocation(false);
   };
 
-  console.log({
-    xyz: getBadgeByLocation(location.id, location.organizationId),
-  });
-
   return (
     <Badge
       count={getBadgeByLocation(location.id, location.organizationId)}

@@ -1,19 +1,13 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
-import { useInView } from "react-intersection-observer";
-import {
-  Message,
-  MessageType,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   useConversationMessages,
   useConversations,
-  useDirectMessages,
-  useDMs,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
 import mdiArrowDownLeft from "@mdi/svg/svg/arrow-down-left.svg";
@@ -22,7 +16,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import styled from "@emotion/styled";
 import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
-import SeenByElement from "./SeenByElement";
 import MessageReactionsElement from "./MessageReactionsElement";
 import { getAvatarByUID } from "utils/utils";
 dayjs.extend(relativeTime);
