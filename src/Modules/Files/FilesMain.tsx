@@ -39,7 +39,7 @@ function FilesMain() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [viewType, setViewType] = useState<"module" | "list">("module");
-  const [orderData, setOrderData] = useState<{
+  const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
     searchQuery?: string;
@@ -67,15 +67,15 @@ function FilesMain() {
   const getOrderedFiles = useMemo(() => {
     let ordered: Cuttinboard_File[] = [];
 
-    switch (orderData.index) {
+    switch (index) {
       case 0:
-        ordered = orderBy(drawerFiles, "createdAt", orderData.order);
+        ordered = orderBy(drawerFiles, "createdAt", order);
         break;
       case 1:
-        ordered = orderBy(drawerFiles, "name", orderData.order);
+        ordered = orderBy(drawerFiles, "name", order);
         break;
       case 2:
-        ordered = orderBy(drawerFiles, "size", orderData.order);
+        ordered = orderBy(drawerFiles, "size", order);
         break;
 
       default:
@@ -83,10 +83,11 @@ function FilesMain() {
         break;
     }
 
-    return matchSorter(ordered, orderData.searchQuery, {
+    return matchSorter(ordered, searchQuery, {
       keys: ["name"],
+      sorter: (items) => items,
     });
-  }, [drawerFiles, orderData]);
+  }, [drawerFiles, index, order, searchQuery]);
 
   const handleChange = (nextView: "module" | "list") => {
     setViewType(nextView);
@@ -130,11 +131,11 @@ function FilesMain() {
       />
       <ToolBar
         options={["Creation", "Name", "Size"]}
-        index={orderData.index}
-        order={orderData.order}
+        index={index}
+        order={order}
         onChageOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
         onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
-        searchQuery={orderData.searchQuery}
+        searchQuery={searchQuery}
         onChangeSearchQuery={(sq) =>
           setOrderData((prev) => ({ ...prev, searchQuery: sq }))
         }

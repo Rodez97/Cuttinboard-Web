@@ -27,7 +27,7 @@ const NoteConverter = ModuleFirestoreConverter<Note>();
 function NotesMain() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [orderData, setOrderData] = useState<{
+  const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
     searchQuery?: string;
@@ -49,22 +49,23 @@ function NotesMain() {
   const getOrderedNotes = useMemo(() => {
     let ordered: Note[] = [];
 
-    switch (orderData.index) {
+    switch (index) {
       case 0:
-        ordered = orderBy(notes, "createdAt", orderData.order);
+        ordered = orderBy(notes, "createdAt", order);
         break;
       case 1:
-        ordered = orderBy(notes, "title", orderData.order);
+        ordered = orderBy(notes, "title", order);
         break;
 
       default:
         ordered = notes;
         break;
     }
-    return matchSorter(ordered, orderData.searchQuery, {
+    return matchSorter(ordered, searchQuery, {
       keys: ["title", "content"],
+      sorter: (items) => items,
     });
-  }, [notes, orderData]);
+  }, [notes, index, order, searchQuery]);
 
   if (loading) {
     return <PageLoading />;
@@ -105,11 +106,11 @@ function NotesMain() {
       />
       <ToolBar
         options={["Creation", "Name"]}
-        index={orderData.index}
-        order={orderData.order}
+        index={index}
+        order={order}
         onChageOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
         onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
-        searchQuery={orderData.searchQuery}
+        searchQuery={searchQuery}
         onChangeSearchQuery={(sq) =>
           setOrderData((prev) => ({ ...prev, searchQuery: sq }))
         }
