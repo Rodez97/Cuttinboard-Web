@@ -94,6 +94,7 @@ function ProjectedSalesDialog({
           <Descriptions.Item label={dayjs(wd).format("dddd")} key={wd.getDay()}>
             <InputNumber
               min={0}
+              step={100}
               bordered={false}
               value={
                 projectedSalesByDay?.[wd.getDay()] ??
