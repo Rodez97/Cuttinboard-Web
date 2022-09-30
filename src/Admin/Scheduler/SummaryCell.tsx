@@ -1,14 +1,12 @@
 import dayjs from "dayjs";
 import { uniqBy } from "lodash";
 import React, { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import duration from "dayjs/plugin/duration";
-import {
-  getShiftDate,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { ShiftsTable } from "./Scheduler";
 import { Space, Table, Typography } from "antd";
+import isoWeek from "dayjs/plugin/isoWeek";
+dayjs.extend(isoWeek);
 
 interface SummaryCellProps {
   weekDay: Date;
@@ -22,7 +20,7 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
     useMemo(() => {
       const columnShifts = data.flatMap(({ shifts }) =>
         shifts.filter(
-          (shift) => getShiftDate(shift.start).day() === weekDay.getDay()
+          (shift) => shift.shiftIsoWeekday === dayjs(weekDay).isoWeekday()
         )
       );
 
@@ -31,13 +29,10 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
         wage: number;
       }>(
         (acc, shift) => {
-          const start = getShiftDate(shift.start);
-          const end = getShiftDate(shift.end);
-          const duration = end.diff(start, "minutes");
           const { time, wage } = acc;
           return {
-            time: time.add(duration, "minutes"),
-            wage: wage + (shift.hourlyWage ?? 0) * (duration / 60),
+            time: time.add(shift.shiftDuration.totalMinutes, "minutes"),
+            wage: wage + shift.getWage,
           };
         },
         { time: dayjs.duration(0), wage: 0 }

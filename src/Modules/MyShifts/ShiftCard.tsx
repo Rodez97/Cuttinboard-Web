@@ -1,15 +1,10 @@
-import { setDoc } from "@firebase/firestore";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { useTranslation } from "react-i18next";
 import SimpleTodo from "../../components/SimpleTodo";
-import {
-  Shift,
-  Todo_Task,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Button, List, Modal, Space, Tag } from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Icon, { OrderedListOutlined, RetweetOutlined } from "@ant-design/icons";
@@ -24,37 +19,23 @@ interface ShiftCardProps {
 
 function ShiftCard({ shift }: ShiftCardProps) {
   const { t } = useTranslation();
-  const [saving, setSaving] = useState(false);
   const [tasksDialogOpen, setTasksDialogOpen] = useState(false);
-  const [tasks, setTasks] = useState(shift?.tasks ?? {});
 
-  const handleTaskChange = (taskId: string, newStatus: boolean) => {
-    setTasks(
-      (tsk) =>
-        ({ ...tsk, [taskId]: { ...tsk[taskId], status: newStatus } } as Record<
-          string,
-          Todo_Task
-        >)
-    );
-  };
-
-  const handleSaveTasks = async () => {
-    setSaving(true);
+  const handleTaskChange = async (taskId: string, newStatus: boolean) => {
     try {
-      await setDoc(shift.docRef, { tasks }, { merge: true });
+      await shift.changeTask(taskId, newStatus);
     } catch (error) {
       recordError(error);
     }
+  };
+
+  const handleSaveTasks = async () => {
     setTasksDialogOpen(false);
-    setSaving(false);
   };
 
   const getHours = () => {
-    const start = getShiftDate(shift.start);
-    const end = getShiftDate(shift.end);
-    const duration = end.diff(start);
     return dayjs
-      .duration(duration)
+      .duration(shift.shiftDuration.totalMinutes, "minutes")
       .format(`H [${t("hours")}] mm [${t("minutes")}]`);
   };
 
@@ -85,7 +66,7 @@ function ShiftCard({ shift }: ShiftCardProps) {
           />,
           <Button
             key="tasks"
-            disabled={Object.keys(tasks).length <= 0}
+            disabled={Object.keys(shift?.tasks ?? {}).length <= 0}
             onClick={() => setTasksDialogOpen(true)}
             icon={<OrderedListOutlined />}
             type="link"
@@ -94,9 +75,9 @@ function ShiftCard({ shift }: ShiftCardProps) {
         ]}
       >
         <List.Item.Meta
-          title={`${getShiftDate(shift.start).format(
+          title={`${shift.getStartDayjsDate.format(
             "h:mm a"
-          )} - ${getShiftDate(shift.end).format("h:mm a")}`.toUpperCase()}
+          )} - ${shift.getEndDayjsDate.format("h:mm a")}`.toUpperCase()}
           description={getHours()}
         />
 
@@ -111,12 +92,11 @@ function ShiftCard({ shift }: ShiftCardProps) {
         open={tasksDialogOpen}
         title={t("Shift Tasks")}
         closable={false}
-        confirmLoading={saving}
         cancelButtonProps={{ style: { display: "none" } }}
         okText={t("Accept")}
         onOk={handleSaveTasks}
       >
-        <SimpleTodo tasks={tasks} onChange={handleTaskChange} />
+        <SimpleTodo tasks={shift?.tasks} onChange={handleTaskChange} />
       </Modal>
     </>
   );

@@ -4,7 +4,6 @@ import {
   Employee,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import dayjs from "dayjs";
 import { useCallback } from "react";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
@@ -26,14 +25,10 @@ function EmpColumnCell({ employee, shifts }: EmpColumnCellProps) {
       wage: number;
     }>(
       (acc, shift) => {
-        const start = getShiftDate(shift.start);
-        const end = getShiftDate(shift.end);
-        const duration = end.diff(start, "minutes");
-        const hours = duration / 60;
         const { time, wage } = acc;
         return {
-          time: time.add(duration, "minutes"),
-          wage: wage + (shift.hourlyWage ?? 0) * hours,
+          time: time.add(shift.shiftDuration.totalMinutes, "minutes"),
+          wage: wage + shift.getWage,
         };
       },
       { time: dayjs.duration(0), wage: 0 }

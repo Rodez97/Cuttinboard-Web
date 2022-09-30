@@ -34,7 +34,6 @@ import {
   ScheduleDoc,
   ScheduleDocConverter,
   Shift,
-  ShiftConverter,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Empty, Layout, Space, Spin, Tabs } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
@@ -70,7 +69,7 @@ function MyShifts() {
         collection(Firestore, locationDocRef.path, "shifts"),
         where("altId", "in", [currentWeekId, "repeat"]),
         where("employeeId", "==", Auth.currentUser.uid)
-      ).withConverter(ShiftConverter)
+      ).withConverter(Shift.Converter)
   );
 
   const weekDays = useMemo(() => {
@@ -87,10 +86,14 @@ function MyShifts() {
 
   const groupByDay = useCallback(
     (shifts: Shift[]) => {
-      const orderedShifts = orderBy(shifts, (shf) => shf.start, "asc");
+      const orderedShifts = orderBy(
+        shifts,
+        (shf) => shf.getStartDayjsDate,
+        "asc"
+      );
       return weekDays.reduce<{ day: Date; shifts: Shift[] }[]>((acc, day) => {
         const dayShifts = orderedShifts.filter(
-          (shf) => getShiftDate(shf.start).day() === day.getDay()
+          (shf) => shf.shiftIsoWeekday === dayjs(day).isoWeekday()
         );
         if (dayShifts?.length) {
           return [...acc, { day, shifts: dayShifts }];
@@ -103,18 +106,13 @@ function MyShifts() {
 
   const getToday = useMemo(
     () =>
-      shifts?.filter(
-        (shift) =>
-          getShiftDate(shift.start).isoWeekday() === dayjs().isoWeekday()
-      ),
+      shifts?.filter((shift) => shift.shiftIsoWeekday === dayjs().isoWeekday()),
     [shifts]
   );
 
   const getThisWeek = useMemo(
     () =>
-      shifts?.filter(
-        (shift) => getShiftDate(shift.start).isoWeekday() > dayjs().isoWeekday()
-      ),
+      shifts?.filter((shift) => shift.shiftIsoWeekday > dayjs().isoWeekday()),
     [shifts]
   );
 

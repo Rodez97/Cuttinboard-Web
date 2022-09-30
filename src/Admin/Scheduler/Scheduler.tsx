@@ -28,7 +28,6 @@ import {
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
-  getShiftDate,
   useEmployeesList,
   useLocation,
   useSchedule,
@@ -181,7 +180,7 @@ function Scheduler() {
           <ShiftCell
             employee={employee}
             shifts={shifts.filter(
-              (s) => getShiftDate(s.start).day() === wd.getDay()
+              (s) => s.shiftIsoWeekday === dayjs(wd).isoWeekday()
             )}
             date={wd}
             onNewShift={newShift}

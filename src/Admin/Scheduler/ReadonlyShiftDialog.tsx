@@ -1,5 +1,4 @@
 import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Checkbox, Descriptions, Modal } from "antd";
 import { capitalize } from "lodash";
 import React from "react";
@@ -21,6 +20,7 @@ function ReadonlyShiftDialog({
   return (
     <Modal
       visible={open}
+      onCancel={onClose}
       title={t("Shift Details")}
       footer={[
         <Button key="ok" onClick={onClose} type="primary">
@@ -30,12 +30,12 @@ function ReadonlyShiftDialog({
     >
       <Descriptions bordered column={1} size="small">
         <Descriptions.Item label={t("Date")}>
-          {capitalize(getShiftDate(shift.start).format("MMMM DD, YYYY"))}
+          {capitalize(shift.getStartDayjsDate.format("MMMM DD, YYYY"))}
         </Descriptions.Item>
         <Descriptions.Item label={t("Hours")}>
-          {`${getShiftDate(shift.start).format("h:mm a")} - ${getShiftDate(
-            shift.end
-          ).format("h:mm a")}`}
+          {`${shift.getStartDayjsDate.format(
+            "h:mm a"
+          )} - ${shift.getEndDayjsDate.format("h:mm a")}`}
         </Descriptions.Item>
         {shift?.position && (
           <Descriptions.Item label={t("Position")}>
@@ -57,16 +57,16 @@ function ReadonlyShiftDialog({
         )}
         {Object.keys(shift?.tasks ?? {}).length > 0 && (
           <Descriptions.Item label={t("Tasks")}>
-            <Checkbox.Group disabled>
-              {getOrderedTasks(shift?.tasks ?? {}).map(([id, task]) => (
+            {getOrderedTasks(shift?.tasks ?? {}).map(([id, task]) => {
+              return (
                 <>
-                  <Checkbox value={task.name} checked={task.status}>
+                  <Checkbox checked={task.status} disabled>
                     {task.name}
                   </Checkbox>
                   <br />
                 </>
-              ))}
-            </Checkbox.Group>
+              );
+            })}
           </Descriptions.Item>
         )}
       </Descriptions>

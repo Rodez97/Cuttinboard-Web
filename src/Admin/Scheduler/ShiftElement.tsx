@@ -7,7 +7,6 @@ import {
   Employee,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
 import { Space, Typography } from "antd";
@@ -72,9 +71,9 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
               display: "flex",
               color: "white",
             }}
-          >{`${getShiftDate(shifts[0].start)
+          >{`${shifts[0].getStartDayjsDate
             .format("h:mma")
-            .replace("m", "")} - ${getShiftDate(shifts[0].end)
+            .replace("m", "")} - ${shifts[0].getStartDayjsDate
             .format("h:mma")
             .replace("m", "")}`}</Typography>
           <Space style={{ justifyContent: "space-evenly", display: "flex" }}>

@@ -4,10 +4,7 @@ import React, { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { useScheduler } from "./Scheduler";
-import {
-  getShiftDate,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Employee,
   Shift,
@@ -31,7 +28,7 @@ function RosterView({ employees }: { employees: Employee[] }) {
 
   const handleCellClick = ({ shift, employee }: RosterData) => {
     if (
-      getShiftDate(shift.start).isBefore(dayjs(dayjs().startOf("isoWeek"))) ||
+      shift.getStartDayjsDate.isBefore(dayjs(dayjs().startOf("isoWeek"))) ||
       isPublished
     ) {
       return;
@@ -57,22 +54,22 @@ function RosterView({ employees }: { employees: Employee[] }) {
         title: t("Start"),
         dataIndex: "start",
         key: "start",
-        render: (_, { shift }) => getShiftDate(shift.start).format("h:mm a"),
+        render: (_, { shift }) => shift.getStartDayjsDate.format("h:mm a"),
       },
       {
         title: t("End"),
         dataIndex: "end",
         key: "end",
-        render: (_, { shift }) => getShiftDate(shift.end).format("h:mm a"),
+        render: (_, { shift }) => shift.getEndDayjsDate.format("h:mm a"),
       },
       {
         title: t("Time"),
         dataIndex: "time",
         key: "time",
         render: (_, { shift }) => {
-          const start = dayjs(getShiftDate(shift?.start));
-          const end = dayjs(getShiftDate(shift?.end));
-          return dayjs.duration(end.diff(start)).format("[🕘] H[h] m[min]");
+          return dayjs
+            .duration(shift.shiftDuration.totalMinutes, "minutes")
+            .format("[🕘] H[h] m[min]");
         },
       },
     ],
@@ -83,7 +80,7 @@ function RosterView({ employees }: { employees: Employee[] }) {
     const shifts = shiftsCollection
       ?.filter(
         (shf) =>
-          getShiftDate(shf.start).day() === weekDays[selectedDateIndex].getDay()
+          shf.getStartDayjsDate.day() === weekDays[selectedDateIndex].getDay()
       )
       ?.map((shift) => ({
         shift,
