@@ -14,6 +14,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import duration from "dayjs/plugin/duration";
 import {
   Employee,
+  IShift,
   Shift,
   Todo_Task,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
@@ -73,7 +74,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const [baseShift, setBaseShift] = useState<Shift>(null);
   const [saving, setSaving] = useState(false);
   const { locationId } = useLocation();
-  const { createShift, editShift, weekId, weekDays } = useSchedule();
+  const { createShift, weekId, weekDays } = useSchedule();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isNewShift, setIsNewShift] = useState(false);
@@ -86,6 +87,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   }));
 
   const openNew = (employee: Employee, date: Date) => {
+    const weekDay = dayjs(date).isoWeekday();
+    console.log(date.toString(), weekDay);
     const position =
       employee.role === "employee"
         ? employee.locations[locationId]?.mainPosition ??
@@ -96,7 +99,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     setEmployee(employee);
     setBaseDate(date);
     form.setFieldsValue({
-      applyTo: [dayjs(date).isoWeekday()],
+      applyTo: [weekDay],
       timeRange: [moment(date).add(8, "hours"), moment(date).add(16, "hours")],
       position,
       repeat: false,
@@ -109,7 +112,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     setEmployee(employee);
     setBaseShift(shift);
     form.setFieldsValue({
-      applyTo: [getShiftDate(shift.start).day()],
+      applyTo: [getShiftDate(shift.start).isoWeekday()],
       notes: shift.notes ?? "",
       position: shift.position ?? "",
       repeat: Boolean(shift.altId === "repeat"),
@@ -130,7 +133,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const onFinish = async (values: FormDataType) => {
     const { applyTo, notes, position, repeat, tasks, timeRange } = values;
 
-    const shiftToSave: Partial<Shift> = {
+    const shiftToSave: IShift = {
       start: getShiftString(timeRange[0].toDate()),
       end: getShiftString(timeRange[1].toDate()),
       notes,
@@ -177,11 +180,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           },
           baseShift.tasks ?? {}
         );
-        await editShift({
-          ...baseShift,
-          ...shiftToSave,
-          tasks: transformedTasks,
-        });
+        await baseShift.editShift({ ...shiftToSave, tasks: transformedTasks });
       }
       handleClose();
     } catch (error) {
@@ -272,8 +271,10 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                 {weekDays.map((wd, i) => (
                   <Col xs={12} sm={8} md={6} key={i}>
                     <Checkbox
-                      value={wd.getDay()}
-                      disabled={Boolean(wd.getDay() === baseDate.getDay())}
+                      value={dayjs(wd).isoWeekday()}
+                      disabled={Boolean(
+                        dayjs(wd).isoWeekday() === dayjs(baseDate).isoWeekday()
+                      )}
                     >
                       {dayjs(wd).format("dddd")}
                     </Checkbox>
@@ -295,6 +296,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                     employee?.locations?.[locationId].mainPosition === position;
                   return (
                     <Select.Option
+                      key={position}
                       value={position}
                       style={{
                         backgroundColor: isMainPos && Colors.Yellow.Light,
@@ -349,6 +351,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                     noStyle
                   >
                     <Input
+                      autoFocus
                       placeholder={t("Add task")}
                       addonAfter={
                         <MinusCircleOutlined
