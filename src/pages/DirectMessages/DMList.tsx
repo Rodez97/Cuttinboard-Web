@@ -5,9 +5,9 @@ import { useMemo, useState } from "react";
 import {
   useCuttinboard,
   useDMs,
+  useEmployeesList,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useNavigate, useParams } from "react-router-dom";
 import { matchSorter } from "match-sorter";
 import { Avatar, Badge, Button, Checkbox, Input, Menu, Space } from "antd";
@@ -35,12 +35,13 @@ function DMList({
   const { getDMBadge } = useNotificationsBadges();
   const [searchQuery, setSearchQuery] = useState("");
   const { notifications } = useCuttinboard();
+  const { getEmployees } = underLocation && useEmployeesList();
 
   const getChats = useMemo(() => {
     let filteredLocations: Chat[] = [];
     if (underLocation && filterChecked) {
       filteredLocations = chats.filter((cht) =>
-        cht.locations?.includes(locationId)
+        getEmployees.some((e) => cht.recipient.id === e.id)
       );
     } else {
       filteredLocations = chats;
