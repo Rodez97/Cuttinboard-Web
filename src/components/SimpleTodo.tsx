@@ -12,8 +12,6 @@ interface SimpleTodoProps {
 }
 
 function SimpleTodo({ tasks, onChange, canRemove, onRemove }: SimpleTodoProps) {
-  const handleRemove = (taskId: string) => () => onRemove(taskId);
-
   return (
     <List
       dataSource={getOrderedTasks(tasks)}
@@ -25,7 +23,7 @@ function SimpleTodo({ tasks, onChange, canRemove, onRemove }: SimpleTodoProps) {
               canRemove && [
                 <Button
                   key="delete"
-                  onClick={handleRemove(id)}
+                  onClick={() => onRemove(id)}
                   danger
                   type="link"
                   icon={<DeleteOutlined />}
