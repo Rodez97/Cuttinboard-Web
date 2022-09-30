@@ -75,7 +75,7 @@ function EmployeeRolePanel({
     try {
       const dataToAdd = {
         ...values,
-        positions: positions.map((pos) => pos.position),
+        pos: positions.map((pos) => pos.position),
         wagePerPosition: positions.reduce(
           (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
           {}
@@ -113,9 +113,9 @@ function EmployeeRolePanel({
         initialValues={{
           role: employee.locations[locationId].role,
           positions:
-            Object.entries(employee.locations[locationId].wagePerPosition).map(
-              ([key, val]) => ({ position: key, wage: val ?? 0 })
-            ) ?? [],
+            Object.entries(
+              employee.locations[locationId].wagePerPosition ?? {}
+            ).map(([key, val]) => ({ position: key, wage: val ?? 0 })) ?? [],
           employeeDataComments:
             employee.locations[locationId].employeeDataComments,
           mainPosition: employee.locations[locationId].mainPosition,
