@@ -25,15 +25,16 @@ function ScheduleSummary() {
   }, [totalHours]);
 
   const getProjectedSales = useMemo(() => {
-    return Object.values(scheduleDocument?.statsByDay ?? {}).reduce(
+    const percent = Object.values(scheduleDocument?.statsByDay ?? {}).reduce(
       (acc, val) => acc + val.projectedSales,
       0
     );
+    return isFinite(percent) ? percent : 0;
   }, [scheduleDocument]);
 
   const getLaborPercent = useMemo(() => {
     const percent = (totalWage / getProjectedSales) * 100;
-    return `${(isFinite(percent) ? percent : 0).toFixed(2)}%`;
+    return isFinite(percent) ? percent : 0;
   }, [totalWage, getProjectedSales]);
 
   return (
@@ -52,7 +53,12 @@ function ScheduleSummary() {
       <Statistic title={t("Scheduled hours")} value={getHours} />
       <Statistic title={t("People")} value={totalPeople} />
       <Statistic title={t("Shifts")} value={totalShifts} />
-      <Statistic title={t("Labor %")} value={getLaborPercent} />
+      <Statistic
+        title={t("Labor %")}
+        value={getLaborPercent}
+        suffix="%"
+        precision={2}
+      />
       <Statistic
         title={t("Projected Sales")}
         value={getProjectedSales}
