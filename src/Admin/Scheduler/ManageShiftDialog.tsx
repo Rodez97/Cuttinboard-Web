@@ -249,7 +249,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           <TimePicker.RangePicker
             placeholder={["Start", "End"]}
             use12Hours
-            format="hh:mm a"
+            format="hh:mm A"
             style={{ width: "100%" }}
           />
         </Form.Item>
