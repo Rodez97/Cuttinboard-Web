@@ -40,7 +40,11 @@ import {
 } from "antd";
 import moment from "moment";
 import TextArea from "antd/lib/input/TextArea";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  MinusCircleOutlined,
+  PlusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { serverTimestamp } from "firebase/firestore";
 dayjs.extend(isoWeek);
@@ -352,6 +356,11 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                           color="danger"
                         />
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          add();
+                        }
+                      }}
                     />
                   </Form.Item>
                 </Form.Item>
