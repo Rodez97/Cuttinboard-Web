@@ -29,7 +29,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   getShiftDate,
-  useCuttinboard,
   useEmployeesList,
   useLocation,
   useSchedule,
@@ -45,7 +44,6 @@ import {
   Layout,
   message,
   Modal,
-  PageHeader,
   Space,
   Tag,
 } from "antd";
@@ -103,21 +101,19 @@ function Scheduler() {
   const { t } = useTranslation();
   const [rosterMode, setRosterMode] = useState(false);
   const { getEmployees } = useEmployeesList();
+  const { locationId } = useLocation();
 
   const handleBack = () => {
     navigate(-1);
   };
 
   const employees = useMemo(() => {
-    const byName = searchQuery
-      ? matchSorter(getEmployees, searchQuery, {
-          keys: ["name", "lastName"],
-        })
-      : getEmployees;
-
+    const byName = matchSorter(getEmployees, searchQuery ?? "", {
+      keys: ["name", "lastName"],
+    });
     return selectedTag
-      ? matchSorter(byName, selectedTag, {
-          keys: ["positions"],
+      ? matchSorter(byName, selectedTag ?? "", {
+          keys: [`locations.${locationId}.pos`],
         })
       : byName;
   }, [searchQuery, selectedTag, getEmployees]);
@@ -270,7 +266,7 @@ function Scheduler() {
             <Input.Search
               placeholder={t("Search")}
               allowClear
-              onSearch={setSearchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               css={{ width: 200 }}
             />
             <AutoComplete
@@ -278,6 +274,7 @@ function Scheduler() {
               onSearch={handleSearch}
               placeholder={t("Filter by position")}
               onSelect={setSelectedTag}
+              onChange={setSelectedTag}
             >
               {result.map((position: string) => (
                 <AutoComplete.Option key={position} value={position}>
