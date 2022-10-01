@@ -46,7 +46,7 @@ function ManageMembers({
   const { t } = useTranslation();
   const { locationAccessKey, locationId } = useLocation();
   const navigate = useNavigate();
-  const { getEmployees, getOrgEmployees } = useEmployeesList();
+  const { getEmployees } = useEmployeesList();
 
   const handleAddMembers = (addedEmployees: Employee[]) => {
     addMembers(addedEmployees);
@@ -71,33 +71,25 @@ function ManageMembers({
   };
 
   const getMembers = useMemo(() => {
-    const empList = getEmployees ?? [];
-    const orgEmpList = getOrgEmployees ?? [];
     let membersList: Employee[] = [];
     if (privacyLevel === PrivacyLevel.PRIVATE) {
-      membersList = uniqBy([...empList, ...orgEmpList], "id").filter(
-        (emp) => indexOf(members, emp.id) > -1
-      );
+      membersList = getEmployees.filter((emp) => indexOf(members, emp.id) > -1);
     }
     if (privacyLevel === PrivacyLevel.PUBLIC) {
-      membersList = uniqBy([...empList, ...orgEmpList], "id");
+      membersList = getEmployees;
     }
     if (privacyLevel === PrivacyLevel.POSITIONS) {
-      membersList = uniqBy([...empList, ...orgEmpList], "id").filter(
+      membersList = getEmployees.filter(
         (emp) =>
           emp?.role === "employee" &&
           emp?.locations?.[locationId]?.pos?.some((p) => positions?.includes(p))
       );
     }
     return membersList.filter((m) => m.id !== hostId);
-  }, [getOrgEmployees, getEmployees, privacyLevel, members, positions, hostId]);
+  }, [getEmployees, privacyLevel, members, positions, hostId]);
 
   const hostUser = useMemo(() => {
-    const empList = getEmployees ?? [];
-    const orgEmpList = getOrgEmployees ?? [];
-    return uniqBy([...empList, ...orgEmpList], "id").find(
-      ({ id }) => id === hostId
-    );
+    return getEmployees.find(({ id }) => id === hostId);
   }, [hostId]);
 
   const handleSetHost = (newHost: Employee) => {
@@ -139,9 +131,7 @@ function ManageMembers({
                       icon={<UserAddOutlined />}
                       onClick={() => navigate(`add`)}
                       type="primary"
-                      disabled={
-                        privacyLevel !== PrivacyLevel.PRIVATE || readonly
-                      }
+                      hidden={privacyLevel !== PrivacyLevel.PRIVATE || readonly}
                     >
                       {t("Add Members")}
                     </Button>
