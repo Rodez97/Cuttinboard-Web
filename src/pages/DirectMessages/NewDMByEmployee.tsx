@@ -9,7 +9,7 @@ import {
 import { Avatar, Button, List, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import { recordError } from "../../utils/utils";
+import { getAvatarByUID, recordError } from "../../utils/utils";
 import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
 
 function NewDMByEmployee({
@@ -56,7 +56,9 @@ function NewDMByEmployee({
             css={{ backgroundColor: "#F7F7F7", padding: 10, marginBottom: 8 }}
           >
             <List.Item.Meta
-              avatar={<Avatar icon={<UserOutlined />} src={emp.avatar} />}
+              avatar={
+                <Avatar icon={<UserOutlined />} src={getAvatarByUID(emp.id)} />
+              }
               title={`${emp.name} ${emp.lastName}`}
               description={emp.email}
             />

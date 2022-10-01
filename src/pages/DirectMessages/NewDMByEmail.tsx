@@ -19,7 +19,7 @@ import {
   CuttinboardUser,
   CuttinboardUserConverter,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { recordError } from "utils/utils";
+import { getAvatarByUID, recordError } from "utils/utils";
 import { useDashboard } from "Dashboard/DashboardProvider";
 import { intersection } from "lodash";
 import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
@@ -151,7 +151,10 @@ function NewDMByEmail({
           >
             <List.Item.Meta
               avatar={
-                <Avatar icon={<UserOutlined />} src={targetUser.avatar} />
+                <Avatar
+                  icon={<UserOutlined />}
+                  src={getAvatarByUID(targetUser.id)}
+                />
               }
               title={`${targetUser.name} ${targetUser.lastName}`}
               description={targetUser.email}
