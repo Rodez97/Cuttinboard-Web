@@ -104,18 +104,6 @@ function MyShifts() {
     [weekDays, currentWeekId]
   );
 
-  const getToday = useMemo(
-    () =>
-      shifts?.filter((shift) => shift.shiftIsoWeekday === dayjs().isoWeekday()),
-    [shifts]
-  );
-
-  const getThisWeek = useMemo(
-    () =>
-      shifts?.filter((shift) => shift.shiftIsoWeekday > dayjs().isoWeekday()),
-    [shifts]
-  );
-
   useEffect(() => {
     return () => {
       if (currentWeekId) removeBadge("sch", currentWeekId);
@@ -124,16 +112,17 @@ function MyShifts() {
 
   return (
     <Layout>
-      <Spin
-        spinning={
-          loadingScheduleDoc ||
-          loadingShifts ||
-          loadingScheduleDoc === undefined ||
-          loadingShifts === undefined
-        }
-      >
-        <GrayPageHeader onBack={() => navigate(-1)} title={t("My Shifts")} />
-        <Layout.Content>
+      <GrayPageHeader onBack={() => navigate(-1)} title={t("My Shifts")} />
+
+      <Layout.Content>
+        <Spin
+          spinning={
+            loadingScheduleDoc ||
+            loadingShifts ||
+            loadingScheduleDoc === undefined ||
+            loadingShifts === undefined
+          }
+        >
           <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
             <div
               css={{
@@ -161,34 +150,31 @@ function MyShifts() {
                   direction="vertical"
                 >
                   {isInCurrentWeek ? (
-                    <React.Fragment>
-                      {/* 📅 Today */}
-                      {getToday?.length > 0 && (
-                        <TitleBoxYellow>{t("Today")}</TitleBoxYellow>
-                      )}
-                      {getToday?.map((shift) => (
-                        <ShiftCard key={shift.id} shift={shift} />
-                      ))}
-
-                      {/* 📅 This Week */}
-                      {getThisWeek?.length > 0 && (
-                        <TitleBoxGreen>{t("This week")}</TitleBoxGreen>
-                      )}
-                      {getThisWeek &&
-                        groupByDay(getThisWeek).map(
-                          ({ day, shifts }, index) => (
-                            <div key={index}>
-                              <TitleBoxBlue>
-                                {dayjs(day).format("dddd, MMMM DD YYYY")}
-                              </TitleBoxBlue>
-
-                              {shifts.map((shift) => (
-                                <ShiftCard key={shift.id} shift={shift} />
-                              ))}
-                            </div>
-                          )
+                    groupByDay(shifts).map(({ day, shifts }, index) => (
+                      <div
+                        key={index}
+                        css={{
+                          border:
+                            day.getDate() === new Date().getDate() &&
+                            "1px dotted #00000025",
+                          padding: day.getDate() === new Date().getDate() && 3,
+                        }}
+                      >
+                        {day.getDate() === new Date().getDate() ? (
+                          <TitleBoxGreen>
+                            {dayjs(day).format("dddd, MMMM DD YYYY")}
+                          </TitleBoxGreen>
+                        ) : (
+                          <TitleBoxBlue>
+                            {dayjs(day).format("dddd, MMMM DD YYYY")}
+                          </TitleBoxBlue>
                         )}
-                    </React.Fragment>
+
+                        {shifts.map((shift) => (
+                          <ShiftCard key={shift.id} shift={shift} />
+                        ))}
+                      </div>
+                    ))
                   ) : (
                     <React.Fragment>
                       {/* 📅 Next Week */}
@@ -216,8 +202,8 @@ function MyShifts() {
               )}
             </div>
           </div>
-        </Layout.Content>
-      </Spin>
+        </Spin>
+      </Layout.Content>
     </Layout>
   );
 }
