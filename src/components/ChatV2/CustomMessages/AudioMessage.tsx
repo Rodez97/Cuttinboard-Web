@@ -5,8 +5,6 @@ import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/src/styles.scss";
 import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps";
 import FileMessage from "components/ChatV2/CustomMessages/FileMessage";
-import Linkify from "linkify-react";
-import { Space, Typography } from "antd";
 
 function AudioMessage({ message }: BaseMediaProps) {
   const audio = useRef<AudioPlayer>(null);
@@ -35,42 +33,19 @@ function AudioMessage({ message }: BaseMediaProps) {
   };
 
   return (
-    <Space direction="vertical">
-      <div css={{ width: 300 }}>
-        <AudioPlayer
-          ref={audio}
-          autoPlay={false}
-          autoPlayAfterSrcChange={false}
-          customAdditionalControls={[]}
-          src={getSrc()}
-          // other props here
-          css={{
-            borderRadius: 5,
-          }}
-        />
-      </div>
-      {message && (
-        <Typography.Paragraph
-          css={{
-            color: "inherit",
-            whiteSpace: "pre-line",
-            wordBreak: "break-word",
-            fontSize: 14,
-            marginBottom: "0px !important",
-          }}
-        >
-          <Linkify
-            options={{
-              target: "_blank",
-              rel: "noreferrer noopener",
-              className: "linkifyInnerStyle",
-            }}
-          >
-            {message.message}
-          </Linkify>
-        </Typography.Paragraph>
-      )}
-    </Space>
+    <div css={{ width: 300 }}>
+      <AudioPlayer
+        ref={audio}
+        autoPlay={false}
+        autoPlayAfterSrcChange={false}
+        customAdditionalControls={[]}
+        src={getSrc()}
+        // other props here
+        css={{
+          borderRadius: 5,
+        }}
+      />
+    </div>
   );
 }
 

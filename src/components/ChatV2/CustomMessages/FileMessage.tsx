@@ -1,9 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps";
-import Linkify from "linkify-react";
 import { getFileIconByType } from "../../../Modules/Files/FileTypeIcons";
-import { Avatar, List, Space, Typography } from "antd";
+import { Avatar, List } from "antd";
 import Icon, { FileFilled } from "@ant-design/icons";
 import mdiOpenInNew from "@mdi/svg/svg/open-in-new.svg";
 import styled from "@emotion/styled";
@@ -38,15 +37,9 @@ function FileMessage({ message }: BaseMediaProps) {
       return <Icon />;
     }
   };
-  const getText = () => {
-    if (message.type === "mediaUri") {
-      return null;
-    } else {
-      return message.attachment.fileName;
-    }
-  };
+
   return (
-    <Space direction="vertical" css={{ width: "100%" }}>
+    <div css={{ width: "100%" }}>
       <FileElementContainer
         extra={[
           <Icon
@@ -63,28 +56,7 @@ function FileMessage({ message }: BaseMediaProps) {
           }
         />
       </FileElementContainer>
-      {message && message.message !== "📁 File Message" && (
-        <Typography.Paragraph
-          css={{
-            color: "inherit",
-            whiteSpace: "pre-line",
-            wordBreak: "break-word",
-            fontSize: 14,
-            marginBottom: "0px !important",
-          }}
-        >
-          <Linkify
-            options={{
-              target: "_blank",
-              rel: "noreferrer noopener",
-              className: "linkifyInnerStyle",
-            }}
-          >
-            {getText()}
-          </Linkify>
-        </Typography.Paragraph>
-      )}
-    </Space>
+    </div>
   );
 }
 
