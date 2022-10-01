@@ -10,8 +10,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { EmptyMainModule } from "../../Modules/Notes/EmptyMainModule";
 import dmImage from "../../assets/images/encrypted-data.png";
 import { useTranslation } from "react-i18next";
+import NewDMByEmployee from "./NewDMByEmployee";
 import NewDM from "./NewDM";
-import NewDMByEmail from "./NewDMByEmail";
 import { useState } from "react";
 
 const DM = ({ locationId }: { locationId?: string }) => {
@@ -52,12 +52,7 @@ const DM = ({ locationId }: { locationId?: string }) => {
                 }
               />
               <Route path=":boardId/*" element={<DMRoutes />} />
-              <Route
-                path="new"
-                element={
-                  locationId && filterByLocation ? <NewDM /> : <NewDMByEmail />
-                }
-              />
+              <Route path="new" element={<NewDM />} />
               <Route path="*" element={<Navigate to="/chats" />} />
             </Route>
           </Routes>
