@@ -3,7 +3,7 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { LocationConverter } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import { Divider, Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
@@ -22,7 +22,7 @@ function SupervisorLocations() {
     query(
       collection(Firestore, "Locations"),
       where("supervisors", "array-contains", Auth.currentUser.uid)
-    ).withConverter(LocationConverter)
+    ).withConverter(Location.Converter)
   );
 
   const groupedByOrganizations = useMemo(

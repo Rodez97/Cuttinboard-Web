@@ -25,10 +25,10 @@ function Utensils() {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const manageUtensilDialogRef = useRef<IManageUtensilDialogRef>(null);
-  const { locationDocRef } = useLocation();
+  const { location } = useLocation();
 
   const [utensils, loading] = useCollectionData<Utensil>(
-    collection(Firestore, locationDocRef.path, "utensils").withConverter(
+    collection(Firestore, location.docRef.path, "utensils").withConverter(
       UtensilConverter
     )
   );

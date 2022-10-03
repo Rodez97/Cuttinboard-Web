@@ -23,7 +23,7 @@ interface ManageModuleProps {
 
 const ManageModule = ({ title, edit }: ManageModuleProps) => {
   const { newElement, editElement, selectedApp } = useCuttinboardModule();
-  const { locationId } = useLocation();
+  const { location } = useLocation();
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
 
@@ -36,7 +36,7 @@ const ManageModule = ({ title, edit }: ManageModuleProps) => {
       ...newModuleData,
       createdAt: serverTimestamp(),
       createdBy: Auth.currentUser.uid,
-      locationId,
+      locationId: location.id,
     };
 
     if (newModuleData.privacyLevel === PrivacyLevel.POSITIONS) {

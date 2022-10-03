@@ -41,7 +41,7 @@ import {
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { recordError } from "../../utils/utils";
+import { getAvatarByUID, recordError } from "../../utils/utils";
 import LocationsPicker from "./LocationsPicker";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
 
@@ -201,11 +201,11 @@ function SupervisorDetails({
                   gap: "8px",
                 }}
               >
-                {getSupervisor?.avatar ? (
-                  <Avatar src={getSupervisor?.avatar} size={80} />
-                ) : (
-                  <Avatar icon={<UserOutlined />} size={80} />
-                )}
+                <Avatar
+                  src={getAvatarByUID(getSupervisor.id)}
+                  icon={<UserOutlined />}
+                  size={80}
+                />
                 <Typography.Title
                   level={3}
                 >{`${getSupervisor.name} ${getSupervisor.lastName}`}</Typography.Title>

@@ -22,7 +22,7 @@ function TasksList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { selectedApp, elements } = useCuttinboardModule();
-  const { locationAccessKey, locationId } = useLocation();
+  const { locationAccessKey, location } = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const { getModuleBadge } = useNotificationsBadges();
 
@@ -56,7 +56,7 @@ function TasksList() {
     >
       <DarkPageHeader
         title={t("Tasks")}
-        onBack={() => navigate(`/location/${locationId}/apps`)}
+        onBack={() => navigate(`/location/${location.id}/apps`)}
         css={{ paddingBottom: 0, paddingTop: 0 }}
       />
       {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (

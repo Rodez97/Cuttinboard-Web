@@ -2,10 +2,8 @@ import {
   Employee,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import dayjs from "dayjs";
 import React from "react";
-import { useScheduler } from "./Scheduler";
 import ShiftElement from "./ShiftElement";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -24,15 +22,7 @@ interface ShiftCellProps {
 }
 
 function ShiftCell({ employee, shifts, date, onNewShift }: ShiftCellProps) {
-  const { isPublished } = useSchedule();
-
   const handleCellClick = () => {
-    if (
-      dayjs(date).isBefore(dayjs(dayjs().startOf("isoWeek"))) ||
-      isPublished
-    ) {
-      return;
-    }
     onNewShift(employee, date);
   };
 

@@ -29,7 +29,7 @@ interface EmployeeCardProps {
 function EmployeeCard({ employee }: EmployeeCardProps) {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
-  const { locationId, locationAccessKey } = useLocation();
+  const { location, locationAccessKey } = useLocation();
   const { removeEmployee } = useEmployeesManager();
   const navigate = useNavigate();
 
@@ -51,10 +51,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
   };
 
   const compareRoles = useMemo(() => {
-    return CompareRoles(
-      locationAccessKey.role,
-      employee.role === "employee" ? employee?.locations?.[locationId].role : 0
-    );
+    return CompareRoles(locationAccessKey.role, employee.locationRole);
   }, [locationAccessKey, employee]);
 
   const openManageDialog = () => navigate(employee.id);
@@ -100,19 +97,19 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
         />
       </List.Item>
 
-      {employee.role === "employee" && employee.locations[locationId].pos && (
+      {employee.role === "employee" && employee.positions && (
         <Space wrap>
-          {employee.locations[locationId].pos?.map((pos) => (
+          {employee.positions.map((pos) => (
             <Tag
               key={pos}
               color="processing"
               icon={
-                employee.locations[locationId]?.mainPosition === pos ? (
+                employee.mainPosition === pos ? (
                   <StarFilled style={{ color: Colors.Yellow.Main }} />
                 ) : null
               }
             >
-              {t(pos)}
+              {pos}
             </Tag>
           ))}
         </Space>

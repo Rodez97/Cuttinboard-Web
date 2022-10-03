@@ -42,8 +42,8 @@ import {
 import moment from "moment";
 import TextArea from "antd/lib/input/TextArea";
 import {
+  ExclamationCircleOutlined,
   MinusCircleOutlined,
-  PlusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
@@ -73,7 +73,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const timeRange = Form.useWatch("timeRange", form);
   const [baseShift, setBaseShift] = useState<Shift>(null);
   const [saving, setSaving] = useState(false);
-  const { locationId } = useLocation();
+  const { location } = useLocation();
   const { createShift, weekId, weekDays } = useSchedule();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -88,12 +88,9 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
 
   const openNew = (employee: Employee, date: Date) => {
     const weekDay = dayjs(date).isoWeekday();
-    console.log(date.toString(), weekDay);
     const position =
       employee.role === "employee"
-        ? employee.locations[locationId]?.mainPosition ??
-          (employee.locations[locationId] &&
-            orderBy(employee.locations[locationId]?.pos)[0])
+        ? employee.mainPosition ?? employee.positions[0]
         : null;
     setIsNewShift(true);
     setEmployee(employee);
@@ -111,15 +108,16 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     setIsNewShift(false);
     setEmployee(employee);
     setBaseShift(shift);
+    const shiftData = shift.hasPendingUpdates ? shift.pendingUpdate : shift;
     form.setFieldsValue({
-      applyTo: [getShiftDate(shift.start).isoWeekday()],
-      notes: shift.notes ?? "",
-      position: shift.position ?? "",
-      repeat: Boolean(shift.altId === "repeat"),
-      tasks: Object.values(shift.tasks ?? {}).map((tsk) => tsk.name),
+      applyTo: [getShiftDate(shiftData.start).isoWeekday()],
+      notes: shiftData.notes ?? "",
+      position: shiftData.position ?? "",
+      repeat: Boolean(shiftData.altId === "repeat"),
+      tasks: Object.values(shiftData.tasks ?? {}).map((tsk) => tsk.name),
       timeRange: [
-        moment(getShiftDate(shift.start).toDate()),
-        moment(getShiftDate(shift.end).toDate()),
+        moment(getShiftDate(shiftData.start).toDate()),
+        moment(getShiftDate(shiftData.end).toDate()),
       ],
     });
     setOpen(true);
@@ -133,7 +131,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const onFinish = async (values: FormDataType) => {
     const { applyTo, notes, position, repeat, tasks, timeRange } = values;
 
-    const shiftToSave: IShift = {
+    const shiftToSave: Partial<IShift> = {
       start: getShiftString(timeRange[0].toDate()),
       end: getShiftString(timeRange[1].toDate()),
       notes,
@@ -199,12 +197,26 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   }, [timeRange]);
 
   const getHourlyWage = useCallback(
-    (pos: string = position) =>
-      employee.role === "employee"
-        ? employee.locations[locationId]?.wagePerPosition?.[pos] ?? 0
-        : 0,
-    [employee, locationId, position]
+    (pos: string = position) => employee.getHourlyWage(pos),
+    [employee, location.id, position]
   );
+
+  const cancelPendingUpdate = async () => {
+    Modal.confirm({
+      title: t("Are you sure to cancel this update?"),
+      content: t("The shift will be restored to the previous state"),
+      icon: <ExclamationCircleOutlined />,
+      async onOk() {
+        try {
+          await baseShift.cancelUpdate();
+          handleClose();
+        } catch (error) {
+          recordError(error);
+        }
+      },
+      onCancel() {},
+    });
+  };
 
   if (!form) {
     return null;
@@ -231,6 +243,17 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           </>
         }
         footer={[
+          baseShift?.pendingUpdate && (
+            <Button
+              key="reset"
+              danger
+              type="dashed"
+              disabled={saving}
+              onClick={cancelPendingUpdate}
+            >
+              {t("Cancel Update")}
+            </Button>
+          ),
           <Button key="back" onClick={handleClose} disabled={saving}>
             {t("Cancel")}
           </Button>,
@@ -290,10 +313,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
             <Form.Item name="position">
               <Select placeholder={t("Select Position")}>
                 <Select.Option value="">{t("No Position")}</Select.Option>
-                {employee?.locations?.[locationId].pos?.map((position) => {
-                  const isMainPos =
-                    employee?.role === "employee" &&
-                    employee?.locations?.[locationId].mainPosition === position;
+                {employee.positions.map((position) => {
+                  const isMainPos = employee.mainPosition === position;
                   return (
                     <Select.Option
                       key={position}

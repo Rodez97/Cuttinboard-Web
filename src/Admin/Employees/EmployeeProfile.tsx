@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { UserOutlined } from "@ant-design/icons";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Layout, PageHeader, Tabs } from "antd";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import EmployeeContactPanel from "./EmployeeContactPanel";
@@ -13,18 +13,19 @@ import {
   useEmployeesList,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { getAvatarByUID } from "utils/utils";
 
 function EmployeeProfile() {
   const { getEmployees } = useEmployeesList();
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { locationId } = useLocation();
-  const [employee, setEmployee] = useState(null);
+  const { location } = useLocation();
 
-  useLayoutEffect(() => {
-    setEmployee(getEmployees.find((e) => e.id === id));
-  }, [getEmployees, id]);
+  const employee = useMemo(
+    () => getEmployees.find((e) => e.id === id),
+    [getEmployees, id]
+  );
 
   if (!employee) {
     return null;
@@ -34,12 +35,12 @@ function EmployeeProfile() {
     <Layout>
       <PageHeader
         className="site-page-header-responsive"
-        onBack={() => navigate(`/location/${locationId}/apps/employees`)}
-        title={`${employee.name} ${employee.lastName}`}
+        onBack={() => navigate(`/location/${location.id}/apps/employees`)}
+        title={employee.fullName}
         avatar={{
-          src: employee.avatar,
+          src: getAvatarByUID(employee.id),
           icon: <UserOutlined />,
-          alt: employee.name,
+          alt: employee.fullName,
         }}
       />
       <Layout.Content
@@ -54,13 +55,7 @@ function EmployeeProfile() {
           <Tabs.TabPane tab={t("Information")} key={0}>
             <React.Fragment>
               <EmployeeContactPanel employee={employee} />
-              <EmployeeRolePanel
-                employee={
-                  { ...employee, role: "employee" } as Employee & {
-                    role: "employee";
-                  }
-                }
-              />
+              <EmployeeRolePanel employee={employee} />
             </React.Fragment>
           </Tabs.TabPane>
           <Tabs.TabPane tab={t("Documents")} key={1}>

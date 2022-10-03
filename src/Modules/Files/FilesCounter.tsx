@@ -5,7 +5,7 @@ import { Progress, Space, Typography } from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function FilesCounter() {
-  const { usage } = useLocation();
+  const { location } = useLocation();
 
   return (
     <Space
@@ -20,15 +20,17 @@ function FilesCounter() {
       }}
     >
       <Progress
-        percent={(usage?.storageUsed / usage.storageLimit) * 100}
+        percent={
+          (location.usage.storageUsed / location.usage.storageLimit) * 100
+        }
         showInfo={false}
       />
       <Space style={{ display: "flex", justifyContent: "space-between" }}>
         <Typography.Text style={{ fontSize: "14px", color: "#fff" }}>
-          {fileSize(usage?.storageUsed)}
+          {fileSize(location.usage.storageUsed)}
         </Typography.Text>
         <Typography.Text style={{ fontSize: "14px", color: "#fff" }}>
-          {fileSize(usage.storageLimit)}
+          {fileSize(location.usage.storageLimit)}
         </Typography.Text>
       </Space>
     </Space>

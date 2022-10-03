@@ -3,23 +3,11 @@ import { jsx } from "@emotion/react";
 import {
   Positions,
   PrivacyLevel,
+  useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  Button,
-  Col,
-  Form,
-  Input,
-  Layout,
-  PageHeader,
-  Radio,
-  Row,
-  Select,
-  Space,
-  Spin,
-} from "antd";
+import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
-import { matchSorter } from "match-sorter";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
@@ -53,9 +41,9 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<FormType>();
   const privacyLevel = Form.useWatch("privacyLevel", form);
-  const [result, setResult] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { location } = useLocation();
 
   const close = () => {
     navigate(-1);
@@ -76,20 +64,6 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
     }
   };
 
-  const handleSearch = (value: string) => {
-    let res: string[] = [];
-    if (!value) {
-      res = Positions;
-    } else {
-      const sortedPos = matchSorter(Positions, value);
-      if (sortedPos.length) {
-        res = sortedPos;
-      } else {
-        res = [value];
-      }
-    }
-    setResult(res);
-  };
   return (
     <Spin spinning={isSubmitting}>
       <GrayPageHeader onBack={() => navigate(-1)} title={title} />
@@ -166,13 +140,24 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
                   mode="tags"
                   style={{ width: "100%" }}
                   tokenSeparators={[","]}
-                  onSearch={handleSearch}
                 >
-                  {result.map((position: string) => (
-                    <Select.Option key={position} value={position}>
-                      {t(position)}
-                    </Select.Option>
-                  ))}
+                  {location.settings?.positions?.length && (
+                    <Select.OptGroup label={t("Custom")}>
+                      {location.settings.positions.map((pos) => (
+                        <Select.Option key={pos} value={pos}>
+                          {pos}
+                        </Select.Option>
+                      ))}
+                    </Select.OptGroup>
+                  )}
+
+                  <Select.OptGroup label={t("Default")}>
+                    {Positions.map((pos) => (
+                      <Select.Option key={pos} value={pos}>
+                        {pos}
+                      </Select.Option>
+                    ))}
+                  </Select.OptGroup>
                 </Select>
               </Form.Item>
             )}

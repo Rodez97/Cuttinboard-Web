@@ -30,10 +30,15 @@ import {
   Layout,
   List,
   Modal,
+  Select,
   Space,
   Tooltip,
 } from "antd";
-import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
+import {
+  ExclamationCircleOutlined,
+  TagOutlined,
+  UserAddOutlined,
+} from "@ant-design/icons";
 import Icon from "@ant-design/icons";
 import AccountGroupOutline from "@mdi/svg/svg/account-group-outline.svg";
 import { recordError } from "../../utils/utils";
@@ -43,6 +48,7 @@ import {
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { GrayPageHeader } from "components/PageHeaders";
+import ManagePositions from "./ManagePositions";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();
@@ -50,8 +56,8 @@ function Employees() {
   const [searchText, setSearchText] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
   const { user } = useCuttinboard();
-  const { isOwner, usage, locationId, isAdmin, location } = useLocation();
-  const [result, setResult] = useState<string[]>([]);
+  const [managePositionsOpen, setManagePositionsOpen] = useState(false);
+  const { isOwner, isAdmin, location } = useLocation();
   const { addPrimaryOwnerAsGeneralManager, removePrimaryOwnerAsEmployee } =
     useEmployeesManager();
   const navigate = useNavigate();
@@ -81,7 +87,7 @@ function Employees() {
         keys:
           role === RoleAccessLevels.OWNER || role === RoleAccessLevels.ADMIN
             ? [`role`]
-            : [`locations.${locationId}.role`],
+            : [`locations.${location.id}.role`],
       });
       const byName = searchText
         ? matchSorter(byRole, searchText, {
@@ -91,27 +97,12 @@ function Employees() {
 
       return selectedTag
         ? matchSorter(byName, selectedTag, {
-            keys: [`locations.${locationId}.pos`],
+            keys: [`locations.${location.id}.pos`],
           })
         : byName;
     },
     [searchText, selectedTag, getEmployees]
   );
-
-  const handleSearch = (value: string) => {
-    let res: string[] = [];
-    if (!value) {
-      res = [];
-    } else {
-      const sortedPos = matchSorter(Positions, value);
-      if (sortedPos.length) {
-        res = sortedPos;
-      } else {
-        res = [value];
-      }
-    }
-    setResult(res);
-  };
 
   const joinSupervisor = async () => {
     try {
@@ -123,7 +114,7 @@ function Employees() {
           "employees",
           Auth.currentUser.uid
         ),
-        { locations: { [locationId]: true } },
+        { locations: { [location.id]: true } },
         { merge: true }
       );
     } catch (error) {
@@ -145,7 +136,7 @@ function Employees() {
               "employees",
               Auth.currentUser.uid
             ),
-            { locations: { [locationId]: deleteField() } },
+            { locations: { [location.id]: deleteField() } },
             { merge: true }
           );
         } catch (error) {
@@ -162,12 +153,20 @@ function Employees() {
         onBack={() => navigate(`/location/${location.id}/apps`)}
         avatar={{ icon: <Icon component={AccountGroupOutline} /> }}
         title={t("Employees")}
-        subTitle={`${usage.employeesCount} / ${usage.employeesLimit}`}
+        subTitle={`${location.usage.employeesCount} / ${location.usage.employeesLimit}`}
         extra={[
+          <Button
+            key="ManagePositions"
+            icon={<TagOutlined />}
+            onClick={() => setManagePositionsOpen(true)}
+            type="primary"
+          >
+            {t("Manage Positions")}
+          </Button>,
           <Tooltip
             key="1"
             title={
-              usage.employeesCount === usage.employeesLimit &&
+              location.usage.employeesCount === location.usage.employeesLimit &&
               t("Limit Reached")
             }
           >
@@ -175,7 +174,9 @@ function Employees() {
               icon={<UserAddOutlined />}
               onClick={() => navigate(`create`)}
               type="primary"
-              disabled={usage.employeesCount === usage.employeesLimit}
+              disabled={
+                location.usage.employeesCount === location.usage.employeesLimit
+              }
             >
               {t("Add Employee")}
             </Button>
@@ -191,18 +192,27 @@ function Employees() {
             value={searchText}
             css={{ width: 200 }}
           />
-          <AutoComplete
-            css={{ width: 200 }}
-            onSearch={handleSearch}
-            placeholder={t("Filter by position")}
+
+          <Select
+            showSearch
+            style={{ width: 200 }}
             onSelect={setSelectedTag}
+            placeholder={t("Filter by position")}
           >
-            {result.map((position: string) => (
-              <AutoComplete.Option key={position} value={position}>
-                {position}
-              </AutoComplete.Option>
-            ))}
-          </AutoComplete>
+            {location.settings?.positions?.length && (
+              <Select.OptGroup label={t("Custom")}>
+                {location.settings.positions.map((pos) => (
+                  <Select.Option value={pos}>{pos}</Select.Option>
+                ))}
+              </Select.OptGroup>
+            )}
+
+            <Select.OptGroup label={t("Default")}>
+              {Positions.map((pos) => (
+                <Select.Option value={pos}>{pos}</Select.Option>
+              ))}
+            </Select.OptGroup>
+          </Select>
         </Space>
         <div
           css={{
@@ -290,6 +300,10 @@ function Employees() {
           </List>
         </div>
       </div>
+      <ManagePositions
+        open={managePositionsOpen}
+        onClose={() => setManagePositionsOpen(false)}
+      />
     </Layout>
   );
 }

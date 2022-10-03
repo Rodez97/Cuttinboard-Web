@@ -39,12 +39,15 @@ import ShiftCell from "./ShiftCell";
 import {
   AutoComplete,
   Button,
+  Descriptions,
   Input,
   Layout,
   message,
   Modal,
+  Select,
   Space,
   Tag,
+  Typography,
 } from "antd";
 import TableFooter from "./TableFooter";
 import PageLoading from "../../components/PageLoading";
@@ -86,12 +89,13 @@ function Scheduler() {
     shiftsCollection,
     shiftsCollectionLoading,
     isPublished,
-    togglePublish,
+    publish,
     searchQuery,
     setSearchQuery,
     selectedTag,
     setSelectedTag,
     weekDays,
+    updatesCount,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
@@ -100,7 +104,7 @@ function Scheduler() {
   const { t } = useTranslation();
   const [rosterMode, setRosterMode] = useState(false);
   const { getEmployees } = useEmployeesList();
-  const { locationId } = useLocation();
+  const { location } = useLocation();
 
   const handleBack = () => {
     navigate(-1);
@@ -112,37 +116,65 @@ function Scheduler() {
     });
     return selectedTag
       ? matchSorter(byName, selectedTag ?? "", {
-          keys: [`locations.${locationId}.pos`],
+          keys: [`locations.${location.id}.pos`],
         })
       : byName;
   }, [searchQuery, selectedTag, getEmployees]);
 
   const togglePublishSchedule = async () => {
-    if (isPublished) {
-      Modal.confirm({
-        title: t(
-          "The entire schedule will be unpublished and team members won't be able to see it until it is republished. Proceed?"
-        ),
-        icon: <ExclamationCircleOutlined />,
+    let notifiTo: "all" | "all_scheduled" | "changed" | "none";
+    Modal.confirm({
+      title: t("Publish schedule changes"),
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <Space direction="vertical" css={{ display: "flex" }}>
+          <Descriptions bordered column={1} size="small">
+            <Descriptions.Item label={t("New or Draft:")}>
+              {updatesCount.newOrDraft}
+            </Descriptions.Item>
 
-        async onOk() {
-          try {
-            await togglePublish();
-            message.warn(t("Schedule unpublished"));
-          } catch (error) {
-            recordError(error);
-          }
-        },
-        onCancel() {},
-      });
-    } else {
-      try {
-        await togglePublish();
-        message.success(t("Schedule published"));
-      } catch (error) {
-        recordError(error);
-      }
-    }
+            <Descriptions.Item label={t("Shift Updates:")}>
+              {updatesCount.pendingUpdates}
+            </Descriptions.Item>
+
+            <Descriptions.Item label={t("Deleted Shifts:")}>
+              {updatesCount.deleted}
+            </Descriptions.Item>
+
+            <Descriptions.Item label={t("Total Changes:")}>
+              {updatesCount.total}
+            </Descriptions.Item>
+          </Descriptions>
+
+          <Typography.Title level={5}>{t("Notify to:")}</Typography.Title>
+
+          <Select
+            onChange={(e: "all" | "all_scheduled" | "changed" | "none") => {
+              notifiTo = e;
+            }}
+            value={notifiTo}
+            defaultValue="changed"
+            css={{ width: "100%" }}
+          >
+            <Select.Option value="all">{t("All")}</Select.Option>
+            <Select.Option value="all_scheduled">
+              {t("all_scheduled")}
+            </Select.Option>
+            <Select.Option value="changed">{t("changed")}</Select.Option>
+            <Select.Option value="none">{t("None")}</Select.Option>
+          </Select>
+        </Space>
+      ),
+      async onOk() {
+        try {
+          await publish(notifiTo ?? "changed");
+          message.success(t("Changes Published"));
+        } catch (error) {
+          recordError(error);
+        }
+      },
+      onCancel() {},
+    });
   };
 
   const newShift = useCallback(
@@ -240,18 +272,13 @@ function Scheduler() {
               onClick={togglePublishSchedule}
               type="primary"
               danger={isPublished}
+              disabled={
+                updatesCount.total === 0 ||
+                dayjs(weekDays[0]).isoWeek() > dayjs().add(1, "week").isoWeek()
+              }
             >
-              {t(isPublished ? "Edit" : "Publish")}
+              {`${t("Publish")} (${updatesCount.total})`}
             </Button>,
-          ]}
-          tags={[
-            <Tag
-              key="publishStatus"
-              color={isPublished ? "success" : "warning"}
-              icon={isPublished ? <CheckCircleOutlined /> : <EditOutlined />}
-            >
-              {t(isPublished ? "Published" : "Unpublished")}
-            </Tag>,
           ]}
         />
 

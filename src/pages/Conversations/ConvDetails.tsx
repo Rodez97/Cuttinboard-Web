@@ -36,8 +36,7 @@ function ConvDetails() {
   const { t } = useTranslation();
   const { selectedChat, deleteConversation } = useConversations();
   const { locationAccessKey } = useLocation();
-  const { getUniqAllEmployees, getOrgEmployees, getEmployees } =
-    useEmployeesList();
+  const { getEmployees } = useEmployeesList();
 
   const deleteConv = useCallback(async () => {
     try {
@@ -51,8 +50,8 @@ function ConvDetails() {
     if (!selectedChat.hostId) {
       return null;
     }
-    return getUniqAllEmployees().find((e) => e.id === selectedChat.hostId);
-  }, [getOrgEmployees, getEmployees, selectedChat]);
+    return getEmployees.find((e) => e.id === selectedChat.hostId);
+  }, [getEmployees, selectedChat]);
 
   return (
     <div>

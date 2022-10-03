@@ -44,7 +44,7 @@ function ManageMembers({
   members,
 }: ManageMembersProps) {
   const { t } = useTranslation();
-  const { locationAccessKey, locationId } = useLocation();
+  const { locationAccessKey, location } = useLocation();
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
 
@@ -79,11 +79,7 @@ function ManageMembers({
       membersList = getEmployees;
     }
     if (privacyLevel === PrivacyLevel.POSITIONS) {
-      membersList = getEmployees.filter(
-        (emp) =>
-          emp?.role === "employee" &&
-          emp?.locations?.[locationId]?.pos?.some((p) => positions?.includes(p))
-      );
+      membersList = getEmployees.filter((emp) => emp.hasAnyPosition(positions));
     }
     return membersList.filter((m) => m.id !== hostId);
   }, [getEmployees, privacyLevel, members, positions, hostId]);

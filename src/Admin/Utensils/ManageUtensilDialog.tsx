@@ -26,7 +26,7 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
     const [form] = Form.useForm<Utensil>();
     const [saving, setSaving] = useState(false);
     const { user } = useCuttinboard();
-    const { locationDocRef } = useLocation();
+    const { location } = useLocation();
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
@@ -63,7 +63,7 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
             createdAt: serverTimestamp(),
             createdBy: user.uid,
           };
-          const dbRef = collection(Firestore, locationDocRef.path, "utensils");
+          const dbRef = collection(Firestore, location.docRef.path, "utensils");
           await addDoc(dbRef, newAppObject);
         }
       } catch (error) {

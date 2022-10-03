@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { deleteDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { capitalize } from "lodash";
+import { capitalize, isEmpty } from "lodash";
 import { useScheduler } from "./Scheduler";
 import ReadonlyShiftDialog from "./ReadonlyShiftDialog";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Avatar, Button, List, Modal } from "antd";
-import {
+import Icon, {
   DeleteFilled,
   ExclamationCircleOutlined,
   PlusCircleFilled,
@@ -26,6 +26,8 @@ import {
 } from "@ant-design/icons";
 import styled from "@emotion/styled";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import mdiDeleteRestore from "@mdi/svg/svg/delete-restore.svg";
+import { recordError } from "utils/utils";
 
 const HoverListItem = styled(List.Item)`
   cursor: pointer;
@@ -52,21 +54,13 @@ function CellItemDialog({
   const { isPublished } = useSchedule();
   const { editShift, newShift } = useScheduler();
   const { t } = useTranslation();
-  const [selectedShiftIndex, setSelectedShiftIndex] = useState(-1);
   const { locationAccessKey } = useLocation();
-  const [readonlyShiftDialogOpen, setReadonlyShiftDialogOpen] = useState(false);
 
   const handleShiftClick =
-    (shift: Shift, index: number) =>
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    (shift: Shift) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();
       onClose();
-      if (isPublished) {
-        setSelectedShiftIndex(index);
-        setReadonlyShiftDialogOpen(true);
-      } else {
-        editShift(employee, shift);
-      }
+      editShift(employee, shift);
     };
 
   const handleOnClose = () => {
@@ -78,25 +72,59 @@ function CellItemDialog({
     newShift(employee, column);
   };
 
-  const showPromiseConfirm = (shift: Shift) => {
+  const showPromiseConfirm = (
+    shift: Shift,
+    e: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
     Modal.confirm({
       title: t("Are you sure to delete this shift?"),
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
-          return await new Promise<void>(async (resolve) => {
-            if (locationAccessKey.role <= RoleAccessLevels.MANAGER) {
-              await deleteDoc(shift.docRef);
-            }
-            resolve();
-            onClose();
-          });
+          if (locationAccessKey.role <= RoleAccessLevels.MANAGER) {
+            await shift.delete();
+          }
         } catch {
           return console.log("Oops errors!");
         }
       },
       onCancel() {},
     });
+  };
+
+  const restoreShift = async (
+    shift: Shift,
+    e: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+    try {
+      await shift.restore();
+    } catch (err) {
+      recordError(err);
+    }
+  };
+
+  const getShiftData = (shift: Shift = shifts[0]) => {
+    let time = "";
+    let shiftPosition = "";
+    if (shift.hasPendingUpdates) {
+      const { start, end, position } = shift.pendingUpdate;
+      time = `${getShiftDate(start)
+        .format("h:mma")
+        .replace("m", "")} - ${getShiftDate(end)
+        .format("h:mma")
+        .replace("m", "")}`;
+      shiftPosition = position;
+    } else {
+      time = `${shift.getStartDayjsDate
+        .format("h:mma")
+        .replace("m", "")} - ${shift.getEndDayjsDate
+        .format("h:mma")
+        .replace("m", "")}`;
+      shiftPosition = shift.position;
+    }
+    return { time, shiftPosition };
   };
 
   return (
@@ -116,28 +144,28 @@ function CellItemDialog({
           split
           renderItem={(shift, index) => (
             <HoverListItem
-              key={shift[0]}
-              actions={
-                isPublished
-                  ? []
-                  : [
-                      <Button
-                        icon={<DeleteFilled />}
-                        danger
-                        onClick={() => showPromiseConfirm(shift)}
-                      />,
-                    ]
+              key={index}
+              extra={
+                shift.deleting ? (
+                  <Button
+                    icon={<Icon component={mdiDeleteRestore} />}
+                    type="primary"
+                    onClick={(e) => restoreShift(shift, e)}
+                  />
+                ) : (
+                  <Button
+                    icon={<DeleteFilled />}
+                    danger
+                    onClick={(e) => showPromiseConfirm(shift, e)}
+                  />
+                )
               }
-              onClick={handleShiftClick(shift, index)}
+              onClick={handleShiftClick(shift)}
             >
               <List.Item.Meta
                 avatar={<Avatar icon={<ScheduleFilled />} />}
-                title={`${getShiftDate(shift.start)
-                  .format("h:mma")
-                  .replace("m", "")} - ${getShiftDate(shift.end)
-                  .format("h:mma")
-                  .replace("m", "")}`}
-                description={shift.position}
+                title={getShiftData(shift).time}
+                description={getShiftData(shift).shiftPosition}
               />
             </HoverListItem>
           )}
@@ -155,13 +183,13 @@ function CellItemDialog({
           </Button>
         )}
       </Modal>
-      {shifts[selectedShiftIndex] && (
+      {/* {shifts[selectedShiftIndex] && (
         <ReadonlyShiftDialog
           open={readonlyShiftDialogOpen}
           shift={shifts[selectedShiftIndex]}
           onClose={() => setReadonlyShiftDialogOpen(false)}
         />
-      )}
+      )} */}
     </React.Fragment>
   );
 }

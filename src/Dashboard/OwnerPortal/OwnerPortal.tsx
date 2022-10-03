@@ -3,10 +3,7 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  Location,
-  LocationConverter,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import { Layout } from "antd";
 import { collection, query, where } from "firebase/firestore";
@@ -34,7 +31,7 @@ function OwnerPortal() {
     query(
       collection(Firestore, "Locations"),
       where("organizationId", "==", Auth.currentUser.uid)
-    ).withConverter(LocationConverter)
+    ).withConverter(Location.Converter)
   );
 
   if (loading) {

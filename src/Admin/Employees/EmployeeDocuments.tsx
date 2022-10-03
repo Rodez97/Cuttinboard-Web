@@ -41,7 +41,7 @@ const { Dragger } = Upload;
 
 function EmployeeDocuments({ employee }: { employee: Employee }) {
   const { t } = useTranslation();
-  const { locationId, location } = useLocation();
+  const { location } = useLocation();
   const { user } = useCuttinboard();
   const [files, setFiles] = useState<StorageReference[]>([]);
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
@@ -69,13 +69,13 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
   const handleSaveFile = async (file: File) => {
     const storageRef = ref(
       Storage,
-      `organizations/${location.organizationId}/employees/${employee.id}/location/${locationId}/${file.name}`
+      `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}/${file.name}`
     );
     try {
       const uploadRef = await uploadBytes(storageRef, file, {
         contentType: file.type,
         customMetadata: {
-          locationId,
+          locationId: location.id,
           employeeId: employee.id,
           uploadedBy: user.uid,
         },
@@ -115,7 +115,7 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
     setLoadingFiles(true);
     const storageRef = ref(
       Storage,
-      `organizations/${location.organizationId}/employees/${employee.id}/location/${locationId}`
+      `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}`
     );
     const result = await listAll(storageRef);
     setFiles(result.items);

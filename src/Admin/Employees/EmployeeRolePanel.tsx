@@ -12,7 +12,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
 import {
-  AutoComplete,
   Button,
   Card,
   Divider,
@@ -24,13 +23,13 @@ import {
   Space,
   Typography,
 } from "antd";
-import { matchSorter } from "match-sorter";
 import {
   EditFilled,
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
+import { compact } from "lodash";
 
 type EmployeeRoleData = {
   positions?: { position: string; wage: number }[];
@@ -39,35 +38,17 @@ type EmployeeRoleData = {
   employeeDataComments?: string;
 };
 
-function EmployeeRolePanel({
-  employee,
-}: {
-  employee: Employee & { role: "employee" };
-}) {
+function EmployeeRolePanel({ employee }: { employee: Employee }) {
   const { t } = useTranslation();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<EmployeeRoleData>();
+  const positions = Form.useWatch("positions", form);
   const [editing, setEditing] = useState(false);
-  const { getAviablePositions, locationId } = useLocation();
+  const { getAviablePositions, location } = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [options, setOptions] = useState<{ value: string; label: string }[]>(
-    []
-  );
 
   const cancelEditing = () => {
     setEditing(false);
     form.resetFields();
-  };
-
-  const onSearch = (searchText: string) => {
-    const newOptions = matchSorter(Positions, searchText).map((pos) => ({
-      label: t(pos),
-      value: pos,
-    }));
-    setOptions(
-      searchText && !Boolean(newOptions.length)
-        ? [{ label: t("Add {{0}}", { 0: searchText }), value: searchText }]
-        : newOptions
-    );
   };
 
   const onFinish = async ({ positions, ...values }: EmployeeRoleData) => {
@@ -85,7 +66,7 @@ function EmployeeRolePanel({
         employee.docRef,
         {
           locations: {
-            [locationId]: dataToAdd,
+            [location.id]: dataToAdd,
           },
         },
         { merge: true }
@@ -96,6 +77,15 @@ function EmployeeRolePanel({
     }
     setEditing(false);
     setIsSubmitting(false);
+  };
+
+  const getPositions = () => {
+    return employee.positions?.map((pos) => {
+      return {
+        position: pos,
+        wage: employee.getHourlyWage(pos),
+      };
+    });
   };
 
   return (
@@ -111,14 +101,10 @@ function EmployeeRolePanel({
         layout="vertical"
         form={form}
         initialValues={{
-          role: employee.locations[locationId].role,
-          positions:
-            Object.entries(
-              employee.locations[locationId].wagePerPosition ?? {}
-            ).map(([key, val]) => ({ position: key, wage: val ?? 0 })) ?? [],
-          employeeDataComments:
-            employee.locations[locationId].employeeDataComments,
-          mainPosition: employee.locations[locationId].mainPosition,
+          role: employee.locationRole,
+          positions: getPositions(),
+          employeeDataComments: employee.locationData?.employeeDataComments,
+          mainPosition: employee.locationData?.mainPosition,
         }}
         disabled={!editing || isSubmitting}
         onFinish={onFinish}
@@ -160,38 +146,58 @@ function EmployeeRolePanel({
           {(fields, { add, remove }) => (
             <React.Fragment>
               {fields.map(({ key, name, ...restField }) => (
-                <Space
+                <div
                   key={key}
-                  style={{ display: "flex", marginBottom: 8 }}
-                  align="baseline"
+                  css={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 1,
+                    marginBottom: 8,
+                  }}
                 >
                   <Form.Item
                     {...restField}
                     name={[name, "position"]}
                     rules={[{ required: true, message: "" }]}
+                    css={{ flex: 0.45 }}
                   >
-                    <AutoComplete
-                      options={options}
-                      onSearch={onSearch}
-                      style={{ width: 200 }}
-                      placeholder={t("Position")}
-                    />
+                    <Select showSearch placeholder={t("Position")}>
+                      {location.settings?.positions?.length && (
+                        <Select.OptGroup label={t("Custom")}>
+                          {location.settings.positions.map((pos) => (
+                            <Select.Option value={pos}>{pos}</Select.Option>
+                          ))}
+                        </Select.OptGroup>
+                      )}
+
+                      <Select.OptGroup label={t("Default")}>
+                        {Positions.map((pos) => (
+                          <Select.Option value={pos}>{pos}</Select.Option>
+                        ))}
+                      </Select.OptGroup>
+                    </Select>
                   </Form.Item>
-                  <Form.Item {...restField} name={[name, "wage"]}>
+                  <Form.Item
+                    {...restField}
+                    name={[name, "wage"]}
+                    css={{ flex: 0.45 }}
+                  >
                     <InputNumber
+                      css={{ width: "100%" }}
                       min={0}
                       placeholder={t("Hourly Wage")}
                       step={0.25}
                     />
                   </Form.Item>
                   <Button
+                    css={{ flex: 0.1 }}
                     type="text"
                     shape="circle"
                     onClick={() => remove(name)}
                     icon={<MinusCircleOutlined />}
                     disabled={!editing || isSubmitting}
                   />
-                </Space>
+                </div>
               ))}
               <Form.Item>
                 <Button
@@ -206,6 +212,22 @@ function EmployeeRolePanel({
             </React.Fragment>
           )}
         </Form.List>
+        {positions?.length > 0 && (
+          <Form.Item label={t("Main Position")} name="mainPosition">
+            <Select
+              options={compact(
+                positions?.map((pos) =>
+                  pos?.position
+                    ? {
+                        label: pos.position,
+                        value: pos.position,
+                      }
+                    : null
+                )
+              )}
+            />
+          </Form.Item>
+        )}
         <Form.Item label={t("Comments")} name="employeeDataComments">
           <Input.TextArea rows={2} maxLength={255} showCount />
         </Form.Item>

@@ -50,7 +50,7 @@ function FilesMain() {
   });
   const [pickFileOpen, setPickFileOpen] = useState(false);
   const { selectedApp, moduleContentRef, canManage } = useCuttinboardModule();
-  const { locationStorageRef } = useLocation();
+  const { location } = useLocation();
   const [drawerFiles, loading, drawerFilesError] =
     useCollectionData<Cuttinboard_File>(
       moduleContentRef &&
@@ -58,8 +58,8 @@ function FilesMain() {
     );
   const storagePathRef = useMemo(
     () =>
-      ref(Storage, `${locationStorageRef.fullPath}/storage/${selectedApp.id}`),
-    [locationStorageRef.fullPath, selectedApp.id]
+      ref(Storage, `${location.storageRef.fullPath}/storage/${selectedApp.id}`),
+    [location.storageRef.fullPath, selectedApp.id]
   );
 
   const pickFiles = () => setPickFileOpen(true);

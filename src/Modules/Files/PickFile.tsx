@@ -40,7 +40,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
   open,
 }) => {
   const { t } = useTranslation();
-  const { usage } = useLocation();
+  const { location } = useLocation();
   const { moduleContentRef } = useCuttinboardModule();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -86,9 +86,9 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
   const handleUpload = async () => {
     const total =
       fileList.reduce((acc, current) => acc + current.size, 0) +
-      usage.storageUsed;
+      location.usage.storageUsed;
 
-    if (total > usage.storageLimit) {
+    if (total > location.usage.storageLimit) {
       return message.warn(
         t("You don't have enough storage to upload this file")
       );

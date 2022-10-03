@@ -3,7 +3,7 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { LocationConverter } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import { Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
@@ -19,7 +19,7 @@ function MemberLocations() {
     query(
       collection(Firestore, "Locations"),
       where("members", "array-contains", Auth.currentUser.uid)
-    ).withConverter(LocationConverter)
+    ).withConverter(Location.Converter)
   );
 
   if (loading) {

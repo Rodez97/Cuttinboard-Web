@@ -44,7 +44,7 @@ dayjs.extend(customParseFormat);
 function MyShifts() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { locationDocRef } = useLocation();
+  const { location } = useLocation();
   const [currentWeekId, setCurrentWeekId] = useState(
     dayjs().format(WEEKFORMAT)
   );
@@ -53,23 +53,13 @@ function MyShifts() {
     () => currentWeekId === dayjs().format(WEEKFORMAT),
     [currentWeekId]
   );
-  const [scheduleDoc, loadingScheduleDoc, errorScheduleDoc] =
-    useDocumentData<ScheduleDoc>(
-      doc(
-        Firestore,
-        locationDocRef.path,
-        "scheduleDocs",
-        currentWeekId
-      ).withConverter(ScheduleDocConverter)
-    );
-
   const [shifts, loadingShifts, errorShifts] = useCollectionData<Shift>(
-    scheduleDoc?.isPublished &&
-      query(
-        collection(Firestore, locationDocRef.path, "shifts"),
-        where("altId", "in", [currentWeekId, "repeat"]),
-        where("employeeId", "==", Auth.currentUser.uid)
-      ).withConverter(Shift.Converter)
+    query(
+      collection(Firestore, location.docRef.path, "shifts"),
+      where("altId", "in", [currentWeekId, "repeat"]),
+      where("employeeId", "==", Auth.currentUser.uid),
+      where("status", "==", "published")
+    ).withConverter(Shift.Converter)
   );
 
   const weekDays = useMemo(() => {
@@ -115,14 +105,7 @@ function MyShifts() {
       <GrayPageHeader onBack={() => navigate(-1)} title={t("My Shifts")} />
 
       <Layout.Content>
-        <Spin
-          spinning={
-            loadingScheduleDoc ||
-            loadingShifts ||
-            loadingScheduleDoc === undefined ||
-            loadingShifts === undefined
-          }
-        >
+        <Spin spinning={loadingShifts || loadingShifts === undefined}>
           <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
             <div
               css={{
@@ -144,7 +127,7 @@ function MyShifts() {
                   },
                 ]}
               />
-              {scheduleDoc && shifts?.length ? (
+              {shifts?.length ? (
                 <Space
                   style={{ display: "flex", width: "100%" }}
                   direction="vertical"

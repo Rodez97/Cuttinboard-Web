@@ -19,7 +19,7 @@ function LocationSettings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { loadCredential, user } = useCuttinboard();
-  const { locationDocRef, location } = useLocation();
+  const { location } = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const deleteLocation = async () => {
@@ -33,7 +33,7 @@ function LocationSettings() {
       async onOk() {
         try {
           navigate("/dashboard");
-          await deleteDoc(locationDocRef);
+          await deleteDoc(location.docRef);
         } catch (error) {
           return recordError(error);
         }
@@ -52,7 +52,7 @@ function LocationSettings() {
   }: Partial<Location>) => {
     setIsSubmitting(true);
     try {
-      await updateDoc(locationDocRef, {
+      await updateDoc(location.docRef, {
         name,
         email,
         description,

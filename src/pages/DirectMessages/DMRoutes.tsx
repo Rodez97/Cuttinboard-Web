@@ -15,8 +15,7 @@ function DMRoutes() {
   const { boardId, locationId } = useParams();
   const { setChatId, selectedChat } = useDMs();
   const navigate = useNavigate();
-  const { getUniqAllEmployees, getOrgEmployees, getEmployees } =
-    locationId != null && useEmployeesList();
+  const { getEmployees } = locationId != null && useEmployeesList();
 
   useLayoutEffect(() => {
     setChatId(boardId);
@@ -29,13 +28,11 @@ function DMRoutes() {
     return {
       employee:
         locationId != null
-          ? getUniqAllEmployees().find(
-              (e) => e.id === selectedChat.recipient.id
-            )
+          ? getEmployees.find((e) => e.id === selectedChat.recipient.id)
           : undefined,
       userId: selectedChat.recipient.id,
     };
-  }, [selectedChat, getOrgEmployees, getEmployees, locationId]);
+  }, [selectedChat, getEmployees, locationId]);
 
   if (!selectedChat || !recipient) {
     return (

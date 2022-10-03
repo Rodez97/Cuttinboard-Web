@@ -27,7 +27,7 @@ function AssignUser({ onSelectedEmployee }: AssignUserProps) {
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const { t } = useTranslation();
-  const { locationId } = useLocation();
+  const { location } = useLocation();
   const { selectedApp } = useCuttinboardModule();
 
   const employees = useMemo(
@@ -35,11 +35,7 @@ function AssignUser({ onSelectedEmployee }: AssignUserProps) {
       selectedApp.privacyLevel === PrivacyLevel.PRIVATE
         ? getEmployees?.filter((e) => selectedApp.accessTags?.includes(e.id))
         : selectedApp.privacyLevel === PrivacyLevel.POSITIONS
-        ? getEmployees?.filter((e) =>
-            e.locations[locationId]?.pos?.some((p) =>
-              selectedApp.accessTags?.includes(p)
-            )
-          )
+        ? getEmployees?.filter((e) => e.hasAnyPosition(selectedApp.accessTags))
         : getEmployees,
     [getEmployees]
   );

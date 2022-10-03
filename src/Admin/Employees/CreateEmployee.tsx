@@ -1,13 +1,12 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { getRoleTextByNumber } from "./employee-utils";
 import { recordError } from "../../utils/utils";
 import {
   useEmployeesList,
-  useEmployeesManager,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
@@ -16,7 +15,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Alert,
-  AutoComplete,
   Button,
   Form,
   Input,
@@ -25,14 +23,12 @@ import {
   message,
   PageHeader,
   Select,
-  Space,
 } from "antd";
 import {
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { matchSorter } from "match-sorter";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
@@ -50,11 +46,9 @@ type EmployeeData = {
 function CreateEmployee() {
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
-  const { getAviablePositions, usage, locationId } = useLocation();
+  const { getAviablePositions, location } = useLocation();
   const { t } = useTranslation();
-  const [options, setOptions] = useState<{ value: string; label: string }[]>(
-    []
-  );
+
   const [addEmployee, submitting, error] = useHttpsCallable<
     {
       name: string;
@@ -72,24 +66,12 @@ function CreateEmployee() {
     }
   >(Functions, "http-employees-create");
 
-  const onSearch = (searchText: string) => {
-    const newOptions = matchSorter(Positions, searchText).map((pos) => ({
-      label: t(pos),
-      value: pos,
-    }));
-    setOptions(
-      searchText && !Boolean(newOptions.length)
-        ? [{ label: t("Add {{0}}", { 0: searchText }), value: searchText }]
-        : newOptions
-    );
-  };
-
   const onFinish = async ({ positions, ...values }: EmployeeData) => {
     if (getEmployees.some((e) => e.email === values.email)) {
       message.warning(t("Employee already exists"));
       return;
     }
-    if (usage.employeesCount >= usage.employeesLimit) {
+    if (location.usage.employeesCount >= location.usage.employeesLimit) {
       message.warning(t("Limit Reached"));
       return;
     }
@@ -106,7 +88,7 @@ function CreateEmployee() {
 
       const {
         data: { status, employeeId },
-      } = await addEmployee({ ...employeeToAdd, locationId });
+      } = await addEmployee({ ...employeeToAdd, locationId: location.id });
 
       if (status === "CANT_ADD_ORG_EMP") {
         message.error(t("The employee is already member of the organization"));
@@ -124,7 +106,7 @@ function CreateEmployee() {
       if (["ADDED", "ALREADY_MEMBER"].includes(status)) {
         message.success(t("Changes saved"));
       }
-      navigate(`/location/${locationId}/apps/employees/${employeeId}`);
+      navigate(`/location/${location.id}/apps/employees/${employeeId}`);
     } catch (error) {
       recordError(error);
     }
@@ -209,24 +191,42 @@ function CreateEmployee() {
           {(fields, { add, remove }) => (
             <React.Fragment>
               {fields.map(({ key, name, ...restField }) => (
-                <Space
+                <div
                   key={key}
-                  style={{ display: "flex", marginBottom: 8 }}
-                  align="baseline"
+                  css={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 1,
+                    marginBottom: 8,
+                  }}
                 >
                   <Form.Item
                     {...restField}
                     name={[name, "position"]}
                     rules={[{ required: true, message: "" }]}
+                    css={{ flex: 0.45 }}
                   >
-                    <AutoComplete
-                      options={options}
-                      onSearch={onSearch}
-                      style={{ width: 200 }}
-                      placeholder={t("Position")}
-                    />
+                    <Select showSearch placeholder={t("Position")}>
+                      {location.settings?.positions?.length && (
+                        <Select.OptGroup label={t("Custom")}>
+                          {location.settings.positions.map((pos) => (
+                            <Select.Option value={pos}>{pos}</Select.Option>
+                          ))}
+                        </Select.OptGroup>
+                      )}
+
+                      <Select.OptGroup label={t("Default")}>
+                        {Positions.map((pos) => (
+                          <Select.Option value={pos}>{pos}</Select.Option>
+                        ))}
+                      </Select.OptGroup>
+                    </Select>
                   </Form.Item>
-                  <Form.Item {...restField} name={[name, "wage"]}>
+                  <Form.Item
+                    {...restField}
+                    name={[name, "wage"]}
+                    css={{ flex: 0.45 }}
+                  >
                     <InputNumber
                       min={0}
                       placeholder={t("Hourly Wage")}
@@ -234,13 +234,14 @@ function CreateEmployee() {
                     />
                   </Form.Item>
                   <Button
+                    css={{ flex: 0.1 }}
                     type="text"
                     shape="circle"
                     onClick={() => remove(name)}
                     icon={<MinusCircleOutlined />}
                     disabled={submitting}
                   />
-                </Space>
+                </div>
               ))}
               <Form.Item>
                 <Button

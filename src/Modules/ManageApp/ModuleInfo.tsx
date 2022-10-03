@@ -29,8 +29,7 @@ function ModuleInfo() {
   const { locationAccessKey } = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { getUniqAllEmployees, getOrgEmployees, getEmployees } =
-    useEmployeesList();
+  const { getEmployees } = useEmployeesList();
 
   const handleDelete = async () => {
     try {
@@ -44,8 +43,8 @@ function ModuleInfo() {
     if (!selectedApp.hostId) {
       return null;
     }
-    return getUniqAllEmployees().find((e) => e.id === selectedApp.hostId);
-  }, [getOrgEmployees, getEmployees, selectedApp]);
+    return getEmployees.find((e) => e.id === selectedApp.hostId);
+  }, [getEmployees, selectedApp]);
 
   return (
     <div>
