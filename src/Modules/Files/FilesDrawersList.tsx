@@ -12,7 +12,7 @@ import {
 import { Button, Input, Menu, Space } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import FilesCounter from "./FilesCounter";

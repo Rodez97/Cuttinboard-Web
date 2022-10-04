@@ -2,7 +2,6 @@ import React from "react";
 import fileSize from "filesize";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Progress, Space, Typography } from "antd";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function FilesCounter() {
   const { location } = useLocation();

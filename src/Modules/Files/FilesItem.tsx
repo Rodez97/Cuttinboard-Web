@@ -15,7 +15,6 @@ import Icon, {
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import fileSize from "filesize";
-import { updateDoc } from "firebase/firestore";
 import { recordError } from "../../utils/utils";
 
 interface FilesItemProps {
@@ -28,7 +27,7 @@ function FilesItem({ file }: FilesItemProps) {
   const fileIcon = getFileIconByType(file.name, file.fileType);
   const fileColor = getFileColorsByType(file.name, file.fileType);
   const { canManage } = useCuttinboardModule();
-  const { deleteFile, copyToClipboard, openFile } = useFileItem(file);
+  const { copyToClipboard, openFile } = useFileItem(file);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [renaming, setRenaming] = useState(false);
@@ -42,7 +41,7 @@ function FilesItem({ file }: FilesItemProps) {
       cancelText: t("No"),
       async onOk() {
         try {
-          await deleteFile();
+          await file.delete();
         } catch (error) {
           return recordError(error);
         }
@@ -52,16 +51,9 @@ function FilesItem({ file }: FilesItemProps) {
   };
 
   const renameFile = async () => {
-    const filenameMath = file.name.match(/^(.*?)\.([^.]*)?$/);
-    const oldName = filenameMath[1];
-    const extension = filenameMath[2];
-    if (!newFileName || newFileName === oldName) {
-      return;
-    }
     setRenaming(true);
-    const name = `${newFileName}.${extension}`;
     try {
-      await updateDoc(file.docRef, { name });
+      await file.rename(newFileName);
     } catch (error) {
       recordError(error);
     }

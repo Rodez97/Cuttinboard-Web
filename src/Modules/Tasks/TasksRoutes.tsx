@@ -1,8 +1,5 @@
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  ModuleFirestoreConverter,
-  Todo,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Result } from "antd";
 import { query, where } from "firebase/firestore";
@@ -18,8 +15,6 @@ import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 import ManageTodo from "./ManageTodo";
 import TasksMain from "./TasksMain";
 
-const TodoConverter = ModuleFirestoreConverter<Todo>();
-
 function TasksRoutes() {
   const { boardId } = useParams();
   const navigate = useNavigate();
@@ -31,12 +26,12 @@ function TasksRoutes() {
   }, [boardId]);
   const [todoCards, loading, error] = useCollectionData<Todo>(
     canManage
-      ? moduleContentRef?.withConverter(TodoConverter)
+      ? moduleContentRef?.withConverter(Todo.Converter)
       : moduleContentRef &&
           query(
             moduleContentRef,
             where(`assignedTo.id`, "==", Auth.currentUser.uid)
-          ).withConverter(TodoConverter)
+          ).withConverter(Todo.Converter)
   );
 
   if (loading) {

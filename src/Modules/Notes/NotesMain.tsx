@@ -39,7 +39,7 @@ function NotesMain() {
   const { selectedApp, canManage, moduleContentRef } = useCuttinboardModule();
   const manageNoteDialogRef = useRef<ManageNoteDialogRef>(null);
   const [notes, loading, error] = useCollectionData<Note>(
-    moduleContentRef && moduleContentRef.withConverter(NoteConverter)
+    moduleContentRef && moduleContentRef.withConverter(Note.Converter)
   );
 
   const handleCreateNote = () => {

@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { addDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, serverTimestamp } from "firebase/firestore";
 import { useRef, useState } from "react";
 import QuickTodo, { QuickTodoRef } from "../../components/QuickTodo";
 import { useTranslation } from "react-i18next";
@@ -67,7 +67,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
     }
     try {
       if (selectedTodo) {
-        await setDoc(selectedTodo.docRef, valuesToAdd, { merge: true });
+        await selectedTodo.update(valuesToAdd);
       } else {
         await addDoc(moduleContentRef, {
           ...valuesToAdd,

@@ -4,7 +4,6 @@ import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
   useEmployeesList,
-  useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Colors,
@@ -27,7 +26,6 @@ function AssignUser({ onSelectedEmployee }: AssignUserProps) {
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const { t } = useTranslation();
-  const { location } = useLocation();
   const { selectedApp } = useCuttinboardModule();
 
   const employees = useMemo(

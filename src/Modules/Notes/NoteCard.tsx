@@ -1,4 +1,3 @@
-import { deleteDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import ReadonlyNoteDialog from "./ReadonlyNoteDialog";
 import { useTranslation } from "react-i18next";
@@ -30,7 +29,7 @@ function NoteCard({ note, manageNoteDialogRef }: INoteCard) {
 
       async onOk() {
         try {
-          await deleteDoc(note.docRef);
+          await note.delete();
         } catch (error) {
           recordError(error);
         }

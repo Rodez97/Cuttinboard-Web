@@ -54,7 +54,7 @@ function FilesMain() {
   const [drawerFiles, loading, drawerFilesError] =
     useCollectionData<Cuttinboard_File>(
       moduleContentRef &&
-        moduleContentRef.withConverter(CuttinboardFileConverter)
+        moduleContentRef.withConverter(Cuttinboard_File.Converter)
     );
   const storagePathRef = useMemo(
     () =>

@@ -48,7 +48,7 @@ function MyShifts() {
   const [currentWeekId, setCurrentWeekId] = useState(
     dayjs().format(WEEKFORMAT)
   );
-  const { removeBadge } = useNotificationsBadges();
+  const { removeScheduleBadges } = useNotificationsBadges();
   const isInCurrentWeek = useMemo(
     () => currentWeekId === dayjs().format(WEEKFORMAT),
     [currentWeekId]
@@ -95,8 +95,9 @@ function MyShifts() {
   );
 
   useEffect(() => {
+    removeScheduleBadges();
     return () => {
-      if (currentWeekId) removeBadge("sch", currentWeekId);
+      removeScheduleBadges();
     };
   }, [currentWeekId]);
 

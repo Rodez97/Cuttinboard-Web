@@ -41,10 +41,11 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   };
 
   useEffect(() => {
+    removeBadge("task", selectedApp.id);
     return () => {
-      if (selectedApp?.id) removeBadge("task", selectedApp.id);
+      removeBadge("task", selectedApp.id);
     };
-  }, [selectedApp]);
+  }, []);
 
   const getOrderedTasks = useMemo(() => {
     let ordered: Todo[] = [];

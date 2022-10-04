@@ -8,7 +8,7 @@ import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { recordError } from "../../utils/utils";
-import { Button, Col, Collapse, Input, Modal, Row, Tag, Tooltip } from "antd";
+import { Button, Collapse, Input, Modal, Tag, Tooltip } from "antd";
 import {
   CalendarOutlined,
   CheckCircleOutlined,
@@ -31,16 +31,9 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
   const { canManage } = useCuttinboardModule();
 
   const handleTaskChange = async (key: string, status: boolean) => {
-    if (
-      taskBlock?.tasks[key] &&
-      (taskBlock?.assignedTo.id === Auth.currentUser.uid || canManage)
-    ) {
+    if (taskBlock?.assignedTo.id === Auth.currentUser.uid || canManage) {
       try {
-        await setDoc(
-          taskBlock.docRef,
-          { tasks: { [key]: { ...taskBlock.tasks[key], status } } },
-          { merge: true }
-        );
+        await taskBlock.changeTaskStatus(key, status);
       } catch (error) {
         recordError(error);
       }
@@ -50,21 +43,13 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
   const handleAddTask = async () => {
     if (newTaskName && canManage) {
       const task = {
-        [nanoid()]: {
-          name: newTaskName,
-          status: false,
-          createdAt: Timestamp.now(),
-        },
+        name: newTaskName,
+        status: false,
+        createdAt: Timestamp.now(),
       };
       setNewTaskName("");
       try {
-        await setDoc(
-          taskBlock.docRef,
-          {
-            tasks: task,
-          },
-          { merge: true }
-        );
+        await taskBlock.addTask(nanoid(), task);
       } catch (error) {
         recordError(error);
       }
@@ -72,40 +57,14 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
   };
 
   const handleRemoveTask = async (taskId: string) => {
-    if (taskBlock.tasks && canManage) {
+    if (canManage) {
       try {
-        await setDoc(
-          taskBlock.docRef,
-          {
-            tasks: {
-              [taskId]: deleteField(),
-            },
-          },
-          { merge: true }
-        );
+        await taskBlock.removeTask(taskId);
       } catch (error) {
         recordError(error);
       }
     }
   };
-
-  const getTasksSummary = useMemo(() => {
-    if (taskBlock.tasks) {
-      const doneTasks = Object.values(taskBlock.tasks).filter(
-        (task) => task.status
-      ).length;
-      const totalTasks = Object.values(taskBlock.tasks).length;
-      return (
-        <Tag
-          key="tasksSummary"
-          icon={<CheckCircleOutlined />}
-          color={doneTasks === totalTasks ? "success" : "error"}
-        >
-          {`${doneTasks}/${totalTasks}`}
-        </Tag>
-      );
-    }
-  }, [taskBlock.tasks]);
 
   const handleDeleteTodoCard = async () => {
     Modal.confirm({
@@ -114,7 +73,7 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
 
       async onOk() {
         try {
-          await deleteDoc(taskBlock.docRef);
+          await taskBlock.delete();
         } catch (error) {
           recordError(error);
         }
@@ -134,7 +93,17 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
       title={taskBlock?.name}
       subTitle={taskBlock?.description}
       tags={[
-        getTasksSummary,
+        <Tag
+          key="tasksSummary"
+          icon={<CheckCircleOutlined />}
+          color={
+            taskBlock.tasksSummary.done === taskBlock.tasksSummary.total
+              ? "success"
+              : "error"
+          }
+        >
+          {`${taskBlock.tasksSummary.done}/${taskBlock.tasksSummary.total}`}
+        </Tag>,
         taskBlock?.assignedTo && (
           <Tag key="assignedTo" icon={<UserOutlined />}>
             {taskBlock.assignedTo.name}
@@ -144,7 +113,7 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
       extra={[
         taskBlock?.dueDate && (
           <Tag icon={<CalendarOutlined />}>
-            {dayjs(taskBlock.dueDate.toDate()).format("MMMM D, YYYY, hh:mm a")}
+            {dayjs(taskBlock.convertedDueDate).format("MMMM D, YYYY, hh:mm a")}
           </Tag>
         ),
         <Tooltip key="delete" title={t("Delete")}>

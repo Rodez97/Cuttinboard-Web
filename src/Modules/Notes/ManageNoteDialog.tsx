@@ -3,7 +3,7 @@ import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Form, Input, Modal } from "antd";
-import { addDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, serverTimestamp } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
@@ -47,7 +47,7 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
     setisSubmitting(true);
     try {
       if (baseNote) {
-        await updateDoc(baseNote.docRef, values);
+        await baseNote.edit(values.title, values.content);
       } else {
         await addDoc(moduleContentRef, {
           ...values,

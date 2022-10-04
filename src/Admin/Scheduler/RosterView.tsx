@@ -9,10 +9,12 @@ import {
   Employee,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import Table, { ColumnsType } from "antd/lib/table";
+import { Divider, Table, TableColumnsType } from "antd";
 import { Button, Space, Typography } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
+import "./RosterView.scss";
+import { groupBy } from "lodash";
 
 type RosterData = {
   employee: Employee;
@@ -20,29 +22,26 @@ type RosterData = {
 };
 
 function RosterView({ employees }: { employees: Employee[] }) {
-  const { isPublished, shiftsCollection, weekDays, selectedTag, searchQuery } =
+  const { shiftsCollection, weekDays, selectedTag, searchQuery } =
     useSchedule();
   const { editShift } = useScheduler();
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const { t } = useTranslation();
 
   const handleCellClick = ({ shift, employee }: RosterData) => {
-    if (
-      shift.getStartDayjsDate.isBefore(dayjs(dayjs().startOf("isoWeek"))) ||
-      isPublished
-    ) {
+    if (shift.getStartDayjsDate.isBefore(dayjs(), "week")) {
       return;
     }
     editShift(employee, shift);
   };
 
   const columns = useMemo(
-    (): ColumnsType<RosterData> => [
+    (): TableColumnsType<RosterData> => [
       {
         title: t("Employee"),
         dataIndex: "employee",
         key: "employee",
-        render: (_, { employee }) => `${employee.name} ${employee.lastName}`,
+        render: (_, { employee }) => employee.fullName,
       },
       {
         title: t("Position"),
@@ -78,9 +77,8 @@ function RosterView({ employees }: { employees: Employee[] }) {
 
   const dataSource = useMemo(() => {
     const shifts = shiftsCollection
-      ?.filter(
-        (shf) =>
-          shf.getStartDayjsDate.day() === weekDays[selectedDateIndex].getDay()
+      ?.filter((shf) =>
+        shf.getStartDayjsDate.isSame(weekDays[selectedDateIndex], "day")
       )
       ?.map((shift) => ({
         shift,
@@ -88,15 +86,17 @@ function RosterView({ employees }: { employees: Employee[] }) {
       }));
     const byName = searchQuery
       ? matchSorter(shifts, searchQuery, {
-          keys: ["employee.name", "employee.lastName"],
+          keys: ["employee.fullName"],
         })
       : shifts;
 
-    return selectedTag
+    const byTag = selectedTag
       ? matchSorter(byName, selectedTag, {
           keys: ["shift.position"],
         })
       : byName;
+
+    return groupBy(byTag, ({ shift }) => shift.getStartDayjsDate.format("a"));
   }, [
     employees,
     shiftsCollection,
@@ -107,7 +107,7 @@ function RosterView({ employees }: { employees: Employee[] }) {
   ]);
 
   return (
-    <React.Fragment>
+    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
       <Space
         align="center"
         wrap
@@ -130,20 +130,67 @@ function RosterView({ employees }: { employees: Employee[] }) {
         />
       </Space>
 
-      <Table
-        size="small"
-        bordered
-        columns={columns}
-        dataSource={dataSource}
-        onRow={(record) => {
-          return {
-            onClick: () => handleCellClick(record), // click row
-          };
+      <div
+        css={{
+          minWidth: 400,
+          maxWidth: 900,
+          margin: "auto",
+          width: "100%",
         }}
-        pagination={false}
-        rowKey={(e) => e.shift.id}
-      />
-    </React.Fragment>
+      >
+        <Divider>{t("AM Shifts")}</Divider>
+
+        <Table
+          className="rosterTable"
+          size="small"
+          bordered
+          columns={columns}
+          dataSource={dataSource["am"]}
+          onRow={(record) => {
+            return {
+              onClick: () => handleCellClick(record), // click row
+            };
+          }}
+          pagination={false}
+          rowKey={(e) => e.shift.id}
+          rowClassName={(e) => {
+            if (e.shift.status === "draft" || e.shift.hasPendingUpdates) {
+              return "edited";
+            }
+            if (e.shift.deleting) {
+              return "deleting";
+            }
+            return "";
+          }}
+        />
+
+        <Divider>{t("PM Shifts")}</Divider>
+
+        <Table
+          className="rosterTable"
+          size="small"
+          bordered
+          columns={columns}
+          dataSource={dataSource["pm"]}
+          onRow={(record) => {
+            return {
+              onClick: () => handleCellClick(record), // click row
+            };
+          }}
+          pagination={false}
+          rowKey={(e) => e.shift.id}
+          rowClassName={(e) => {
+            if (e.shift.status === "draft" || e.shift.hasPendingUpdates) {
+              return "edited";
+            }
+            if (e.shift.deleting) {
+              return "deleting";
+            }
+            return "";
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
