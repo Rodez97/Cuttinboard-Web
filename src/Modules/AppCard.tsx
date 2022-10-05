@@ -25,7 +25,7 @@ function AppCard({
   const { getBadgeByModule } = useNotificationsBadges();
   const { t } = useTranslation();
   return (
-    <Tooltip title={t(description)}>
+    <Tooltip title={t(description)} placement="bottom">
       <Badge count={badge && getBadgeByModule(badge)}>
         <Card
           style={{
