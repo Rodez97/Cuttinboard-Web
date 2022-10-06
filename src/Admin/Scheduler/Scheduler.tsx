@@ -111,11 +111,13 @@ function Scheduler() {
   };
 
   const employees = useMemo(() => {
-    const byName = matchSorter(getEmployees, searchQuery ?? "", {
-      keys: ["fullName"],
-    });
+    const byName = searchQuery
+      ? matchSorter(getEmployees, searchQuery, {
+          keys: ["fullName"],
+        })
+      : getEmployees;
     return selectedTag
-      ? matchSorter(byName, selectedTag ?? "", {
+      ? matchSorter(byName, selectedTag, {
           keys: [`positions`],
         })
       : byName;
