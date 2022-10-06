@@ -61,6 +61,7 @@ import {
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { GrayPageHeader } from "components/PageHeaders";
+import "./Scheduler.scss";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -203,6 +204,9 @@ function Scheduler() {
         render: (_, { employee, shifts }) => (
           <EmpColumnCell employee={employee} shifts={shifts} />
         ),
+        fixed: "left",
+        width: 250,
+        className: "employee-column",
       },
       ...weekDays.map((wd) => ({
         title: dayjs(wd).format("ddd DD"),
@@ -239,13 +243,13 @@ function Scheduler() {
   };
 
   return (
-    <Layout>
-      <ScheduleContext.Provider
-        value={{
-          editShift,
-          newShift,
-        }}
-      >
+    <ScheduleContext.Provider
+      value={{
+        editShift,
+        newShift,
+      }}
+    >
+      <Layout css={{ overflow: "auto" }}>
         <ManageShiftDialog ref={manageShiftDialogRef} />
         <GrayPageHeader
           onBack={handleBack}
@@ -312,40 +316,52 @@ function Scheduler() {
         </Space>
 
         <ScheduleSummary />
-        {rosterMode ? (
-          <RosterView employees={employees} />
-        ) : (
-          <Table
-            bordered
-            components={{
-              body: {
-                cell: ({ children, ...props }) => (
-                  <td {...props} style={{ height: 1, padding: 2 }}>
-                    {children}
-                  </td>
+        <div
+          css={{
+            width: "100vw",
+            overflow: "auto",
+            boxSizing: "border-box",
+          }}
+        >
+          {rosterMode ? (
+            <RosterView employees={employees} />
+          ) : (
+            <Table
+              css={{
+                width: "100%",
+                position: "relative",
+              }}
+              bordered
+              components={{
+                body: {
+                  cell: ({ children, ...props }) => (
+                    <td {...props} className="shift-cell">
+                      {children}
+                    </td>
+                  ),
+                },
+              }}
+              columns={columns}
+              dataSource={employees?.map((emp) => ({
+                key: emp.id,
+                employee: emp,
+                shifts: shiftsCollection?.filter(
+                  (shf) => shf.employeeId === emp.id
                 ),
-              },
-            }}
-            columns={columns}
-            dataSource={employees?.map((emp) => ({
-              key: emp.id,
-              employee: emp,
-              shifts: shiftsCollection?.filter(
-                (shf) => shf.employeeId === emp.id
-              ),
-            }))}
-            summary={(pageData) => <TableFooter data={pageData} />}
-            pagination={false}
-            rowKey={(e) => e.employee.id}
-          />
-        )}
-
+              }))}
+              summary={(pageData) => <TableFooter data={pageData} />}
+              pagination={false}
+              rowKey={(e) => e.employee.id}
+              rowClassName="scheduler-row"
+            />
+          )}
+        </div>
         <ProjectedSalesDialog
           visible={projectedSalesOpen}
           onClose={() => setProjectedSalesOpen(false)}
         />
-      </ScheduleContext.Provider>
-    </Layout>
+      </Layout>
+    </ScheduleContext.Provider>
   );
 }
 

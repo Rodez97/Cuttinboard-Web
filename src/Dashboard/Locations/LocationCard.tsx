@@ -26,7 +26,7 @@ function LocationCard({ location, actions }: LocationCardProps) {
   const { selectLocation: selectLocId } = useSelectedLocation();
   const { getBadgeByLocation } = useNotificationsBadges();
   const { t } = useTranslation();
-  const { user, selectLocation } = useCuttinboard();
+  const { user, selectLocation, organizationKey } = useCuttinboard();
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [createBillingSession, isRunning, error] = useHttpsCallable<
     { return_url: string },
@@ -81,6 +81,7 @@ function LocationCard({ location, actions }: LocationCardProps) {
     setLoadingLocation(true);
     try {
       selectLocId(location.id);
+      console.log({ organizationKey });
       await selectLocation(location);
       navigate(`/location/${location.id}`);
     } catch (error) {

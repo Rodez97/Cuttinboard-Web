@@ -1,0 +1,22 @@
+.shift-cell {
+  height: 1px;
+  padding: 0px !important;
+  min-width: 130px !important;
+  width: calc((100vw - 250px) / 7);
+  z-index: 1;
+}
+
+.scheduler-row td:first-child {
+  z-index: 2 !important;
+}
+
+@-moz-document url-prefix() {
+  .scheduler-row {
+    height: 100%;
+  }
+  .shift-cell {
+    height: 100%;
+    padding: 0px !important;
+    z-index: 1;
+  }
+}

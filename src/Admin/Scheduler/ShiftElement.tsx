@@ -31,6 +31,7 @@ const PositionElement = styled(Typography.Text)`
 const Container = styled(Space)<{ draftOrEdited?: boolean; deleting: boolean }>`
   cursor: pointer;
   width: 100%;
+  height: 100%;
   background: ${(props) =>
     props.deleting
       ? `repeating-linear-gradient(-45deg, #f33d61, #f33d61 10px, #e76e8a 10px, #e76e8a 20px)`
