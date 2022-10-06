@@ -105,7 +105,6 @@ function Scheduler() {
   const { t } = useTranslation();
   const [rosterMode, setRosterMode] = useState(false);
   const { getEmployees } = useEmployeesList();
-  const { location } = useLocation();
 
   const handleBack = () => {
     navigate(-1);
@@ -113,11 +112,11 @@ function Scheduler() {
 
   const employees = useMemo(() => {
     const byName = matchSorter(getEmployees, searchQuery ?? "", {
-      keys: ["name", "lastName"],
+      keys: ["fullName"],
     });
     return selectedTag
       ? matchSorter(byName, selectedTag ?? "", {
-          keys: [`locations.${location.id}.pos`],
+          keys: [`positions`],
         })
       : byName;
   }, [searchQuery, selectedTag, getEmployees]);

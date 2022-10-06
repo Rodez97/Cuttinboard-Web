@@ -44,7 +44,7 @@ const Container = styled(Space)<{ draftOrEdited?: boolean; deleting: boolean }>`
       return Colors.CalculateContrast("#f33d61");
     }
     if (props.draftOrEdited) {
-      return Colors.CalculateContrast("#86888A");
+      return Colors.CalculateContrast("#606060");
     }
     return Colors.CalculateContrast(Colors.MainBlue);
   }} !important;
