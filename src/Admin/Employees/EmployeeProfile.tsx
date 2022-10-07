@@ -54,8 +54,8 @@ function EmployeeProfile() {
         <Tabs defaultActiveKey="0" centered>
           <Tabs.TabPane tab={t("Information")} key={0}>
             <React.Fragment>
-              <EmployeeContactPanel employee={employee} />
               <EmployeeRolePanel employee={employee} />
+              <EmployeeContactPanel employee={employee} />
             </React.Fragment>
           </Tabs.TabPane>
           <Tabs.TabPane tab={t("Documents")} key={1}>

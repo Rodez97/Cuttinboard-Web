@@ -12,6 +12,8 @@ import {
   List,
   Typography,
 } from "antd";
+import { orderBy } from "lodash";
+import { matchSorter } from "match-sorter";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "utils/utils";
@@ -61,7 +63,7 @@ function ManagePositions(props: DrawerProps) {
       <Divider orientation="left">{t("Custom Positions")}</Divider>
       <List
         size="small"
-        dataSource={location.positions}
+        dataSource={matchSorter(location.positions, "")}
         renderItem={(pos) => (
           <List.Item
             key={pos}

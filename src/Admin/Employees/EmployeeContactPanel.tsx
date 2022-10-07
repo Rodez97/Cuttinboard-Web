@@ -73,7 +73,7 @@ function EmployeeContactPanel({ employee }: { employee: Employee }) {
         minWidth: 300,
         maxWidth: 500,
         margin: "auto",
-        marginBottom: 16,
+        marginTop: 16,
       }}
     >
       <Form<EmployeeContactData>

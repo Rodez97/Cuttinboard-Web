@@ -9,19 +9,13 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  LocationCheckList,
-  ModuleFirestoreConverter,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { LocationCheckList } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Col, Input, Layout, Row, Space, Typography } from "antd";
 import dayjs from "dayjs";
-import { getAnalytics, logEvent } from "firebase/analytics";
 import {
   collection,
-  deleteDoc,
-  deleteField,
   doc,
   getDocs,
   limitToLast,
@@ -32,7 +26,7 @@ import {
 } from "firebase/firestore";
 import { nanoid } from "nanoid";
 import React, { useMemo, useState } from "react";
-import { useDocument } from "react-firebase-hooks/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import PageError from "../../components/PageError";
@@ -41,23 +35,20 @@ import PageLoading from "../../components/PageLoading";
 import SimpleTodo from "../../components/SimpleTodo";
 import { recordError } from "../../utils/utils";
 
-const LocationCheckListConverter =
-  ModuleFirestoreConverter<LocationCheckList>();
-
 function GlobalChecklist() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const { location, locationAccessKey } = useLocation();
   const [newTaskName, setNewTaskName] = useState("");
-  const [checklistData, loading, error] = useDocument<LocationCheckList>(
+  const [checklistData, loading, error] = useDocumentData<LocationCheckList>(
     doc(
       Firestore,
       "Locations",
       location.id,
       "locationChecklist",
       selectedDate.format("DD_MM_YYYY")
-    ).withConverter(LocationCheckListConverter)
+    ).withConverter(LocationCheckList.Converter)
   );
 
   const canUse = useMemo(
@@ -66,22 +57,11 @@ function GlobalChecklist() {
   );
 
   const handleTaskChange = async (key: string, status: boolean) => {
-    if (!checklistData.exists() || !checklistData.data()?.tasks[key]) {
+    if (!checklistData) {
       return;
     }
-    const docRef = doc(
-      Firestore,
-      "Locations",
-      location.id,
-      "locationChecklist",
-      selectedDate.format("DD_MM_YYYY")
-    );
     try {
-      await setDoc(
-        docRef,
-        { tasks: { [key]: { ...checklistData.data().tasks[key], status } } },
-        { merge: true }
-      );
+      await checklistData.changeTaskStatus(key, status);
     } catch (error) {
       recordError(error);
     }
@@ -91,31 +71,13 @@ function GlobalChecklist() {
     if (!newTaskName || !canUse) {
       return;
     }
-    const docRef = doc(
-      Firestore,
-      "Locations",
-      location.id,
-      "locationChecklist",
-      selectedDate.format("DD_MM_YYYY")
-    );
-    const task = {
-      [nanoid()]: {
+    setNewTaskName("");
+    try {
+      await checklistData.addTask(nanoid(), {
         name: newTaskName,
         status: false,
         createdAt: Timestamp.now(),
-      },
-    };
-    setNewTaskName("");
-    try {
-      const update: Partial<LocationCheckList> = {
-        tasks: task,
-      };
-      if (!checklistData.exists()) {
-        update.checklistDate = Timestamp.fromDate(selectedDate.toDate());
-        update.createdAt = Timestamp.now();
-        update.createdBy = Auth.currentUser.uid;
-      }
-      await setDoc(docRef, update, { merge: true });
+      });
     } catch (error) {
       recordError(error);
     }
@@ -125,31 +87,8 @@ function GlobalChecklist() {
     if (!checklistData || !canUse) {
       return;
     }
-    const docRef = doc(
-      Firestore,
-      "Locations",
-      location.id,
-      "locationChecklist",
-      selectedDate.format("DD_MM_YYYY")
-    );
-    const tasks = checklistData.get("tasks");
     try {
-      if (
-        Object.keys(tasks ?? {}).length === 1 &&
-        Object.keys(tasks)[0] === taskId
-      ) {
-        await deleteDoc(docRef);
-      } else {
-        await setDoc(
-          docRef,
-          {
-            tasks: {
-              [taskId]: deleteField(),
-            },
-          },
-          { merge: true }
-        );
-      }
+      await checklistData.removeTask(taskId);
     } catch (error) {
       recordError(error);
     }
@@ -173,10 +112,10 @@ function GlobalChecklist() {
       if (docsSnap.docs.length === 0) {
         return;
       }
-      const update: Partial<LocationCheckList> = {
+      const update: any = {
         tasks: docsSnap.docs[0].get("tasks"),
       };
-      if (!checklistData.exists()) {
+      if (!checklistData) {
         update.checklistDate = Timestamp.fromDate(selectedDate.toDate());
         update.createdAt = Timestamp.now();
         update.createdBy = Auth.currentUser.uid;
@@ -188,32 +127,11 @@ function GlobalChecklist() {
   };
 
   const clearAll = async () => {
-    if (!checklistData.data()) {
+    if (!checklistData) {
       return;
-    }
-    const docRef = doc(
-      Firestore,
-      "Locations",
-      location.id,
-      "locationChecklist",
-      selectedDate.format("DD_MM_YYYY")
-    );
-    const tasks = Object.keys(checklistData.data()?.tasks ?? {});
-    if (tasks.length === 0) {
-      return;
-    }
-    const update: Partial<LocationCheckList> = {
-      tasks: {},
-    };
-
-    for (const task of tasks) {
-      update.tasks[task] = {
-        ...checklistData.data().tasks[task],
-        status: false,
-      };
     }
     try {
-      await setDoc(docRef, update, { merge: true });
+      await checklistData.clearTasks();
     } catch (error) {
       recordError(error);
     }
@@ -228,9 +146,7 @@ function GlobalChecklist() {
         className="site-page-header-responsive"
         onBack={() => navigate(-1)}
         title={t("Daily Checklists")}
-        subTitle={`(${Number(
-          Object.keys(checklistData?.data()?.tasks ?? {})?.length
-        )})`}
+        subTitle={`(${checklistData?.tasksSummary?.total ?? 0})`}
       />
 
       {loading ? (
@@ -274,7 +190,7 @@ function GlobalChecklist() {
                 <Button
                   onClick={cloneLastChecklist}
                   icon={<RetweetOutlined />}
-                  disabled={checklistData.exists()}
+                  disabled={checklistData != null}
                   type="dashed"
                 >
                   {t("Clone Last")}
@@ -300,7 +216,7 @@ function GlobalChecklist() {
                 />
               )}
               <SimpleTodo
-                tasks={checklistData?.data()?.tasks ?? {}}
+                tasks={checklistData?.tasks ?? {}}
                 canRemove={canUse}
                 onRemove={handleRemoveTask}
                 onChange={handleTaskChange}
