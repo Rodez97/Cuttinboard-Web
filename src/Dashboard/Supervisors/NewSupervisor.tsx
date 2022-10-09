@@ -112,8 +112,8 @@ function NewSupervisor() {
             message={
               <Typography.Text>
                 {t(
-                  "Supervisors have all permissions in the locations you assign to them. "
-                )}
+                  "Supervisors will be deleted from the locations they belong to."
+                )}{" "}
                 <a href="#" target="_blank">
                   {t("Learn more")}
                 </a>
