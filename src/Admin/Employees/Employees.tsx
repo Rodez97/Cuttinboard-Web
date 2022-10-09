@@ -233,8 +233,19 @@ function Employees() {
                   {t("Join this location")}
                 </Button>
               )}
+              {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
+                <Button type="dashed" onClick={joinSupervisor} block>
+                  {t("Join this location")}
+                </Button>
+              )}
+
               {isOwner && getEmployees?.some((e) => e.id === user.uid) && (
                 <Button type="dashed" danger onClick={removePrimaryOwner} block>
+                  {t("Leave this location")}
+                </Button>
+              )}
+              {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
+                <Button type="dashed" danger onClick={leaveSupervisor} block>
                   {t("Leave this location")}
                 </Button>
               )}
@@ -248,17 +259,6 @@ function Employees() {
               {getEmployeeByRole(RoleAccessLevels.OWNER)?.map((emp, i) => (
                 <EmployeeCard key={i} employee={emp} />
               ))}
-
-              {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" onClick={joinSupervisor} block>
-                  {t("Join this location")}
-                </Button>
-              )}
-              {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" danger onClick={leaveSupervisor} block>
-                  {t("Leave this location")}
-                </Button>
-              )}
 
               {getEmployeeByRole(RoleAccessLevels.ADMIN)?.length > 0 && (
                 <TitleBoxOwner>
