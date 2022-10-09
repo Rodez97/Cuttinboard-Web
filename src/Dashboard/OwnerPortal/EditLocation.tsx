@@ -53,12 +53,14 @@ function EditLocation() {
         title={t("Edit Location Details")}
       />
       <Layout.Content css={{ display: "flex", justifyContent: "center" }}>
-        <LocationEditor
-          baseLocation={getLocation}
-          onChange={handleChange}
-          onCancel={() => navigate(-1)}
-          loading={editing}
-        />
+        <div>
+          <LocationEditor
+            baseLocation={getLocation}
+            onChange={handleChange}
+            onCancel={() => navigate(-1)}
+            loading={editing}
+          />
+        </div>
       </Layout.Content>
     </Layout>
   );
