@@ -200,7 +200,9 @@ function Employees() {
           showSearch
           style={{ width: 200 }}
           onSelect={setSelectedTag}
+          onClear={() => setSelectedTag(null)}
           placeholder={t("Filter by position")}
+          allowClear
         >
           {location.settings?.positions?.length && (
             <Select.OptGroup label={t("Custom")}>
