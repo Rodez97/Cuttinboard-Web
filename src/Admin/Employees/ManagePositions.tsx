@@ -84,7 +84,7 @@ function ManagePositions(props: DrawerProps) {
       <List
         css={{ overflowY: "auto" }}
         size="small"
-        dataSource={Positions}
+        dataSource={matchSorter(Positions, "")}
         renderItem={(pos) => (
           <List.Item key={pos}>
             <Typography.Text>{pos}</Typography.Text>
