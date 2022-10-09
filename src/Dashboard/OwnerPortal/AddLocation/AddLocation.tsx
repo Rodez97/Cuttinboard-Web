@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { httpsCallable } from "firebase/functions";
 import FinalStep from "./Steps/FinalStep";
 import LocationInfo from "./Steps/LocationInfo";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
@@ -11,15 +10,14 @@ import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   Button,
   Layout,
+  message,
   Modal,
   Result,
   Space,
-  Spin,
   Steps,
   Tooltip,
 } from "antd";
 import { recordError } from "../../../utils/utils";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 
 const { confirm } = Modal;
@@ -76,7 +74,7 @@ function AddLocation() {
       setActiveStep(activeStep + 1);
     }
     if (activeStep === 1 && location) {
-      showConfirm();
+      createLocation();
     }
   };
 
@@ -97,28 +95,16 @@ function AddLocation() {
 
   const createLocation = async () => {
     try {
+      const hide = message.loading(t("Adding a new location..."), 0);
       await addLocation({
         location,
         generalManager,
       });
+      hide();
       navigate(-1);
     } catch (error) {
       recordError(error);
     }
-  };
-
-  const showConfirm = () => {
-    confirm({
-      title: "Are you sure you want to create this location?",
-      icon: <ExclamationCircleOutlined />,
-      content: `${t("Name")}: ${location.name}`,
-      onOk() {
-        return createLocation();
-      },
-      onCancel() {
-        console.log("Cancel");
-      },
-    });
   };
 
   if (error) {
