@@ -17,13 +17,16 @@ import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
 import { customOrderSorter } from "Dashboard/OwnerPortal/customOrderSorter";
+import { differenceBy } from "lodash";
 
 function LocationsPicker({
   selectedLocations,
   onSelectionChange,
+  alreadySelected,
 }: {
   selectedLocations: Location[];
   onSelectionChange: (locs: Location[]) => void;
+  alreadySelected: Location[];
 }) {
   const { t } = useTranslation();
   const [{ order, index }, setOrderData] = useState<{
@@ -47,24 +50,25 @@ function LocationsPicker({
   };
 
   const getOrderedLocations = useMemo(() => {
+    const aviableLocations = differenceBy(locations, alreadySelected, "id");
     switch (index) {
       case 0:
-        return matchSorter(locations, searchQuery, {
+        return matchSorter(aviableLocations, searchQuery, {
           keys: ["name"],
           baseSort: customOrderSorter(order),
         });
       case 1:
-        return matchSorter(locations, searchQuery, {
+        return matchSorter(aviableLocations, searchQuery, {
           keys: ["address.city"],
           baseSort: customOrderSorter(order),
         });
       case 2:
-        return matchSorter(locations, searchQuery, {
+        return matchSorter(aviableLocations, searchQuery, {
           keys: ["intId"],
           baseSort: customOrderSorter(order),
         });
       default:
-        return locations;
+        return aviableLocations;
     }
   }, [locations, index, order, searchQuery]);
 
@@ -103,14 +107,20 @@ function LocationsPicker({
 
       <div css={{ overflow: "auto", flex: 1 }}>
         <Space wrap size="large">
-          {getOrderedLocations?.map((loc) => (
-            <LocationsPickerOption
-              key={loc.id}
-              location={loc}
-              selected={selectedLocations.indexOf(loc) > -1}
-              onSelectChange={handleLocSelection}
-            />
-          ))}
+          {Boolean(getOrderedLocations.length) ? (
+            getOrderedLocations?.map((loc) => (
+              <LocationsPickerOption
+                key={loc.id}
+                location={loc}
+                selected={selectedLocations.indexOf(loc) > -1}
+                onSelectChange={handleLocSelection}
+              />
+            ))
+          ) : (
+            <Typography.Text type="secondary">
+              {t("No aviable positions to select.")}
+            </Typography.Text>
+          )}
         </Space>
       </div>
     </Layout.Content>
