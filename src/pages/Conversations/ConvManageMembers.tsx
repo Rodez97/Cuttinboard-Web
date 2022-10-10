@@ -1,8 +1,5 @@
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useConversations,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import React from "react";
 import { useNavigate } from "react-router-dom";

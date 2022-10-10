@@ -14,13 +14,8 @@ function ConversationsRoutes() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const {
-    selectedChat,
-    createConversation,
-    editConversation,
-    deleteConversation,
-    setChatId,
-  } = useConversations();
+  const { selectedChat, createConversation, editConversation, setChatId } =
+    useConversations();
 
   useLayoutEffect(() => {
     setChatId(boardId);

@@ -5,11 +5,11 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { jsx } from "@emotion/react";
-import { Avatar, Button, Divider, Space, Switch, Tag } from "antd";
+import { Button, Divider, Space, Switch, Tag } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { List } from "antd";
 import {
   CrownOutlined,
@@ -23,7 +23,6 @@ import {
   TagsOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useCallback } from "react";
 import { recordError } from "utils/utils";
 import {

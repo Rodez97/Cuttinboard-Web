@@ -9,8 +9,7 @@ import {
 } from "react-router-dom";
 
 function NewConversation() {
-  const { createConversation, editConversation, setChatId } =
-    useConversations();
+  const { createConversation, editConversation } = useConversations();
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
 
