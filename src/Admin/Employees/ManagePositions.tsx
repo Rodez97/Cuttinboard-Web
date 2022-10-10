@@ -58,6 +58,8 @@ function ManagePositions(props: DrawerProps) {
         onSearch={addPosition}
         loading={addingPosition}
         disabled={location.positions?.length >= 20}
+        maxLength={40}
+        showCount
       />
 
       <Divider orientation="left">{t("Custom Positions")}</Divider>
