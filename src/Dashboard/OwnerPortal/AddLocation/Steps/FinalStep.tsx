@@ -11,7 +11,7 @@ import PageError from "../../../../components/PageError";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "../../../DashboardProvider";
-import { List, Typography } from "antd";
+import { List, Space, Typography } from "antd";
 import { ShopOutlined, UserOutlined } from "@ant-design/icons";
 
 const SummaryNewLocationContainer = styled.div`
@@ -95,7 +95,11 @@ function FinalStep() {
           {t("A new location will be added")}
         </Typography.Title>
 
-        <div css={{ border: "1px solid #ffffff80", padding: 5, gap: 8 }}>
+        <Space
+          css={{ border: "1px solid #ffffff80", padding: 5 }}
+          size="large"
+          direction="vertical"
+        >
           <List.Item.Meta
             avatar={<ShopOutlined />}
             title={t("Name")}
@@ -108,7 +112,7 @@ function FinalStep() {
               description={generalManager.name}
             />
           )}
-        </div>
+        </Space>
 
         <Typography.Title level={5}>
           {t("Your new bill will be:")}
