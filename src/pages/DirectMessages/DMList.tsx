@@ -18,6 +18,7 @@ import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import { getAvatarByUID } from "utils/utils";
 import { Chat } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { useNewElement } from "Modules/Notes/useNewElement";
 
 function DMList({
   underLocation,
@@ -30,6 +31,7 @@ function DMList({
 }) {
   const navigate = useNavigate();
   const { locationId } = useParams();
+  const newElement = useNewElement();
   const { t } = useTranslation();
   const { chats, chatId } = useDMs();
   const { getDMBadge } = useNotificationsBadges();
@@ -96,12 +98,7 @@ function DMList({
         }
         css={{ paddingBottom: 0, paddingTop: 0 }}
       />
-      <Button
-        icon={<PlusOutlined />}
-        block
-        type="dashed"
-        onClick={() => navigate("new")}
-      >
+      <Button icon={<PlusOutlined />} block type="dashed" onClick={newElement}>
         {t("Add")}
       </Button>
       <Input.Search

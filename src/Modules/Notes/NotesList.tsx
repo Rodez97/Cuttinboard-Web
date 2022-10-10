@@ -9,18 +9,20 @@ import {
   Colors,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Input, Menu, PageHeader, Space } from "antd";
+import { Button, Input, Menu, Space } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { Note } from "./notesIcons";
+import { useNewElement } from "./useNewElement";
 
 function NotesList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const newElement = useNewElement();
   const { selectedApp, elements } = useCuttinboardModule();
   const { locationAccessKey, location } = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,7 +56,7 @@ function NotesList() {
           icon={<PlusOutlined />}
           block
           type="dashed"
-          onClick={() => navigate("new")}
+          onClick={newElement}
         >
           {t("Add")}
         </Button>
