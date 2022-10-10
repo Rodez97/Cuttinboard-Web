@@ -1,10 +1,5 @@
 /** @jsx jsx */
-import {
-  CrownOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { CrownOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import {
@@ -12,28 +7,28 @@ import {
   Button,
   Input,
   Layout,
-  Modal,
   PageHeader,
   Space,
   Typography,
 } from "antd";
 import SplitButton from "components/SplitButton";
 import dayjs from "dayjs";
-import { deleteDoc } from "firebase/firestore";
-import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
 import LocationCard from "../Locations/LocationCard";
 import { customOrderSorter } from "./customOrderSorter";
+import DeleteLocationDialog, {
+  DeleteLocationDialogRef,
+} from "./DeleteLocationDialog";
 import GoldTag from "./GoldTag";
 import { useOwner } from "./OwnerPortal";
 
 function MyLocations() {
   const { t } = useTranslation();
+  const deleteLocDialogRef = useRef<DeleteLocationDialogRef>(null);
   const { locations } = useOwner();
   const navigate = useNavigate();
   const { organization, userDocument } = useDashboard();
@@ -47,22 +42,7 @@ function MyLocations() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const deleteLocation = (loc: Location) => {
-    Modal.confirm({
-      title: t("Are you sure you want to delete this location?"),
-      content: t("Otra advertencia"),
-      icon: <ExclamationCircleOutlined />,
-      okText: t("Yes"),
-      okType: "danger",
-      cancelText: t("No"),
-      async onOk() {
-        try {
-          await deleteDoc(loc.docRef);
-        } catch (error) {
-          return recordError(error);
-        }
-      },
-      onCancel() {},
-    });
+    deleteLocDialogRef.current.openDialog(loc);
   };
 
   const getOrderedLocations = useMemo(() => {
@@ -217,6 +197,7 @@ function MyLocations() {
           </div>
         )}
       </Layout.Content>
+      <DeleteLocationDialog ref={deleteLocDialogRef} />
     </Layout>
   );
 }
