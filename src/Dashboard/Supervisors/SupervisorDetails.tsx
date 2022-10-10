@@ -6,7 +6,6 @@ import {
   ExclamationCircleOutlined,
   MoreOutlined,
   PlusSquareOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import {
   Auth,
@@ -16,10 +15,8 @@ import {
   Employee,
   Location,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Alert,
-  Avatar,
   Button,
   Card,
   Divider,
@@ -41,9 +38,10 @@ import {
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { getAvatarByUID, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
 import LocationsPicker from "./LocationsPicker";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
+import { QuickUserDialogAvatar } from "components/QuickUserDialog";
 
 function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
   const { supervisorId } = useParams();
@@ -197,11 +195,8 @@ function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
                   gap: "8px",
                 }}
               >
-                <Avatar
-                  src={getAvatarByUID(getSupervisor.id)}
-                  icon={<UserOutlined />}
-                  size={80}
-                />
+                <QuickUserDialogAvatar employee={getSupervisor} size={60} />
+
                 <Typography.Title
                   level={3}
                 >{`${getSupervisor.name} ${getSupervisor.lastName}`}</Typography.Title>

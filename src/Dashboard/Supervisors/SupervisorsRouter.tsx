@@ -17,16 +17,12 @@ import NewSupervisor from "./NewSupervisor";
 import SupervisorDetails from "./SupervisorDetails";
 import Supervisors from "./Supervisors";
 
-const Converter = ModuleFirestoreConverter<
-  Employee & { role: RoleAccessLevels.ADMIN }
->();
-
 function SupervisorsRouter() {
   const [supervisors, loading, error] = useCollectionData(
     query(
       collection(Firestore, "Organizations", Auth.currentUser.uid, "employees"),
       where("role", "==", RoleAccessLevels.ADMIN)
-    ).withConverter(Converter)
+    ).withConverter(Employee.Converter)
   );
 
   if (loading) {
