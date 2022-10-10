@@ -45,11 +45,7 @@ import { getAvatarByUID, recordError } from "../../utils/utils";
 import LocationsPicker from "./LocationsPicker";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
 
-function SupervisorDetails({
-  supervisors,
-}: {
-  supervisors: (Employee & { role: RoleAccessLevels.ADMIN })[];
-}) {
+function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
   const { supervisorId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -265,6 +261,7 @@ function SupervisorDetails({
                 <LocationsPicker
                   selectedLocations={selectedLocations}
                   onSelectionChange={setSelectedLocations}
+                  alreadySelected={getSupervisorLocations}
                 />
 
                 <Layout.Footer

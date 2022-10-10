@@ -201,6 +201,7 @@ function NewSupervisor() {
             <LocationsPicker
               selectedLocations={selectedLocations}
               onSelectionChange={setSelectedLocations}
+              alreadySelected={[]}
             />
 
             <Layout.Footer css={{ justifyContent: "center", display: "flex" }}>
