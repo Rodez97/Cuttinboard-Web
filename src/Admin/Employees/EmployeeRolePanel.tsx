@@ -153,44 +153,54 @@ function EmployeeRolePanel({ employee }: { employee: Employee }) {
                     flexDirection: "row",
                     gap: 1,
                     marginBottom: 8,
+                    width: "100%",
                   }}
                 >
-                  <Form.Item
-                    {...restField}
-                    name={[name, "position"]}
-                    rules={[{ required: true, message: "" }]}
-                    css={{ flex: 0.45 }}
+                  <div
+                    css={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 1,
+                      width: "100%",
+                    }}
                   >
-                    <Select showSearch placeholder={t("Position")}>
-                      {location.settings?.positions?.length && (
-                        <Select.OptGroup label={t("Custom")}>
-                          {location.settings.positions.map((pos) => (
+                    <Form.Item
+                      {...restField}
+                      name={[name, "position"]}
+                      rules={[{ required: true, message: "" }]}
+                      css={{ width: "50%" }}
+                    >
+                      <Select showSearch placeholder={t("Position")}>
+                        {location.settings?.positions?.length && (
+                          <Select.OptGroup label={t("Custom")}>
+                            {location.settings.positions.map((pos) => (
+                              <Select.Option value={pos}>{pos}</Select.Option>
+                            ))}
+                          </Select.OptGroup>
+                        )}
+
+                        <Select.OptGroup label={t("Default")}>
+                          {Positions.map((pos) => (
                             <Select.Option value={pos}>{pos}</Select.Option>
                           ))}
                         </Select.OptGroup>
-                      )}
-
-                      <Select.OptGroup label={t("Default")}>
-                        {Positions.map((pos) => (
-                          <Select.Option value={pos}>{pos}</Select.Option>
-                        ))}
-                      </Select.OptGroup>
-                    </Select>
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, "wage"]}
-                    css={{ flex: 0.45 }}
-                  >
-                    <InputNumber
-                      css={{ width: "100%" }}
-                      min={0}
-                      placeholder={t("Hourly Wage")}
-                      step={0.25}
-                    />
-                  </Form.Item>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "wage"]}
+                      css={{ width: "50%" }}
+                    >
+                      <InputNumber
+                        css={{ width: "100%" }}
+                        min={0}
+                        placeholder={t("Hourly Wage")}
+                        step={0.25}
+                      />
+                    </Form.Item>
+                  </div>
                   <Button
-                    css={{ flex: 0.1 }}
+                    css={{ width: 30 }}
                     type="text"
                     shape="circle"
                     onClick={() => remove(name)}
