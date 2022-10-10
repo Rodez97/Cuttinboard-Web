@@ -18,12 +18,14 @@ import { MessageOutlined, PlusOutlined } from "@ant-design/icons";
 import { Badge, Button, Input, Menu, Space } from "antd";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
+import { useNewElement } from "Modules/Notes/useNewElement";
 
 function ConversationsList() {
   const { locationId } = useParams();
   const { locationAccessKey } = useLocation();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const newElement = useNewElement();
   const { chats, chatId } = useConversations();
   const { getModuleBadge } = useNotificationsBadges();
   const { notifications } = useCuttinboard();
@@ -67,7 +69,7 @@ function ConversationsList() {
           icon={<PlusOutlined />}
           block
           type="dashed"
-          onClick={() => navigate("new")}
+          onClick={newElement}
         >
           {t("Add")}
         </Button>

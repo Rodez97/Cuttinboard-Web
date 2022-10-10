@@ -17,10 +17,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import FilesCounter from "./FilesCounter";
 import { DarkPageHeader } from "../../components/PageHeaders";
+import { useNewElement } from "Modules/Notes/useNewElement";
 
 function FilesDrawersList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const newElement = useNewElement();
   const { selectedApp, elements } = useCuttinboardModule();
   const { locationAccessKey, location } = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,7 +59,7 @@ function FilesDrawersList() {
             icon={<PlusOutlined />}
             block
             type="dashed"
-            onClick={() => navigate("new")}
+            onClick={newElement}
           >
             {t("Add")}
           </Button>
