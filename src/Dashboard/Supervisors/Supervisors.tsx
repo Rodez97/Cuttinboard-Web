@@ -11,11 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 
-function Supervisors({
-  supervisors,
-}: {
-  supervisors: (Employee & { role: RoleAccessLevels.ADMIN })[];
-}) {
+function Supervisors({ supervisors }: { supervisors: Employee[] }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 

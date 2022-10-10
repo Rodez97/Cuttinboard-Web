@@ -24,7 +24,7 @@ function UserInfoElement({ employee }: QuickUserDialogProps) {
     <List>
       <List.Item css={{ justifyContent: "center" }}>
         <Avatar
-          src={getAvatarByUID(employee.id)}
+          src={employee.getAvatar}
           size={60}
           alt={employee.name}
           icon={<UserOutlined />}
@@ -34,7 +34,7 @@ function UserInfoElement({ employee }: QuickUserDialogProps) {
       <List.Item>
         <List.Item.Meta
           title={t("Name")}
-          description={`${employee.name} ${employee.lastName}`}
+          description={employee.fullName}
           avatar={<InfoCircleOutlined />}
         />
       </List.Item>
@@ -74,7 +74,13 @@ function UserInfoElement({ employee }: QuickUserDialogProps) {
   );
 }
 
-export function QuickUserDialogAvatar({ employee }: { employee: Employee }) {
+export function QuickUserDialogAvatar({
+  employee,
+  size,
+}: {
+  employee: Employee;
+  size?: number;
+}) {
   const { t } = useTranslation();
   const handleOpen = () => {
     Modal.info({
@@ -84,7 +90,8 @@ export function QuickUserDialogAvatar({ employee }: { employee: Employee }) {
   };
   return (
     <Avatar
-      src={getAvatarByUID(employee.id)}
+      size={size}
+      src={employee.getAvatar}
       onClick={handleOpen}
       css={{ cursor: "pointer" }}
       icon={<UserOutlined />}
