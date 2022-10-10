@@ -192,7 +192,7 @@ function MyLocations() {
             }}
           >
             <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-              {t("You haven't created any location.")}
+              {t("No locations.")}
             </Typography.Text>
           </div>
         )}
