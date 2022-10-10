@@ -138,163 +138,176 @@ function CreateEmployee() {
   };
 
   return (
-    <Layout style={{ overflow: "auto" }}>
+    <Layout>
       <PageHeader
         className="site-page-header-responsive"
         onBack={() => navigate(-1)}
         title={t("Add Employee")}
       />
 
-      <Form<EmployeeData>
-        css={{ width: 300, alignSelf: "center" }}
-        layout="vertical"
-        onFinish={onFinish}
-        initialValues={{
-          name: "",
-          lastName: "",
-          email: "",
-          role: RoleAccessLevels.STAFF,
-          positions: [],
-        }}
-        disabled={submitting}
-      >
-        <Form.Item
-          required
-          label={t("Name")}
-          name="name"
-          rules={[{ required: true, message: "" }]}
+      <Layout.Content>
+        <Form<EmployeeData>
+          css={{ minWidth: 280, maxWidth: 500, margin: "auto" }}
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{
+            name: "",
+            lastName: "",
+            email: "",
+            role: RoleAccessLevels.STAFF,
+            positions: [],
+          }}
+          disabled={submitting}
         >
-          <Input maxLength={50} showCount />
-        </Form.Item>
-        <Form.Item
-          required
-          label={t("Last Name")}
-          name="lastName"
-          rules={[{ required: true, message: "" }]}
-        >
-          <Input maxLength={50} showCount />
-        </Form.Item>
-        <Form.Item
-          label={t("Email")}
-          name="email"
-          rules={[
-            { required: true, message: "" },
-            { type: "email", message: t("Must be a valid email") },
-          ]}
-        >
-          <Input type="email" maxLength={255} showCount />
-        </Form.Item>
-        <Form.Item
-          label={t("Role")}
-          name="role"
-          rules={[{ required: true, message: "" }]}
-        >
-          <Select
-            defaultValue={RoleAccessLevels.STAFF}
-            options={getAviablePositions
-              .filter((p) => p !== RoleAccessLevels.ADMIN)
-              .map((role) => ({
-                label: t(getRoleTextByNumber(role)),
-                value: role,
-              }))}
-          />
-        </Form.Item>
-        <Form.List
-          name="positions"
-          rules={[
-            {
-              validator: async (_, positions) => {
-                if (positions && positions.length >= 10) {
-                  return Promise.reject(
-                    new Error(t("Can't add more than 10 positions"))
-                  );
-                }
-              },
-            },
-          ]}
-        >
-          {(fields, { add, remove }) => (
-            <React.Fragment>
-              {fields.map(({ key, name, ...restField }) => (
-                <div
-                  key={key}
-                  css={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: 1,
-                    marginBottom: 8,
-                  }}
-                >
-                  <Form.Item
-                    {...restField}
-                    name={[name, "position"]}
-                    rules={[{ required: true, message: "" }]}
-                    css={{ flex: 0.45 }}
-                  >
-                    <Select showSearch placeholder={t("Position")}>
-                      {location.settings?.positions?.length && (
-                        <Select.OptGroup label={t("Custom")}>
-                          {location.settings.positions.map((pos) => (
-                            <Select.Option value={pos}>{pos}</Select.Option>
-                          ))}
-                        </Select.OptGroup>
-                      )}
-
-                      <Select.OptGroup label={t("Default")}>
-                        {Positions.map((pos) => (
-                          <Select.Option value={pos}>{pos}</Select.Option>
-                        ))}
-                      </Select.OptGroup>
-                    </Select>
-                  </Form.Item>
-                  <Form.Item
-                    {...restField}
-                    name={[name, "wage"]}
-                    css={{ flex: 0.45 }}
-                  >
-                    <InputNumber
-                      min={0}
-                      placeholder={t("Hourly Wage")}
-                      step={0.25}
-                    />
-                  </Form.Item>
-                  <Button
-                    css={{ flex: 0.1 }}
-                    type="text"
-                    shape="circle"
-                    onClick={() => remove(name)}
-                    icon={<MinusCircleOutlined />}
-                    disabled={submitting}
-                  />
-                </div>
-              ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                >
-                  {t("Add Position")}
-                </Button>
-              </Form.Item>
-            </React.Fragment>
-          )}
-        </Form.List>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            icon={<SaveFilled />}
-            block
-            loading={submitting}
+          <Form.Item
+            required
+            label={t("Name")}
+            name="name"
+            rules={[{ required: true, message: "" }]}
           >
-            {t("Save")}
-          </Button>
-        </Form.Item>
+            <Input maxLength={50} showCount />
+          </Form.Item>
+          <Form.Item
+            required
+            label={t("Last Name")}
+            name="lastName"
+            rules={[{ required: true, message: "" }]}
+          >
+            <Input maxLength={50} showCount />
+          </Form.Item>
+          <Form.Item
+            label={t("Email")}
+            name="email"
+            rules={[
+              { required: true, message: "" },
+              { type: "email", message: t("Must be a valid email") },
+            ]}
+          >
+            <Input type="email" maxLength={255} showCount />
+          </Form.Item>
+          <Form.Item
+            label={t("Role")}
+            name="role"
+            rules={[{ required: true, message: "" }]}
+          >
+            <Select
+              defaultValue={RoleAccessLevels.STAFF}
+              options={getAviablePositions
+                .filter((p) => p !== RoleAccessLevels.ADMIN)
+                .map((role) => ({
+                  label: t(getRoleTextByNumber(role)),
+                  value: role,
+                }))}
+            />
+          </Form.Item>
+          <Form.List
+            name="positions"
+            rules={[
+              {
+                validator: async (_, positions) => {
+                  if (positions && positions.length >= 10) {
+                    return Promise.reject(
+                      new Error(t("Can't add more than 10 positions"))
+                    );
+                  }
+                },
+              },
+            ]}
+          >
+            {(fields, { add, remove }) => (
+              <React.Fragment>
+                {fields.map(({ key, name, ...restField }) => (
+                  <div
+                    key={key}
+                    css={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 1,
+                      marginBottom: 8,
+                      width: "100%",
+                    }}
+                  >
+                    <div
+                      css={{
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: 1,
+                        width: "100%",
+                      }}
+                    >
+                      <Form.Item
+                        {...restField}
+                        name={[name, "position"]}
+                        rules={[{ required: true, message: "" }]}
+                        css={{ width: "50%" }}
+                      >
+                        <Select showSearch placeholder={t("Position")}>
+                          {location.settings?.positions?.length && (
+                            <Select.OptGroup label={t("Custom")}>
+                              {location.settings.positions.map((pos) => (
+                                <Select.Option value={pos}>{pos}</Select.Option>
+                              ))}
+                            </Select.OptGroup>
+                          )}
 
-        {error && <Alert message={error?.message} type="error" showIcon />}
-      </Form>
+                          <Select.OptGroup label={t("Default")}>
+                            {Positions.map((pos) => (
+                              <Select.Option value={pos}>{pos}</Select.Option>
+                            ))}
+                          </Select.OptGroup>
+                        </Select>
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "wage"]}
+                        css={{ width: "50%" }}
+                      >
+                        <InputNumber
+                          min={0}
+                          placeholder={t("Hourly Wage")}
+                          step={0.25}
+                          css={{ width: "100%" }}
+                        />
+                      </Form.Item>
+                    </div>
+                    <Button
+                      css={{ width: 30 }}
+                      type="text"
+                      shape="circle"
+                      onClick={() => remove(name)}
+                      icon={<MinusCircleOutlined />}
+                      disabled={submitting}
+                    />
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    {t("Add Position")}
+                  </Button>
+                </Form.Item>
+              </React.Fragment>
+            )}
+          </Form.List>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<SaveFilled />}
+              block
+              loading={submitting}
+            >
+              {t("Save")}
+            </Button>
+          </Form.Item>
+
+          {error && <Alert message={error?.message} type="error" showIcon />}
+        </Form>
+      </Layout.Content>
     </Layout>
   );
 }
