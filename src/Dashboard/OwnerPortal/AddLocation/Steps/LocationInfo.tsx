@@ -21,7 +21,6 @@ function LocationInfo() {
   const [locationForm] = Form.useForm<locFormType>();
   const { t } = useTranslation();
   const { location, setLocation, setGeneralManager } = useAddLocation();
-  const { user } = useCuttinboard();
   const [saved, setSaved] = useState(false);
   const [addGM, setAddGM] = useState(false);
 
@@ -73,30 +72,42 @@ function LocationInfo() {
                 name="name"
                 rules={[{ required: true, message: "" }]}
               >
-                <Input maxLength={50} showCount placeholder={t("Name")} />
+                <Input
+                  required
+                  maxLength={50}
+                  showCount
+                  placeholder={t("Location Name") + " (required)"}
+                />
               </Form.Item>
               <Form.Item
                 name="email"
                 rules={[{ type: "email", message: t("Must be a valid email") }]}
               >
-                <Input type="email" maxLength={100} placeholder={t("Email")} />
+                <Input
+                  type="email"
+                  maxLength={100}
+                  placeholder={t("Email") + " (optional)"}
+                />
               </Form.Item>
               <Form.Item name="phoneNumber">
                 <Input
                   type="phoneNumber"
                   maxLength={30}
-                  placeholder={t("Phone Number")}
+                  placeholder={t("Phone Number") + " (optional)"}
                 />
               </Form.Item>
               <Form.Item name="intId">
-                <Input maxLength={90} placeholder={t("Internal ID")} />
+                <Input
+                  maxLength={90}
+                  placeholder={t("Internal ID") + " (optional)"}
+                />
               </Form.Item>
               <Form.Item name="description">
                 <Input.TextArea
                   maxLength={255}
                   showCount
                   rows={3}
-                  placeholder={t("Description")}
+                  placeholder={t("Description") + " (optional)"}
                 />
               </Form.Item>
             </Input.Group>
@@ -109,22 +120,22 @@ function LocationInfo() {
           >
             <Input.Group>
               <Form.Item name={["address", "streetNumber"]}>
-                <Input placeholder={t("Address Line 1")} />
+                <Input placeholder={t("Address Line 1") + " (optional)"} />
               </Form.Item>
               <Form.Item name={["address", "street"]}>
-                <Input placeholder={t("Address Line 2")} />
+                <Input placeholder={t("Address Line 2") + " (optional)"} />
               </Form.Item>
               <Form.Item name={["address", "city"]}>
-                <Input placeholder={t("City")} />
+                <Input placeholder={t("City") + " (optional)"} />
               </Form.Item>
               <Form.Item name={["address", "state"]}>
-                <Input placeholder={t("State")} />
+                <Input placeholder={t("State") + " (optional)"} />
               </Form.Item>
               <Form.Item name={["address", "country"]}>
-                <Input placeholder={t("Country")} />
+                <Input placeholder={t("Country") + " (optional)"} />
               </Form.Item>
               <Form.Item name={["address", "zip"]}>
-                <Input placeholder={t("Zip")} />
+                <Input placeholder={t("Zip") + " (optional)"} />
               </Form.Item>
             </Input.Group>
           </Form.Item>
