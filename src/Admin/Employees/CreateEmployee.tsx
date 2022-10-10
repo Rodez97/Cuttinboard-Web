@@ -30,7 +30,11 @@ import {
   SaveFilled,
 } from "@ant-design/icons";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import {
+  Firestore,
+  Functions,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 type EmployeeData = {
   name: string;
@@ -76,6 +80,25 @@ function CreateEmployee() {
       return;
     }
     try {
+      const checkForSupervisor = await getDocs(
+        query(
+          collection(
+            Firestore,
+            "Organizations",
+            location.organizationId,
+            "employees"
+          ),
+          where("email", "==", values.email),
+          where("role", "in", [0, 1])
+        )
+      );
+      if (checkForSupervisor.size === 1) {
+        message.error(
+          t("This user is already an owner or supervisor in the organization")
+        );
+        return;
+      }
+
       const employeeToAdd = {
         ...values,
         positions: positions.map((pos) => pos.position),
@@ -91,7 +114,9 @@ function CreateEmployee() {
       } = await addEmployee({ ...employeeToAdd, locationId: location.id });
 
       if (status === "CANT_ADD_ORG_EMP") {
-        message.error(t("The employee is already member of the organization"));
+        message.error(
+          t("This user is already an owner or supervisor in the organization")
+        );
         navigate(-1);
         return;
       }
