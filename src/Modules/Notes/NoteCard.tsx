@@ -44,6 +44,12 @@ function NoteCard({ note, manageNoteDialogRef }: INoteCard) {
     setReadonlyNoteDialogOpen(true);
   };
 
+  const linkProps = {
+    onClick: (event: MouseEvent) => {
+      event.preventDefault();
+    },
+  };
+
   return (
     <React.Fragment>
       <Tooltip title={note.title}>
@@ -63,6 +69,7 @@ function NoteCard({ note, manageNoteDialogRef }: INoteCard) {
                     target: "_blank",
                     rel: "noreferrer noopener",
                     className: "linkifyInnerStyle",
+                    attributes: linkProps,
                   }}
                 >
                   {note.content}
