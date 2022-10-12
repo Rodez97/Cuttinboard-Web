@@ -116,7 +116,7 @@ function NotesMain() {
         }
       />
       {getOrderedNotes.length ? (
-        <Space wrap>
+        <Space wrap css={{ padding: 20 }}>
           {getOrderedNotes?.map((note) => (
             <NoteCard
               key={note.id}
