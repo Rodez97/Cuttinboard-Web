@@ -15,7 +15,16 @@ import AddMembers from "./AddMembers";
 import MemberItem from "./MemberItem";
 import SelectEmployee from "./SelectEmployee";
 import { differenceBy, indexOf, uniqBy } from "lodash";
-import { Button, List, Modal, Space, Tag, Tooltip, Typography } from "antd";
+import {
+  Button,
+  Divider,
+  List,
+  Modal,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { GrayPageHeader } from "components/PageHeaders";
@@ -149,7 +158,7 @@ function ManageMembers({
                   {(hostUser ||
                     locationAccessKey.role <=
                       RoleAccessLevels.GENERAL_MANAGER) && (
-                    <TitleBoxBlue>{t("Host")}</TitleBoxBlue>
+                    <Divider orientation="left">{t("Host")}</Divider>
                   )}
 
                   {hostUser && (
@@ -174,7 +183,7 @@ function ManageMembers({
                     )}
 
                   {/* Members */}
-                  <TitleBoxGreen>{t("Members")}</TitleBoxGreen>
+                  <Divider orientation="left">{t("Members")}</Divider>
 
                   {privacyLevel === PrivacyLevel.PUBLIC && (
                     <Typography.Text

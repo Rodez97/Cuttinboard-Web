@@ -26,6 +26,7 @@ import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   AutoComplete,
   Button,
+  Divider,
   Input,
   Layout,
   List,
@@ -253,9 +254,9 @@ function Employees() {
               )}
 
               {getEmployeeByRole(RoleAccessLevels.OWNER)?.length > 0 && (
-                <TitleBoxOwner>
+                <Divider orientation="left">
                   {t(getRoleTextByNumber(RoleAccessLevels.OWNER))}
-                </TitleBoxOwner>
+                </Divider>
               )}
 
               {getEmployeeByRole(RoleAccessLevels.OWNER)?.map((emp, i) => (
@@ -263,9 +264,9 @@ function Employees() {
               ))}
 
               {getEmployeeByRole(RoleAccessLevels.ADMIN)?.length > 0 && (
-                <TitleBoxOwner>
+                <Divider orientation="left">
                   {t(getRoleTextByNumber(RoleAccessLevels.ADMIN))}
-                </TitleBoxOwner>
+                </Divider>
               )}
 
               {getEmployeeByRole(RoleAccessLevels.ADMIN)?.map((emp, i) => (
@@ -274,9 +275,9 @@ function Employees() {
 
               {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.length >
                 0 && (
-                <TitleBoxBlue>
+                <Divider orientation="left">
                   {t(getRoleTextByNumber(RoleAccessLevels.GENERAL_MANAGER))}
-                </TitleBoxBlue>
+                </Divider>
               )}
 
               {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.map(
@@ -286,9 +287,9 @@ function Employees() {
               )}
 
               {getEmployeeByRole(RoleAccessLevels.MANAGER)?.length > 0 && (
-                <TitleBoxGreen>
+                <Divider orientation="left">
                   {t(getRoleTextByNumber(RoleAccessLevels.MANAGER))}
-                </TitleBoxGreen>
+                </Divider>
               )}
 
               {getEmployeeByRole(RoleAccessLevels.MANAGER)?.map((emp, i) => (
@@ -296,9 +297,9 @@ function Employees() {
               ))}
 
               {getEmployeeByRole(RoleAccessLevels.STAFF)?.length > 0 && (
-                <TitleBoxYellow>
+                <Divider orientation="left">
                   {t(getRoleTextByNumber(RoleAccessLevels.STAFF))}
-                </TitleBoxYellow>
+                </Divider>
               )}
 
               {getEmployeeByRole(RoleAccessLevels.STAFF)?.map((emp, i) => (
