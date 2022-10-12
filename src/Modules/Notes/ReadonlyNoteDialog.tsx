@@ -1,10 +1,10 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { DeleteFilled, EditFilled, UserOutlined } from "@ant-design/icons";
 import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Modal, Tag, Typography } from "antd";
 import Linkify from "linkify-react";
-import React from "react";
 import { useTranslation } from "react-i18next";
 
 interface ReadonlyNoteDialogProps {
@@ -60,7 +60,7 @@ function ReadonlyNoteDialog({
       ]}
     >
       <Typography.Paragraph
-        style={{
+        css={{
           wordBreak: "break-word",
           color: "inherit",
           whiteSpace: "pre-line",

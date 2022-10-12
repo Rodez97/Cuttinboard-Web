@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import React, { useState } from "react";
 import ReadonlyNoteDialog from "./ReadonlyNoteDialog";
 import { useTranslation } from "react-i18next";
@@ -43,7 +45,7 @@ function NoteCard({ note, manageNoteDialogRef }: INoteCard) {
   };
 
   return (
-    <>
+    <React.Fragment>
       <Tooltip title={note.title}>
         <StickyNoteCard hoverable onClick={handleClick} bordered={false}>
           <Card.Meta
@@ -51,6 +53,10 @@ function NoteCard({ note, manageNoteDialogRef }: INoteCard) {
             description={
               <Typography.Paragraph
                 ellipsis={{ rows: 8, expandable: false, symbol: "..." }}
+                css={{
+                  wordBreak: "break-word",
+                  whiteSpace: "pre-line",
+                }}
               >
                 <Linkify
                   options={{
@@ -73,7 +79,7 @@ function NoteCard({ note, manageNoteDialogRef }: INoteCard) {
         onEdit={handleEditNote}
         onDelete={handleDeleteNote}
       />
-    </>
+    </React.Fragment>
   );
 }
 
