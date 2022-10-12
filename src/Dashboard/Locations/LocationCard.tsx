@@ -13,8 +13,37 @@ import { recordError } from "../../utils/utils";
 import { ReactNode, useState } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import styled from "@emotion/styled";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import "./LocationCard.scss";
 
 const { Meta } = Card;
+
+const MainCard = styled(Card)<{
+  draftOrEdited?: boolean;
+  deleting: boolean;
+  haveActions?: boolean;
+}>`
+  cursor: pointer;
+  width: 270px;
+  height: ${(props) => (props.haveActions ? 170 : 120)};
+  background: ${(props) =>
+    props.deleting
+      ? `repeating-linear-gradient(-45deg, #f33d61, #f33d61 10px, #e76e8a 10px, #e76e8a 20px)`
+      : props.draftOrEdited &&
+        `repeating-linear-gradient(-45deg, #606060, #606060 10px, #505050 10px, #505050 20px)`};
+  background-color: ${(props) =>
+    !props.draftOrEdited && !props.deleting && Colors.MainOnWhite};
+  color: ${(props) => {
+    if (props.deleting) {
+      return Colors.CalculateContrast("#f33d61");
+    }
+    if (props.draftOrEdited) {
+      return Colors.CalculateContrast("#606060");
+    }
+    return Colors.CalculateContrast(Colors.MainOnWhite);
+  }} !important;
+`;
 
 interface LocationCardProps {
   location: Location;
@@ -96,19 +125,19 @@ function LocationCard({ location, actions }: LocationCardProps) {
       color="primary"
     >
       <Spin spinning={loadingLocation || isRunning}>
-        <Card
-          css={{
-            width: 270,
-            height: Boolean(actions?.length) ? 170 : 120,
-          }}
+        <MainCard
           hoverable
           onClick={handleSelectLocation}
           actions={actions}
+          haveActions={Boolean(actions?.length)}
+          deleting={Boolean(location.subscriptionStatus === "canceled")}
         >
           <Meta
+            css={{ color: "inherit" }}
             title={
               <Typography.Paragraph
                 ellipsis={{ rows: 2, expandable: false, symbol: "..." }}
+                css={{ color: "inherit" }}
               >
                 {location?.name}
               </Typography.Paragraph>
@@ -117,7 +146,7 @@ function LocationCard({ location, actions }: LocationCardProps) {
               location.members ? location.members.length : 0
             } Member(s)`}
           />
-        </Card>
+        </MainCard>
       </Spin>
     </Badge>
   );
