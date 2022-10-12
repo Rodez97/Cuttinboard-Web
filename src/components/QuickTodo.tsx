@@ -1,10 +1,15 @@
 import { Todo_Task } from "@cuttinboard-solutions/cuttinboard-library";
 import { Timestamp } from "@firebase/firestore";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
 import SimpleTodo from "./SimpleTodo";
-import { Input } from "antd";
+import { Input, InputRef } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 
 interface QuickTodoProps {
@@ -21,6 +26,7 @@ const QuickTodo = forwardRef<QuickTodoRef, QuickTodoProps>(
   ({ tasks, onChange }, ref) => {
     const [newTaskName, setNewTaskName] = useState("");
     const { t } = useTranslation();
+    const inputRef = useRef<InputRef>(null);
 
     const addTask = () => {
       if (newTaskName) {
@@ -34,6 +40,7 @@ const QuickTodo = forwardRef<QuickTodoRef, QuickTodoProps>(
         });
         setNewTaskName("");
       }
+      inputRef.current.focus();
     };
 
     const handleTaskChange = (key: string, status: boolean) => () => {
@@ -53,6 +60,7 @@ const QuickTodo = forwardRef<QuickTodoRef, QuickTodoProps>(
     return (
       <>
         <Input
+          ref={inputRef}
           placeholder={t("Add a task")}
           value={newTaskName}
           onChange={(e) => setNewTaskName(e.target.value)}
