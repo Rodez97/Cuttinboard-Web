@@ -63,7 +63,6 @@ function ReadonlyNoteDialog({
         style={{
           wordBreak: "break-word",
           color: "inherit",
-          textAlign: "center",
           whiteSpace: "pre-line",
         }}
       >
