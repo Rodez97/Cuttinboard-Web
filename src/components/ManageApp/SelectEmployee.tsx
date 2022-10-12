@@ -3,11 +3,11 @@ import { jsx } from "@emotion/react";
 import {
   Colors,
   Employee,
+  RoleAccessLevels,
   useEmployeesList,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, List } from "antd";
 import { useTranslation } from "react-i18next";
-import { TitleBoxGreen } from "../../theme/styledComponents";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { ArrowRightOutlined } from "@ant-design/icons";
 
@@ -29,9 +29,10 @@ function SelectEmployee({ onSelectedEmployee }: AddMembersProps) {
           width: "100%",
         }}
       >
-        <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
         <List
-          dataSource={getEmployees}
+          dataSource={getEmployees.filter(
+            (emp) => emp.locationRole <= RoleAccessLevels.MANAGER
+          )}
           renderItem={(emp) => {
             return (
               <List.Item
