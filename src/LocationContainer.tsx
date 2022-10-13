@@ -37,7 +37,11 @@ export function LocationContainer() {
   const { t } = useTranslation();
   const { getBadgeByModule, getDMBadges } = useNotificationsBadges();
 
-  if (!locationAccessKey || locationAccessKey.locId !== locationId) {
+  if (
+    !locationAccessKey ||
+    locationAccessKey.locId !== locationId ||
+    !location
+  ) {
     return <Navigate to="/dashboard" />;
   }
 
