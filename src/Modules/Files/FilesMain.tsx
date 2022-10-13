@@ -49,12 +49,12 @@ function FilesMain() {
     searchQuery: "",
   });
   const [pickFileOpen, setPickFileOpen] = useState(false);
-  const { selectedApp, moduleContentRef, canManage } = useCuttinboardModule();
+  const { selectedApp, canManage } = useCuttinboardModule();
   const { location } = useLocation();
   const [drawerFiles, loading, drawerFilesError] =
     useCollectionData<Cuttinboard_File>(
-      moduleContentRef &&
-        moduleContentRef.withConverter(Cuttinboard_File.Converter)
+      selectedApp &&
+        selectedApp.contentRef.withConverter(Cuttinboard_File.Converter)
     );
   const storagePathRef = useMemo(
     () =>

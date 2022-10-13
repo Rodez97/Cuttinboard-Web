@@ -1,10 +1,5 @@
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  useCuttinboardModule,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { serverTimestamp } from "firebase/firestore";
 import React from "react";
 import ManageBase, { BaseApp } from "../../components/ManageApp/ManageBase";
 import { recordError } from "../../utils/utils";
@@ -12,7 +7,7 @@ import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
-import { GenericModule } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { IGenericModule } from "@cuttinboard-solutions/cuttinboard-library/models";
 
 interface ManageModuleProps {
   title: string;
@@ -22,8 +17,7 @@ interface ManageModuleProps {
 // TODO: Crear una cceso directo para manejar los miembros
 
 const ManageModule = ({ title, edit }: ManageModuleProps) => {
-  const { newElement, editElement, selectedApp } = useCuttinboardModule();
-  const { location } = useLocation();
+  const { newElement, selectedApp, canManage } = useCuttinboardModule();
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
 
@@ -32,12 +26,7 @@ const ManageModule = ({ title, edit }: ManageModuleProps) => {
     positions,
     ...newModuleData
   }: BaseApp) => {
-    const newAppObject: any = {
-      ...newModuleData,
-      createdAt: serverTimestamp(),
-      createdBy: Auth.currentUser.uid,
-      locationId: location.id,
-    };
+    const newAppObject: Omit<IGenericModule, "locationId"> = newModuleData;
 
     if (newModuleData.privacyLevel === PrivacyLevel.POSITIONS) {
       newAppObject.accessTags = positions;
@@ -59,7 +48,13 @@ const ManageModule = ({ title, edit }: ManageModuleProps) => {
     positions,
     ...moduleData
   }: BaseApp) => {
-    const editedData: GenericModule = { ...selectedApp, ...moduleData };
+    if (!canManage) {
+      return;
+    }
+    const editedData: Pick<
+      IGenericModule,
+      "name" | "description" | "accessTags"
+    > = moduleData;
 
     if (moduleData.privacyLevel === PrivacyLevel.POSITIONS) {
       editedData.accessTags = positions;
@@ -68,7 +63,7 @@ const ManageModule = ({ title, edit }: ManageModuleProps) => {
       editedData.accessTags = members;
     }
     try {
-      await editElement(editedData);
+      await selectedApp.update(editedData);
     } catch (error) {
       recordError(error);
     }

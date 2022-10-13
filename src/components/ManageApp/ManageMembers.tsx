@@ -10,11 +10,10 @@ import {
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import { TitleBoxBlue, TitleBoxGreen } from "../../theme/styledComponents";
 import AddMembers from "./AddMembers";
 import MemberItem from "./MemberItem";
 import SelectEmployee from "./SelectEmployee";
-import { differenceBy, indexOf, uniqBy } from "lodash";
+import { indexOf } from "lodash";
 import {
   Button,
   Divider,
@@ -38,7 +37,7 @@ interface ManageMembersProps {
   removeHost: (hostUser: Employee) => void;
   privacyLevel: PrivacyLevel;
   positions?: string[];
-  hostId?: string;
+  hosts?: string[];
 }
 
 function ManageMembers({
@@ -49,7 +48,7 @@ function ManageMembers({
   removeHost,
   privacyLevel,
   positions,
-  hostId,
+  hosts,
   members,
 }: ManageMembersProps) {
   const { t } = useTranslation();
@@ -90,19 +89,22 @@ function ManageMembers({
     if (privacyLevel === PrivacyLevel.POSITIONS) {
       membersList = getEmployees.filter((emp) => emp.hasAnyPosition(positions));
     }
-    return membersList.filter((m) => m.id !== hostId);
-  }, [getEmployees, privacyLevel, members, positions, hostId]);
+    return membersList.filter((m) => !hosts?.includes(m.id));
+  }, [getEmployees, privacyLevel, members, positions, hosts]);
 
-  const hostUser = useMemo(() => {
-    return getEmployees.find(({ id }) => id === hostId);
-  }, [hostId]);
+  const hostsList = useMemo(() => {
+    if (!Boolean(hosts?.length)) {
+      return [];
+    }
+    return getEmployees.filter((e) => hosts?.indexOf(e.id) > -1);
+  }, [getEmployees, hosts]);
 
   const handleSetHost = (newHost: Employee) => {
     setAppHost(newHost);
     navigate(-1);
   };
 
-  const handleRemoveHost = async () => {
+  const handleRemoveHost = async (host: Employee) => {
     Modal.confirm({
       title: t("Are you sure you want to remove this host?"),
       icon: <ExclamationCircleOutlined />,
@@ -111,7 +113,7 @@ function ManageMembers({
       cancelText: t("No"),
       async onOk() {
         try {
-          removeHost(hostUser);
+          removeHost(host);
         } catch (error) {
           recordError(error);
         }
@@ -155,32 +157,36 @@ function ManageMembers({
                   }}
                 >
                   {/* 🛡 Host */}
-                  {(hostUser ||
+                  {(Boolean(hostsList.length) ||
                     locationAccessKey.role <=
                       RoleAccessLevels.GENERAL_MANAGER) && (
                     <Divider orientation="left">{t("Host")}</Divider>
                   )}
 
-                  {hostUser && (
-                    <MemberItem
-                      key={hostUser.id}
-                      employee={hostUser}
-                      onRemove={handleRemoveHost}
-                      hostId={hostId}
-                      privacyLevel={privacyLevel}
+                  {Boolean(hostsList.length) && (
+                    <List
+                      dataSource={hostsList}
+                      renderItem={(hostUser) => (
+                        <MemberItem
+                          key={hostUser.id}
+                          employee={hostUser}
+                          onRemove={() => handleRemoveHost(hostUser)}
+                          hosts={hosts}
+                          privacyLevel={privacyLevel}
+                        />
+                      )}
                     />
                   )}
-                  {!hostUser &&
-                    locationAccessKey.role <=
-                      RoleAccessLevels.GENERAL_MANAGER && (
-                      <Button
-                        type="dashed"
-                        block
-                        onClick={() => navigate("host")}
-                      >
-                        {t("Set Host")}
-                      </Button>
-                    )}
+                  {locationAccessKey.role <=
+                    RoleAccessLevels.GENERAL_MANAGER && (
+                    <Button
+                      type="dashed"
+                      block
+                      onClick={() => navigate("host")}
+                    >
+                      {t("Add Host")}
+                    </Button>
+                  )}
 
                   {/* Members */}
                   <Divider orientation="left">{t("Members")}</Divider>
@@ -216,7 +222,6 @@ function ManageMembers({
                         key={emp.id}
                         employee={emp}
                         onRemove={handleMemberRemove}
-                        hostId={hostId}
                         privacyLevel={privacyLevel}
                         readonly={
                           privacyLevel === PrivacyLevel.POSITIONS ||
@@ -241,7 +246,7 @@ function ManageMembers({
               />
               <AddMembers
                 onSelectedEmployees={handleAddMembers}
-                hostId={hostId}
+                hosts={hosts}
                 initialSelected={getMembers}
               />
             </div>
@@ -255,7 +260,10 @@ function ManageMembers({
                 onBack={() => navigate(-1)}
                 title={t("Select Host")}
               />
-              <SelectEmployee onSelectedEmployee={handleSetHost} />
+              <SelectEmployee
+                onSelectedEmployee={handleSetHost}
+                hosts={hosts}
+              />
             </div>
           }
         />

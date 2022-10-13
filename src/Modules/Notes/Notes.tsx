@@ -16,6 +16,7 @@ import NotesList from "./NotesList";
 import NotesRoutes from "./NotesRoutes";
 import notesImage from "../../assets/images/notes.png";
 import { EmptyMainModule } from "./EmptyMainModule";
+import { recordError } from "utils/utils";
 
 function Notes() {
   const { t } = useTranslation();
@@ -29,39 +30,46 @@ function Notes() {
         location.organizationId,
         "notes"
       )}
-      LoadingElement={<PageLoading />}
-      ErrorElement={(error) => <PageError error={error} />}
+      onError={recordError}
     >
-      <Layout hasSider>
-        <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
-          <NotesList />
-        </Layout.Sider>
-        <Layout.Content>
-          <Routes>
-            <Route path="/">
-              <Route
-                index
-                element={
-                  <EmptyMainModule
-                    description={
-                      <p>
-                        {t("Welcome to Notes.")} <a>{t("Learn More")}</a>
-                      </p>
+      {(loading, error) =>
+        loading ? (
+          <PageLoading />
+        ) : error ? (
+          <PageError error={error} />
+        ) : (
+          <Layout hasSider>
+            <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
+              <NotesList />
+            </Layout.Sider>
+            <Layout.Content>
+              <Routes>
+                <Route path="/">
+                  <Route
+                    index
+                    element={
+                      <EmptyMainModule
+                        description={
+                          <p>
+                            {t("Welcome to Notes.")} <a>{t("Learn More")}</a>
+                          </p>
+                        }
+                        image={notesImage}
+                      />
                     }
-                    image={notesImage}
                   />
-                }
-              />
-              <Route path=":boardId/*" element={<NotesRoutes />} />
-              <Route
-                path="new"
-                element={<ManageModule title="New Notes Board" />}
-              />
-              <Route path="*" element={<Navigate to="/apps/notes" />} />
-            </Route>
-          </Routes>
-        </Layout.Content>
-      </Layout>
+                  <Route path=":boardId/*" element={<NotesRoutes />} />
+                  <Route
+                    path="new"
+                    element={<ManageModule title="New Notes Board" />}
+                  />
+                  <Route path="*" element={<Navigate to="/apps/notes" />} />
+                </Route>
+              </Routes>
+            </Layout.Content>
+          </Layout>
+        )
+      }
     </CuttinboardModuleProvider>
   );
 }

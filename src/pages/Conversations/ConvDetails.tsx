@@ -33,23 +33,26 @@ import {
 function ConvDetails() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedChat, deleteConversation } = useConversations();
+  const { selectedChat, canManageApp } = useConversations();
   const { locationAccessKey } = useLocation();
   const { getEmployees } = useEmployeesList();
 
   const deleteConv = useCallback(async () => {
+    if (!canManageApp) {
+      return;
+    }
     try {
-      await deleteConversation();
+      await selectedChat.delete();
     } catch (error) {
       recordError(error);
     }
   }, [selectedChat]);
 
-  const host = useMemo(() => {
-    if (!selectedChat.hostId) {
-      return null;
+  const hosts = useMemo(() => {
+    if (!Boolean(selectedChat.hosts?.length)) {
+      return [];
     }
-    return getEmployees.find((e) => e.id === selectedChat.hostId);
+    return getEmployees.filter((e) => selectedChat.hosts.indexOf(e.id) > -1);
   }, [getEmployees, selectedChat]);
 
   return (
@@ -87,14 +90,19 @@ function ConvDetails() {
               description={t(selectedChat.privacyLevel)}
             />
           </List.Item>
-          {host && (
-            <List.Item>
-              <List.Item.Meta
-                avatar={<CrownOutlined />}
-                title={t("Host")}
-                description={`${host.name} ${host.lastName}`}
-              />
-            </List.Item>
+          {Boolean(hosts.length) && (
+            <List
+              dataSource={hosts}
+              renderItem={(host, index) => (
+                <List.Item key={`${host.id}-${index}`}>
+                  <List.Item.Meta
+                    avatar={<CrownOutlined />}
+                    title={t("Host")}
+                    description={`${host.fullName}`}
+                  />
+                </List.Item>
+              )}
+            />
           )}
           <List.Item>
             <List.Item.Meta

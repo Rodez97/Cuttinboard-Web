@@ -19,17 +19,16 @@ function TasksRoutes() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedApp, setSelected, canManage, moduleContentRef } =
-    useCuttinboardModule();
+  const { selectedApp, setSelected, canManage } = useCuttinboardModule();
   useLayoutEffect(() => {
     setSelected(boardId);
   }, [boardId]);
   const [todoCards, loading, error] = useCollectionData<Todo>(
     canManage
-      ? moduleContentRef?.withConverter(Todo.Converter)
-      : moduleContentRef &&
+      ? selectedApp?.contentRef.withConverter(Todo.Converter)
+      : selectedApp &&
           query(
-            moduleContentRef,
+            selectedApp.contentRef,
             where(`assignedTo.id`, "==", Auth.currentUser.uid)
           ).withConverter(Todo.Converter)
   );

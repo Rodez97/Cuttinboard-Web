@@ -8,17 +8,22 @@ import { CuttinboardProvider } from "@cuttinboard-solutions/cuttinboard-library/
 import AuthWrapper from "./Auth/AuthWrapper";
 
 function App() {
-  const onError = (error: Error) => recordError(error);
-  const ErrorElement = (error: Error) => <PageError error={error} />;
   return (
-    <CuttinboardProvider
-      authScreen={<AuthWrapper />}
-      LoadingElement={<LoadingScreen />}
-      onError={onError}
-      ErrorElement={ErrorElement}
-    >
-      <TrackPageAnalytics />
-      <MainRouter />
+    <CuttinboardProvider onError={recordError}>
+      {(user, error, loading) =>
+        loading ? (
+          <LoadingScreen />
+        ) : error ? (
+          <PageError error={error} />
+        ) : user ? (
+          <>
+            <TrackPageAnalytics />
+            <MainRouter />
+          </>
+        ) : (
+          <AuthWrapper />
+        )
+      }
     </CuttinboardProvider>
   );
 }

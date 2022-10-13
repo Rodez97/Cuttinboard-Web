@@ -1,6 +1,6 @@
-import { deleteDoc, deleteField, setDoc, Timestamp } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import dayjs from "dayjs";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
 import SimpleTodo from "../../components/SimpleTodo";

@@ -16,6 +16,7 @@ import TasksRoutes from "./TasksRoutes";
 import tasksImage from "../../assets/images/to-do-list.png";
 import { useTranslation } from "react-i18next";
 import { EmptyMainModule } from "../Notes/EmptyMainModule";
+import { recordError } from "utils/utils";
 
 function Tasks() {
   const { t } = useTranslation();
@@ -28,39 +29,46 @@ function Tasks() {
         location.organizationId,
         "todo"
       )}
-      LoadingElement={<PageLoading />}
-      ErrorElement={(error) => <PageError error={error} />}
+      onError={recordError}
     >
-      <Layout hasSider>
-        <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
-          <TasksList />
-        </Layout.Sider>
-        <Layout.Content>
-          <Routes>
-            <Route path="/">
-              <Route
-                index
-                element={
-                  <EmptyMainModule
-                    description={
-                      <p>
-                        {t("Welcome to Tasks.")} <a>{t("Learn More")}</a>
-                      </p>
+      {(loading, error) =>
+        loading ? (
+          <PageLoading />
+        ) : error ? (
+          <PageError error={error} />
+        ) : (
+          <Layout hasSider>
+            <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
+              <TasksList />
+            </Layout.Sider>
+            <Layout.Content>
+              <Routes>
+                <Route path="/">
+                  <Route
+                    index
+                    element={
+                      <EmptyMainModule
+                        description={
+                          <p>
+                            {t("Welcome to Tasks.")} <a>{t("Learn More")}</a>
+                          </p>
+                        }
+                        image={tasksImage}
+                      />
                     }
-                    image={tasksImage}
                   />
-                }
-              />
-              <Route path=":boardId/*" element={<TasksRoutes />} />
-              <Route
-                path="new"
-                element={<ManageModule title="New to-do board" />}
-              />
-              <Route path="*" element={<Navigate to="/apps/to-do" />} />
-            </Route>
-          </Routes>
-        </Layout.Content>
-      </Layout>
+                  <Route path=":boardId/*" element={<TasksRoutes />} />
+                  <Route
+                    path="new"
+                    element={<ManageModule title="New to-do board" />}
+                  />
+                  <Route path="*" element={<Navigate to="/apps/to-do" />} />
+                </Route>
+              </Routes>
+            </Layout.Content>
+          </Layout>
+        )
+      }
     </CuttinboardModuleProvider>
   );
 }

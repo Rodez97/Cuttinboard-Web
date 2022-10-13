@@ -25,25 +25,28 @@ import {
 import { useMemo } from "react";
 
 function ModuleInfo() {
-  const { selectedApp, deleteElement } = useCuttinboardModule();
+  const { selectedApp, canManage } = useCuttinboardModule();
   const { locationAccessKey } = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
 
   const handleDelete = async () => {
+    if (!canManage) {
+      return;
+    }
     try {
-      await deleteElement(selectedApp);
+      await selectedApp.delete();
     } catch (error) {
       recordError(error);
     }
   };
 
-  const host = useMemo(() => {
-    if (!selectedApp.hostId) {
-      return null;
+  const hosts = useMemo(() => {
+    if (!Boolean(selectedApp.hosts?.length)) {
+      return [];
     }
-    return getEmployees.find((e) => e.id === selectedApp.hostId);
+    return getEmployees.filter((e) => selectedApp.hosts?.indexOf(e.id) > -1);
   }, [getEmployees, selectedApp]);
 
   return (
@@ -81,14 +84,19 @@ function ModuleInfo() {
               description={t(selectedApp.privacyLevel)}
             />
           </List.Item>
-          {host && (
-            <List.Item>
-              <List.Item.Meta
-                avatar={<CrownOutlined />}
-                title={t("Host")}
-                description={`${host.name} ${host.lastName}`}
-              />
-            </List.Item>
+          {Boolean(hosts.length) && (
+            <List
+              dataSource={hosts}
+              renderItem={(host, index) => (
+                <List.Item key={`${host.id}-${index}`}>
+                  <List.Item.Meta
+                    avatar={<CrownOutlined />}
+                    title={t("Host")}
+                    description={`${host.fullName}`}
+                  />
+                </List.Item>
+              )}
+            />
           )}
           <List.Item>
             <List.Item.Meta

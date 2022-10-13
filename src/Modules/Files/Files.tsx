@@ -16,6 +16,7 @@ import FilesRoutes from "./FilesRoutes";
 import { EmptyMainModule } from "../Notes/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
+import { recordError } from "utils/utils";
 
 function Files() {
   const { t } = useTranslation();
@@ -28,36 +29,46 @@ function Files() {
         location.organizationId,
         "storage"
       )}
-      LoadingElement={<PageLoading />}
-      ErrorElement={(error) => <PageError error={error} />}
+      onError={recordError}
     >
-      <Layout hasSider>
-        <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
-          <FilesDrawersList />
-        </Layout.Sider>
-        <Layout.Content>
-          <Routes>
-            <Route path="/">
-              <Route
-                index
-                element={
-                  <EmptyMainModule
-                    description={
-                      <p>
-                        {t("Welcome to Files.")} <a>{t("Learn More")}</a>
-                      </p>
+      {(loading, error) =>
+        loading ? (
+          <PageLoading />
+        ) : error ? (
+          <PageError error={error} />
+        ) : (
+          <Layout hasSider>
+            <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
+              <FilesDrawersList />
+            </Layout.Sider>
+            <Layout.Content>
+              <Routes>
+                <Route path="/">
+                  <Route
+                    index
+                    element={
+                      <EmptyMainModule
+                        description={
+                          <p>
+                            {t("Welcome to Files.")} <a>{t("Learn More")}</a>
+                          </p>
+                        }
+                        image={filesImage}
+                      />
                     }
-                    image={filesImage}
                   />
-                }
-              />
-              <Route path=":boardId/*" element={<FilesRoutes />} />
-              <Route path="new" element={<ManageModule title="New Drawer" />} />
-              <Route path="*" element={<Navigate to="/apps/storage" />} />
-            </Route>
-          </Routes>
-        </Layout.Content>
-      </Layout>
+                  <Route path=":boardId/*" element={<FilesRoutes />} />
+                  <Route
+                    path="new"
+                    element={<ManageModule title="New Drawer" />}
+                  />
+                  <Route path="*" element={<Navigate to="/apps/storage" />} />
+                </Route>
+              </Routes>
+            </Layout.Content>
+          </Layout>
+        )
+      }
     </CuttinboardModuleProvider>
   );
 }

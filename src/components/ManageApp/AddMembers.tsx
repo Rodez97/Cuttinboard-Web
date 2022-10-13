@@ -13,13 +13,13 @@ import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/ser
 interface AddMembersProps {
   onSelectedEmployees: (employees: Employee[]) => void;
   initialSelected?: Employee[];
-  hostId?: string;
+  hosts?: string[];
 }
 
 function AddMembers({
   onSelectedEmployees,
   initialSelected,
-  hostId,
+  hosts,
 }: AddMembersProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ function AddMembers({
       >
         <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
         <List
-          dataSource={getEmployees}
+          dataSource={getEmployees.filter((emp) => !hosts.includes(emp.id))}
           renderItem={(emp) => {
             return (
               <List.Item

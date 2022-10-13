@@ -16,7 +16,7 @@ export interface ManageNoteDialogRef {
 const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<{ title?: string; content: string }>();
-  const { moduleContentRef } = useCuttinboardModule();
+  const { selectedApp } = useCuttinboardModule();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [isSubmitting, setisSubmitting] = useState(false);
@@ -40,6 +40,7 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
 
   const handleClose = () => {
     setOpen(false);
+    setBaseNote(null);
     form.resetFields();
   };
 
@@ -49,7 +50,7 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
       if (baseNote) {
         await baseNote.edit(values.title, values.content);
       } else {
-        await addDoc(moduleContentRef, {
+        await addDoc(selectedApp?.contentRef, {
           ...values,
           createdAt: serverTimestamp(),
           createdBy: Auth.currentUser.uid,

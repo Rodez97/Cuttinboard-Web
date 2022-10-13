@@ -9,20 +9,15 @@ import NoteCard from "./NoteCard";
 import { useTranslation } from "react-i18next";
 import PageError from "../../components/PageError";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  ModuleFirestoreConverter,
-  Note,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
-import { Button, Empty, Layout, Space } from "antd";
+import { Button, Layout, Space } from "antd";
 import PageLoading from "../../components/PageLoading";
 import Icon, { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { NotePlus } from "./notesIcons";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import { matchSorter } from "match-sorter";
 import { EmptyMainModule } from "./EmptyMainModule";
-
-const NoteConverter = ModuleFirestoreConverter<Note>();
 
 function NotesMain() {
   const { t } = useTranslation();
@@ -36,10 +31,10 @@ function NotesMain() {
     order: "asc",
     searchQuery: "",
   });
-  const { selectedApp, canManage, moduleContentRef } = useCuttinboardModule();
+  const { selectedApp, canManage } = useCuttinboardModule();
   const manageNoteDialogRef = useRef<ManageNoteDialogRef>(null);
   const [notes, loading, error] = useCollectionData<Note>(
-    moduleContentRef && moduleContentRef.withConverter(Note.Converter)
+    selectedApp && selectedApp.contentRef.withConverter(Note.Converter)
   );
 
   const handleCreateNote = () => {

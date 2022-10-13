@@ -46,7 +46,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const quickTodoRef = useRef<QuickTodoRef>(null);
-  const { moduleContentRef } = useCuttinboardModule();
+  const { selectedApp } = useCuttinboardModule();
   const [submitting, setSubmitting] = useState(false);
 
   const handleClose = () => {
@@ -69,7 +69,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
       if (selectedTodo) {
         await selectedTodo.update(valuesToAdd);
       } else {
-        await addDoc(moduleContentRef, {
+        await addDoc(selectedApp.contentRef, {
           ...valuesToAdd,
           createdAt: serverTimestamp(),
           createdBy: Auth.currentUser?.uid,

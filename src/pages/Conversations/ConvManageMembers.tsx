@@ -2,13 +2,10 @@ import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";
 
 function ConvManageMembers() {
-  const navigate = useNavigate();
-
   const { canManageApp, selectedChat } = useConversations();
 
   const handleRemoveMember = async (employeeId: string) => {
@@ -38,8 +35,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await selectedChat.setHost(newHostUser);
-      navigate(-1);
+      await selectedChat.addHost(newHostUser);
     } catch (error) {
       recordError(error);
     }
@@ -72,7 +68,7 @@ function ConvManageMembers() {
         selectedChat.privacyLevel === PrivacyLevel.POSITIONS &&
         (selectedChat?.positions ?? [])
       }
-      hostId={selectedChat?.hostId ?? ""}
+      hosts={selectedChat?.hosts}
     />
   );
 }

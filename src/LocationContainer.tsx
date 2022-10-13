@@ -41,8 +41,6 @@ export function LocationContainer() {
     return <Navigate to="/dashboard" />;
   }
 
-  console.log({ locationAccessKey });
-
   return (
     <Layout>
       <DarkPageHeader

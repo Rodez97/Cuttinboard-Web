@@ -4,7 +4,10 @@ import ConversationsMain from "./ConversationsMain";
 import ConvManageMembers from "./ConvManageMembers";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
 import ManageBase from "../../components/ManageApp/ManageBase";
-import { Conversation } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  Conversation,
+  IConversation,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { recordError } from "../../utils/utils";
 import { Button, Result } from "antd";
 import { useTranslation } from "react-i18next";
@@ -14,7 +17,7 @@ function ConversationsRoutes() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedChat, createConversation, editConversation, setChatId } =
+  const { selectedChat, createConversation, setChatId, canManageApp } =
     useConversations();
 
   useLayoutEffect(() => {
@@ -29,9 +32,14 @@ function ConversationsRoutes() {
     }
   };
 
-  const edit = async (convData: Conversation) => {
+  const edit = async (
+    convData: Pick<IConversation, "name" | "description" | "positions">
+  ) => {
+    if (!canManageApp) {
+      return;
+    }
     try {
-      await editConversation(convData);
+      await selectedChat.update(convData);
     } catch (error) {
       recordError(error);
     }

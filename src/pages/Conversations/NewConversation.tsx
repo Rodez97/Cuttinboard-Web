@@ -1,4 +1,7 @@
-import { Conversation } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  Conversation,
+  IConversation,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React from "react";
 import ManageBase from "../../components/ManageApp/ManageBase";
@@ -9,7 +12,7 @@ import {
 } from "react-router-dom";
 
 function NewConversation() {
-  const { createConversation, editConversation } = useConversations();
+  const { createConversation, selectedChat } = useConversations();
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
 
@@ -22,9 +25,11 @@ function NewConversation() {
     }
   };
 
-  const edit = async (convData: Conversation) => {
+  const edit = async (
+    convData: Pick<IConversation, "name" | "description" | "positions">
+  ) => {
     try {
-      await editConversation(convData);
+      await selectedChat.update(convData);
     } catch (error) {
       recordError(error);
     }

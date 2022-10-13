@@ -1,28 +1,18 @@
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useCuttinboardModule,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React from "react";
 import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";
 
 function ModuleManageMembers() {
-  const {
-    selectedApp,
-    canManage,
-    removeMember,
-    addMembers,
-    setAppHost,
-    removeHost,
-  } = useCuttinboardModule();
+  const { selectedApp, canManage } = useCuttinboardModule();
 
   const handleRemoveMember = async (employeeId: string) => {
     if (!selectedApp) {
       return;
     }
     try {
-      await removeMember(employeeId);
+      await selectedApp.removeMember(employeeId);
     } catch (error) {
       recordError(error);
     }
@@ -33,7 +23,7 @@ function ModuleManageMembers() {
       return;
     }
     try {
-      await addMembers(addedEmployees);
+      await selectedApp.addMembers(addedEmployees);
     } catch (error) {
       recordError(error);
     }
@@ -44,18 +34,18 @@ function ModuleManageMembers() {
       return;
     }
     try {
-      await setAppHost(newHostUser);
+      await selectedApp.addHost(newHostUser);
     } catch (error) {
       recordError(error);
     }
   };
 
-  const handleRemoveHost = async () => {
+  const handleRemoveHost = async (host: Employee) => {
     if (!selectedApp) {
       return;
     }
     try {
-      await removeHost();
+      await selectedApp.removeHost(host.id);
     } catch (error) {
       recordError(error);
     }
@@ -71,7 +61,7 @@ function ModuleManageMembers() {
       removeHost={handleRemoveHost}
       privacyLevel={selectedApp.privacyLevel}
       positions={selectedApp.accessTags}
-      hostId={selectedApp?.hostId}
+      hosts={selectedApp?.hosts}
     />
   );
 }

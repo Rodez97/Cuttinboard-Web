@@ -41,7 +41,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
 }) => {
   const { t } = useTranslation();
   const { location } = useLocation();
-  const { moduleContentRef } = useCuttinboardModule();
+  const { selectedApp } = useCuttinboardModule();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -116,7 +116,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
           storagePath: fileRef.fullPath,
         };
         await setDoc(
-          doc(Firestore, moduleContentRef.path, fileId),
+          doc(Firestore, selectedApp.contentRef.path, fileId),
           newFileRecord,
           {
             merge: true,

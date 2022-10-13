@@ -13,9 +13,10 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 
 interface AddMembersProps {
   onSelectedEmployee: (employee: Employee) => void;
+  hosts?: string[];
 }
 
-function SelectEmployee({ onSelectedEmployee }: AddMembersProps) {
+function SelectEmployee({ onSelectedEmployee, hosts }: AddMembersProps) {
   const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
 
@@ -31,7 +32,9 @@ function SelectEmployee({ onSelectedEmployee }: AddMembersProps) {
       >
         <List
           dataSource={getEmployees.filter(
-            (emp) => emp.locationRole <= RoleAccessLevels.MANAGER
+            (emp) =>
+              emp.locationRole <= RoleAccessLevels.MANAGER &&
+              !hosts?.includes(emp.id)
           )}
           renderItem={(emp) => {
             return (
