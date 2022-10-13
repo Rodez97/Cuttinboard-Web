@@ -78,13 +78,18 @@ function MyLocations() {
           </GoldTag>,
         ]}
         extra={[
-          <Button key="2" onClick={() => navigate("supervisors")}>
+          <Button
+            key="2"
+            onClick={() => navigate("supervisors")}
+            disabled={Boolean(organization.subscriptionStatus === "canceled")}
+          >
             {t("Supervisors")}
           </Button>,
           <Button
             key="1"
             type="primary"
             onClick={() => navigate("add-location")}
+            disabled={Boolean(organization.subscriptionStatus === "canceled")}
           >
             {t("Create Location")}
           </Button>,
@@ -159,27 +164,29 @@ function MyLocations() {
               <LocationCard
                 key={loc.id}
                 location={loc}
-                actions={[
-                  <Button
-                    key="edit"
-                    icon={<EditOutlined />}
-                    type="link"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`locationDetails/${loc.id}`);
-                    }}
-                  />,
-                  <Button
-                    key="delete"
-                    icon={<DeleteOutlined />}
-                    danger
-                    type="link"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteLocation(loc);
-                    }}
-                  />,
-                ]}
+                actions={
+                  !Boolean(organization.subscriptionStatus === "canceled") && [
+                    <Button
+                      key="edit"
+                      icon={<EditOutlined />}
+                      type="link"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`locationDetails/${loc.id}`);
+                      }}
+                    />,
+                    <Button
+                      key="delete"
+                      icon={<DeleteOutlined />}
+                      danger
+                      type="link"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteLocation(loc);
+                      }}
+                    />,
+                  ]
+                }
               />
             ))}
           </Space>
