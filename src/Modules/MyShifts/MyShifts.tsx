@@ -1,18 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { collection, doc, query, where } from "firebase/firestore";
+import { collection, query, where } from "firebase/firestore";
 import { orderBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  useCollectionData,
-  useDocumentData,
-} from "react-firebase-hooks/firestore";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useNavigate } from "react-router-dom";
-import {
-  TitleBoxBlue,
-  TitleBoxGreen,
-  TitleBoxYellow,
-} from "../../theme/styledComponents";
+import { TitleBoxGreen } from "../../theme/styledComponents";
 import ShiftCard from "./ShiftCard";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -24,19 +17,15 @@ import {
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
-  getShiftDate,
   useLocation,
   useNotificationsBadges,
   WEEKFORMAT,
   weekToDate,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  ScheduleDoc,
-  ScheduleDocConverter,
-  Shift,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Empty, Layout, Space, Spin, Tabs } from "antd";
+import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Divider, Empty, Layout, Space, Spin, Tabs, Tag } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -144,15 +133,17 @@ function MyShifts() {
                           padding: day.getDate() === new Date().getDate() && 3,
                         }}
                       >
-                        {day.getDate() === new Date().getDate() ? (
-                          <TitleBoxGreen>
-                            {dayjs(day).format("dddd, MMMM DD YYYY")}
-                          </TitleBoxGreen>
-                        ) : (
-                          <TitleBoxBlue>
-                            {dayjs(day).format("dddd, MMMM DD YYYY")}
-                          </TitleBoxBlue>
-                        )}
+                        <Divider orientation="left">
+                          {dayjs(day).format("dddd, MMMM DD YYYY")}
+                          {day.getDate() === new Date().getDate() && (
+                            <Tag
+                              color={Colors.MainBlue}
+                              css={{ marginLeft: 10 }}
+                            >
+                              {t("Today")}
+                            </Tag>
+                          )}
+                        </Divider>
 
                         {shifts.map((shift) => (
                           <ShiftCard key={shift.id} shift={shift} />
@@ -167,9 +158,9 @@ function MyShifts() {
                           <TitleBoxGreen>{t("Next week")}</TitleBoxGreen>
                           {groupByDay(shifts).map(({ day, shifts }, index) => (
                             <div key={index}>
-                              <TitleBoxBlue>
+                              <Divider orientation="left">
                                 {dayjs(day).format("dddd, MMMM DD YYYY")}
-                              </TitleBoxBlue>
+                              </Divider>
 
                               {shifts.map((shift) => (
                                 <ShiftCard key={shift.id} shift={shift} />
