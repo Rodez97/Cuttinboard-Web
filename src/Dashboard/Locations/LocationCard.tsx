@@ -33,7 +33,7 @@ const MainCard = styled(Card)<{
       : props.draftOrEdited &&
         `repeating-linear-gradient(-45deg, #606060, #606060 10px, #505050 10px, #505050 20px)`};
   background-color: ${(props) =>
-    !props.draftOrEdited && !props.deleting && Colors.MainOnWhite};
+    !props.draftOrEdited && !props.deleting && "#fff"};
   color: ${(props) => {
     if (props.deleting) {
       return Colors.CalculateContrast("#f33d61");
@@ -41,7 +41,7 @@ const MainCard = styled(Card)<{
     if (props.draftOrEdited) {
       return Colors.CalculateContrast("#606060");
     }
-    return Colors.CalculateContrast(Colors.MainOnWhite);
+    return Colors.CalculateContrast("#ffffff");
   }} !important;
 `;
 
