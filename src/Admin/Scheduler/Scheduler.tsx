@@ -37,7 +37,6 @@ import Table, { ColumnsType } from "antd/lib/table";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
 import {
-  AutoComplete,
   Button,
   Descriptions,
   Input,
@@ -46,13 +45,11 @@ import {
   Modal,
   Select,
   Space,
-  Tag,
   Typography,
 } from "antd";
 import TableFooter from "./TableFooter";
 import PageLoading from "../../components/PageLoading";
 import {
-  CheckCircleOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
   FundProjectionScreenOutlined,
@@ -105,6 +102,7 @@ function Scheduler() {
   const { t } = useTranslation();
   const [rosterMode, setRosterMode] = useState(false);
   const { getEmployees } = useEmployeesList();
+  const { location } = useLocation();
 
   const handleBack = () => {
     navigate(-1);
@@ -297,22 +295,32 @@ function Scheduler() {
             <Input.Search
               placeholder={t("Search")}
               allowClear
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.currentTarget.value)}
+              value={searchQuery}
               css={{ width: 200 }}
             />
-            <AutoComplete
-              css={{ width: 200 }}
-              onSearch={handleSearch}
-              placeholder={t("Filter by position")}
+            <Select
+              showSearch
+              style={{ width: 200 }}
               onSelect={setSelectedTag}
-              onChange={setSelectedTag}
+              onClear={() => setSelectedTag(null)}
+              placeholder={t("Filter by position")}
+              allowClear
             >
-              {result.map((position: string) => (
-                <AutoComplete.Option key={position} value={position}>
-                  {position}
-                </AutoComplete.Option>
-              ))}
-            </AutoComplete>
+              {location.settings?.positions?.length && (
+                <Select.OptGroup label={t("Custom")}>
+                  {location.settings.positions.map((pos) => (
+                    <Select.Option value={pos}>{pos}</Select.Option>
+                  ))}
+                </Select.OptGroup>
+              )}
+
+              <Select.OptGroup label={t("Default")}>
+                {Positions.map((pos) => (
+                  <Select.Option value={pos}>{pos}</Select.Option>
+                ))}
+              </Select.OptGroup>
+            </Select>
           </Space>
         </Space>
 
