@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
+import { isEmpty } from "lodash";
 
 export interface BaseApp {
   id: string;
@@ -99,7 +100,7 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
             </Form.Item>
 
             <Form.Item name="privacyLevel" label={t("Privacy Level")}>
-              <Radio.Group disabled>
+              <Radio.Group disabled={!isEmpty(baseApp)}>
                 <Space direction="vertical">
                   <Radio value={PrivacyLevel.PUBLIC}>
                     {t(PrivacyLevel.PUBLIC)}

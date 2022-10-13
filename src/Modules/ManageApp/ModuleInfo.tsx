@@ -85,18 +85,15 @@ function ModuleInfo() {
             />
           </List.Item>
           {Boolean(hosts.length) && (
-            <List
-              dataSource={hosts}
-              renderItem={(host, index) => (
-                <List.Item key={`${host.id}-${index}`}>
-                  <List.Item.Meta
-                    avatar={<CrownOutlined />}
-                    title={t("Host")}
-                    description={`${host.fullName}`}
-                  />
-                </List.Item>
-              )}
-            />
+            <List.Item>
+              <List.Item.Meta
+                avatar={<CrownOutlined />}
+                title={t("Hosts")}
+                description={hosts.map((host) => (
+                  <p>{host.fullName}</p>
+                ))}
+              />
+            </List.Item>
           )}
           <List.Item>
             <List.Item.Meta
