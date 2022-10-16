@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import FilesCounter from "./FilesCounter";
 import { DarkPageHeader } from "../../components/PageHeaders";
-import { useNewElement } from "Modules/Notes/useNewElement";
+import { useNewElement } from "hooks/useNewElement";
 
 function FilesDrawersList() {
   const { t } = useTranslation();

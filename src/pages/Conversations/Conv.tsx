@@ -10,7 +10,7 @@ import ConversationsList from "./ConversationsList";
 import { EmptyMainModule } from "../../Modules/Notes/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import convImage from "../../assets/images/chat.png";
-import NewConversation from "./NewConversation";
+import ManageConversation from "./ManageConversation";
 import { recordError } from "utils/utils";
 
 const Conv = () => {
@@ -46,7 +46,7 @@ const Conv = () => {
                     }
                   />
                   <Route path=":boardId/*" element={<ConversationsRoutes />} />
-                  <Route path="new" element={<NewConversation />} />
+                  <Route path="new" element={<ManageConversation />} />
                   <Route path="*" element={<Navigate to="/conversations" />} />
                 </Route>
               </Routes>

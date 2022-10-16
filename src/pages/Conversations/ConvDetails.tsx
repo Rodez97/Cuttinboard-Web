@@ -5,7 +5,7 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { jsx } from "@emotion/react";
-import { Button, Divider, Space, Switch, Tag } from "antd";
+import { Button, Divider, Modal, Switch } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,11 +15,13 @@ import {
   CrownOutlined,
   DeleteOutlined,
   EditOutlined,
+  ExclamationCircleOutlined,
   FormOutlined,
   GlobalOutlined,
   InfoCircleOutlined,
   LockOutlined,
   NotificationOutlined,
+  TagOutlined,
   TagsOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
@@ -41,11 +43,19 @@ function ConvDetails() {
     if (!canManageApp) {
       return;
     }
-    try {
-      await selectedChat.delete();
-    } catch (error) {
-      recordError(error);
-    }
+    Modal.confirm({
+      title: t("Do you want to delete this conversation?"),
+      icon: <ExclamationCircleOutlined />,
+      async onOk() {
+        try {
+          navigate(-2);
+          await selectedChat.delete();
+        } catch (error) {
+          recordError(error);
+        }
+      },
+      onCancel() {},
+    });
   }, [selectedChat]);
 
   const hosts = useMemo(() => {
@@ -112,27 +122,25 @@ function ConvDetails() {
               }
             />
           </List.Item>
-          <List.Item>
-            <List.Item.Meta
-              avatar={<TeamOutlined />}
-              title={t("Members")}
-              description={selectedChat.members?.length ?? 0}
-            />
-          </List.Item>
+          {selectedChat.privacyLevel === PrivacyLevel.PRIVATE && (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<TeamOutlined />}
+                title={t("Members")}
+                description={selectedChat.members?.length ?? 0}
+              />
+            </List.Item>
+          )}
+
           {selectedChat.privacyLevel === PrivacyLevel.POSITIONS &&
-            selectedChat.positions?.length && (
-              <Space
-                wrap
-                css={{
-                  border: "1px solid #00000025",
-                  width: "100%",
-                  padding: 10,
-                }}
-              >
-                {selectedChat.positions.map((p) => (
-                  <Tag key={p}>{p}</Tag>
-                ))}
-              </Space>
+            Boolean(selectedChat.positions?.length) && (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={<TagOutlined />}
+                  title={t("Position")}
+                  description={selectedChat.positions[0]}
+                />
+              </List.Item>
             )}
           <Divider />
           <List.Item

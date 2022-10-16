@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { Note } from "./notesIcons";
-import { useNewElement } from "./useNewElement";
+import { useNewElement } from "../../hooks/useNewElement";
 
 function NotesList() {
   const { t } = useTranslation();

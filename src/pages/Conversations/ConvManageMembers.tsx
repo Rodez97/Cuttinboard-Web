@@ -24,7 +24,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await selectedChat.addMember(addedEmployees);
+      await selectedChat.addMembers(addedEmployees);
     } catch (error) {
       recordError(error);
     }
@@ -46,7 +46,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await selectedChat.removeHost(host);
+      await selectedChat.removeHost(host.id);
     } catch (error) {
       recordError(error);
     }
@@ -55,19 +55,13 @@ function ConvManageMembers() {
   return (
     <ManageMembers
       readonly={!canManageApp}
-      members={
-        selectedChat.privacyLevel === PrivacyLevel.PRIVATE &&
-        (selectedChat?.members ?? [])
-      }
+      members={selectedChat.accessTags}
       removeMember={handleRemoveMember}
       addMembers={handleAddMembers}
       setAppHost={handleSetAppHost}
       removeHost={handleRemoveHost}
       privacyLevel={selectedChat.privacyLevel}
-      positions={
-        selectedChat.privacyLevel === PrivacyLevel.POSITIONS &&
-        (selectedChat?.positions ?? [])
-      }
+      positions={selectedChat.accessTags}
       hosts={selectedChat?.hosts}
     />
   );

@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
-import { orderBy } from "lodash";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -35,7 +34,6 @@ import {
   Modal,
   Row,
   Select,
-  Switch,
   TimePicker,
   Typography,
 } from "antd";
@@ -74,7 +72,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const [baseShift, setBaseShift] = useState<Shift>(null);
   const [saving, setSaving] = useState(false);
   const { location } = useLocation();
-  const { createShift, weekId, weekDays } = useSchedule();
+  const { createShift, weekDays } = useSchedule();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isNewShift, setIsNewShift] = useState(false);
@@ -99,7 +97,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       applyTo: [weekDay],
       timeRange: [moment(date).add(8, "hours"), moment(date).add(16, "hours")],
       position,
-      repeat: false,
     });
     setOpen(true);
   };
@@ -113,7 +110,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       applyTo: [getShiftDate(shiftData.start).isoWeekday()],
       notes: shiftData.notes ?? "",
       position: shiftData.position ?? "",
-      repeat: Boolean(shiftData.altId === "repeat"),
       tasks: Object.values(shiftData.tasks ?? {}).map((tsk) => tsk.name),
       timeRange: [
         moment(getShiftDate(shiftData.start).toDate()),
@@ -129,15 +125,13 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   };
 
   const onFinish = async (values: FormDataType) => {
-    const { applyTo, notes, position, repeat, tasks, timeRange } = values;
+    const { applyTo, notes, position, tasks, timeRange } = values;
 
     const shiftToSave: Partial<IShift> = {
       start: getShiftString(timeRange[0].toDate()),
       end: getShiftString(timeRange[1].toDate()),
       notes,
       position,
-      altId: repeat ? "repeat" : weekId,
-      employeeId: employee.id,
       hourlyWage: getHourlyWage(),
     };
 
@@ -158,10 +152,11 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           {}
         );
         await createShift(
-          { ...shiftToSave, tasks: transformedTasks },
+          { ...shiftToSave, tasks: transformedTasks } as IShift,
           weekDays,
           applyTo,
-          nanoid()
+          nanoid(),
+          employee.id
         );
       } else {
         const transformedTasks = tasks?.reduce<Record<string, Todo_Task>>(
@@ -280,13 +275,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           />
         </Form.Item>
 
-        <Form.Item
-          name="repeat"
-          label={t("Repeat every week")}
-          valuePropName="checked"
-        >
-          <Switch />
-        </Form.Item>
         {isNewShift && (
           <Form.Item label={t("Apply to:")} name="applyTo">
             <Checkbox.Group>

@@ -42,14 +42,14 @@ export function LocationContainer() {
     locationAccessKey.locId !== locationId ||
     !location
   ) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
     <Layout>
       <DarkPageHeader
         className="site-page-header"
-        onBack={() => navigate("/dashboard")}
+        onBack={() => navigate("/dashboard", { replace: true })}
         backIcon={<SwapOutlined />}
         title={location.name}
         subTitle={t(getRoleTextByNumber(locationAccessKey.role))}
@@ -66,7 +66,7 @@ export function LocationContainer() {
                 pathname.split("/")[3] === "conversations" ? "primary" : "text"
               }
               shape="circle"
-              onClick={() => navigate("conversations")}
+              onClick={() => navigate("conversations", { replace: true })}
             />
           </Badge>,
 
@@ -80,7 +80,7 @@ export function LocationContainer() {
               icon={<Icon component={MessageTextLock} />}
               type={pathname.split("/")[3] === "chats" ? "primary" : "text"}
               shape="circle"
-              onClick={() => navigate("chats")}
+              onClick={() => navigate("chats", { replace: true })}
             />
           </Badge>,
           <Button
@@ -89,7 +89,7 @@ export function LocationContainer() {
             key="locSettings"
             type={pathname.split("/")[3] === "locSettings" ? "primary" : "text"}
             shape="circle"
-            onClick={() => navigate("locSettings")}
+            onClick={() => navigate("locSettings", { replace: true })}
             className="settings-btn"
             css={{ marginRight: 15 }}
           />,

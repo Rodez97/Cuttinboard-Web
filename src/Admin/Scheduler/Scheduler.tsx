@@ -25,12 +25,14 @@ import ScheduleSummary from "./ScheduleSummary";
 import WeekNavigator from "./WeekNavigator";
 import {
   Employee,
+  EmployeeShifts,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useEmployeesList,
   useLocation,
   useSchedule,
+  WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Positions } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Table, { ColumnsType } from "antd/lib/table";
@@ -45,20 +47,21 @@ import {
   Modal,
   Select,
   Space,
+  Tag,
   Typography,
 } from "antd";
 import TableFooter from "./TableFooter";
-import PageLoading from "../../components/PageLoading";
 import {
-  EditOutlined,
   ExclamationCircleOutlined,
   FundProjectionScreenOutlined,
+  ScheduleOutlined,
   TeamOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { GrayPageHeader } from "components/PageHeaders";
 import "./Scheduler.scss";
+import CloneSchedule from "./CloneSchedule";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -76,17 +79,14 @@ export const ScheduleContext = createContext<Partial<IScheduleContextProps>>(
 export interface ShiftsTable {
   key: string;
   employee: Employee;
-  shifts: Shift[];
+  empShifts: EmployeeShifts;
 }
 
 function Scheduler() {
   const {
     weekId,
     setWeekId,
-    scheduleDocumentLoading,
-    shiftsCollection,
-    shiftsCollectionLoading,
-    isPublished,
+    employeeShiftsCollection,
     publish,
     searchQuery,
     setSearchQuery,
@@ -98,9 +98,9 @@ function Scheduler() {
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
   const manageShiftDialogRef = useRef<IManageShiftDialogRef>(null);
-  const [result, setResult] = useState<string[]>([]);
   const { t } = useTranslation();
   const [rosterMode, setRosterMode] = useState(false);
+  const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
   const { getEmployees } = useEmployeesList();
   const { location } = useLocation();
 
@@ -190,18 +190,14 @@ function Scheduler() {
     [manageShiftDialogRef.current]
   );
 
-  if (scheduleDocumentLoading || shiftsCollectionLoading) {
-    return <PageLoading />;
-  }
-
   const columns = useMemo(
     (): ColumnsType<ShiftsTable> => [
       {
         title: t("Employee"),
         dataIndex: "employee",
         key: "employee",
-        render: (_, { employee, shifts }) => (
-          <EmpColumnCell employee={employee} shifts={shifts} />
+        render: (_, { employee, empShifts }) => (
+          <EmpColumnCell employee={employee} empShifts={empShifts} />
         ),
         fixed: "left",
         width: 250,
@@ -211,10 +207,10 @@ function Scheduler() {
         title: dayjs(wd).format("ddd DD"),
         dataIndex: dayjs(wd).isoWeekday(),
         key: dayjs(wd).isoWeekday(),
-        render: (_, { employee, shifts }: ShiftsTable) => (
+        render: (_, { employee, empShifts }: ShiftsTable) => (
           <ShiftCell
             employee={employee}
-            shifts={shifts.filter(
+            shifts={empShifts?.shiftsArray.filter(
               (s) => s.shiftIsoWeekday === dayjs(wd).isoWeekday()
             )}
             date={wd}
@@ -223,23 +219,8 @@ function Scheduler() {
         ),
       })),
     ],
-    [weekDays, employees, shiftsCollection]
+    [weekDays, employees, employeeShiftsCollection]
   );
-
-  const handleSearch = (value: string) => {
-    let res: string[] = [];
-    if (!value) {
-      res = [];
-    } else {
-      const sortedPos = matchSorter(Positions, value);
-      if (sortedPos.length) {
-        res = sortedPos;
-      } else {
-        res = [value];
-      }
-    }
-    setResult(res);
-  };
 
   return (
     <ScheduleContext.Provider
@@ -254,6 +235,14 @@ function Scheduler() {
           onBack={handleBack}
           title={t("Schedule")}
           extra={[
+            <Button
+              key="clone"
+              onClick={() => setCloneDialogOpen(true)}
+              type="dashed"
+              icon={<ScheduleOutlined />}
+            >
+              {t("Clone Schedule")}
+            </Button>,
             <Button
               key="projectedSales"
               onClick={() => setProjectedSalesOpen(true)}
@@ -271,10 +260,9 @@ function Scheduler() {
             </Button>,
             <Button
               key="1"
-              icon={isPublished ? <EditOutlined /> : <UploadOutlined />}
+              icon={<UploadOutlined />}
               onClick={togglePublishSchedule}
               type="primary"
-              danger={isPublished}
               disabled={
                 updatesCount.total === 0 ||
                 dayjs(weekDays[0]).isoWeek() > dayjs().add(1, "week").isoWeek()
@@ -283,6 +271,13 @@ function Scheduler() {
               {`${t("Publish")} (${updatesCount.total})`}
             </Button>,
           ]}
+          tags={
+            Boolean(dayjs().format(WEEKFORMAT) === weekId) && [
+              <Tag key="thisWeek" color="processing">
+                {t("This Week")}
+              </Tag>,
+            ]
+          }
         />
 
         <Space
@@ -354,8 +349,8 @@ function Scheduler() {
               dataSource={employees?.map((emp) => ({
                 key: emp.id,
                 employee: emp,
-                shifts: shiftsCollection?.filter(
-                  (shf) => shf.employeeId === emp.id
+                empShifts: employeeShiftsCollection?.find(
+                  (shf) => shf.id === `${weekId}_${emp.id}`
                 ),
               }))}
               summary={(pageData) => <TableFooter data={pageData} />}
@@ -368,6 +363,10 @@ function Scheduler() {
         <ProjectedSalesDialog
           visible={projectedSalesOpen}
           onClose={() => setProjectedSalesOpen(false)}
+        />
+        <CloneSchedule
+          open={cloneDialogOpen}
+          onCancel={() => setCloneDialogOpen(false)}
         />
       </Layout>
     </ScheduleContext.Provider>

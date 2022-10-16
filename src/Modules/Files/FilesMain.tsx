@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ref } from "firebase/storage";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useNavigate } from "react-router-dom";
 import FilesItem from "./FilesItem";
@@ -9,10 +9,7 @@ import { orderBy } from "lodash";
 import { useTranslation } from "react-i18next";
 import PageError from "../../components/PageError";
 import PageLoading from "../../components/PageLoading";
-import {
-  Cuttinboard_File,
-  ModuleFirestoreConverter,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
   useLocation,
@@ -32,8 +29,6 @@ import {
 import PickFile from "./PickFile";
 import { matchSorter } from "match-sorter";
 import { EmptyMainModule } from "../Notes/EmptyMainModule";
-
-const CuttinboardFileConverter = ModuleFirestoreConverter<Cuttinboard_File>();
 
 function FilesMain() {
   const navigate = useNavigate();

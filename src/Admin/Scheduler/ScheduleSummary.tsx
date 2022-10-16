@@ -2,13 +2,9 @@
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import duration from "dayjs/plugin/duration";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-import dayjs from "dayjs";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Divider, Space, Statistic } from "antd";
-dayjs.extend(advancedFormat);
-dayjs.extend(duration);
+import { getDurationText } from "./getDurationText";
 
 function ScheduleSummary() {
   const { t } = useTranslation();
@@ -17,12 +13,10 @@ function ScheduleSummary() {
     scheduleSummary: { totalHours, totalShifts, totalPeople, totalWage },
   } = useSchedule();
 
-  const getHours = useMemo(() => {
-    const totalTime = totalHours.toString().split(".");
-    const hours = `${totalTime[0] ?? "0"}h`;
-    const minutes = `${60 * (Number.parseInt(totalTime[1] ?? "0") / 10)}min`;
-    return `${hours} ${minutes}`;
-  }, [totalHours]);
+  const getHours = useMemo(
+    () => getDurationText(totalHours * 60),
+    [totalHours]
+  );
 
   const getProjectedSales = useMemo(() => {
     const percent = Object.values(scheduleDocument?.statsByDay ?? {}).reduce(

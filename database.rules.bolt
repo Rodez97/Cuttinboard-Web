@@ -1,0 +1,56 @@
+function isUser(uid) {
+  return auth != null && auth.uid == uid;
+}
+
+function orgMember(orgId){
+  return auth != null && auth.token.organizationKey != null && auth.token.organizationKey.orgId == orgId;
+}
+
+function locMember(orgId, locId){
+  return orgMember(orgId) && auth.token.organizationKey.locKeys[locId] != null;
+}
+
+function isOwnerOrSupervisor(orgId){
+  return orgMember(orgId) && auth.token.organizationKey.role <= 1;
+}
+
+function isGM(orgId, locId){
+  return locMember(orgId, locId) && auth.token.organizationKey.locKeys[locId].role <= 2;
+}
+
+function getConversationAccess(orgId, locId, convId, refData){
+  return root.child("conversations").child(orgId).child(locId).child(convId).child("accessTags").child(refData).val();
+}
+
+function conversationMember(orgId, locId, convId){
+  return locMember(orgId, locId) && (getConversationAccess(orgId, locId, convId, "isPublic") == true || 
+                                     getConversationAccess(orgId, locId, convId, auth.uid) == auth.uid || 
+                                     auth.token.organizationKey.locKeys[locId].pos.includes(getConversationAccess(orgId, locId, convId, "position")));
+}
+
+path /users/{uid} {
+  read() { isUser(uid) };
+  update() { isUser(uid) };
+}
+
+path /directMessages/{dmId} {
+  read() { auth != null && dmId.includes(auth.uid) };
+  update() { auth != null && dmId.includes(auth.uid) };
+  index() { ["createdAt"] }
+}
+
+path /conversationMessages/{organizationId} {
+  read() { isOwnerOrSupervisor(organizationId) };
+  write() { isOwnerOrSupervisor(organizationId) };
+
+  /{locationId} {
+    read() { isGM(organizationId, locationId) };
+    write() { isGM(organizationId, locationId) };
+
+    /{conversationId} {
+      read() { conversationMember(organizationId, locationId, conversationId) };
+      write() { conversationMember(organizationId, locationId, conversationId) };
+      index() { ["createdAt"] }
+    }
+  }
+}

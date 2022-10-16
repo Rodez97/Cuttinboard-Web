@@ -18,10 +18,10 @@ import { MessageOutlined, PlusOutlined } from "@ant-design/icons";
 import { Badge, Button, Input, Menu, Space } from "antd";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
-import { useNewElement } from "Modules/Notes/useNewElement";
+import { useNewElement } from "hooks/useNewElement";
 
 function ConversationsList() {
-  const { locationId } = useParams();
+  const { locationId, boardId } = useParams();
   const { locationAccessKey } = useLocation();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ function ConversationsList() {
       icon: <MessageOutlined />,
       key: el.id,
     }));
-  }, [chats, searchQuery, notifications]);
+  }, [chats, searchQuery, notifications, boardId]);
 
   return (
     <Space
@@ -82,7 +82,9 @@ function ConversationsList() {
       <Menu
         theme="dark"
         items={menuItems}
-        onSelect={({ key }) => navigate(key)}
+        onSelect={({ key }) =>
+          navigate(key, { replace: Boolean(boardId || chatId) })
+        }
         selectedKeys={[chatId]}
       />
     </Space>

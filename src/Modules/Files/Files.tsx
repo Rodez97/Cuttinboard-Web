@@ -58,10 +58,7 @@ function Files() {
                     }
                   />
                   <Route path=":boardId/*" element={<FilesRoutes />} />
-                  <Route
-                    path="new"
-                    element={<ManageModule title="New Drawer" />}
-                  />
+                  <Route path="new" element={<ManageModule />} />
                   <Route path="*" element={<Navigate to="/apps/storage" />} />
                 </Route>
               </Routes>

@@ -32,7 +32,7 @@ function AppCard({
             width: 300,
           }}
           hoverable
-          onClick={() => navigate(path)}
+          onClick={() => navigate(path, { replace: true })}
         >
           <Card.Meta
             avatar={<Avatar src={icon} shape="square" />}

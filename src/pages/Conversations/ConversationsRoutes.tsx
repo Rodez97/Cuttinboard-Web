@@ -3,47 +3,23 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import ConversationsMain from "./ConversationsMain";
 import ConvManageMembers from "./ConvManageMembers";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
-import ManageBase from "../../components/ManageApp/ManageBase";
-import {
-  Conversation,
-  IConversation,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import { recordError } from "../../utils/utils";
 import { Button, Result } from "antd";
 import { useTranslation } from "react-i18next";
 import ConvDetails from "./ConvDetails";
+import ManageConversation from "./ManageConversation";
 
 function ConversationsRoutes() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedChat, createConversation, setChatId, canManageApp } =
-    useConversations();
+  const { selectedChat, setChatId } = useConversations();
 
   useLayoutEffect(() => {
     setChatId(boardId);
+    return () => {
+      setChatId(null);
+    };
   }, [boardId]);
-
-  const create = async (newConvData: Conversation) => {
-    try {
-      await createConversation(newConvData);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const edit = async (
-    convData: Pick<IConversation, "name" | "description" | "positions">
-  ) => {
-    if (!canManageApp) {
-      return;
-    }
-    try {
-      await selectedChat.update(convData);
-    } catch (error) {
-      recordError(error);
-    }
-  };
 
   if (!selectedChat) {
     return (
@@ -69,14 +45,7 @@ function ConversationsRoutes() {
           <Route index element={<ConvDetails />} />
           <Route
             path="edit"
-            element={
-              <ManageBase
-                title="Edit Conversation"
-                create={create}
-                edit={edit}
-                baseApp={selectedChat}
-              />
-            }
+            element={<ManageConversation baseConversation={selectedChat} />}
           />
         </Route>
       </Route>

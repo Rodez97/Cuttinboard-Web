@@ -1,62 +1,74 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
+import { Conversation } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  useConversations,
+  useLocation,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useState } from "react";
+import { recordError } from "../../utils/utils";
+import {
+  useNavigate,
+  useLocation as useRouterLocation,
+} from "react-router-dom";
 import {
   Positions,
   PrivacyLevel,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { recordError } from "../../utils/utils";
 import { isEmpty } from "lodash";
+import { useTranslation } from "react-i18next";
 
-export interface BaseApp {
-  id: string;
-  name: string;
-  description?: string;
-  privacyLevel: PrivacyLevel;
-  members?: string[];
-  positions?: string[];
-}
-
-interface ManageBaseProps {
-  title: string;
-  create: (newData: Partial<BaseApp>) => Promise<void>;
-  edit: (newData: Partial<BaseApp>) => Promise<void>;
-  baseApp?: BaseApp;
+interface ManageConversationProps {
+  baseConversation?: Conversation;
 }
 
 type FormType = {
   name: string;
   description?: string;
-  positions?: string[];
+  position: string;
   privacyLevel: PrivacyLevel;
 };
 
-// TODO: Crear una cceso directo para manejar los miembros
-
-const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
+function ManageConversation({ baseConversation }: ManageConversationProps) {
   const { t } = useTranslation();
+  const isEditing = !isEmpty(baseConversation);
   const [form] = Form.useForm<FormType>();
   const privacyLevel = Form.useWatch("privacyLevel", form);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const { createConversation, canManageApp } = useConversations();
   const { location } = useLocation();
-
-  const close = () => {
-    navigate(-1);
-  };
+  const { pathname } = useRouterLocation();
+  const navigate = useNavigate();
 
   const onFinish = async (values: FormType) => {
+    if (!canManageApp) {
+      return;
+    }
     setIsSubmitting(true);
     try {
-      if (baseApp) {
-        await edit(values);
+      if (isEditing) {
+        const { privacyLevel, position, ...others } = values;
+        if (baseConversation.privacyLevel === PrivacyLevel.POSITIONS) {
+          const hosts = baseConversation.accessTags?.filter((at) =>
+            at.startsWith("hostId_")
+          );
+          const accessTags = [...hosts, position];
+          await baseConversation.update({ ...others, accessTags });
+        } else {
+          await baseConversation.update(others);
+        }
       } else {
-        await create(values);
+        let newId: string;
+        const { position, ...others } = values;
+        if (others.privacyLevel === PrivacyLevel.POSITIONS) {
+          const accessTags = [position];
+          newId = await createConversation({ ...others, accessTags });
+        } else {
+          newId = await createConversation(others);
+        }
+        navigate(pathname.replace("new", newId));
       }
       setIsSubmitting(false);
     } catch (error) {
@@ -65,9 +77,25 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
     }
   };
 
+  const getInitialValues = () => {
+    if (isEditing) {
+      const { privacyLevel, accessTags, name, description } = baseConversation;
+      if (privacyLevel === PrivacyLevel.POSITIONS) {
+        const position = accessTags?.find((at) => !at.startsWith("hostId_"));
+        return { name, description, privacyLevel, position };
+      } else {
+        return { name, description, privacyLevel };
+      }
+    }
+    return {};
+  };
+
   return (
     <Spin spinning={isSubmitting}>
-      <GrayPageHeader onBack={() => navigate(-1)} title={title} />
+      <GrayPageHeader
+        onBack={() => navigate(-1)}
+        title={isEditing ? "Edit conversation" : "New conversation"}
+      />
       <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
         <div
           css={{ minWidth: 270, maxWidth: 400, margin: "auto", width: "100%" }}
@@ -78,13 +106,7 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
             style={{ width: "100%" }}
             onFinish={onFinish}
             disabled={isSubmitting}
-            initialValues={{
-              name: "",
-              description: "",
-              privacyLevel: PrivacyLevel.PUBLIC,
-              positions: [],
-              ...baseApp,
-            }}
+            initialValues={getInitialValues()}
           >
             <Form.Item
               required
@@ -99,8 +121,18 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
               <Input.TextArea maxLength={255} showCount rows={3} />
             </Form.Item>
 
-            <Form.Item name="privacyLevel" label={t("Privacy Level")}>
-              <Radio.Group disabled={!isEmpty(baseApp)}>
+            <Form.Item
+              required
+              name="privacyLevel"
+              label={t("Privacy Level")}
+              rules={[
+                {
+                  required: true,
+                  message: "",
+                },
+              ]}
+            >
+              <Radio.Group disabled={isEditing}>
                 <Space direction="vertical">
                   <Radio value={PrivacyLevel.PUBLIC}>
                     {t(PrivacyLevel.PUBLIC)}
@@ -116,32 +148,18 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
             </Form.Item>
 
             {privacyLevel === PrivacyLevel.POSITIONS && (
-              <Form.Item<string[]>
-                name="positions"
-                label={t("Select Positions")}
+              <Form.Item
+                required
+                name="position"
+                label={t("Select Position")}
                 rules={[
                   {
-                    validator(_, value) {
-                      if (value && value.lenght < 1) {
-                        return Promise.reject(
-                          new Error(t("At least one position is required"))
-                        );
-                      }
-                      if (value && value.lenght > 5) {
-                        return Promise.reject(
-                          new Error(t("Can't be more than 5 positions"))
-                        );
-                      }
-                      return Promise.resolve();
-                    },
+                    required: true,
+                    message: "",
                   },
                 ]}
               >
-                <Select
-                  mode="tags"
-                  style={{ width: "100%" }}
-                  tokenSeparators={[","]}
-                >
+                <Select css={{ width: "100%" }} allowClear showSearch>
                   {location.settings?.positions?.length && (
                     <Select.OptGroup label={t("Custom")}>
                       {location.settings.positions.map((pos) => (
@@ -182,6 +200,6 @@ const ManageBase = ({ title, create, edit, baseApp }: ManageBaseProps) => {
       </div>
     </Spin>
   );
-};
+}
 
-export default ManageBase;
+export default ManageConversation;

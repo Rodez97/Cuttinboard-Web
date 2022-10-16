@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { orderBy } from "lodash";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskBlock from "./TaskBlock";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
-import { Button, Layout, List, Space } from "antd";
+import { Button, Layout } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import {
   InfoCircleOutlined,

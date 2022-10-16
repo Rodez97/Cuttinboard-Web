@@ -17,6 +17,7 @@ import { indexOf } from "lodash";
 import {
   Button,
   Divider,
+  Layout,
   List,
   Modal,
   Space,
@@ -128,7 +129,7 @@ function ManageMembers({
         <Route
           index
           element={
-            <div>
+            <Layout>
               <GrayPageHeader
                 onBack={() => navigate(-1)}
                 title={t("Members")}
@@ -145,126 +146,136 @@ function ManageMembers({
                   </Tooltip>,
                 ]}
               />
-              <div
-                css={{ display: "flex", flexDirection: "column", padding: 20 }}
-              >
+              <Layout.Content>
                 <div
                   css={{
-                    minWidth: 300,
-                    maxWidth: 600,
-                    margin: "auto",
-                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: 20,
                   }}
                 >
-                  {/* 🛡 Host */}
-                  {(Boolean(hostsList.length) ||
-                    locationAccessKey.role <=
-                      RoleAccessLevels.GENERAL_MANAGER) && (
-                    <Divider orientation="left">{t("Host")}</Divider>
-                  )}
+                  <div
+                    css={{
+                      minWidth: 300,
+                      maxWidth: 600,
+                      margin: "auto",
+                      width: "100%",
+                    }}
+                  >
+                    {/* 🛡 Host */}
+                    {(Boolean(hostsList.length) ||
+                      locationAccessKey.role <=
+                        RoleAccessLevels.GENERAL_MANAGER) && (
+                      <Divider orientation="left">{t("Host")}</Divider>
+                    )}
 
-                  {Boolean(hostsList.length) && (
+                    {Boolean(hostsList.length) && (
+                      <List
+                        dataSource={hostsList}
+                        renderItem={(hostUser) => (
+                          <MemberItem
+                            key={hostUser.id}
+                            employee={hostUser}
+                            onRemove={() => handleRemoveHost(hostUser)}
+                            hosts={hosts}
+                            privacyLevel={privacyLevel}
+                          />
+                        )}
+                      />
+                    )}
+                    {locationAccessKey.role <=
+                      RoleAccessLevels.GENERAL_MANAGER && (
+                      <Button
+                        type="dashed"
+                        block
+                        onClick={() => navigate("host")}
+                      >
+                        {t("Add Host")}
+                      </Button>
+                    )}
+
+                    {/* Members */}
+                    <Divider orientation="left">{t("Members")}</Divider>
+
+                    {privacyLevel === PrivacyLevel.PUBLIC && (
+                      <Typography.Text
+                        strong
+                        css={{
+                          fontSize: 20,
+                          textAlign: "center",
+                          display: "block",
+                        }}
+                      >
+                        {t("This is a Public element. Everyone is a member")}
+                      </Typography.Text>
+                    )}
+
+                    {privacyLevel === PrivacyLevel.POSITIONS &&
+                      positions?.length && (
+                        <Space wrap>
+                          {positions
+                            .filter((p) => !p.startsWith("hostId_"))
+                            .map((pos, index) => (
+                              <Tag key={index}>{t(pos)}</Tag>
+                            ))}
+                        </Space>
+                      )}
+
                     <List
-                      dataSource={hostsList}
-                      renderItem={(hostUser) => (
+                      dataSource={getMembers}
+                      renderItem={(emp) => (
                         <MemberItem
-                          key={hostUser.id}
-                          employee={hostUser}
-                          onRemove={() => handleRemoveHost(hostUser)}
-                          hosts={hosts}
+                          key={emp.id}
+                          employee={emp}
+                          onRemove={handleMemberRemove}
                           privacyLevel={privacyLevel}
+                          readonly={
+                            privacyLevel === PrivacyLevel.POSITIONS ||
+                            privacyLevel === PrivacyLevel.PUBLIC ||
+                            readonly
+                          }
                         />
                       )}
                     />
-                  )}
-                  {locationAccessKey.role <=
-                    RoleAccessLevels.GENERAL_MANAGER && (
-                    <Button
-                      type="dashed"
-                      block
-                      onClick={() => navigate("host")}
-                    >
-                      {t("Add Host")}
-                    </Button>
-                  )}
-
-                  {/* Members */}
-                  <Divider orientation="left">{t("Members")}</Divider>
-
-                  {privacyLevel === PrivacyLevel.PUBLIC && (
-                    <Typography.Text
-                      strong
-                      css={{
-                        fontSize: 20,
-                        textAlign: "center",
-                        display: "block",
-                      }}
-                    >
-                      {t("This is a Public element. Everyone is a member")}
-                    </Typography.Text>
-                  )}
-
-                  {privacyLevel === PrivacyLevel.POSITIONS &&
-                    positions?.length && (
-                      <Space wrap>
-                        {positions
-                          .filter((p) => !p.startsWith("hostId_"))
-                          .map((pos, index) => (
-                            <Tag key={index}>{t(pos)}</Tag>
-                          ))}
-                      </Space>
-                    )}
-
-                  <List
-                    dataSource={getMembers}
-                    renderItem={(emp) => (
-                      <MemberItem
-                        key={emp.id}
-                        employee={emp}
-                        onRemove={handleMemberRemove}
-                        privacyLevel={privacyLevel}
-                        readonly={
-                          privacyLevel === PrivacyLevel.POSITIONS ||
-                          privacyLevel === PrivacyLevel.PUBLIC ||
-                          readonly
-                        }
-                      />
-                    )}
-                  />
+                  </div>
                 </div>
-              </div>
-            </div>
+              </Layout.Content>
+            </Layout>
           }
         />
         <Route
           path="add"
           element={
-            <div>
+            <Layout>
               <GrayPageHeader
                 onBack={() => navigate(-1)}
                 title={t("Add Members")}
               />
-              <AddMembers
-                onSelectedEmployees={handleAddMembers}
-                hosts={hosts}
-                initialSelected={getMembers}
-              />
-            </div>
+              <Layout.Content>
+                <AddMembers
+                  onSelectedEmployees={handleAddMembers}
+                  hosts={hosts}
+                  initialSelected={getMembers}
+                />
+              </Layout.Content>
+            </Layout>
           }
         />
         <Route
           path="host"
           element={
-            <div>
+            <Layout>
               <GrayPageHeader
                 onBack={() => navigate(-1)}
                 title={t("Select Host")}
               />
-              <SelectEmployee
-                onSelectedEmployee={handleSetHost}
-                hosts={hosts}
-              />
-            </div>
+              <Layout.Content>
+                <SelectEmployee
+                  onSelectedEmployee={handleSetHost}
+                  hosts={hosts}
+                />
+              </Layout.Content>
+            </Layout>
           }
         />
       </Route>

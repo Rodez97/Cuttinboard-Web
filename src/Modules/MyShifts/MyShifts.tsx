@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { collection, query, where } from "firebase/firestore";
+import { doc } from "firebase/firestore";
 import { orderBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useCollectionData } from "react-firebase-hooks/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useNavigate } from "react-router-dom";
 import { TitleBoxGreen } from "../../theme/styledComponents";
 import ShiftCard from "./ShiftCard";
@@ -22,7 +22,10 @@ import {
   WEEKFORMAT,
   weekToDate,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  EmployeeShifts,
+  Shift,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Divider, Empty, Layout, Space, Spin, Tabs, Tag } from "antd";
 import { GrayPageHeader } from "components/PageHeaders";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
@@ -42,13 +45,13 @@ function MyShifts() {
     () => currentWeekId === dayjs().format(WEEKFORMAT),
     [currentWeekId]
   );
-  const [shifts, loadingShifts, errorShifts] = useCollectionData<Shift>(
-    query(
-      collection(Firestore, location.docRef.path, "shifts"),
-      where("altId", "in", [currentWeekId, "repeat"]),
-      where("employeeId", "==", Auth.currentUser.uid),
-      where("status", "==", "published")
-    ).withConverter(Shift.Converter)
+  const [shifts, loadingShifts, errorShifts] = useDocumentData(
+    doc(
+      Firestore,
+      location.docRef.path,
+      "shifts",
+      `${currentWeekId}_${Auth.currentUser.uid}`
+    ).withConverter(EmployeeShifts.Converter)
   );
 
   const weekDays = useMemo(() => {
@@ -117,56 +120,61 @@ function MyShifts() {
                   },
                 ]}
               />
-              {shifts?.length ? (
+              {shifts?.shiftsArray.length ? (
                 <Space
                   style={{ display: "flex", width: "100%" }}
                   direction="vertical"
                 >
                   {isInCurrentWeek ? (
-                    groupByDay(shifts).map(({ day, shifts }, index) => (
-                      <div
-                        key={index}
-                        css={{
-                          border:
-                            day.getDate() === new Date().getDate() &&
-                            "1px dotted #00000025",
-                          padding: day.getDate() === new Date().getDate() && 3,
-                        }}
-                      >
-                        <Divider orientation="left">
-                          {dayjs(day).format("dddd, MMMM DD YYYY")}
-                          {day.getDate() === new Date().getDate() && (
-                            <Tag
-                              color={Colors.MainBlue}
-                              css={{ marginLeft: 10 }}
-                            >
-                              {t("Today")}
-                            </Tag>
-                          )}
-                        </Divider>
+                    groupByDay(shifts?.shiftsArray).map(
+                      ({ day, shifts }, index) => (
+                        <div
+                          key={index}
+                          css={{
+                            border:
+                              day.getDate() === new Date().getDate() &&
+                              "1px dotted #00000025",
+                            padding:
+                              day.getDate() === new Date().getDate() && 3,
+                          }}
+                        >
+                          <Divider orientation="left">
+                            {dayjs(day).format("dddd, MMMM DD YYYY")}
+                            {day.getDate() === new Date().getDate() && (
+                              <Tag
+                                color={Colors.MainBlue}
+                                css={{ marginLeft: 10 }}
+                              >
+                                {t("Today")}
+                              </Tag>
+                            )}
+                          </Divider>
 
-                        {shifts.map((shift) => (
-                          <ShiftCard key={shift.id} shift={shift} />
-                        ))}
-                      </div>
-                    ))
+                          {shifts.map((shift) => (
+                            <ShiftCard key={shift.id} shift={shift} />
+                          ))}
+                        </div>
+                      )
+                    )
                   ) : (
                     <React.Fragment>
                       {/* 📅 Next Week */}
                       {shifts && (
                         <React.Fragment>
                           <TitleBoxGreen>{t("Next week")}</TitleBoxGreen>
-                          {groupByDay(shifts).map(({ day, shifts }, index) => (
-                            <div key={index}>
-                              <Divider orientation="left">
-                                {dayjs(day).format("dddd, MMMM DD YYYY")}
-                              </Divider>
+                          {groupByDay(shifts?.shiftsArray).map(
+                            ({ day, shifts }, index) => (
+                              <div key={index}>
+                                <Divider orientation="left">
+                                  {dayjs(day).format("dddd, MMMM DD YYYY")}
+                                </Divider>
 
-                              {shifts.map((shift) => (
-                                <ShiftCard key={shift.id} shift={shift} />
-                              ))}
-                            </div>
-                          ))}
+                                {shifts.map((shift) => (
+                                  <ShiftCard key={shift.id} shift={shift} />
+                                ))}
+                              </div>
+                            )
+                          )}
                         </React.Fragment>
                       )}
                     </React.Fragment>

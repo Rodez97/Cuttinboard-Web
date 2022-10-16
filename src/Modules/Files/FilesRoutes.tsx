@@ -16,6 +16,9 @@ function FilesRoutes() {
 
   useLayoutEffect(() => {
     setSelected(boardId);
+    return () => {
+      setSelected(null);
+    };
   }, [boardId]);
 
   if (!selectedApp) {
@@ -40,10 +43,7 @@ function FilesRoutes() {
         <Route path="members/*" element={<ModuleManageMembers />} />
         <Route path="details">
           <Route index element={<ModuleInfo />} />
-          <Route
-            path="edit"
-            element={<ManageModule title="Edit Drawer" edit />}
-          />
+          <Route path="edit" element={<ManageModule />} />
         </Route>
       </Route>
     </Routes>

@@ -58,10 +58,7 @@ function Tasks() {
                     }
                   />
                   <Route path=":boardId/*" element={<TasksRoutes />} />
-                  <Route
-                    path="new"
-                    element={<ManageModule title="New to-do board" />}
-                  />
+                  <Route path="new" element={<ManageModule />} />
                   <Route path="*" element={<Navigate to="/apps/to-do" />} />
                 </Route>
               </Routes>

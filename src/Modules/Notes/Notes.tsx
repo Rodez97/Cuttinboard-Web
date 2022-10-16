@@ -59,10 +59,7 @@ function Notes() {
                     }
                   />
                   <Route path=":boardId/*" element={<NotesRoutes />} />
-                  <Route
-                    path="new"
-                    element={<ManageModule title="New Notes Board" />}
-                  />
+                  <Route path="new" element={<ManageModule />} />
                   <Route path="*" element={<Navigate to="/apps/notes" />} />
                 </Route>
               </Routes>

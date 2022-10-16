@@ -2,45 +2,36 @@
 import { jsx } from "@emotion/react";
 import {
   Employee,
-  Shift,
+  EmployeeShifts,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import dayjs from "dayjs";
 import { useCallback } from "react";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
-import duration from "dayjs/plugin/duration";
-import advancedFormat from "dayjs/plugin/advancedFormat";
 import { Card } from "antd";
-dayjs.extend(advancedFormat);
-dayjs.extend(duration);
+import { getDurationText } from "./getDurationText";
 
 interface EmpColumnCellProps {
   employee: Employee;
-  shifts?: Shift[];
+  empShifts?: EmployeeShifts;
 }
 
-function EmpColumnCell({ employee, shifts }: EmpColumnCellProps) {
+function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
   const getSecondaryText = useCallback(() => {
-    const durationTotal = shifts?.reduce<{
-      time: duration.Duration;
-      wage: number;
-    }>(
-      (acc, shift) => {
-        const { time, wage } = acc;
-        return {
-          time: time.add(shift.shiftDuration.totalMinutes, "minutes"),
-          wage: wage + shift.getWage,
-        };
-      },
-      { time: dayjs.duration(0), wage: 0 }
-    ) ?? { time: dayjs.duration(0), wage: 0 };
-    const totalTime = durationTotal?.time?.asHours().toString().split(".");
-    const hours = `${totalTime?.[0] ?? "0"}h`;
-    const minutes = `${60 * (Number.parseInt(totalTime?.[1] ?? "0") / 10)}min`;
-    return `${hours} ${minutes} - ${durationTotal.wage.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-    })}`;
-  }, [shifts]);
+    if (!empShifts) {
+      return `${0}h ${0}min - ${Number(0).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+      })}`;
+    }
+
+    const totalTime = getDurationText(empShifts.userSummary.totalHours * 60);
+    return `${totalTime} - ${empShifts.userSummary.totalWage.toLocaleString(
+      "en-US",
+      {
+        style: "currency",
+        currency: "USD",
+      }
+    )}`;
+  }, [empShifts]);
 
   return (
     <Card bordered={false} css={{ zIndex: 2 }}>

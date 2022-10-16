@@ -1,8 +1,4 @@
-import {
-  MessageOutlined,
-  OrderedListOutlined,
-  RetweetOutlined,
-} from "@ant-design/icons";
+import { MessageOutlined, OrderedListOutlined } from "@ant-design/icons";
 import {
   Employee,
   Shift,
@@ -28,22 +24,25 @@ const PositionElement = styled(Typography.Text)`
   font-size: 12px;
 `;
 
-const Container = styled(Space)<{ draftOrEdited?: boolean; deleting: boolean }>`
+const Container = styled(Space)<{
+  $draftoredited: boolean;
+  $deleting: boolean;
+}>`
   cursor: pointer;
   width: 100%;
   height: 100%;
   background: ${(props) =>
-    props.deleting
+    props.$deleting
       ? `repeating-linear-gradient(-45deg, #f33d61, #f33d61 10px, #e76e8a 10px, #e76e8a 20px)`
-      : props.draftOrEdited &&
+      : props.$draftoredited &&
         `repeating-linear-gradient(-45deg, #606060, #606060 10px, #505050 10px, #505050 20px)`};
   background-color: ${(props) =>
-    !props.draftOrEdited && !props.deleting && Colors.MainBlue};
+    !props.$draftoredited && !props.$deleting && Colors.MainBlue};
   color: ${(props) => {
-    if (props.deleting) {
+    if (props.$deleting) {
       return Colors.CalculateContrast("#f33d61");
     }
-    if (props.draftOrEdited) {
+    if (props.$draftoredited) {
       return Colors.CalculateContrast("#606060");
     }
     return Colors.CalculateContrast(Colors.MainBlue);
@@ -70,9 +69,8 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
     let hasTasks = false;
     let hasNotes = false;
     const shiftsCount = shifts.length;
-    let isRepeat = false;
     if (shift.hasPendingUpdates) {
-      const { start, end, tasks, notes, position, altId } = shift.pendingUpdate;
+      const { start, end, tasks, notes, position } = shift.pendingUpdate;
       time = `${getShiftDate(start)
         .format("h:mma")
         .replace("m", "")} - ${getShiftDate(end)
@@ -81,7 +79,6 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       shiftPosition = position;
       hasTasks = !isEmpty(tasks);
       hasNotes = Boolean(notes);
-      isRepeat = altId === "repeat";
     } else {
       time = `${shift.getStartDayjsDate
         .format("h:mma")
@@ -91,9 +88,8 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       shiftPosition = shift.position;
       hasTasks = !isEmpty(shift.tasks);
       hasNotes = Boolean(shift.notes);
-      isRepeat = shift.altId === "repeat";
     }
-    return { time, shiftPosition, hasTasks, hasNotes, shiftsCount, isRepeat };
+    return { time, shiftPosition, hasTasks, hasNotes, shiftsCount };
   };
 
   return (
@@ -101,10 +97,10 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       <Container
         onClick={handleShiftClick}
         direction="vertical"
-        draftOrEdited={Boolean(
+        $draftoredited={Boolean(
           shifts[0].status === "draft" || shifts[0].hasPendingUpdates
         )}
-        deleting={Boolean(shifts[0].deleting)}
+        $deleting={Boolean(shifts[0].deleting)}
       >
         {getShiftData()?.shiftPosition && (
           <div
@@ -138,9 +134,6 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
             )}
           </Space>
           <Space style={{ justifyContent: "space-evenly", display: "flex" }}>
-            {getShiftData().isRepeat && (
-              <RetweetOutlined style={{ color: "inherit" }} />
-            )}
             {getShiftData().shiftsCount > 1 && (
               <Typography style={{ color: "inherit" }}>{`+${
                 getShiftData().shiftsCount - 1

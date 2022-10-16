@@ -1,12 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import { deleteDoc } from "firebase/firestore";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { capitalize, isEmpty } from "lodash";
+import { capitalize } from "lodash";
 import { useScheduler } from "./Scheduler";
-import ReadonlyShiftDialog from "./ReadonlyShiftDialog";
 import {
   Employee,
   Shift,
@@ -51,7 +49,6 @@ function CellItemDialog({
   employee,
   column,
 }: CellItemDialogProps) {
-  const { isPublished } = useSchedule();
   const { editShift, newShift } = useScheduler();
   const { t } = useTranslation();
   const { locationAccessKey } = useLocation();
@@ -171,17 +168,15 @@ function CellItemDialog({
           )}
         />
 
-        {isPublished || (
-          <Button
-            css={{ marginTop: 10 }}
-            type="dashed"
-            icon={<PlusCircleFilled />}
-            onClick={handleOnAddShift}
-            block
-          >
-            {t("Add")}
-          </Button>
-        )}
+        <Button
+          css={{ marginTop: 10 }}
+          type="dashed"
+          icon={<PlusCircleFilled />}
+          onClick={handleOnAddShift}
+          block
+        >
+          {t("Add")}
+        </Button>
       </Modal>
       {/* {shifts[selectedShiftIndex] && (
         <ReadonlyShiftDialog

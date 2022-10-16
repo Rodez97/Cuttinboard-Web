@@ -22,6 +22,9 @@ function TasksRoutes() {
   const { selectedApp, setSelected, canManage } = useCuttinboardModule();
   useLayoutEffect(() => {
     setSelected(boardId);
+    return () => {
+      setSelected(null);
+    };
   }, [boardId]);
   const [todoCards, loading, error] = useCollectionData<Todo>(
     canManage
@@ -62,10 +65,7 @@ function TasksRoutes() {
         <Route path="members/*" element={<ModuleManageMembers />} />
         <Route path="details">
           <Route index element={<ModuleInfo />} />
-          <Route
-            path="edit"
-            element={<ManageModule title="Edit to-do board" edit />}
-          />
+          <Route path="edit" element={<ManageModule />} />
         </Route>
         <Route
           path="new-todo/*"

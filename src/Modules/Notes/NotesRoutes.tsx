@@ -16,6 +16,9 @@ function NotesRoutes() {
 
   useLayoutEffect(() => {
     setSelected(boardId);
+    return () => {
+      setSelected(null);
+    };
   }, [boardId]);
 
   if (!selectedApp) {
@@ -39,10 +42,7 @@ function NotesRoutes() {
         <Route path="members/*" element={<ModuleManageMembers />} />
         <Route path="details">
           <Route index element={<ModuleInfo />} />
-          <Route
-            path="edit"
-            element={<ManageModule title="Edit Board" edit />}
-          />
+          <Route path="edit" element={<ManageModule />} />
         </Route>
       </Route>
     </Routes>

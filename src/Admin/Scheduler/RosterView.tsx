@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { useScheduler } from "./Scheduler";
@@ -22,7 +22,7 @@ type RosterData = {
 };
 
 function RosterView({ employees }: { employees: Employee[] }) {
-  const { shiftsCollection, weekDays, selectedTag, searchQuery } =
+  const { employeeShiftsCollection, weekDays, selectedTag, searchQuery } =
     useSchedule();
   const { editShift } = useScheduler();
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
@@ -72,23 +72,31 @@ function RosterView({ employees }: { employees: Employee[] }) {
         },
       },
     ],
-    [weekDays, shiftsCollection]
+    [weekDays, employeeShiftsCollection]
   );
 
   const dataSource = useMemo(() => {
-    const shifts = shiftsCollection
-      ?.filter((shf) =>
-        shf.getStartDayjsDate.isSame(weekDays[selectedDateIndex], "day")
-      )
-      ?.map((shift) => ({
-        shift,
-        employee: employees.find((e) => e.id === shift.employeeId),
-      }));
+    const shiftsCollection: RosterData[] = [];
+    employeeShiftsCollection
+      .flatMap((sd) => ({
+        employeeId: sd.employeeId,
+        shiftsColl: sd.shiftsArray?.filter((sfts) =>
+          sfts.getStartDayjsDate.isSame(weekDays[selectedDateIndex], "day")
+        ),
+      }))
+      ?.forEach((shiftsDoc) => {
+        shiftsDoc.shiftsColl.forEach((shift) => {
+          shiftsCollection.push({
+            shift,
+            employee: employees.find((e) => e.id === shiftsDoc.employeeId),
+          });
+        });
+      });
     const byName = searchQuery
-      ? matchSorter(shifts, searchQuery, {
+      ? matchSorter(shiftsCollection, searchQuery, {
           keys: ["employee.fullName"],
         })
-      : shifts;
+      : shiftsCollection;
 
     const byTag = selectedTag
       ? matchSorter(byName, selectedTag, {
@@ -99,7 +107,7 @@ function RosterView({ employees }: { employees: Employee[] }) {
     return groupBy(byTag, ({ shift }) => shift.getStartDayjsDate.format("a"));
   }, [
     employees,
-    shiftsCollection,
+    employeeShiftsCollection,
     weekDays,
     selectedDateIndex,
     searchQuery,

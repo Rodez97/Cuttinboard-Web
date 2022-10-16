@@ -7,7 +7,7 @@ import SimpleTodo from "../../components/SimpleTodo";
 import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Button, List, Modal, Space, Tag } from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import Icon, { OrderedListOutlined, RetweetOutlined } from "@ant-design/icons";
+import Icon, { OrderedListOutlined } from "@ant-design/icons";
 import { Note } from "../Notes/notesIcons";
 import { recordError } from "../../utils/utils";
 dayjs.extend(advancedFormat);
@@ -81,10 +81,9 @@ function ShiftCard({ shift }: ShiftCardProps) {
           description={getHours()}
         />
 
-        {(shift.position || shift.altId === "repeat") && (
+        {shift.position && (
           <Space style={{ display: "flex", justifyContent: "space-evenly" }}>
             {shift.position && <Tag color="processing">{shift.position}</Tag>}
-            {shift.altId === "repeat" && <RetweetOutlined />}
           </Space>
         )}
       </List.Item>

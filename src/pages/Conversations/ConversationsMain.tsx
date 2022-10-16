@@ -26,10 +26,7 @@ function ConversationsMain() {
   }, [selectedChat]);
 
   return (
-    <ConversationMessagesProvider
-      chatId={selectedChat.id}
-      members={selectedChat.members}
-    >
+    <ConversationMessagesProvider chatId={selectedChat.id}>
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={() => navigate("details")}
