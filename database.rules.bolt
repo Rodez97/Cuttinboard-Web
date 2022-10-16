@@ -37,6 +37,14 @@ path /directMessages/{dmId} {
   read() { auth != null && dmId.includes(auth.uid) };
   update() { auth != null && dmId.includes(auth.uid) };
   index() { ["createdAt"] }
+
+  /{messageId} {
+    write() { auth != null && (messageId == "firstMessage" || this.sender.id == auth.uid) };
+
+    /reactions/{reactionId} {
+      write() { auth != null && reactionId == auth.uid && dmId.includes(auth.uid) };
+    }
+  }
 }
 
 path /conversationMessages/{organizationId} {

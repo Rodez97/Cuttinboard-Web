@@ -58,6 +58,7 @@ service cloud.firestore {
 
 		match /Locations/{locationId} {
 			allow read: if isAuthenticated();
+      allow create: if isOwner(resource.data.organizationId) && request.resource.data.keys().hasAll(["organizationId","subItemId","name"]);
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus"]) == false
                     && isOwnerOrSupervisor(resource.data.organizationId);
       allow delete: if isOwner(resource.data.organizationId);
