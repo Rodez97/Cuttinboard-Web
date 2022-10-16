@@ -1,14 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import React, { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
 import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  useConversationMessages,
-  useConversations,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
 import mdiArrowDownLeft from "@mdi/svg/svg/arrow-down-left.svg";
 import mdiReply from "@mdi/svg/svg/reply.svg";
@@ -17,7 +13,7 @@ import styled from "@emotion/styled";
 import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { getAvatarByUID } from "utils/utils";
+import { getAvatarByUID, recordError } from "utils/utils";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`
@@ -54,14 +50,10 @@ const MessageWrap = styled.div`
 
 interface MessageBubbleProps {
   prevMessage?: Message;
-  currentMessage?: Message & {
-    type: "attachment" | "youtube" | "mediaUri" | "text";
-  };
+  currentMessage?: Message;
   i: number;
   allMessagesLength: number;
-  onReply: (
-    message: Message & { type: "attachment" | "youtube" | "mediaUri" | "text" }
-  ) => void;
+  onReply: (message: Message) => void;
   canUseApp?: boolean;
 }
 
@@ -73,9 +65,6 @@ function MessageBubble({
   onReply,
   canUseApp,
 }: MessageBubbleProps) {
-  const { deleteMessage } = useConversationMessages();
-  const { selectedChat } = useConversations();
-
   const handleReplyMsg = () => {
     onReply(currentMessage);
   };
@@ -92,12 +81,10 @@ function MessageBubble({
     () =>
       prevMessage &&
       (i === allMessagesLength - 1 ||
-        dayjs(currentMessage.createdAt).diff(
-          dayjs(prevMessage?.createdAt),
-          "hours"
-        ) > 5 ||
-        dayjs(currentMessage.createdAt).day() !==
-          dayjs(prevMessage?.createdAt).day()),
+        currentMessage.createdAtDate.diff(prevMessage?.createdAtDate, "hours") >
+          5 ||
+        currentMessage.createdAtDate.day() !==
+          prevMessage?.createdAtDate.day()),
     [prevMessage, currentMessage, allMessagesLength]
   );
 
@@ -105,17 +92,25 @@ function MessageBubble({
     if (!currentMessage.replyTarget) {
       return null;
     }
-    const [rsId, rsName] = selectedChat.members.find(
-      ([id]) => id === currentMessage.replyTarget.sender.id
-    );
+    const {
+      sender: { id, name },
+    } = currentMessage.replyTarget;
     return {
-      id: rsId,
-      name: rsName,
-      avatar: getAvatarByUID(rsId),
+      id,
+      name,
+      avatar: getAvatarByUID(id),
     };
   };
 
   const avatar = getAvatarByUID(currentMessage.sender.id);
+
+  const deleteMessage = async () => {
+    try {
+      await currentMessage.delete();
+    } catch (error) {
+      recordError(error);
+    }
+  };
 
   return (
     <div
@@ -129,7 +124,7 @@ function MessageBubble({
     >
       {showDate && (
         <Divider plain>
-          {dayjs(currentMessage.createdAt).format("MM/DD/YYYY, h:mm a")}
+          {currentMessage.createdAtDate.format("MM/DD/YYYY, h:mm a")}
         </Divider>
       )}
 
@@ -215,7 +210,7 @@ function MessageBubble({
                 {currentMessage.sender?.name}
                 <Tooltip
                   placement="top"
-                  title={dayjs(currentMessage.createdAt).format(
+                  title={currentMessage.createdAtDate.format(
                     "MM/DD/YYYY, h:mm a"
                   )}
                 >
@@ -226,7 +221,7 @@ function MessageBubble({
                       color: "#00000070",
                     }}
                   >
-                    {dayjs(currentMessage.createdAt).fromNow()}
+                    {currentMessage.createdAtDate.fromNow()}
                   </Typography.Text>
                 </Tooltip>
               </Typography.Text>
@@ -252,19 +247,9 @@ function MessageBubble({
               onClick={handleReplyMsg}
               icon={<Icon component={mdiReply} />}
             />
-            <MessageReactionPicker
-              messageId={currentMessage.id}
-              haveUserReaction={Boolean(
-                currentMessage.reactions?.[Auth.currentUser.uid]
-              )}
-              isChat={false}
-            />
+            <MessageReactionPicker message={currentMessage} />
             {Auth.currentUser.uid === currentMessage?.sender?.id && (
-              <Button
-                onClick={() => deleteMessage(currentMessage.id)}
-                danger
-                icon={<DeleteFilled />}
-              />
+              <Button onClick={deleteMessage} danger icon={<DeleteFilled />} />
             )}
           </Button.Group>
         )}
@@ -273,4 +258,4 @@ function MessageBubble({
   );
 }
 
-export default React.memo(MessageBubble);
+export default MessageBubble;

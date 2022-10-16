@@ -8,9 +8,7 @@ import { Tag, Tooltip } from "antd";
 function MessageReactionsElement({
   reactions,
 }: {
-  reactions?: (Message & {
-    type: "attachment" | "youtube" | "mediaUri" | "text";
-  })["reactions"];
+  reactions?: Message["reactions"];
 }) {
   const getReactions = useMemo(() => {
     if (!reactions) {

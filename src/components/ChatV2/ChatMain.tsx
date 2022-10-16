@@ -29,9 +29,7 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
   const { t } = useTranslation();
   const { fetchOlderMessages, allMessages, noMoreMessages, loading } =
     type === "chats" ? useDirectMessages() : useConversationMessages();
-  const [replyTargetMessage, setReplyTargetMessage] = useState<
-    Message & { type: "attachment" | "youtube" | "mediaUri" | "text" }
-  >(null);
+  const [replyTargetMessage, setReplyTargetMessage] = useState<Message>(null);
 
   useEffect(() => {
     setReplyTargetMessage(null);
@@ -98,7 +96,7 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
                   {t("The conversation starts here 😉")}
                 </Typography.Text>
                 <Divider plain>
-                  {dayjs(rm.createdAt).format("MM/DD/YYYY, h:mm a")}
+                  {rm.createdAtDate.format("MM/DD/YYYY, h:mm a")}
                 </Divider>
               </div>
             ) : type === "chats" ? (

@@ -4,16 +4,8 @@ import dayjs from "dayjs";
 import React, { useEffect, useMemo } from "react";
 import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
 import { useInView } from "react-intersection-observer";
-import {
-  Message,
-  MessageType,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  useConversationMessages,
-  useDirectMessages,
-  useDMs,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
 import mdiArrowDownLeft from "@mdi/svg/svg/arrow-down-left.svg";
 import mdiReply from "@mdi/svg/svg/reply.svg";
@@ -23,7 +15,7 @@ import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
 import SeenByElement from "./SeenByElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { getAvatarByUID } from "utils/utils";
+import { getAvatarByUID, recordError } from "utils/utils";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`
@@ -60,14 +52,10 @@ const MessageWrap = styled.div`
 
 interface DirectMessageBubbleProps {
   prevMessage?: Message;
-  currentMessage?: Message & {
-    type: "attachment" | "youtube" | "mediaUri" | "text";
-  };
+  currentMessage?: Message;
   i: number;
   allMessagesLength: number;
-  onReply: (
-    message: Message & { type: "attachment" | "youtube" | "mediaUri" | "text" }
-  ) => void;
+  onReply: (message: Message) => void;
 }
 
 function DirectMessageBubble({
@@ -81,12 +69,10 @@ function DirectMessageBubble({
     /* Optional options */
     threshold: 1,
   });
-  const { updateLastVisitedBy, deleteMessage } = useDirectMessages();
-  const { selectedChat } = useDMs();
 
   useEffect(() => {
-    if (!Boolean(currentMessage?.seenBy?.[Auth.currentUser.uid]) && inView) {
-      updateLastVisitedBy(currentMessage.id);
+    if (!Boolean(currentMessage.seenBy[Auth.currentUser.uid]) && inView) {
+      currentMessage.updateLastVisitedBy();
     }
   }, [inView]);
 
@@ -106,12 +92,10 @@ function DirectMessageBubble({
     () =>
       prevMessage &&
       (i === allMessagesLength - 1 ||
-        dayjs(currentMessage.createdAt).diff(
-          dayjs(prevMessage?.createdAt),
-          "hours"
-        ) > 5 ||
-        dayjs(currentMessage.createdAt).day() !==
-          dayjs(prevMessage?.createdAt).day()),
+        currentMessage.createdAtDate.diff(prevMessage?.createdAtDate, "hours") >
+          5 ||
+        currentMessage.createdAtDate.day() !==
+          prevMessage?.createdAtDate.day()),
     [prevMessage, currentMessage, allMessagesLength]
   );
 
@@ -119,17 +103,25 @@ function DirectMessageBubble({
     if (!currentMessage.replyTarget) {
       return null;
     }
-    const [rsId, rsName] = Object.entries(selectedChat.members).find(
-      ([id]) => id === currentMessage.replyTarget.sender.id
-    );
+    const {
+      sender: { id, name },
+    } = currentMessage.replyTarget;
     return {
-      id: rsId,
-      name: rsName,
-      avatar: getAvatarByUID(rsId),
+      id,
+      name,
+      avatar: getAvatarByUID(id),
     };
   };
 
   const avatar = getAvatarByUID(currentMessage.sender.id);
+
+  const deleteMessage = async () => {
+    try {
+      await currentMessage.delete();
+    } catch (error) {
+      recordError(error);
+    }
+  };
 
   return (
     <div
@@ -144,7 +136,7 @@ function DirectMessageBubble({
     >
       {showDate && (
         <Divider plain>
-          {dayjs(currentMessage.createdAt).format("MM/DD/YYYY, h:mm a")}
+          {currentMessage.createdAtDate.format("MM/DD/YYYY, h:mm a")}
         </Divider>
       )}
 
@@ -230,7 +222,7 @@ function DirectMessageBubble({
                 {currentMessage.sender.name}
                 <Tooltip
                   placement="top"
-                  title={dayjs(currentMessage.createdAt).format(
+                  title={currentMessage.createdAtDate.format(
                     "MM/DD/YYYY, h:mm a"
                   )}
                 >
@@ -241,7 +233,7 @@ function DirectMessageBubble({
                       color: "#00000070",
                     }}
                   >
-                    {dayjs(currentMessage.createdAt).fromNow()}
+                    {currentMessage.createdAtDate.fromNow()}
                   </Typography.Text>
                 </Tooltip>
               </Typography.Text>
@@ -257,10 +249,7 @@ function DirectMessageBubble({
               }}
             >
               <MessageElement targetMsg={currentMessage} />
-              <SeenByElement
-                message={currentMessage}
-                members={Object.keys(selectedChat.members)}
-              />
+              <SeenByElement message={currentMessage} />
             </div>
             <MessageReactionsElement reactions={currentMessage.reactions} />
           </div>
@@ -270,19 +259,9 @@ function DirectMessageBubble({
             onClick={handleReplyMsg}
             icon={<Icon component={mdiReply} />}
           />
-          <MessageReactionPicker
-            messageId={currentMessage.id}
-            haveUserReaction={Boolean(
-              currentMessage.reactions?.[Auth.currentUser.uid]
-            )}
-            isChat={true}
-          />
+          <MessageReactionPicker message={currentMessage} />
           {Auth.currentUser.uid === currentMessage?.sender?.id && (
-            <Button
-              onClick={() => deleteMessage(currentMessage.id)}
-              danger
-              icon={<DeleteFilled />}
-            />
+            <Button onClick={deleteMessage} danger icon={<DeleteFilled />} />
           )}
         </Button.Group>
       </MessageWrap>

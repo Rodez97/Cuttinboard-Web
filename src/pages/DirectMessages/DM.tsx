@@ -10,9 +10,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { EmptyMainModule } from "../../Modules/Notes/EmptyMainModule";
 import dmImage from "../../assets/images/encrypted-data.png";
 import { useTranslation } from "react-i18next";
-import NewDMByEmployee from "./NewDMByEmployee";
 import NewDM from "./NewDM";
 import { useState } from "react";
+import { recordError } from "utils/utils";
 
 const DM = ({ locationId }: { locationId?: string }) => {
   const { t } = useTranslation();
@@ -21,43 +21,47 @@ const DM = ({ locationId }: { locationId?: string }) => {
   );
 
   return (
-    <DMsProvider
-      LoadingElement={<PageLoading />}
-      ErrorElement={(error) => <PageError error={error} />}
-      {...{ locationId }}
-    >
-      <Layout hasSider>
-        <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
-          <DMList
-            underLocation={Boolean(locationId != null)}
-            filterChecked={filterByLocation}
-            onFilterCheckedChange={setFilterByLocation}
-          />
-        </Layout.Sider>
-        <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
-          <Routes>
-            <Route path="/">
-              <Route
-                index
-                element={
-                  <EmptyMainModule
-                    description={
-                      <p>
-                        {t("Welcome to Conversations.")}{" "}
-                        <a>{t("Learn More")}</a>
-                      </p>
-                    }
-                    image={dmImage}
-                  />
-                }
+    <DMsProvider onError={recordError}>
+      {({ loading, error }) =>
+        loading ? (
+          <PageLoading />
+        ) : error ? (
+          <PageError error={error} />
+        ) : (
+          <Layout hasSider>
+            <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
+              <DMList
+                underLocation={Boolean(locationId != null)}
+                filterChecked={filterByLocation}
+                onFilterCheckedChange={setFilterByLocation}
               />
-              <Route path=":boardId/*" element={<DMRoutes />} />
-              <Route path="new" element={<NewDM />} />
-              <Route path="*" element={<Navigate to="/chats" />} />
-            </Route>
-          </Routes>
-        </Layout.Content>
-      </Layout>
+            </Layout.Sider>
+            <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
+              <Routes>
+                <Route path="/">
+                  <Route
+                    index
+                    element={
+                      <EmptyMainModule
+                        description={
+                          <p>
+                            {t("Welcome to Conversations.")}{" "}
+                            <a>{t("Learn More")}</a>
+                          </p>
+                        }
+                        image={dmImage}
+                      />
+                    }
+                  />
+                  <Route path=":boardId/*" element={<DMRoutes />} />
+                  <Route path="new" element={<NewDM />} />
+                  <Route path="*" element={<Navigate to="/chats" />} />
+                </Route>
+              </Routes>
+            </Layout.Content>
+          </Layout>
+        )
+      }
     </DMsProvider>
   );
 };

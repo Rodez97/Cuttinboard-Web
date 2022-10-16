@@ -2,23 +2,21 @@
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import mdiCheckAll from "@mdi/svg/svg/check-all.svg";
-import {
-  Message,
-  MessageType,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import Icon from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 
-function SeenByElement({
-  message,
-  members = [],
-}: {
-  message: Message & { type: "attachment" | "youtube" | "mediaUri" | "text" };
-  members: string[];
-}) {
+function SeenByElement({ message }: { message: Message }) {
+  const { selectedChat } = useDMs();
   const getAllSeen = useMemo(() => {
-    return members.every((member) => message?.seenBy?.[member] === true);
-  }, [members, message]);
+    if (!selectedChat) {
+      return false;
+    }
+    return selectedChat.membersList.every(
+      (member) => message.seenBy[member] === true
+    );
+  }, [selectedChat, message]);
 
   return (
     <Icon

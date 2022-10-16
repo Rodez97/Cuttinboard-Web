@@ -1,6 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  Message,
+  ReplyRecipient,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Space, Typography } from "antd";
 import AudioMessage from "components/ChatV2/CustomMessages/AudioMessage";
 import FileMessage from "components/ChatV2/CustomMessages/FileMessage";
@@ -9,7 +12,7 @@ import VideoMessage from "components/ChatV2/CustomMessages/VideoMessage";
 import Linkify from "linkify-react";
 
 interface MessageElementProps {
-  targetMsg: Message & { type: "attachment" | "youtube" | "mediaUri" | "text" };
+  targetMsg: Message | ReplyRecipient;
 }
 
 const defaultMessages = [

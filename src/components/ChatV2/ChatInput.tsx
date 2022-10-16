@@ -30,9 +30,7 @@ import { GrayPageHeader } from "../PageHeaders";
 import { recordError } from "../../utils/utils";
 
 interface ChatInputProps {
-  replyTargetMessage?: Message & {
-    type: "attachment" | "youtube" | "mediaUri" | "text";
-  };
+  replyTargetMessage?: Message;
   onSendMessage: () => void;
   cancelReply: () => void;
   type: "chats" | "conversations";

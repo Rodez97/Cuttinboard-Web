@@ -1,13 +1,12 @@
 /** @jsx jsx */
-import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  Message,
+  ReplyRecipient,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import ReactPlayer from "react-player";
 
-function VideoMessage({
-  message,
-}: {
-  message?: Message & { type: "attachment" | "mediaUri" | "youtube" };
-}) {
+function VideoMessage({ message }: { message?: Message | ReplyRecipient }) {
   const getSrc = () => {
     if (message.type === "mediaUri" || message.type === "youtube") {
       return message.sourceUrl;
