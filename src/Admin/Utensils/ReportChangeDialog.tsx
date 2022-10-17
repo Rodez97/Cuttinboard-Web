@@ -5,17 +5,9 @@ import {
   SaveFilled,
 } from "@ant-design/icons";
 import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, InputNumber, Modal, Space } from "antd";
 import TextArea from "antd/lib/input/TextArea";
-import {
-  arrayRemove,
-  arrayUnion,
-  getFirestore,
-  Timestamp,
-  writeBatch,
-} from "firebase/firestore";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
@@ -31,57 +23,48 @@ function ReportChangeDialog({
   open,
   onClose,
 }: ReportChangeDialogProps) {
-  const Firestore = getFirestore();
   const [changeQty, setChangeQty] = useState(0);
   const [reason, setReason] = useState("");
-  const { user } = useCuttinboard();
   const { t } = useTranslation();
+  const [submitting, setSubmitting] = useState(false);
 
   const saveChanges = async () => {
     if (changeQty === 0) {
-      handleClose();
       return;
     }
-    const changesLength = utensil?.changes?.length ?? 0;
+    setSubmitting(true);
     try {
-      const batch = writeBatch(Firestore);
-      if (changesLength >= 5) {
-        batch.set(
-          utensil.docRef,
-          { changes: arrayRemove(utensil?.changes[0]) },
-          { merge: true }
-        );
-      }
-      const changeObject = {
-        quantity: changeQty,
-        date: Timestamp.now(),
-        userId: user.uid,
-        reason,
-      };
-      const changeRecord = {
-        currentQuantity: utensil.currentQuantity + changeQty,
-        changes: arrayUnion(changeObject),
-      };
-      batch.set(utensil.docRef, changeRecord, { merge: true });
-      await batch.commit();
+      await utensil.addChange(changeQty, reason);
     } catch (error) {
       recordError(error);
     }
+    setSubmitting(false);
     handleClose();
   };
+
   const handleClose = () => {
     onClose();
     setChangeQty(0);
     setReason("");
   };
+
   return (
     <Modal
       visible={open}
+      confirmLoading={submitting}
       title={t("Report change")}
       onCancel={handleClose}
       footer={[
-        <Button onClick={handleClose}>{t("Cancel")}</Button>,
-        <Button onClick={saveChanges} type="primary" icon={<SaveFilled />}>
+        <Button key="cancel" onClick={handleClose} disabled={submitting}>
+          {t("Cancel")}
+        </Button>,
+        <Button
+          key="ok"
+          onClick={saveChanges}
+          type="primary"
+          icon={<SaveFilled />}
+          loading={submitting}
+        >
           {t("Save")}
         </Button>,
       ]}
@@ -101,6 +84,7 @@ function ReportChangeDialog({
           }
           onChange={setChangeQty}
           style={{ display: "inherit" }}
+          disabled={submitting}
         />
         <TextArea
           rows={3}
@@ -108,6 +92,7 @@ function ReportChangeDialog({
           maxLength={250}
           showCount
           onChange={(e) => setReason(e.target.value)}
+          disabled={submitting}
         />
       </Space>
     </Modal>

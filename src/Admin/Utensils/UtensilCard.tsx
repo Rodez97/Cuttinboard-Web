@@ -31,27 +31,24 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
   const { isGeneralManager, isOwner } = useLocation();
   const [reportChangeDialogOpen, setReportChangeDialogOpen] = useState(false);
   const [changesDialogOpen, setChangesDialogOpen] = useState(false);
-  const utencilPercent = Number.parseInt(
-    ((utensil.currentQuantity / utensil.optimalQuantity) * 100).toFixed()
-  );
 
   const getScaleColor = useMemo(() => {
-    if (utencilPercent <= 20) {
+    if (utensil.percent <= 20) {
       return "#ff0000";
     }
-    if (utencilPercent <= 40) {
+    if (utensil.percent <= 40) {
       return "#ffa700";
     }
-    if (utencilPercent <= 60) {
+    if (utensil.percent <= 60) {
       return "#fff400";
     }
-    if (utencilPercent <= 80) {
+    if (utensil.percent <= 80) {
       return "#68AEA0";
     }
-    if (utencilPercent <= 80) {
+    if (utensil.percent <= 80) {
       return "#2cba00";
     }
-  }, [utencilPercent]);
+  }, [utensil.percent]);
 
   const handleReportChangeDialogOpen = () => {
     setReportChangeDialogOpen(true);
@@ -64,16 +61,6 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
   const handleDelete = () => {
     deleteDoc(utensil.docRef);
   };
-
-  const menuItems = [
-    { label: t("Edit"), key: "edit", icon: <EditOutlined /> },
-    {
-      label: t("Delete"),
-      key: "delete",
-      icon: <DeleteOutlined />,
-      danger: true,
-    },
-  ];
 
   return (
     <CardContainer>
@@ -132,7 +119,7 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
       </List.Item>
       <Progress
         strokeColor={getScaleColor}
-        percent={utencilPercent}
+        percent={utensil.percent}
         showInfo={false}
       />
 

@@ -5,8 +5,8 @@ import {
   useCuttinboard,
   Employee,
   PrivacyLevel,
-  COLORS,
   useLocation,
+  Colors,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, List } from "antd";
 import { useMemo } from "react";
@@ -56,7 +56,7 @@ function MemberItem({
   return (
     <List.Item
       css={{
-        backgroundColor: COLORS.MainOnWhite,
+        backgroundColor: Colors.MainOnWhite,
         padding: 10,
         margin: 5,
       }}

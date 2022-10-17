@@ -4,7 +4,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   CuttinboardUser,
-  CuttinboardUserConverter,
   Organization,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { doc, DocumentData, DocumentReference } from "firebase/firestore";
@@ -27,7 +26,7 @@ function DashboardProvider({ children }: { children: ReactNode }) {
   const [userDocument, loadingUserDocument, userDocumentError] =
     useDocumentData<CuttinboardUser>(
       doc(Firestore, "Users", Auth.currentUser.uid).withConverter(
-        CuttinboardUserConverter
+        CuttinboardUser.Converter
       )
     );
   const [subscriptionDocument, loadingSubscriptionDocument, SubDocumentError] =

@@ -15,10 +15,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import {
-  CuttinboardUser,
-  CuttinboardUserConverter,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
+import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { getAvatarByUID, recordError } from "utils/utils";
 import { useDashboard } from "Dashboard/DashboardProvider";
 import { intersection } from "lodash";
@@ -46,7 +43,7 @@ function NewDMByEmail({
       if (locationId) {
         const senderSnap = await getDoc<CuttinboardUser>(
           doc(Firestore, "Users", Auth.currentUser.uid).withConverter(
-            CuttinboardUserConverter
+            CuttinboardUser.Converter
           )
         );
 
@@ -67,7 +64,7 @@ function NewDMByEmail({
         query(
           collection(Firestore, "Users"),
           where("email", "==", email)
-        ).withConverter(CuttinboardUserConverter)
+        ).withConverter(CuttinboardUser.Converter)
       );
       if (recipientSnap.size !== 1) {
         message.warn(

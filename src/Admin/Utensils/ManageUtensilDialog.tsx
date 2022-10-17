@@ -1,6 +1,10 @@
 import { SaveFilled } from "@ant-design/icons";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  FirebaseSignature,
+  IUtensil,
+  Utensil,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboard,
   useLocation,
@@ -9,8 +13,8 @@ import { Button, Form, Input, InputNumber, Modal } from "antd";
 import {
   addDoc,
   collection,
+  PartialWithFieldValue,
   serverTimestamp,
-  setDoc,
 } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,13 +27,14 @@ export interface IManageUtensilDialogRef {
 
 const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
   (_props, ref) => {
-    const [form] = Form.useForm<Utensil>();
+    const [form] = Form.useForm<IUtensil>();
     const [saving, setSaving] = useState(false);
     const { user } = useCuttinboard();
     const { location } = useLocation();
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
+    const [utensil, setUtensil] = useState<Utensil>(null);
 
     useImperativeHandle(ref, () => ({
       openNew,
@@ -43,22 +48,26 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
 
     const openEdit = (utensilToEdit: Utensil) => {
       setTitle("Edit Utensil");
-      form?.setFieldsValue(utensilToEdit);
+      form.setFieldsValue(utensilToEdit);
+      setUtensil(utensilToEdit);
       setOpen(true);
     };
 
     const handleClose = () => {
       form.resetFields();
       setOpen(false);
+      setUtensil(null);
     };
 
-    const onFinish = async (values: Utensil) => {
+    const onFinish = async (values: Partial<IUtensil>) => {
       setSaving(true);
       try {
-        if (values.id) {
-          await setDoc(values.docRef, values, { merge: true });
+        if (utensil) {
+          await utensil.update(values);
         } else {
-          const newAppObject = {
+          const newAppObject: PartialWithFieldValue<
+            IUtensil & FirebaseSignature
+          > = {
             ...values,
             createdAt: serverTimestamp(),
             createdBy: user.uid,
