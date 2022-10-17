@@ -224,6 +224,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       disabled={saving}
       size="small"
       layout="vertical"
+      autoComplete="off"
     >
       <Modal
         open={open}

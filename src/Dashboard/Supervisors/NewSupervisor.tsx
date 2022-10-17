@@ -124,6 +124,7 @@ function NewSupervisor() {
             onFinish={onSupervisorFormFinish}
             disabled={loading}
             css={{ width: 300 }}
+            autoComplete="off"
           >
             <Form.Item
               required

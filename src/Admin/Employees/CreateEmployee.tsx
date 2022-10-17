@@ -158,6 +158,7 @@ function CreateEmployee() {
             positions: [],
           }}
           disabled={submitting}
+          autoComplete="off"
         >
           <Form.Item
             required

@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAddLocation } from "../AddLocation";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Button, Checkbox, Form, Input, message, Space } from "antd";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
@@ -52,6 +51,7 @@ function LocationInfo() {
         onFinish={onFinish}
         disabled={saved}
         size="small"
+        autoComplete="off"
       >
         <Space
           wrap

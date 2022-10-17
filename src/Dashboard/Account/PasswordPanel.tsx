@@ -51,6 +51,7 @@ function PasswordPanel() {
           disabled={!editing || isSubmitting || updating}
           layout="vertical"
           onFinish={onFinish}
+          autoComplete="off"
         >
           <Form.Item
             label={t("Current Password")}

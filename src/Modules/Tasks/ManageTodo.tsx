@@ -93,6 +93,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
           selectedTodo?.dueDate && moment(selectedTodo.dueDate?.toDate()),
       }}
       disabled={submitting}
+      autoComplete="off"
     >
       <Routes>
         <Route path="/">

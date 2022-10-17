@@ -108,6 +108,7 @@ function EmployeeRolePanel({ employee }: { employee: Employee }) {
         }}
         disabled={!editing || isSubmitting}
         onFinish={onFinish}
+        autoComplete="off"
       >
         <Form.Item
           label={t("Role")}

@@ -13,7 +13,7 @@ import {
   Typography,
 } from "antd";
 import { setDoc } from "firebase/firestore";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 
@@ -89,6 +89,7 @@ function EmployeeContactPanel({ employee }: { employee: Employee }) {
         }}
         disabled={!editing || isSubmitting}
         onFinish={onFinish}
+        autoComplete="off"
       >
         <Form.Item label={t("Email")} name="email">
           <Input disabled />

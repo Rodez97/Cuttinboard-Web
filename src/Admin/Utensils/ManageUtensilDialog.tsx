@@ -108,6 +108,7 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           size="small"
           layout="vertical"
           disabled={saving}
+          autoComplete="off"
         >
           <Form.Item
             name="name"

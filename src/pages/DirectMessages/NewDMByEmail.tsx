@@ -104,7 +104,7 @@ function NewDMByEmail({
 
   return (
     <div>
-      <Form layout="vertical">
+      <Form layout="vertical" autoComplete="off">
         <Form.Item
           name="email"
           label={

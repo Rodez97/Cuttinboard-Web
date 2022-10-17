@@ -27,6 +27,7 @@ function LocationEditor({
       css={{ width: 300, paddingBottom: 20 }}
       disabled={loading}
       size="small"
+      autoComplete="off"
     >
       <Form.Item required name="name" rules={[{ required: true, message: "" }]}>
         <Input maxLength={50} showCount placeholder={t("Name")} />

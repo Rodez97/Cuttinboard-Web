@@ -90,6 +90,7 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
         onFinish={onFinish}
         disabled={isSubmitting}
         initialValues={{ title: baseNote?.title, content: baseNote?.content }}
+        autoComplete="off"
       >
         <Form.Item name="title">
           <Input placeholder={t("Title")} maxLength={80} showCount />
