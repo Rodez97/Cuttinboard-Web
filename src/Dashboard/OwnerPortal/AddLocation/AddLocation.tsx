@@ -7,20 +7,9 @@ import FinalStep from "./Steps/FinalStep";
 import LocationInfo from "./Steps/LocationInfo";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  Button,
-  Layout,
-  message,
-  Modal,
-  Result,
-  Space,
-  Steps,
-  Tooltip,
-} from "antd";
+import { Button, Layout, message, Result, Space, Steps, Tooltip } from "antd";
 import { recordError } from "../../../utils/utils";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-
-const { confirm } = Modal;
 
 interface AddLocationContextProps {
   location: Partial<Location>;

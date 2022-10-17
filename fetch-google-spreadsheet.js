@@ -1,5 +1,5 @@
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const secret = require("./cuttinboard-translations-SA.json");
+const secret = require("./.cuttinboard-translations-SA.json");
 
 const fs = require("fs");
 

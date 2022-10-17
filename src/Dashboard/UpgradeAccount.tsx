@@ -37,9 +37,6 @@ const PlanCard = styled.div`
   color: #3d3d3d;
 `;
 
-const ProductID = "prod_MINsulkDhsnMys";
-const PriceID = "price_1LZn7ACYVoOESVglP6Dtv6xm";
-
 function UpgradeAccount() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -49,7 +46,13 @@ function UpgradeAccount() {
     "stripe-upgradeOwner"
   );
   const [price, loadingPrice, priceError] = useDocumentData(
-    doc(Firestore, "Products", ProductID, "prices", PriceID)
+    doc(
+      Firestore,
+      "Products",
+      process.env.REACT_APP_STRIPE_PRODUCT_ID,
+      "prices",
+      process.env.REACT_APP_STRIPE_PRICE_ID
+    )
   );
 
   const handleUpgrade = async () => {
@@ -68,7 +71,7 @@ function UpgradeAccount() {
 
   const upgradeToBusiness = async () => {
     try {
-      await upgradeAccount(PriceID);
+      await upgradeAccount(process.env.REACT_APP_STRIPE_PRICE_ID);
       navigate("/dashboard/owner-portal");
     } catch (error) {
       recordError(error);
