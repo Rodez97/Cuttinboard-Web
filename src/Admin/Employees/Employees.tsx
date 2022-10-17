@@ -48,8 +48,8 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { GrayPageHeader } from "components/PageHeaders";
 import ManagePositions from "./ManagePositions";
+import { GrayPageHeader } from "../../components/PageHeaders";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();

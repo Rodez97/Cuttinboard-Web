@@ -13,11 +13,10 @@ import {
 import { useTranslation } from "react-i18next";
 import SplitButton from "../../components/SplitButton";
 import { useMemo, useState } from "react";
-import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
-import { customOrderSorter } from "Dashboard/OwnerPortal/customOrderSorter";
 import { differenceBy } from "lodash";
+import { customOrderSorter } from "../OwnerPortal/customOrderSorter";
 
 function LocationsPicker({
   selectedLocations,

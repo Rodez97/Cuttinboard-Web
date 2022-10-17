@@ -12,11 +12,10 @@ import {
   List,
   Typography,
 } from "antd";
-import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 
 function ManagePositions(props: DrawerProps) {
   const { t } = useTranslation();

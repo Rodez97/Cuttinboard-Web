@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps";
+import { BaseMediaProps } from "./BaseMediaProps";
 import { getFileIconByType } from "../../../Modules/Files/FileTypeIcons";
 import { Avatar, List } from "antd";
 import Icon, { FileFilled } from "@ant-design/icons";

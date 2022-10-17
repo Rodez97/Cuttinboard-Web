@@ -1,9 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { UserOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Layout, PageHeader, Tabs } from "antd";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import EmployeeContactPanel from "./EmployeeContactPanel";
@@ -13,7 +12,7 @@ import {
   useEmployeesList,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { getAvatarByUID } from "utils/utils";
+import { getAvatarByUID } from "../../utils/utils";
 
 function EmployeeProfile() {
   const { getEmployees } = useEmployeesList();

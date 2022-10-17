@@ -16,7 +16,7 @@ import NotesList from "./NotesList";
 import NotesRoutes from "./NotesRoutes";
 import notesImage from "../../assets/images/notes.png";
 import { EmptyMainModule } from "./EmptyMainModule";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 
 function Notes() {
   const { t } = useTranslation();

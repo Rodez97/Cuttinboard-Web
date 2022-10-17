@@ -1,8 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import ManageShiftDialog, {
-  IManageShiftDialogRef,
-} from "Admin/Scheduler/ManageShiftDialog";
 import dayjs from "dayjs";
 import {
   createContext,
@@ -59,9 +56,10 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { GrayPageHeader } from "components/PageHeaders";
 import "./Scheduler.scss";
 import CloneSchedule from "./CloneSchedule";
+import { GrayPageHeader } from "../../components/PageHeaders";
+import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);

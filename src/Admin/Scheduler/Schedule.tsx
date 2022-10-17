@@ -1,6 +1,6 @@
 import { ScheduleProvider } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React from "react";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 import PageError from "../../components/PageError";
 import PageLoading from "../../components/PageLoading";
 import Scheduler from "./Scheduler";

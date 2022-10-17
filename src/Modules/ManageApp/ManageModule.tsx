@@ -15,8 +15,8 @@ import {
   useLocation as useRouterLocation,
 } from "react-router-dom";
 import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
-import { GrayPageHeader } from "components/PageHeaders";
 import { useTranslation } from "react-i18next";
+import { GrayPageHeader } from "../../components/PageHeaders";
 
 type FormType = {
   name: string;

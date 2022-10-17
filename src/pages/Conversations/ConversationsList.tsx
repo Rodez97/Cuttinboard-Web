@@ -18,7 +18,7 @@ import { MessageOutlined, PlusOutlined } from "@ant-design/icons";
 import { Badge, Button, Input, Menu, Space } from "antd";
 import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
-import { useNewElement } from "hooks/useNewElement";
+import { useNewElement } from "../../hooks/useNewElement";
 
 function ConversationsList() {
   const { locationId, boardId } = useParams();

@@ -41,7 +41,7 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import LocationsPicker from "./LocationsPicker";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
-import { QuickUserDialogAvatar } from "components/QuickUserDialog";
+import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 
 function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
   const { supervisorId } = useParams();

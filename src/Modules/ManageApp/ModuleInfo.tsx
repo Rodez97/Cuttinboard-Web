@@ -7,10 +7,9 @@ import {
   useEmployeesList,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { GrayPageHeader } from "components/PageHeaders";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 import { Button, Divider, List, Space, Tag } from "antd";
 import {
   CrownOutlined,
@@ -23,6 +22,7 @@ import {
   TagsOutlined,
 } from "@ant-design/icons";
 import { useMemo } from "react";
+import { GrayPageHeader } from "../../components/PageHeaders";
 
 function ModuleInfo() {
   const { selectedApp, canManage } = useCuttinboardModule();

@@ -3,8 +3,8 @@ import { jsx } from "@emotion/react";
 import { useRef, useState } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/src/styles.scss";
-import { BaseMediaProps } from "components/ChatV2/CustomMessages/BaseMediaProps";
-import FileMessage from "components/ChatV2/CustomMessages/FileMessage";
+import { BaseMediaProps } from "./BaseMediaProps";
+import FileMessage from "./FileMessage";
 
 function AudioMessage({ message }: BaseMediaProps) {
   const audio = useRef<AudioPlayer>(null);

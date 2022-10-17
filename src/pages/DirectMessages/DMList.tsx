@@ -16,9 +16,9 @@ import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
 import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import { getAvatarByUID } from "utils/utils";
+import { getAvatarByUID } from "../../utils/utils";
 import { Chat } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useNewElement } from "hooks/useNewElement";
+import { useNewElement } from "../../hooks/useNewElement";
 
 function DMList({
   underLocation,

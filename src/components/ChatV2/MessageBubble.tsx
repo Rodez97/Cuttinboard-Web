@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import { useEffect, useMemo } from "react";
-import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
+import { useMemo } from "react";
+import MessageReactionPicker from "./MessageReactionPicker";
 import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
@@ -13,7 +13,7 @@ import styled from "@emotion/styled";
 import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { getAvatarByUID, recordError } from "utils/utils";
+import { getAvatarByUID, recordError } from "../../utils/utils";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`

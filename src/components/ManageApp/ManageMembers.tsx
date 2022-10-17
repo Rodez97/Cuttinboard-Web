@@ -27,7 +27,7 @@ import {
 } from "antd";
 import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { GrayPageHeader } from "components/PageHeaders";
+import { GrayPageHeader } from "../PageHeaders";
 
 interface ManageMembersProps {
   readonly?: boolean;

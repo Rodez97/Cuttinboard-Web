@@ -16,7 +16,7 @@ import FilesRoutes from "./FilesRoutes";
 import { EmptyMainModule } from "../Notes/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 
 function Files() {
   const { t } = useTranslation();

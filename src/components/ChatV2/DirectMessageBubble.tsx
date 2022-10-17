@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React, { useEffect, useMemo } from "react";
-import MessageReactionPicker from "components/ChatV2/MessageReactionPicker";
+import MessageReactionPicker from "./MessageReactionPicker";
 import { useInView } from "react-intersection-observer";
 import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
@@ -15,7 +15,7 @@ import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
 import SeenByElement from "./SeenByElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { getAvatarByUID, recordError } from "utils/utils";
+import { getAvatarByUID, recordError } from "../../utils/utils";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`

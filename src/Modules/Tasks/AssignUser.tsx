@@ -13,10 +13,10 @@ import { Button, List } from "antd";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { GrayPageHeader } from "components/PageHeaders";
-import { TitleBoxGreen } from "theme/styledComponents";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import { QuickUserDialogAvatar } from "components/QuickUserDialog";
+import { GrayPageHeader } from "../../components/PageHeaders";
+import { TitleBoxGreen } from "../../theme/styledComponents";
+import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 
 interface AssignUserProps {
   onSelectedEmployee: (employee: Employee) => void;

@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Avatar, Divider, List, Spin, Switch, Typography } from "antd";
-import { GrayPageHeader } from "components/PageHeaders";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -11,7 +10,6 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import PageError from "components/PageError";
 import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   MailOutlined,
@@ -20,6 +18,8 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { GrayPageHeader } from "../../components/PageHeaders";
+import PageError from "../../components/PageError";
 
 function DMDetails({
   userId,

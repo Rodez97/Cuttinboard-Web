@@ -17,7 +17,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DarkPageHeader } from "../../components/PageHeaders";
-import { useNewElement } from "hooks/useNewElement";
+import { useNewElement } from "../../hooks/useNewElement";
 
 function TasksList() {
   const { t } = useTranslation();

@@ -27,8 +27,8 @@ import {
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Divider, Empty, Layout, Space, Spin, Tabs, Tag } from "antd";
-import { GrayPageHeader } from "components/PageHeaders";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { GrayPageHeader } from "../../components/PageHeaders";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);

@@ -6,7 +6,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { jsx } from "@emotion/react";
 import { Button, Divider, Modal, Switch } from "antd";
-import { GrayPageHeader } from "components/PageHeaders";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -26,11 +25,12 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { useCallback } from "react";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 import {
   PrivacyLevel,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { GrayPageHeader } from "../../components/PageHeaders";
 
 function ConvDetails() {
   const navigate = useNavigate();

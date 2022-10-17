@@ -16,9 +16,9 @@ import {
   PrivacyLevel,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
-import { GrayPageHeader } from "components/PageHeaders";
 import { isEmpty } from "lodash";
 import { useTranslation } from "react-i18next";
+import { GrayPageHeader } from "../../components/PageHeaders";
 
 interface ManageConversationProps {
   baseConversation?: Conversation;

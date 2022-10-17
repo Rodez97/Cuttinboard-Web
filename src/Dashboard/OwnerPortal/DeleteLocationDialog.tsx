@@ -15,7 +15,7 @@ import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { deleteDoc } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 
 export interface DeleteLocationDialogRef {
   openDialog: (location: Location) => void;

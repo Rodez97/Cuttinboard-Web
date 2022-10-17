@@ -11,7 +11,6 @@ import {
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library";
 import { Avatar, Button, List, Modal } from "antd";
 import { useTranslation } from "react-i18next";
-import { getAvatarByUID } from "utils/utils";
 
 interface QuickUserDialogProps {
   employee: Employee;

@@ -13,7 +13,7 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import WeekNavigator from "./WeekNavigator";
 import { UserOutlined } from "@ant-design/icons";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);

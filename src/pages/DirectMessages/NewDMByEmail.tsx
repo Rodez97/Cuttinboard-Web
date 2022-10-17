@@ -16,12 +16,12 @@ import {
   where,
 } from "firebase/firestore";
 import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { getAvatarByUID, recordError } from "utils/utils";
-import { useDashboard } from "Dashboard/DashboardProvider";
+import { getAvatarByUID, recordError } from "../../utils/utils";
 import { intersection } from "lodash";
 import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
+import { useDashboard } from "../../Dashboard/DashboardProvider";
 
 function NewDMByEmail({
   onCreatingChange,

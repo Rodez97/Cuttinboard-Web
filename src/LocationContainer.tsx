@@ -21,8 +21,8 @@ import Forum from "@mdi/svg/svg/forum.svg";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import UserMenu from "./components/UserMenu";
 import { getRoleTextByNumber } from "./Admin/Employees/employee-utils";
-import { DarkPageHeader } from "components/PageHeaders";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { DarkPageHeader } from "./components/PageHeaders";
 
 const LocationSettings = lazy(() => import("./Admin/LocationSettings"));
 const DM = lazy(() => import("./pages/DirectMessages/DM"));

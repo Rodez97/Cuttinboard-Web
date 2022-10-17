@@ -1,13 +1,12 @@
 import { UserOutlined } from "@ant-design/icons";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   DirectMessagesProvider,
   useDMs,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAvatarByUID } from "utils/utils";
+import { getAvatarByUID } from "../../utils/utils";
 import ChatMain from "../../components/ChatV2/ChatMain";
 import { GrayPageHeader } from "../../components/PageHeaders";
 

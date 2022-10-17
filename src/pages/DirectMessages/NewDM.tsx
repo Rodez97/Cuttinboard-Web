@@ -3,10 +3,10 @@ import { jsx } from "@emotion/react";
 import { Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { GrayPageHeader } from "components/PageHeaders";
 import NewDMByEmployee from "./NewDMByEmployee";
 import NewDMByEmail from "./NewDMByEmail";
 import { useTranslation } from "react-i18next";
+import { GrayPageHeader } from "../../components/PageHeaders";
 
 function NewDM() {
   const { t } = useTranslation();

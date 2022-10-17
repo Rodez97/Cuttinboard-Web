@@ -12,7 +12,7 @@ import dmImage from "../../assets/images/encrypted-data.png";
 import { useTranslation } from "react-i18next";
 import NewDM from "./NewDM";
 import { useState } from "react";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 
 const DM = ({ locationId }: { locationId?: string }) => {
   const { t } = useTranslation();

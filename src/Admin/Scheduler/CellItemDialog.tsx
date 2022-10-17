@@ -12,7 +12,6 @@ import {
 import {
   getShiftDate,
   useLocation,
-  useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Avatar, Button, List, Modal } from "antd";
@@ -25,7 +24,7 @@ import Icon, {
 import styled from "@emotion/styled";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import mdiDeleteRestore from "@mdi/svg/svg/delete-restore.svg";
-import { recordError } from "utils/utils";
+import { recordError } from "../../utils/utils";
 
 const HoverListItem = styled(List.Item)`
   cursor: pointer;

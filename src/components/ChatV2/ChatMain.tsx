@@ -3,8 +3,8 @@ import { jsx } from "@emotion/react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
-import MessageBubble from "components/ChatV2/MessageBubble";
-import ChatInput from "components/ChatV2/ChatInput";
+import MessageBubble from "./MessageBubble";
+import ChatInput from "./ChatInput";
 import {
   Message,
   MessageType,

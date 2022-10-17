@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import AllWhiteLogo from "assets/images/allWhiteLogo.svg";
+import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
 import { useMemo } from "react";
 import UserMenu from "../components/UserMenu";
 import DashboardRouter from "./DashboardRouter";
@@ -28,8 +28,8 @@ import {
 } from "../components/BusinessPaper";
 import { DarkPageHeader } from "../components/PageHeaders";
 import mdiMessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import DM from "pages/DirectMessages/DM";
 import { useNotificationsBadges } from "@cuttinboard-solutions/cuttinboard-library/services";
+import DM from "../pages/DirectMessages/DM";
 
 const { Content, Footer, Sider } = Layout;
 
