@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { deleteDoc, updateDoc } from "firebase/firestore";
+import { updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../utils/utils";
@@ -10,8 +10,7 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import OverflowLayout from "../components/OverflowLayout";
-import { Button, Divider, Layout, message, Modal, PageHeader } from "antd";
-import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Layout, message, PageHeader } from "antd";
 import LocationEditor from "../components/LocationEditor";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 
@@ -21,26 +20,6 @@ function LocationSettings() {
   const { loadCredential, user } = useCuttinboard();
   const { location } = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const deleteLocation = async () => {
-    Modal.confirm({
-      title: t("Are you sure you want to delete this location?"),
-      content: t("Otra advertencia"),
-      icon: <ExclamationCircleOutlined />,
-      okText: t("Yes"),
-      okType: "danger",
-      cancelText: t("No"),
-      async onOk() {
-        try {
-          navigate("/dashboard");
-          await deleteDoc(location.docRef);
-        } catch (error) {
-          return recordError(error);
-        }
-      },
-      onCancel() {},
-    });
-  };
 
   const handleChange = async ({
     name,
@@ -90,18 +69,6 @@ function LocationSettings() {
           onCancel={() => navigate(-1)}
           loading={isSubmitting}
         />
-        <Divider />
-        <Button
-          disabled={isSubmitting}
-          icon={<DeleteOutlined />}
-          size="large"
-          type="primary"
-          danger
-          onClick={deleteLocation}
-          css={{ width: 300 }}
-        >
-          {t("Remove Location")}
-        </Button>
       </Layout.Content>
     </OverflowLayout>
   );
