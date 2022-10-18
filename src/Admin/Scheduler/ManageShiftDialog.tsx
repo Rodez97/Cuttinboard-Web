@@ -60,7 +60,6 @@ type FormDataType = {
   applyTo: number[];
   notes?: string;
   position?: string;
-  repeat: boolean;
   tasks?: string[];
   timeRange: [moment.Moment, moment.Moment];
 };

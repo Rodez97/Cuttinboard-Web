@@ -25,7 +25,6 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@cuttinboard-solutions/cuttinboard-library": "^0.9.1",
-    "@cuttinboard/cuttinboard-library": "^6.3.8",
     "@date-io/dayjs": "^2.15.0",
     "@emotion/babel-preset-css-prop": "^11.10.0",
     "@fontsource/roboto": "^4.5.8",
@@ -39,7 +38,7 @@
     "dayjs": "^1.11.5",
     "emoji-picker-react": "^3.6.2",
     "filesize": "^8.0.7",
-    "firebase": "^9.10.0",
+    "firebase": "^9.12.1",
     "firestore-size": "^2.0.7",
     "google-spreadsheet": "^3.3.0",
     "i18next": "^21.9.1",

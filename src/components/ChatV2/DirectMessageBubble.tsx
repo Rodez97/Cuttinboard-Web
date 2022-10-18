@@ -269,4 +269,4 @@ function DirectMessageBubble({
   );
 }
 
-export default React.memo(DirectMessageBubble);
+export default DirectMessageBubble;

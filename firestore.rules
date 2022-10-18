@@ -95,7 +95,8 @@ service cloud.firestore {
 
       function updateModule(){
         return (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name","description","accessTags","hosts"]) && (isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)))
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["accessTags"]) && request.auth.uid in resource.data.hosts);
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["accessTags"]) && request.auth.uid in resource.data.hosts)
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]));
       }
 
       function deleteOrCreateModule(){

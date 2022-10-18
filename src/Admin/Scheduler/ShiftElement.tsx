@@ -111,7 +111,7 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
             }}
           >
             <PositionElement type="secondary">
-              {t(getShiftData().shiftPosition)}
+              {getShiftData().shiftPosition}
             </PositionElement>
           </div>
         )}

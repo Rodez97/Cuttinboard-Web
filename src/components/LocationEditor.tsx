@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard/cuttinboard-library/models";
 import { Button, Form, Input } from "antd";
 import { useTranslation } from "react-i18next";
 import { CloseOutlined, SaveFilled } from "@ant-design/icons";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 
 function LocationEditor({
   baseLocation,

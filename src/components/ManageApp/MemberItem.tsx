@@ -74,7 +74,7 @@ function MemberItem({
     >
       <List.Item.Meta
         avatar={<QuickUserDialogAvatar employee={employee} />}
-        title={`${employee.name} ${employee.lastName}`}
+        title={`${employee.fullName}`}
         description={employee.email}
       />
     </List.Item>

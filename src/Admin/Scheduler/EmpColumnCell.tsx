@@ -37,7 +37,7 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
     <Card bordered={false} css={{ zIndex: 2 }}>
       <Card.Meta
         avatar={<QuickUserDialogAvatar employee={employee} />}
-        title={`${employee.name} ${employee.lastName}`}
+        title={`${employee.fullName}`}
         description={getSecondaryText()}
       />
     </Card>

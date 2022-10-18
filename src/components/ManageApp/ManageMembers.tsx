@@ -53,7 +53,7 @@ function ManageMembers({
   members,
 }: ManageMembersProps) {
   const { t } = useTranslation();
-  const { locationAccessKey, location } = useLocation();
+  const { locationAccessKey } = useLocation();
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
 
