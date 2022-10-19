@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { getRoleTextByNumber } from "./employee-utils";
 import { recordError } from "../../utils/utils";
 import {
+  useAddEmployee,
   useEmployeesList,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
@@ -29,11 +30,7 @@ import {
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { useHttpsCallable } from "react-firebase-hooks/functions";
-import {
-  Firestore,
-  Functions,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 type EmployeeData = {
@@ -52,23 +49,7 @@ function CreateEmployee() {
   const { getEmployees } = useEmployeesList();
   const { getAviablePositions, location } = useLocation();
   const { t } = useTranslation();
-
-  const [addEmployee, submitting, error] = useHttpsCallable<
-    {
-      name: string;
-      lastName: string;
-      email: string;
-      role: RoleAccessLevels | "employee";
-      positions: string[];
-      wagePerPosition: {};
-      mainPosition: string;
-      locationId: string;
-    },
-    {
-      status: "ADDED" | "CREATED" | "ALREADY_MEMBER" | "CANT_ADD_ORG_EMP";
-      employeeId: string;
-    }
-  >(Functions, "http-employees-create");
+  const [addEmployee, submitting, error] = useAddEmployee();
 
   const onFinish = async ({ positions, ...values }: EmployeeData) => {
     if (getEmployees.some((e) => e.email === values.email)) {

@@ -15,7 +15,6 @@ import { getRoleTextByNumber } from "./employee-utils";
 import {
   useCuttinboard,
   useEmployeesList,
-  useEmployeesManager,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
@@ -59,12 +58,10 @@ function Employees() {
   const { user } = useCuttinboard();
   const [managePositionsOpen, setManagePositionsOpen] = useState(false);
   const { isOwner, isAdmin, location } = useLocation();
-  const { addPrimaryOwnerAsGeneralManager, removePrimaryOwnerAsEmployee } =
-    useEmployeesManager();
   const navigate = useNavigate();
 
   const addPrimaryOwner = async () => {
-    await addPrimaryOwnerAsGeneralManager();
+    await location.ownerJoin(true);
   };
 
   const removePrimaryOwner = () => {
@@ -73,7 +70,7 @@ function Employees() {
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
-          await removePrimaryOwnerAsEmployee();
+          await location.ownerJoin();
         } catch (error) {
           recordError(error);
         }
@@ -107,17 +104,7 @@ function Employees() {
 
   const joinSupervisor = async () => {
     try {
-      await setDoc(
-        doc(
-          Firestore,
-          "Organizations",
-          location.organizationId,
-          "employees",
-          Auth.currentUser.uid
-        ),
-        { locations: { [location.id]: true } },
-        { merge: true }
-      );
+      await location.supervisorJoin(true);
     } catch (error) {
       recordError(error);
     }
@@ -129,17 +116,7 @@ function Employees() {
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
-          await setDoc(
-            doc(
-              Firestore,
-              "Organizations",
-              location.organizationId,
-              "employees",
-              Auth.currentUser.uid
-            ),
-            { locations: { [location.id]: deleteField() } },
-            { merge: true }
-          );
+          await location.supervisorJoin();
         } catch (error) {
           recordError(error);
         }

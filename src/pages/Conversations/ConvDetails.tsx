@@ -133,12 +133,12 @@ function ConvDetails() {
           )}
 
           {selectedChat.privacyLevel === PrivacyLevel.POSITIONS &&
-            Boolean(selectedChat.positions?.length) && (
+            Boolean(selectedChat.position) && (
               <List.Item>
                 <List.Item.Meta
                   avatar={<TagOutlined />}
                   title={t("Position")}
-                  description={selectedChat.positions[0]}
+                  description={selectedChat.position}
                 />
               </List.Item>
             )}

@@ -21,7 +21,7 @@ import { GrayPageHeader } from "../../components/PageHeaders";
 type FormType = {
   name: string;
   description?: string;
-  positions?: string[];
+  position?: string;
   privacyLevel: PrivacyLevel;
 };
 // TODO: Crear una cceso directo para manejar los miembros
@@ -47,23 +47,23 @@ const ManageModule = () => {
     setIsSubmitting(true);
     try {
       if (selectedApp) {
-        const { privacyLevel, positions, ...others } = values;
+        const { privacyLevel, position, ...others } = values;
         if (selectedApp.privacyLevel === PrivacyLevel.POSITIONS) {
           const hosts = selectedApp.accessTags?.filter((at) =>
             at.startsWith("hostId_")
           );
-          const accessTags = [...hosts, ...positions];
+          const accessTags = [...hosts, position];
           await selectedApp.update({ ...others, accessTags });
         } else {
           await selectedApp.update(others);
         }
       } else {
         let newId: string;
-        const { positions, ...others } = values;
+        const { position, ...others } = values;
         if (others.privacyLevel === PrivacyLevel.POSITIONS) {
           newId = await newElement({
             ...others,
-            accessTags: positions,
+            accessTags: [position],
           });
         } else {
           newId = await newElement(others);
@@ -79,9 +79,10 @@ const ManageModule = () => {
 
   const getInitialValues = () => {
     if (selectedApp) {
-      const { privacyLevel, positions, name, description } = selectedApp;
+      const { privacyLevel, accessTags, name, description } = selectedApp;
       if (privacyLevel === PrivacyLevel.POSITIONS) {
-        return { name, description, privacyLevel, positions };
+        const position = accessTags?.find((at) => !at.startsWith("hostId_"));
+        return { name, description, privacyLevel, position };
       } else {
         return { name, description, privacyLevel };
       }
@@ -138,32 +139,18 @@ const ManageModule = () => {
             </Form.Item>
 
             {privacyLevel === PrivacyLevel.POSITIONS && (
-              <Form.Item<string[]>
-                name="positions"
-                label={t("Select Positions")}
+              <Form.Item
+                required
+                name="position"
+                label={t("Select Position")}
                 rules={[
                   {
-                    validator(_, value) {
-                      if (value && value.lenght < 1) {
-                        return Promise.reject(
-                          new Error(t("At least one position is required"))
-                        );
-                      }
-                      if (value && value.lenght > 5) {
-                        return Promise.reject(
-                          new Error(t("Can't be more than 5 positions"))
-                        );
-                      }
-                      return Promise.resolve();
-                    },
+                    required: true,
+                    message: "",
                   },
                 ]}
               >
-                <Select
-                  mode="tags"
-                  style={{ width: "100%" }}
-                  tokenSeparators={[","]}
-                >
+                <Select css={{ width: "100%" }} allowClear showSearch>
                   {location.settings?.positions?.length && (
                     <Select.OptGroup label={t("Custom")}>
                       {location.settings.positions.map((pos) => (

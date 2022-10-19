@@ -5,7 +5,6 @@ import LangSelect from "./LangSelect";
 import PasswordPanel from "./PasswordPanel";
 import PhonePanel from "./PhonePanel";
 import ProfilePanel from "./ProfilePanel";
-import { useCuttinboardAuth } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Input, Layout, message, Modal, Typography } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -13,9 +12,10 @@ import {
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import React, { ReactNode } from "react";
+import { useDeleteCuttinboardAccount } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 function Account() {
-  const { deleteAccount } = useCuttinboardAuth();
+  const { deleteAccount } = useDeleteCuttinboardAccount();
   const { t } = useTranslation();
 
   const handleDeleteAccount = () => {

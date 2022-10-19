@@ -6,22 +6,14 @@ import { getAnalytics, logEvent } from "firebase/analytics";
 import { recordError } from "../utils/utils";
 import { Alert, Button, Checkbox, Form, Input, Typography } from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useHttpsCallable } from "react-firebase-hooks/functions";
-import {
-  Auth,
-  Functions,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRegisterUser } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 //= ==========================|| FIREBASE - REGISTER ||===========================//
 
 const FirebaseRegister = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [registerCuttinboardUser, isSubmitting, signUpError] = useHttpsCallable<
-    { email: string; password: string; name: string; lastName: string },
-    string
-  >(Functions, "auth-registerUser");
+  const { registerUser, submitting, error } = useRegisterUser();
 
   const onFinish = async ({
     name,
@@ -36,7 +28,7 @@ const FirebaseRegister = () => {
     acceptTerms: boolean;
   }) => {
     try {
-      const { data } = await registerCuttinboardUser({
+      await registerUser({
         email,
         name,
         lastName,
@@ -44,9 +36,8 @@ const FirebaseRegister = () => {
       });
       logEvent(getAnalytics(), "sign_up", {
         method: "Email-Password",
-        uid: data,
+        email: email,
       });
-      await signInWithEmailAndPassword(Auth, email, password);
     } catch (error) {
       recordError(error);
     }
@@ -62,7 +53,7 @@ const FirebaseRegister = () => {
         {t("Sign up")}
       </Typography.Title>
       <Form
-        disabled={isSubmitting}
+        disabled={submitting}
         onFinish={onFinish}
         initialValues={{ acceptTerms: false }}
       >
@@ -162,7 +153,7 @@ const FirebaseRegister = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button block htmlType="submit" loading={isSubmitting} type="primary">
+          <Button block htmlType="submit" loading={submitting} type="primary">
             {t("Sign up")}
           </Button>
         </Form.Item>
@@ -179,10 +170,10 @@ const FirebaseRegister = () => {
           </Typography.Link>
         </Form.Item>
       </Form>
-      {signUpError && (
+      {error && (
         <Alert
           message="Error"
-          description={t(signUpError.message)}
+          description={t(error.message)}
           type="error"
           showIcon
         />

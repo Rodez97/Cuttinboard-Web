@@ -107,6 +107,7 @@ function FilesItem({ file }: FilesItemProps) {
           trigger={["contextMenu"]}
         >
           <Space
+            onClick={openFile}
             direction="vertical"
             align="center"
             style={{
@@ -122,7 +123,7 @@ function FilesItem({ file }: FilesItemProps) {
           >
             <Icon
               component={fileIcon}
-              style={{ color: fileColor, fontSize: "70px" }}
+              style={{ color: fileColor, fontSize: "60px" }}
             />
             <Typography.Paragraph
               ellipsis={{ rows: 2, expandable: false, symbol: "..." }}

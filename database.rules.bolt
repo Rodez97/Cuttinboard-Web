@@ -30,7 +30,7 @@ function conversationMember(orgId, locId, convId){
 
 path /users/{uid} {
   read() { isUser(uid) };
-  update() { isUser(uid) };
+  write() { isUser(uid) };
 }
 
 path /directMessages/{dmId} {

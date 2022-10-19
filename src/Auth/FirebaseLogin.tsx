@@ -34,6 +34,7 @@ const FirebaseLogin = () => {
       setIsSubmitting(false);
       logEvent(getAnalytics(), "login", {
         method: "Email-Password",
+        email,
       });
     } catch (error) {
       recordError(error);

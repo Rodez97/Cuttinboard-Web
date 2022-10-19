@@ -74,14 +74,20 @@ function MainRouter() {
             path="location/:locationId/*"
             element={
               <LocationProvider
-                LoadingElement={<LoadingScreen />}
                 organizationKey={organizationKey}
                 locationId={selectedLocation}
-                ErrorElement={onError}
               >
-                <EmployeesProvider>
-                  <LocationContainer />
-                </EmployeesProvider>
+                {({ loading, error }) =>
+                  loading ? (
+                    <LoadingScreen />
+                  ) : error ? (
+                    <PageError error={error} />
+                  ) : (
+                    <EmployeesProvider>
+                      <LocationContainer />
+                    </EmployeesProvider>
+                  )
+                }
               </LocationProvider>
             }
           />

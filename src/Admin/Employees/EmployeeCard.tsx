@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboard,
-  useEmployeesManager,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
@@ -30,7 +29,6 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
   const { location, locationAccessKey } = useLocation();
-  const { removeEmployee } = useEmployeesManager();
   const navigate = useNavigate();
 
   const handleRemoveEmployee = async () => {
@@ -41,7 +39,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
-          await removeEmployee(employee);
+          await employee.delete();
         } catch (error) {
           recordError(error);
         }

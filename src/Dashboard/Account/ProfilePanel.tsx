@@ -4,7 +4,7 @@ import { EditFilled, SaveFilled } from "@ant-design/icons";
 import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   useCuttinboard,
-  useCuttinboardAuth,
+  useUpdateCuttinboardAccount,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Card, DatePicker, Form, Input, message, Space } from "antd";
 import dayjs from "dayjs";
@@ -20,7 +20,7 @@ function ProfilePanel() {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const { user } = useCuttinboard();
-  const { updateUserProfile } = useCuttinboardAuth();
+  const { updateUserProfile, updating } = useUpdateCuttinboardAccount();
   const { userDocument } = useDashboard();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -69,7 +69,7 @@ function ProfilePanel() {
             birthDate: dayjs(userDocument.birthDate?.toDate()),
             avatar: user.photoURL,
           }}
-          disabled={!editing || isSubmitting}
+          disabled={!editing || isSubmitting || updating}
           onFinish={onFinish}
         >
           <Form.Item
@@ -85,7 +85,7 @@ function ProfilePanel() {
               align="center"
               value={form.getFieldValue("avatar")}
               onImageEdited={(avatar) => form.setFieldValue("avatar", avatar)}
-              disabled={!editing || isSubmitting}
+              disabled={!editing || isSubmitting || updating}
             />
           </Form.Item>
           <Form.Item
@@ -126,14 +126,14 @@ function ProfilePanel() {
           }}
         >
           {editing && (
-            <Button onClick={cancelEditing} disabled={isSubmitting}>
+            <Button onClick={cancelEditing} disabled={isSubmitting || updating}>
               {t("Cancel")}
             </Button>
           )}
           {editing ? (
             <Button
               icon={<SaveFilled />}
-              loading={isSubmitting}
+              loading={isSubmitting || updating}
               onClick={form.submit}
               type="primary"
             >
@@ -142,7 +142,7 @@ function ProfilePanel() {
           ) : (
             <Button
               icon={<EditFilled />}
-              loading={isSubmitting}
+              loading={isSubmitting || updating}
               onClick={() => setEditing(true)}
               type="link"
               disabled={false}

@@ -19,6 +19,7 @@ import {
   GlobalOutlined,
   InfoCircleOutlined,
   LockOutlined,
+  TagOutlined,
   TagsOutlined,
 } from "@ant-design/icons";
 import { useMemo } from "react";
@@ -107,19 +108,14 @@ function ModuleInfo() {
             />
           </List.Item>
           {selectedApp.privacyLevel === PrivacyLevel.POSITIONS &&
-            selectedApp.accessTags?.length && (
-              <Space
-                wrap
-                css={{
-                  border: "1px solid #00000025",
-                  width: "100%",
-                  padding: 10,
-                }}
-              >
-                {selectedApp.accessTags.map((p) => (
-                  <Tag key={p}>{p}</Tag>
-                ))}
-              </Space>
+            Boolean(selectedApp.position) && (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={<TagOutlined />}
+                  title={t("Position")}
+                  description={selectedApp.position}
+                />
+              </List.Item>
             )}
           <Divider />
           {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
