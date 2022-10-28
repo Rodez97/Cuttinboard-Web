@@ -10,7 +10,7 @@ import AuthWrapper from "./Auth/AuthWrapper";
 function App() {
   return (
     <CuttinboardProvider onError={recordError}>
-      {(user, error, loading) =>
+      {({ user, error, loading }) =>
         loading ? (
           <LoadingScreen />
         ) : error ? (

@@ -5,56 +5,14 @@ import LangSelect from "./LangSelect";
 import PasswordPanel from "./PasswordPanel";
 import PhonePanel from "./PhonePanel";
 import ProfilePanel from "./ProfilePanel";
-import { Button, Input, Layout, message, Modal, Typography } from "antd";
-import {
-  ExclamationCircleOutlined,
-  UserDeleteOutlined,
-} from "@ant-design/icons";
-import { recordError } from "../../utils/utils";
-import React, { ReactNode } from "react";
-import { useDeleteCuttinboardAccount } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Button, Layout, Typography } from "antd";
+import { UserDeleteOutlined } from "@ant-design/icons";
+import React from "react";
+import DeleteAccountDialog from "./DeleteAccountDialog";
 
 function Account() {
-  const { deleteAccount } = useDeleteCuttinboardAccount();
   const { t } = useTranslation();
-
-  const handleDeleteAccount = () => {
-    let password: string;
-    Modal.confirm({
-      title: t("Are you sure you want to delete your account?"),
-      icon: <ExclamationCircleOutlined />,
-      content: ((): ReactNode => {
-        return (
-          <React.Fragment>
-            <Typography>
-              {t("You will be removed from the locations you belong to")}
-            </Typography>
-            <Input.Password
-              placeholder={t("Password")}
-              value={password}
-              onChange={({ currentTarget: { value } }) => {
-                password = value;
-                console.log({ password });
-              }}
-            />
-          </React.Fragment>
-        );
-      })(),
-      async onOk() {
-        try {
-          await deleteAccount(password);
-        } catch (error) {
-          recordError(error);
-          if (error?.code === "OWNER") {
-            message.error(
-              t("You can't delete your account because you are an Owner.")
-            );
-          }
-        }
-      },
-      onCancel() {},
-    });
-  };
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
 
   return (
     <Layout>
@@ -81,7 +39,7 @@ function Account() {
           size="large"
           color="error"
           css={{ minWidth: 270 }}
-          onClick={handleDeleteAccount}
+          onClick={() => setOpenDeleteDialog(true)}
           icon={<UserDeleteOutlined />}
           danger
           type="primary"
@@ -92,6 +50,11 @@ function Account() {
       <Layout.Footer style={{ textAlign: "center" }}>
         Cuttinboard ©{new Date().getFullYear()} Elevvate Technologies
       </Layout.Footer>
+
+      <DeleteAccountDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+      />
     </Layout>
   );
 }

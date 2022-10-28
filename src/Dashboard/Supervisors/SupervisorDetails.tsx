@@ -25,6 +25,7 @@ import {
   Menu,
   Modal,
   PageHeader,
+  Result,
   Space,
   Typography,
 } from "antd";
@@ -162,6 +163,20 @@ function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
     }
     setAssigning(false);
   };
+
+  if (!getSupervisor) {
+    return (
+      <Result
+        status="error"
+        title={t("Supervisor not found")}
+        extra={
+          <Button type="primary" key="console" onClick={() => navigate(-1)}>
+            {t("Go back")}
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <Layout
