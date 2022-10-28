@@ -24,7 +24,7 @@
   "homepage": "https://github.com/cuttinboard/Cuttinboard-Web-App",
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@cuttinboard-solutions/cuttinboard-library": "^1.0.6",
+    "@cuttinboard-solutions/cuttinboard-library": "^1.0.8",
     "@date-io/dayjs": "^2.15.0",
     "@emotion/babel-preset-css-prop": "^11.10.0",
     "@fontsource/roboto": "^4.5.8",

@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 import LangSelect from "./LangSelect";
 import PasswordPanel from "./PasswordPanel";
-import PhonePanel from "./PhonePanel";
+import ContactDetails from "./ContactDetails";
 import ProfilePanel from "./ProfilePanel";
 import { Button, Layout, Typography } from "antd";
 import { UserDeleteOutlined } from "@ant-design/icons";
@@ -31,7 +31,7 @@ function Account() {
         {/* Basic Info 🙎  */}
         <ProfilePanel />
         {/* Phone Number 📱  */}
-        <PhonePanel />
+        <ContactDetails />
         {/* Password 🔒  */}
         <PasswordPanel />
         <LangSelect />
