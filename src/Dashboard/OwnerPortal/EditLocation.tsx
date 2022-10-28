@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Layout, PageHeader } from "antd";
+import { Layout, message, PageHeader } from "antd";
 import { updateDoc } from "firebase/firestore";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,10 +39,11 @@ function EditLocation() {
         intId,
         address,
       });
+      message.success(t("Changes saved"));
       setEditing(false);
-      navigate(-1);
     } catch (error) {
       recordError(error);
+      message.error(t("Error saving changes"));
       setEditing(false);
     }
   };
