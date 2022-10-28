@@ -140,6 +140,11 @@ function CreateEmployee() {
           }}
           disabled={submitting}
           autoComplete="off"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
         >
           <Form.Item
             required
