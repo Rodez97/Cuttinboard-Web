@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import {
   useEmployeesList,
   useSchedule,
-  WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Alert, Avatar, Checkbox, List, Modal } from "antd";
 import dayjs from "dayjs";
@@ -15,6 +14,7 @@ import WeekNavigator from "./WeekNavigator";
 import { UserOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
+import { WEEKFORMAT } from "@cuttinboard-solutions/cuttinboard-library/utils";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);

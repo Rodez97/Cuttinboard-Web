@@ -3,12 +3,10 @@ import React, { useMemo } from "react";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import {
-  WEEKFORMAT,
-  weekToDate,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { weekToDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Space, Typography } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
+import { WEEKFORMAT } from "@cuttinboard-solutions/cuttinboard-library/utils";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);

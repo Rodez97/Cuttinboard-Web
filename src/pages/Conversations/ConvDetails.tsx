@@ -35,12 +35,12 @@ import { GrayPageHeader } from "../../components/PageHeaders";
 function ConvDetails() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedChat, canManageApp } = useConversations();
+  const { selectedConversation, canManage } = useConversations();
   const { locationAccessKey } = useLocation();
   const { getEmployees } = useEmployeesList();
 
   const deleteConv = useCallback(async () => {
-    if (!canManageApp) {
+    if (!canManage) {
       return;
     }
     Modal.confirm({
@@ -49,21 +49,23 @@ function ConvDetails() {
       async onOk() {
         try {
           navigate(-2);
-          await selectedChat.delete();
+          await selectedConversation.delete();
         } catch (error) {
           recordError(error);
         }
       },
       onCancel() {},
     });
-  }, [selectedChat]);
+  }, [selectedConversation]);
 
   const hosts = useMemo(() => {
-    if (!Boolean(selectedChat.hosts?.length)) {
+    if (!Boolean(selectedConversation.hosts?.length)) {
       return [];
     }
-    return getEmployees.filter((e) => selectedChat.hosts.indexOf(e.id) > -1);
-  }, [getEmployees, selectedChat]);
+    return getEmployees.filter(
+      (e) => selectedConversation.hosts.indexOf(e.id) > -1
+    );
+  }, [getEmployees, selectedConversation]);
 
   return (
     <div>
@@ -82,22 +84,23 @@ function ConvDetails() {
             <List.Item.Meta
               avatar={<FormOutlined />}
               title={t("Name")}
-              description={selectedChat.name}
+              description={selectedConversation.name}
             />
           </List.Item>
           <List.Item>
             <List.Item.Meta
               avatar={
-                selectedChat.privacyLevel === PrivacyLevel.PRIVATE ? (
+                selectedConversation.privacyLevel === PrivacyLevel.PRIVATE ? (
                   <LockOutlined />
-                ) : selectedChat.privacyLevel === PrivacyLevel.POSITIONS ? (
+                ) : selectedConversation.privacyLevel ===
+                  PrivacyLevel.POSITIONS ? (
                   <TagsOutlined />
                 ) : (
                   <GlobalOutlined />
                 )
               }
               title={t("Privacy Level")}
-              description={t(selectedChat.privacyLevel)}
+              description={t(selectedConversation.privacyLevel)}
             />
           </List.Item>
           {Boolean(hosts.length) && (
@@ -116,29 +119,29 @@ function ConvDetails() {
               avatar={<InfoCircleOutlined />}
               title={t("Description")}
               description={
-                Boolean(selectedChat.description)
-                  ? selectedChat.description
+                Boolean(selectedConversation.description)
+                  ? selectedConversation.description
                   : "---"
               }
             />
           </List.Item>
-          {selectedChat.privacyLevel === PrivacyLevel.PRIVATE && (
+          {selectedConversation.privacyLevel === PrivacyLevel.PRIVATE && (
             <List.Item>
               <List.Item.Meta
                 avatar={<TeamOutlined />}
                 title={t("Members")}
-                description={selectedChat.members?.length ?? 0}
+                description={selectedConversation.members?.length ?? 0}
               />
             </List.Item>
           )}
 
-          {selectedChat.privacyLevel === PrivacyLevel.POSITIONS &&
-            Boolean(selectedChat.position) && (
+          {selectedConversation.privacyLevel === PrivacyLevel.POSITIONS &&
+            Boolean(selectedConversation.position) && (
               <List.Item>
                 <List.Item.Meta
                   avatar={<TagOutlined />}
                   title={t("Position")}
-                  description={selectedChat.position}
+                  description={selectedConversation.position}
                 />
               </List.Item>
             )}
@@ -146,9 +149,9 @@ function ConvDetails() {
           <List.Item
             extra={
               <Switch
-                checked={selectedChat.isMuted}
+                checked={selectedConversation.isMuted}
                 onChange={() => {
-                  selectedChat.toggleMuteChat();
+                  selectedConversation.toggleMuteChat();
                 }}
               />
             }

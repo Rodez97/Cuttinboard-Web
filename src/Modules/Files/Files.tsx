@@ -31,7 +31,7 @@ function Files() {
       )}
       onError={recordError}
     >
-      {(loading, error) =>
+      {({ loading, error }) =>
         loading ? (
           <PageLoading />
         ) : error ? (

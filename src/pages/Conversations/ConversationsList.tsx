@@ -26,13 +26,13 @@ function ConversationsList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const newElement = useNewElement();
-  const { chats, chatId } = useConversations();
+  const { conversations, conversationId } = useConversations();
   const { getModuleBadge } = useNotificationsBadges();
   const { notifications } = useCuttinboard();
   const [searchQuery, setSearchQuery] = useState("");
 
   const menuItems = useMemo(() => {
-    const sorted = matchSorter(chats, searchQuery, { keys: ["name"] });
+    const sorted = matchSorter(conversations, searchQuery, { keys: ["name"] });
     return orderBy(sorted, "createdAt", "desc")?.map((el) => ({
       label: (
         <Badge
@@ -48,7 +48,7 @@ function ConversationsList() {
       icon: <MessageOutlined />,
       key: el.id,
     }));
-  }, [chats, searchQuery, notifications, boardId]);
+  }, [conversations, searchQuery, notifications, boardId]);
 
   return (
     <Space
@@ -83,9 +83,9 @@ function ConversationsList() {
         theme="dark"
         items={menuItems}
         onSelect={({ key }) =>
-          navigate(key, { replace: Boolean(boardId || chatId) })
+          navigate(key, { replace: Boolean(boardId || conversationId) })
         }
-        selectedKeys={[chatId]}
+        selectedKeys={[conversationId]}
       />
     </Space>
   );

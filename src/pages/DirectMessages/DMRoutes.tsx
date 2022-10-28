@@ -8,7 +8,6 @@ import {
 import { Button, Result } from "antd";
 import { useTranslation } from "react-i18next";
 import DMDetails from "./DMDetails";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
 function DMRoutes() {
   const { t } = useTranslation();

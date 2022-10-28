@@ -17,20 +17,20 @@ function ConversationsMain() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { removeBadge } = useNotificationsBadges();
-  const { selectedChat, canUseApp } = useConversations();
+  const { selectedConversation, canUse } = useConversations();
   useEffect(() => {
-    removeBadge("conv", selectedChat.id);
+    removeBadge("conv", selectedConversation.id);
     return () => {
-      removeBadge("conv", selectedChat.id);
+      removeBadge("conv", selectedConversation.id);
     };
-  }, [selectedChat]);
+  }, [selectedConversation]);
 
   return (
-    <ConversationMessagesProvider chatId={selectedChat.id}>
+    <ConversationMessagesProvider chatId={selectedConversation.id}>
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={() => navigate("details")}
-        title={selectedChat.name}
+        title={selectedConversation.name}
         extra={[
           <Button
             key="members"
@@ -44,8 +44,8 @@ function ConversationsMain() {
       />
       <ChatMain
         type="conversations"
-        chatId={selectedChat.id}
-        canUse={canUseApp}
+        chatId={selectedConversation.id}
+        canUse={canUse}
       />
     </ConversationMessagesProvider>
   );

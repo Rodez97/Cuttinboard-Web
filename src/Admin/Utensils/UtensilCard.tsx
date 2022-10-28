@@ -8,10 +8,10 @@ import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
-import { deleteDoc } from "@firebase/firestore";
-import { Button, List, Progress, Tooltip } from "antd";
+import { Button, List, Modal, Progress, Tooltip } from "antd";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { recordError } from "../../utils/utils";
 import ChangesDialog from "./ChangesDialog";
 import ReportChangeDialog from "./ReportChangeDialog";
 
@@ -28,7 +28,7 @@ const CardContainer = styled.div`
 
 function UtensilCard({ utensil, onClick }: IUtensilCard) {
   const { t } = useTranslation();
-  const { isGeneralManager, isOwner } = useLocation();
+  const { isGeneralManager, isOwner, isAdmin } = useLocation();
   const [reportChangeDialogOpen, setReportChangeDialogOpen] = useState(false);
   const [changesDialogOpen, setChangesDialogOpen] = useState(false);
 
@@ -59,7 +59,17 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
   };
 
   const handleDelete = () => {
-    deleteDoc(utensil.docRef);
+    try {
+      Modal.confirm({
+        title: t("utensils.deleteUtensil"),
+        content: t("utensils.deleteUtensilDescription"),
+        onOk: async () => {
+          await utensil.delete();
+        },
+      });
+    } catch (error) {
+      recordError(error);
+    }
   };
 
   return (
@@ -85,9 +95,7 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
           <Tooltip title={t("Edit")} key="edit">
             <Button
               type="text"
-              style={{
-                display: isOwner || isGeneralManager ? "initial" : "none",
-              }}
+              hidden={!(isOwner || isGeneralManager || isAdmin)}
               icon={<EditOutlined />}
               onClick={() => onClick(utensil)}
             />
@@ -95,9 +103,7 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
           <Tooltip title={t("Delete")} key="delete">
             <Button
               type="text"
-              style={{
-                display: isOwner || isGeneralManager ? "initial" : "none",
-              }}
+              hidden={!(isOwner || isGeneralManager || isAdmin)}
               icon={<DeleteOutlined />}
               onClick={handleDelete}
               danger

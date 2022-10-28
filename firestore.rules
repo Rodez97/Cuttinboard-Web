@@ -27,7 +27,17 @@ service cloud.firestore {
     }
 
     function isGM(orgId, locId){
-      return locMember(orgId, locId) && request.auth.token.organizationKey.locKeys[locId].role <= 2;
+      return locMember(orgId, locId) && request.auth.token.organizationKey.locKeys[locId].role == 2;
+    }
+
+    function isManager(orgId, locId){
+      return locMember(orgId, locId) && request.auth.token.organizationKey.locKeys[locId].role == 3;
+    }
+
+    function compareRoles(orgId){
+      let employeeEditingLocation = request.resource.data.locations.keys()[0];
+      let employeeRole = resource.data.locations[employeeEditingLocation].role;
+      return isOwnerOrSupervisor(orgId) || (orgMember(orgId) && request.auth.token.organizationKey.locKeys[employeeEditingLocation].role < employeeRole);
     }
 
     match /Users/{userId} {
@@ -54,6 +64,7 @@ service cloud.firestore {
     match /DirectMessages/{dmId} {
       allow create: if isAuthenticated() && request.auth.uid in request.resource.data.membersList;
     	allow read: if isAuthenticated() && request.auth.uid in resource.data.membersList;
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.membersList && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]);
 		}
 
 		match /Locations/{locationId} {
@@ -61,11 +72,7 @@ service cloud.firestore {
       allow create: if isOwner(resource.data.organizationId) && request.resource.data.keys().hasAll(["organizationId","subItemId","name"]);
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus"]) == false
                     && isOwnerOrSupervisor(resource.data.organizationId);
-      allow delete: if isOwner(resource.data.organizationId);
-
-  		match /{document=**} {
-				allow read, write: if true;
-			}
+      allow delete: if isOwner(resource.data.organizationId);      
 		}
 
     match /Organizations/{organizationId} {
@@ -77,20 +84,63 @@ service cloud.firestore {
         allow delete: if orgMember(organizationId)
                       && resource.data.locations.keys().size() == 1
                       && resource.data.role == "employee";
-        allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["locations"])
-                      && isOwnerOrSupervisor(organizationId);
+        allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["locations"]) && compareRoles(organizationId))
+                      || (orgMember(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["preferredName","emergencyContact","contactComments"]));
       }
 
       match /locationChecklist/{checklistId} {
-    	  allow read, write: if true;
+    	  allow read: if isOwnerOrSupervisor(organizationId) || locMember(organizationId, resource.data.locationId);
+        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
+                      || (locMember(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["tasks"]));
+      }
+
+      match /utensils/{utensilId} {
+        allow read: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+        allow create, delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId);
+        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)
+                      || (isManager(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["changes","currentQuantity"]));
+      }
+
+      match /scheduleDocs/{sdId} {
+				allow read, write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+			}
+
+      match /shifts/{empShiftsId} {
+        allow read: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId) || resource.data.employeeId == request.auth.uid;
+        allow create, delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
+                      || resource.data.employeeId == request.auth.uid;
+			}
+
+      function accessContentHost(hosts){
+        return request.auth.uid in hosts;
+      }
+
+      function getTags(locationId, accessTags){
+        let baseTags = [request.auth.uid, "hostId_" + request.auth.uid, "pl_public"];
+        let userPositions = request.auth.token.organizationKey.locKeys[locationId].pos;
+        return accessTags.hasAny(baseTags) || baseTags.hasAny(userPositions);
+      }
+
+      function moduleContentWrite(moduleName,boardId){
+        let data = get(/databases/$(database)/documents/Organizations/$(organizationId)/$(moduleName)/$(boardId)).data;
+        return isOwnerOrSupervisor(organizationId) 
+            || isGM(organizationId, data.locationId) 
+            || (locMember(organizationId, data.locationId) && accessContentHost(data.hosts));
+      }
+
+      function readContentModule(moduleName,boardId){
+        let data = get(/databases/$(database)/documents/Organizations/$(organizationId)/$(moduleName)/$(boardId)).data;
+        return isOwnerOrSupervisor(organizationId) 
+            || isGM(organizationId, data.locationId) 
+            || (locMember(organizationId, data.locationId) && getTags(data.locationId,data.accessTags));
       }
 
       // Module Functions
-      function readModule(moduleData){
+      function readModule(){
         return isOwnerOrSupervisor(organizationId) 
-            || isGM(organizationId, moduleData.locationId) 
-            || (locMember(organizationId, moduleData.locationId)
-            && (accessPublic(moduleData) || accessPositions(moduleData) || accessPrivate(moduleData) || accessHost(moduleData)));
+            || locMember(organizationId, resource.data.locationId);
       }
 
       function updateModule(){
@@ -103,74 +153,45 @@ service cloud.firestore {
         return isOwnerOrSupervisor(organizationId) 
             || isGM(organizationId, resource.data.locationId);
       }
-
-      function accessPublic(moduleData){
-        return moduleData.privacyLevel == "PUBLIC" && "pl_public" in moduleData.accessTags;
-      }
-
-      function accessPositions(moduleData){
-        return moduleData.privacyLevel == "POSITIONS" && request.auth.token.organizationKey.locKeys[moduleData.locationId].pos.hasAny(moduleData.accessTags);
-      }
-
-      function accessPrivate(moduleData){
-        return moduleData.privacyLevel == "PRIVATE" && request.auth.uid in moduleData.accessTags;
-      }
-
-      function accessHost(moduleData){
-        return  request.auth.uid in moduleData.hosts;
-      }
-
-      function moduleContentWrite(moduleData){
-        return isOwnerOrSupervisor(organizationId) 
-            || isGM(organizationId, moduleData.locationId) 
-            || (locMember(organizationId, moduleData.locationId) && accessHost(moduleData));
-      }
       
       match /conversations/{conversationId} {
-          allow read: if readModule(resource.data);
+          allow read: if readModule();
           allow update: if updateModule();
           allow delete, create: if deleteOrCreateModule();      
       }
 
       match /notes/{boardId} {
-          allow read: if readModule(resource.data);
+          allow read: if readModule();
           allow update: if updateModule();
           allow delete, create: if deleteOrCreateModule();
 
           match /content/{contentId} {
-            allow read: if readModule(get(/databases/$(database)/documents/Organizations/$(organizationId)/notes/$(boardId)).data);
-            allow write: if moduleContentWrite(get(/databases/$(database)/documents/Organizations/$(organizationId)/notes/$(boardId)).data);
+            allow read: if readContentModule("notes",boardId);
+            allow write: if moduleContentWrite("notes",boardId);
           }      
       }
 
       match /todo/{boardId} {
-          allow read: if readModule(resource.data);
+          allow read: if readModule();
           allow update: if updateModule();
           allow delete, create: if deleteOrCreateModule();
 
           match /content/{contentId} {
-            allow read: if readModule(get(/databases/$(database)/documents/Organizations/$(organizationId)/todo/$(boardId)).data);
-            allow write: if moduleContentWrite(get(/databases/$(database)/documents/Organizations/$(organizationId)/todo/$(boardId)).data);
+            allow read: if readContentModule("todo",boardId);
+            allow write: if moduleContentWrite("todo",boardId);
           }      
       }
 
       match /storage/{boardId} {
-          allow read: if readModule(resource.data);
+          allow read: if readModule();
           allow update: if updateModule();
           allow delete, create: if deleteOrCreateModule();
 
           match /content/{contentId} {
-            allow read: if readModule(get(/databases/$(database)/documents/Organizations/$(organizationId)/storage/$(boardId)).data);
-            allow write: if moduleContentWrite(get(/databases/$(database)/documents/Organizations/$(organizationId)/storage/$(boardId)).data);
+            allow read: if readContentModule("storage",boardId);
+            allow write: if moduleContentWrite("storage",boardId);
           }      
       }
-        
-        
-        // Tools
-        match /utensils/{utensilId} {
-          allow read: if true;
-          allow write: if true;
-        }
     }
   }
 }

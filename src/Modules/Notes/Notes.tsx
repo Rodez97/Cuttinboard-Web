@@ -32,7 +32,7 @@ function Notes() {
       )}
       onError={recordError}
     >
-      {(loading, error) =>
+      {({ loading, error }) =>
         loading ? (
           <PageLoading />
         ) : error ? (

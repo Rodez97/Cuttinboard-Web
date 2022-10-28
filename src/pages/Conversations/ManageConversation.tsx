@@ -37,13 +37,13 @@ function ManageConversation({ baseConversation }: ManageConversationProps) {
   const [form] = Form.useForm<FormType>();
   const privacyLevel = Form.useWatch("privacyLevel", form);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createConversation, canManageApp } = useConversations();
+  const { createConversation, canManage } = useConversations();
   const { location } = useLocation();
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
 
   const onFinish = async (values: FormType) => {
-    if (!canManageApp) {
+    if (!canManage) {
       return;
     }
     setIsSubmitting(true);

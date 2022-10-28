@@ -19,7 +19,6 @@ import {
 import {
   useLocation,
   useNotificationsBadges,
-  WEEKFORMAT,
   weekToDate,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
@@ -27,7 +26,10 @@ import {
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Divider, Empty, Layout, Space, Spin, Tabs, Tag } from "antd";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Colors,
+  WEEKFORMAT,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { GrayPageHeader } from "../../components/PageHeaders";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
@@ -48,9 +50,10 @@ function MyShifts() {
   const [shifts, loadingShifts, errorShifts] = useDocumentData(
     doc(
       Firestore,
-      location.docRef.path,
+      "Organizations",
+      location.organizationId,
       "shifts",
-      `${currentWeekId}_${Auth.currentUser.uid}`
+      `${currentWeekId}_${Auth.currentUser.uid}_${location.id}`
     ).withConverter(EmployeeShifts.Converter)
   );
 

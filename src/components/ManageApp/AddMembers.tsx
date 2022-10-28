@@ -65,7 +65,7 @@ function AddMembers({
       >
         <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
         <List
-          dataSource={getEmployees.filter((emp) => !hosts.includes(emp.id))}
+          dataSource={getEmployees.filter((emp) => !hosts?.includes(emp.id))}
           renderItem={(emp) => {
             return (
               <List.Item
@@ -78,13 +78,13 @@ function AddMembers({
                 extra={
                   <Checkbox
                     onChange={handleToggle(emp)}
-                    checked={selectedEmployees.includes(emp)}
+                    checked={selectedEmployees?.includes(emp)}
                   />
                 }
               >
                 <List.Item.Meta
                   avatar={<QuickUserDialogAvatar employee={emp} />}
-                  title={`${emp.name} ${emp.lastName}`}
+                  title={emp.fullName}
                   description={emp.email}
                 />
               </List.Item>

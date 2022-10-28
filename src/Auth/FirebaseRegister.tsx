@@ -36,7 +36,7 @@ const FirebaseRegister = () => {
       });
       logEvent(getAnalytics(), "sign_up", {
         method: "Email-Password",
-        email: email,
+        email,
       });
     } catch (error) {
       recordError(error);

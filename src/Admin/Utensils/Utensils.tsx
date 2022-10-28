@@ -4,6 +4,7 @@ import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { collection } from "@firebase/firestore";
 import { Button, Empty, Input, Layout, List, PageHeader, Space } from "antd";
+import { query, where } from "firebase/firestore";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import React, { useMemo, useRef, useState } from "react";
@@ -21,11 +22,17 @@ function Utensils() {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const manageUtensilDialogRef = useRef<IManageUtensilDialogRef>(null);
-  const { location } = useLocation();
+  const { location, isAdmin, isGeneralManager, isOwner } = useLocation();
   const [utensils, loading] = useCollectionData<Utensil>(
-    collection(Firestore, location.docRef.path, "utensils").withConverter(
-      Utensil.Converter
-    )
+    query(
+      collection(
+        Firestore,
+        "Organizations",
+        location.organizationId,
+        "utensils"
+      ),
+      where("locationId", "==", location.id)
+    ).withConverter(Utensil.Converter)
   );
 
   const handleBack = () => {
@@ -58,6 +65,7 @@ function Utensils() {
             icon={<PlusOutlined />}
             onClick={handleNewUtensilClick}
             type="primary"
+            hidden={!isAdmin && !isGeneralManager && !isOwner}
           >
             {t("Add Utensil")}
           </Button>,

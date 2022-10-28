@@ -71,8 +71,14 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
             ...values,
             createdAt: serverTimestamp(),
             createdBy: user.uid,
+            locationId: location.id,
           };
-          const dbRef = collection(Firestore, location.docRef.path, "utensils");
+          const dbRef = collection(
+            Firestore,
+            "Organizations",
+            location.organizationId,
+            "utensils"
+          );
           await addDoc(dbRef, newAppObject);
         }
       } catch (error) {

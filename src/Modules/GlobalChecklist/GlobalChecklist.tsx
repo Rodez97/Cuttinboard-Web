@@ -21,6 +21,7 @@ import {
   limitToLast,
   orderBy,
   query,
+  serverTimestamp,
   setDoc,
   Timestamp,
 } from "firebase/firestore";
@@ -44,10 +45,10 @@ function GlobalChecklist() {
   const [checklistData, loading, error] = useDocumentData<LocationCheckList>(
     doc(
       Firestore,
-      "Locations",
-      location.id,
+      "Organizations",
+      location.organizationId,
       "locationChecklist",
-      selectedDate.format("DD_MM_YYYY")
+      `${selectedDate.format("DDMMYYYY")}_${location.id}`
     ).withConverter(LocationCheckList.Converter)
   );
 
@@ -71,13 +72,34 @@ function GlobalChecklist() {
     if (!newTaskName || !canUse) {
       return;
     }
+    const task = {
+      name: newTaskName,
+      status: false,
+      createdAt: serverTimestamp(),
+    };
     setNewTaskName("");
     try {
-      await checklistData.addTask(nanoid(), {
-        name: newTaskName,
-        status: false,
-        createdAt: Timestamp.now(),
-      });
+      if (checklistData) {
+        await checklistData.addTask(nanoid(), task);
+      } else {
+        await setDoc(
+          doc(
+            Firestore,
+            "Organizations",
+            location.organizationId,
+            "locationChecklist",
+            `${selectedDate.format("DDMMYYYY")}_${location.id}`
+          ),
+          {
+            createdAt: serverTimestamp(),
+            createdBy: Auth.currentUser.uid,
+            checklistDate: Timestamp.fromDate(selectedDate.toDate()),
+            signedBy: Auth.currentUser.uid,
+            tasks: { [nanoid()]: task },
+            locationId: location.id,
+          }
+        );
+      }
     } catch (error) {
       recordError(error);
     }
@@ -95,15 +117,23 @@ function GlobalChecklist() {
   };
 
   const cloneLastChecklist = async () => {
+    if (!canUse) {
+      return;
+    }
     const docRef = doc(
       Firestore,
-      "Locations",
-      location.id,
+      "Organizations",
+      location.organizationId,
       "locationChecklist",
-      selectedDate.format("DD_MM_YYYY")
+      `${selectedDate.format("DDMMYYYY")}_${location.id}`
     );
     const collRef = query(
-      collection(Firestore, "Locations", location.id, "locationChecklist"),
+      collection(
+        Firestore,
+        "Organizations",
+        location.organizationId,
+        "locationChecklist"
+      ),
       orderBy("checklistDate"),
       limitToLast(1)
     );
@@ -127,7 +157,7 @@ function GlobalChecklist() {
   };
 
   const clearAll = async () => {
-    if (!checklistData) {
+    if (!checklistData || !canUse) {
       return;
     }
     try {
@@ -143,7 +173,6 @@ function GlobalChecklist() {
   return (
     <Layout.Content>
       <GrayPageHeader
-        className="site-page-header-responsive"
         onBack={() => navigate(-1)}
         title={t("Daily Checklists")}
         subTitle={`(${checklistData?.tasksSummary?.total ?? 0})`}

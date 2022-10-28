@@ -31,7 +31,7 @@ function Tasks() {
       )}
       onError={recordError}
     >
-      {(loading, error) =>
+      {({ loading, error }) =>
         loading ? (
           <PageLoading />
         ) : error ? (

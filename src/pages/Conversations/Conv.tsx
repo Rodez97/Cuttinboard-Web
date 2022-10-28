@@ -18,7 +18,7 @@ const Conv = () => {
 
   return (
     <ConversationsProvider onError={recordError}>
-      {(loading, error) =>
+      {({ loading, error }) =>
         loading ? (
           <PageLoading />
         ) : error ? (

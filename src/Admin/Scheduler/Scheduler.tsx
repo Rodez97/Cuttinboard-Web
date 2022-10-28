@@ -29,9 +29,11 @@ import {
   useEmployeesList,
   useLocation,
   useSchedule,
-  WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Positions } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Positions,
+  WEEKFORMAT,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Table, { ColumnsType } from "antd/lib/table";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
@@ -92,6 +94,7 @@ function Scheduler() {
     setSelectedTag,
     weekDays,
     updatesCount,
+    error,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
@@ -348,7 +351,7 @@ function Scheduler() {
                 key: emp.id,
                 employee: emp,
                 empShifts: employeeShiftsCollection?.find(
-                  (shf) => shf.id === `${weekId}_${emp.id}`
+                  (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
                 ),
               }))}
               summary={(pageData) => <TableFooter data={pageData} />}

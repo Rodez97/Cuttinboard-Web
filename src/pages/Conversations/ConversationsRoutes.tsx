@@ -12,16 +12,16 @@ function ConversationsRoutes() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedChat, setChatId } = useConversations();
+  const { selectedConversation, setConversationId } = useConversations();
 
   useLayoutEffect(() => {
-    setChatId(boardId);
+    setConversationId(boardId);
     return () => {
-      setChatId(null);
+      setConversationId(null);
     };
   }, [boardId]);
 
-  if (!selectedChat) {
+  if (!selectedConversation) {
     return (
       <Result
         status="404"
@@ -45,7 +45,9 @@ function ConversationsRoutes() {
           <Route index element={<ConvDetails />} />
           <Route
             path="edit"
-            element={<ManageConversation baseConversation={selectedChat} />}
+            element={
+              <ManageConversation baseConversation={selectedConversation} />
+            }
           />
         </Route>
       </Route>

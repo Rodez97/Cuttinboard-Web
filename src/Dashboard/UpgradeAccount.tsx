@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
+import { STRIPE_PRICE_ID, STRIPE_PRODUCT_ID } from "../VARS";
 
 const PlanCard = styled.div`
   background: #f7f7f7;
@@ -46,13 +47,7 @@ function UpgradeAccount() {
     "stripe-upgradeOwner"
   );
   const [price, loadingPrice, priceError] = useDocumentData(
-    doc(
-      Firestore,
-      "Products",
-      process.env.REACT_APP_STRIPE_PRODUCT_ID,
-      "prices",
-      process.env.REACT_APP_STRIPE_PRICE_ID
-    )
+    doc(Firestore, "Products", STRIPE_PRODUCT_ID, "prices", STRIPE_PRICE_ID)
   );
 
   const handleUpgrade = async () => {
@@ -71,7 +66,7 @@ function UpgradeAccount() {
 
   const upgradeToBusiness = async () => {
     try {
-      await upgradeAccount(process.env.REACT_APP_STRIPE_PRICE_ID);
+      await upgradeAccount(STRIPE_PRICE_ID);
       navigate("/dashboard/owner-portal");
     } catch (error) {
       recordError(error);
