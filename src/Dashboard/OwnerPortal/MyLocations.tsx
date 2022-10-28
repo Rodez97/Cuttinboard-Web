@@ -155,6 +155,7 @@ function MyLocations() {
             css={{ width: 250 }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            allowClear
           />
         </Space>
 
