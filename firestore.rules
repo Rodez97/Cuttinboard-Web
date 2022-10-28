@@ -70,8 +70,9 @@ service cloud.firestore {
 		match /Locations/{locationId} {
 			allow read: if isAuthenticated() && (isOwner(resource.data.organizationId) || request.auth.uid in resource.data.supervisors || request.auth.uid in resource.data.members) ;
       allow create: if isOwner(resource.data.organizationId) && request.resource.data.keys().hasAll(["organizationId","subItemId","name"]);
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus"]) == false
-                    && isOwnerOrSupervisor(resource.data.organizationId);
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus","supervisors"]) == false
+                    && isOwnerOrSupervisor(resource.data.organizationId))
+                    || (isOwner(resource.data.organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisors"]));
       allow delete: if isOwner(resource.data.organizationId);      
 		}
 
@@ -85,7 +86,8 @@ service cloud.firestore {
                       && resource.data.locations.keys().size() == 1
                       && resource.data.role == "employee";
         allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["locations"]) && compareRoles(organizationId))
-                      || (orgMember(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["preferredName","emergencyContact","contactComments"]));
+                      || (orgMember(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["preferredName","emergencyContact","contactComments"]))
+                      || (isOwner(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisingLocations"]));
       }
 
       match /locationChecklist/{checklistId} {
