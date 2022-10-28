@@ -35,6 +35,10 @@ import { recordError } from "../utils/utils";
 
 const { Dragger } = Upload;
 
+const MAX_DOCUMENTS = 20;
+
+const MAX_FILE_SIZE = 1024 * 1024 * 8; // 8MB
+
 function MyDocuments() {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
@@ -105,12 +109,23 @@ function MyDocuments() {
 
   const props: UploadProps = {
     beforeUpload: async (file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        message.error(t("File size is too large"));
+        return false;
+      }
+
+      if (file.type !== "application/pdf") {
+        message.error(t("Only PDF files are supported"));
+        return false;
+      }
+
       message.loading(t("Uploading File"));
       await handleChange(file);
       message.destroy();
       return false;
     },
     fileList: [],
+    maxCount: 1,
   };
 
   return (
@@ -141,7 +156,10 @@ function MyDocuments() {
         />
 
         <div>
-          <Dragger {...props}>
+          <Dragger
+            {...props}
+            disabled={Boolean(userFiles.length >= MAX_DOCUMENTS)}
+          >
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
@@ -149,10 +167,16 @@ function MyDocuments() {
             <p className="ant-upload-hint">
               {t("Click or drag file to this area to upload")}
             </p>
+            <p className="ant-upload-hint">
+              {t("Files must be PDFs and less than 8MB in size")}
+            </p>
           </Dragger>
         </div>
 
-        <Divider>{t("Documents")}</Divider>
+        <Divider>
+          {t("Documents")}{" "}
+          <Typography.Text type="secondary">{`${userFiles.length}/${MAX_DOCUMENTS}`}</Typography.Text>
+        </Divider>
 
         <List loading={loadingFiles}>
           {userFiles.map((file, index) => (
