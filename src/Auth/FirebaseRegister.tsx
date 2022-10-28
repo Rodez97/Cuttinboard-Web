@@ -65,9 +65,13 @@ const FirebaseRegister = () => {
               required: true,
               message: "",
             },
+            {
+              max: 20,
+              message: t("Name must be 20 characters or less"),
+            },
           ]}
         >
-          <Input placeholder={t("First Name")} maxLength={255} />
+          <Input placeholder={t("First Name")} maxLength={20} showCount />
         </Form.Item>
         <Form.Item
           required
@@ -77,9 +81,13 @@ const FirebaseRegister = () => {
               required: true,
               message: "",
             },
+            {
+              max: 20,
+              message: t("Last Name must be 20 characters or less"),
+            },
           ]}
         >
-          <Input placeholder={t("Last Name")} maxLength={255} />
+          <Input placeholder={t("Last Name")} maxLength={20} showCount />
         </Form.Item>
         <Form.Item
           required
@@ -92,7 +100,12 @@ const FirebaseRegister = () => {
             { type: "email", message: t("Must be a valid email") },
           ]}
         >
-          <Input type="email" placeholder={t("Email")} maxLength={255} />
+          <Input
+            type="email"
+            placeholder={t("Email")}
+            maxLength={255}
+            showCount
+          />
         </Form.Item>
         <Form.Item
           required
@@ -120,7 +133,11 @@ const FirebaseRegister = () => {
             },
           ]}
         >
-          <Input.Password placeholder={t("Password")} maxLength={255} />
+          <Input.Password
+            placeholder={t("Password")}
+            maxLength={255}
+            showCount
+          />
         </Form.Item>
         <Form.Item
           required

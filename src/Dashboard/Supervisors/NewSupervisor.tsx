@@ -134,9 +134,13 @@ function NewSupervisor() {
                   required: true,
                   message: "",
                 },
+                {
+                  max: 20,
+                  message: t("Name must be 20 characters or less"),
+                },
               ]}
             >
-              <Input placeholder={t("First Name")} maxLength={255} />
+              <Input placeholder={t("Name")} maxLength={20} showCount />
             </Form.Item>
             <Form.Item
               required
@@ -146,9 +150,13 @@ function NewSupervisor() {
                   required: true,
                   message: "",
                 },
+                {
+                  max: 20,
+                  message: t("Last Name must be 20 characters or less"),
+                },
               ]}
             >
-              <Input placeholder={t("Last Name")} maxLength={255} />
+              <Input placeholder={t("Last Name")} maxLength={20} showCount />
             </Form.Item>
             <Form.Item
               required

@@ -150,17 +150,29 @@ function CreateEmployee() {
             required
             label={t("Name")}
             name="name"
-            rules={[{ required: true, message: "" }]}
+            rules={[
+              { required: true, message: "" },
+              {
+                max: 20,
+                message: t("Name must be 20 characters or less"),
+              },
+            ]}
           >
-            <Input maxLength={50} showCount />
+            <Input maxLength={20} showCount />
           </Form.Item>
           <Form.Item
             required
             label={t("Last Name")}
             name="lastName"
-            rules={[{ required: true, message: "" }]}
+            rules={[
+              { required: true, message: "" },
+              {
+                max: 20,
+                message: t("Last Name must be 20 characters or less"),
+              },
+            ]}
           >
-            <Input maxLength={50} showCount />
+            <Input maxLength={20} showCount />
           </Form.Item>
           <Form.Item
             label={t("Email")}

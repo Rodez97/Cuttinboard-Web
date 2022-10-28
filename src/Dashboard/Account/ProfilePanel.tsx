@@ -91,22 +91,30 @@ function ProfilePanel() {
           <Form.Item
             label={t("Name")}
             name="name"
-            rules={[{ required: true, message: "" }]}
+            rules={[
+              { required: true, message: "" },
+              {
+                max: 20,
+                message: t("Name must be 20 characters or less"),
+              },
+            ]}
           >
-            <Input />
+            <Input maxLength={20} showCount />
           </Form.Item>
           <Form.Item
             label={t("Last Name")}
             name="lastName"
-            rules={[{ required: true, message: "" }]}
+            rules={[
+              { required: true, message: "" },
+              {
+                max: 20,
+                message: t("Last Name must be 20 characters or less"),
+              },
+            ]}
           >
-            <Input />
+            <Input maxLength={20} showCount />
           </Form.Item>
-          <Form.Item
-            label={t("Email")}
-            name="email"
-            rules={[{ required: true, message: "" }, { type: "email" }]}
-          >
+          <Form.Item label={t("Email")} name="email">
             <Input disabled />
           </Form.Item>
           <Form.Item
