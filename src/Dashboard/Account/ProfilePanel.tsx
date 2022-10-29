@@ -34,16 +34,19 @@ function ProfilePanel() {
     setIsSubmitting(true);
     try {
       let photoURL: string = user.photoURL;
-      if (avatar.file) {
+      if (avatar?.file) {
         const profilePictureRef = ref(Storage, `users/${user.uid}/avatar`);
         const uploadTask = await uploadBytes(profilePictureRef, avatar.file);
         photoURL = await getDownloadURL(uploadTask.ref);
       }
-      await updateUserProfile({
-        ...others,
-        avatar: photoURL,
-        birthDate: birthDate?.toDate(),
-      });
+      await updateUserProfile(
+        {
+          ...others,
+          avatar: photoURL,
+          birthDate: birthDate ? birthDate.toDate() : undefined,
+        },
+        null
+      );
       await user.getIdToken(true);
       setEditing(false);
       message.success(t("Changes saved"));

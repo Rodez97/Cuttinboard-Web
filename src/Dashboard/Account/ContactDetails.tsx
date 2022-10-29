@@ -39,7 +39,7 @@ function ContactDetails() {
 
   const onFinish = async (values: EmployeeContactData) => {
     try {
-      await updateUserProfile(values);
+      await updateUserProfile(null, values);
       setEditing(false);
       form.resetFields();
       message.success(t("Changes saved"));
@@ -47,8 +47,6 @@ function ContactDetails() {
       recordError(error);
     }
   };
-
-  console.log({ userDocument });
 
   return (
     <Space

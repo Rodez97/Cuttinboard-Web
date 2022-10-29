@@ -29,7 +29,7 @@ const FirebaseRegister = () => {
   }) => {
     try {
       await registerUser({
-        email,
+        email: email.toLowerCase(),
         name,
         lastName,
         password,

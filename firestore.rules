@@ -11,7 +11,7 @@ service cloud.firestore {
     }
 
     function orgMember(orgId){
-      return request.auth != null && request.auth.token.organizationKey != null && request.auth.token.organizationKey.orgId == orgId;
+      return request.auth != null && ((request.auth.token.organizationKey != null && request.auth.token.organizationKey.orgId == orgId) || request.auth.uid == orgId);
     }
 
     function locMember(orgId, locId){
