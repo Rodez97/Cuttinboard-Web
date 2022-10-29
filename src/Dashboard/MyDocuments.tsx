@@ -146,13 +146,9 @@ function MyDocuments() {
           type="warning"
           showIcon
           css={{ marginBottom: 10 }}
-          message={
-            <Typography.Title level={5} type="secondary">
-              {t(
-                "Employers will have access to the documents you upload in this section"
-              )}
-            </Typography.Title>
-          }
+          message={t(
+            "Employers will have access to the documents you upload in this section"
+          )}
         />
 
         <div>
