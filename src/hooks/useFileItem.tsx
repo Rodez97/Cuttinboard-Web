@@ -1,7 +1,7 @@
 import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { message } from "antd";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
+import { recordError } from "../utils/utils";
 
 function useFileItem(file: Cuttinboard_File) {
   const { t } = useTranslation();

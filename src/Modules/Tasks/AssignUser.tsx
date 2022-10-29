@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { GrayPageHeader } from "../../components/PageHeaders";
-import { TitleBoxGreen } from "../../theme/styledComponents";
+import { TitleBoxGreen } from "../../components/ColorTextDividers";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 
 interface AssignUserProps {

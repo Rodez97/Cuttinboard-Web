@@ -13,7 +13,7 @@ import PageLoading from "../../components/PageLoading";
 import ManageModule from "../ManageApp/ManageModule";
 import FilesDrawersList from "./FilesDrawersList";
 import FilesRoutes from "./FilesRoutes";
-import { EmptyMainModule } from "../Notes/EmptyMainModule";
+import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
 import { recordError } from "../../utils/utils";

@@ -1,9 +1,20 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import React, { useState } from "react";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
-import useFileItem from "./useFileItem";
-import { Dropdown, Input, Menu, Modal, Space, Tooltip, Typography } from "antd";
+import useFileItem from "../../hooks/useFileItem";
+import {
+  Dropdown,
+  Image,
+  Input,
+  Menu,
+  Modal,
+  Space,
+  Tooltip,
+  Typography,
+} from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Icon, {
   CopyOutlined,
@@ -16,6 +27,8 @@ import Icon, {
 import { useTranslation } from "react-i18next";
 import fileSize from "filesize";
 import { recordError } from "../../utils/utils";
+import axios from "axios";
+import fileDownload from "js-file-download";
 
 interface FilesItemProps {
   id: string;
@@ -31,6 +44,8 @@ function FilesItem({ file }: FilesItemProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [renaming, setRenaming] = useState(false);
+  const [isImageVisible, setIsImageVisible] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
 
   const handleDelete = async () => {
     Modal.confirm({
@@ -61,8 +76,34 @@ function FilesItem({ file }: FilesItemProps) {
     setRenaming(false);
   };
 
+  const downloadFile = async () => {
+    try {
+      const fileUrl = await file.getUrl();
+      const res = await axios.get(fileUrl, { responseType: "blob" });
+      fileDownload(res.data, file.name, file.fileType);
+    } catch (error) {
+      recordError(error);
+    }
+  };
+
+  const handleFileClick = async () => {
+    try {
+      if (file.fileType.startsWith("image/")) {
+        if (!imageUrl) {
+          const fileUrl = await file.getUrl();
+          setImageUrl(fileUrl);
+        }
+        setIsImageVisible(true);
+      } else {
+        openFile();
+      }
+    } catch (error) {
+      recordError(error);
+    }
+  };
+
   return (
-    <>
+    <React.Fragment>
       <Tooltip title={file.name}>
         <Dropdown
           overlay={
@@ -78,7 +119,7 @@ function FilesItem({ file }: FilesItemProps) {
                   label: t("Download"),
                   key: "onDownload",
                   icon: <DownloadOutlined />,
-                  onClick: openFile,
+                  onClick: downloadFile,
                 },
                 {
                   label: t("Rename"),
@@ -107,10 +148,10 @@ function FilesItem({ file }: FilesItemProps) {
           trigger={["contextMenu"]}
         >
           <Space
-            onClick={openFile}
+            onClick={handleFileClick}
             direction="vertical"
             align="center"
-            style={{
+            css={{
               backgroundColor: Colors.MainOnWhite,
               width: 120,
               height: 120,
@@ -123,14 +164,28 @@ function FilesItem({ file }: FilesItemProps) {
           >
             <Icon
               component={fileIcon}
-              style={{ color: fileColor, fontSize: "60px" }}
+              css={{ color: fileColor, fontSize: "60px" }}
             />
             <Typography.Paragraph
               ellipsis={{ rows: 2, expandable: false, symbol: "..." }}
-              style={{ wordBreak: "break-word" }}
+              css={{ wordBreak: "break-word" }}
             >
               {file.name}
             </Typography.Paragraph>
+            {file.fileType.startsWith("image/") && (
+              <Image
+                width={200}
+                css={{ display: "none" }}
+                src={imageUrl}
+                preview={{
+                  visible: isImageVisible,
+                  src: imageUrl,
+                  onVisibleChange: (value) => {
+                    setIsImageVisible(value);
+                  },
+                }}
+              />
+            )}
           </Space>
         </Dropdown>
       </Tooltip>
@@ -151,7 +206,7 @@ function FilesItem({ file }: FilesItemProps) {
           disabled={renaming}
         />
       </Modal>
-    </>
+    </React.Fragment>
   );
 }
 

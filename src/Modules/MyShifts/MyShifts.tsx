@@ -2,10 +2,10 @@
 import { jsx } from "@emotion/react";
 import { doc } from "firebase/firestore";
 import { orderBy } from "lodash";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useNavigate } from "react-router-dom";
-import { TitleBoxGreen } from "../../theme/styledComponents";
+import { TitleBoxGreen } from "../../components/ColorTextDividers";
 import ShiftCard from "./ShiftCard";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -31,6 +31,8 @@ import {
   WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { GrayPageHeader } from "../../components/PageHeaders";
+import { useLayoutEffect } from "react";
+import PageError from "../../components/PageError";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -89,7 +91,7 @@ function MyShifts() {
     [weekDays, currentWeekId]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     removeScheduleBadges();
     return () => {
       removeScheduleBadges();
@@ -100,96 +102,102 @@ function MyShifts() {
     <Layout>
       <GrayPageHeader onBack={() => navigate(-1)} title={t("My Shifts")} />
 
-      <Layout.Content>
-        <Spin spinning={loadingShifts || loadingShifts === undefined}>
-          <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+      {errorShifts ? (
+        <PageError error={errorShifts} />
+      ) : (
+        <Layout.Content>
+          <Spin spinning={loadingShifts || loadingShifts === undefined}>
             <div
-              css={{
-                minWidth: 270,
-                maxWidth: 700,
-                margin: "auto",
-                width: "100%",
-              }}
+              css={{ display: "flex", flexDirection: "column", padding: 20 }}
             >
-              <Tabs
-                centered
-                onChange={setCurrentWeekId}
-                defaultActiveKey={currentWeekId}
-                items={[
-                  { label: t("This week"), key: dayjs().format(WEEKFORMAT) },
-                  {
-                    label: t("Next week"),
-                    key: dayjs().add(7, "days").format(WEEKFORMAT),
-                  },
-                ]}
-              />
-              {shifts?.shiftsArray.length ? (
-                <Space
-                  style={{ display: "flex", width: "100%" }}
-                  direction="vertical"
-                >
-                  {isInCurrentWeek ? (
-                    groupByDay(shifts?.shiftsArray).map(
-                      ({ day, shifts }, index) => (
-                        <div
-                          key={index}
-                          css={{
-                            border:
-                              day.getDate() === new Date().getDate() &&
-                              "1px dotted #00000025",
-                            padding:
-                              day.getDate() === new Date().getDate() && 3,
-                          }}
-                        >
-                          <Divider orientation="left">
-                            {dayjs(day).format("dddd, MMMM DD YYYY")}
-                            {day.getDate() === new Date().getDate() && (
-                              <Tag
-                                color={Colors.MainBlue}
-                                css={{ marginLeft: 10 }}
-                              >
-                                {t("Today")}
-                              </Tag>
-                            )}
-                          </Divider>
+              <div
+                css={{
+                  minWidth: 270,
+                  maxWidth: 700,
+                  margin: "auto",
+                  width: "100%",
+                }}
+              >
+                <Tabs
+                  centered
+                  onChange={setCurrentWeekId}
+                  defaultActiveKey={currentWeekId}
+                  items={[
+                    { label: t("This week"), key: dayjs().format(WEEKFORMAT) },
+                    {
+                      label: t("Next week"),
+                      key: dayjs().add(7, "days").format(WEEKFORMAT),
+                    },
+                  ]}
+                />
+                {shifts?.shiftsArray.length ? (
+                  <Space
+                    style={{ display: "flex", width: "100%" }}
+                    direction="vertical"
+                  >
+                    {isInCurrentWeek ? (
+                      groupByDay(shifts?.shiftsArray).map(
+                        ({ day, shifts }, index) => (
+                          <div
+                            key={index}
+                            css={{
+                              border:
+                                day.getDate() === new Date().getDate() &&
+                                "1px dotted #00000025",
+                              padding:
+                                day.getDate() === new Date().getDate() && 3,
+                            }}
+                          >
+                            <Divider orientation="left">
+                              {dayjs(day).format("dddd, MMMM DD YYYY")}
+                              {day.getDate() === new Date().getDate() && (
+                                <Tag
+                                  color={Colors.MainBlue}
+                                  css={{ marginLeft: 10 }}
+                                >
+                                  {t("Today")}
+                                </Tag>
+                              )}
+                            </Divider>
 
-                          {shifts.map((shift) => (
-                            <ShiftCard key={shift.id} shift={shift} />
-                          ))}
-                        </div>
+                            {shifts.map((shift) => (
+                              <ShiftCard key={shift.id} shift={shift} />
+                            ))}
+                          </div>
+                        )
                       )
-                    )
-                  ) : (
-                    <React.Fragment>
-                      {/* 📅 Next Week */}
-                      {shifts && (
-                        <React.Fragment>
-                          <TitleBoxGreen>{t("Next week")}</TitleBoxGreen>
-                          {groupByDay(shifts?.shiftsArray).map(
-                            ({ day, shifts }, index) => (
-                              <div key={index}>
-                                <Divider orientation="left">
-                                  {dayjs(day).format("dddd, MMMM DD YYYY")}
-                                </Divider>
+                    ) : (
+                      <React.Fragment>
+                        {/* 📅 Next Week */}
+                        {shifts && (
+                          <React.Fragment>
+                            <TitleBoxGreen>{t("Next week")}</TitleBoxGreen>
+                            {groupByDay(shifts?.shiftsArray).map(
+                              ({ day, shifts }, index) => (
+                                <div key={index}>
+                                  <Divider orientation="left">
+                                    {dayjs(day).format("dddd, MMMM DD YYYY")}
+                                  </Divider>
 
-                                {shifts.map((shift) => (
-                                  <ShiftCard key={shift.id} shift={shift} />
-                                ))}
-                              </div>
-                            )
-                          )}
-                        </React.Fragment>
-                      )}
-                    </React.Fragment>
-                  )}
-                </Space>
-              ) : (
-                <Empty description={t("There are no scheduled shifts")} />
-              )}
+                                  {shifts.map((shift) => (
+                                    <ShiftCard key={shift.id} shift={shift} />
+                                  ))}
+                                </div>
+                              )
+                            )}
+                          </React.Fragment>
+                        )}
+                      </React.Fragment>
+                    )}
+                  </Space>
+                ) : (
+                  <Empty description={t("There are no scheduled shifts")} />
+                )}
+              </div>
             </div>
-          </div>
-        </Spin>
-      </Layout.Content>
+          </Spin>
+        </Layout.Content>
+      )}
     </Layout>
   );
 }

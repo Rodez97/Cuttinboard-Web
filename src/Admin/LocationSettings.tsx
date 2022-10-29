@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../utils/utils";
@@ -31,7 +30,7 @@ function LocationSettings() {
   }: Partial<Location>) => {
     setIsSubmitting(true);
     try {
-      await updateDoc(location.docRef, {
+      await location.updateLocation({
         name,
         email,
         description,
@@ -50,7 +49,6 @@ function LocationSettings() {
   return (
     <OverflowLayout>
       <PageHeader
-        className="site-page-header-responsive"
         onBack={() => navigate(-1)}
         title={t("Location information")}
         subTitle={location.name}

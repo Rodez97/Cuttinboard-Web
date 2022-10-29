@@ -48,7 +48,6 @@ export function LocationContainer() {
   return (
     <Layout>
       <DarkPageHeader
-        className="site-page-header"
         onBack={() => navigate("/dashboard", { replace: true })}
         backIcon={<SwapOutlined />}
         title={location.name}

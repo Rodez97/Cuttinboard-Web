@@ -7,7 +7,7 @@ import { ConversationsProvider } from "@cuttinboard-solutions/cuttinboard-librar
 import PageLoading from "../../components/PageLoading";
 import ConversationsRoutes from "./ConversationsRoutes";
 import ConversationsList from "./ConversationsList";
-import { EmptyMainModule } from "../../Modules/Notes/EmptyMainModule";
+import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import convImage from "../../assets/images/chat.png";
 import ManageConversation from "./ManageConversation";

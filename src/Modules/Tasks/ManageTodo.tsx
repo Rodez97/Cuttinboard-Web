@@ -89,8 +89,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
       onFinish={onFinish}
       initialValues={{
         ...selectedTodo,
-        dueDate:
-          selectedTodo?.dueDate && moment(selectedTodo.dueDate?.toDate()),
+        dueDate: selectedTodo.dueDate && moment(selectedTodo.dueDate.toDate()),
       }}
       disabled={submitting}
       autoComplete="off"
@@ -213,15 +212,12 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
             path="assign"
             element={
               <AssignUser
-                onSelectedEmployee={({ id, name, lastName, email }) => {
-                  console.log({ id, name, lastName, email });
-
+                onSelectedEmployee={({ id, fullName, email }) => {
                   form.setFieldValue("assignedTo", {
                     id,
-                    name: `${name} ${lastName}`,
+                    name: fullName,
                     email,
                   });
-                  console.log(form.getFieldsValue());
                 }}
               />
             }

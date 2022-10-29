@@ -1,4 +1,4 @@
-import { getAnalytics, logEvent, setCurrentScreen } from "firebase/analytics";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 

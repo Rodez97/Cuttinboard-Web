@@ -6,7 +6,7 @@ import { Button, Checkbox, List } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { TitleBoxGreen } from "../../theme/styledComponents";
+import { TitleBoxGreen } from "../ColorTextDividers";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 

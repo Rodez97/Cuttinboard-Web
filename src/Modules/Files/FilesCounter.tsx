@@ -1,4 +1,5 @@
-import React from "react";
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import fileSize from "filesize";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Progress, Space, Typography } from "antd";
@@ -9,7 +10,7 @@ function FilesCounter() {
   return (
     <Space
       direction="vertical"
-      style={{
+      css={{
         display: "flex",
         padding: "3px",
         margin: "2px",
@@ -24,11 +25,11 @@ function FilesCounter() {
         }
         showInfo={false}
       />
-      <Space style={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography.Text style={{ fontSize: "14px", color: "#fff" }}>
+      <Space css={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography.Text css={{ fontSize: "14px", color: "#fff" }}>
           {fileSize(location.usage.storageUsed)}
         </Typography.Text>
-        <Typography.Text style={{ fontSize: "14px", color: "#fff" }}>
+        <Typography.Text css={{ fontSize: "14px", color: "#fff" }}>
           {fileSize(location.usage.storageLimit)}
         </Typography.Text>
       </Space>

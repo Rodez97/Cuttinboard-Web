@@ -28,7 +28,8 @@ import {
 } from "@ant-design/icons";
 import PickFile from "./PickFile";
 import { matchSorter } from "match-sorter";
-import { EmptyMainModule } from "../Notes/EmptyMainModule";
+import { EmptyMainModule } from "../../components/EmptyMainModule";
+import useDisclose from "../../hooks/useDisclose";
 
 function FilesMain() {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ function FilesMain() {
     order: "asc",
     searchQuery: "",
   });
-  const [pickFileOpen, setPickFileOpen] = useState(false);
+  const [pickFileOpen, pickFiles, closePickFile] = useDisclose();
   const { selectedApp, canManage } = useCuttinboardModule();
   const { location } = useLocation();
   const [drawerFiles, loading, drawerFilesError] =
@@ -56,8 +57,6 @@ function FilesMain() {
       ref(Storage, `${location.storageRef.fullPath}/storage/${selectedApp.id}`),
     [location.storageRef.fullPath, selectedApp.id]
   );
-
-  const pickFiles = () => setPickFileOpen(true);
 
   const getOrderedFiles = useMemo(() => {
     let ordered: Cuttinboard_File[] = [];
@@ -154,17 +153,17 @@ function FilesMain() {
 
       {getOrderedFiles?.length ? (
         viewType === "module" ? (
-          <Space wrap style={{ display: "flex", padding: "10px" }}>
+          <Space wrap css={{ display: "flex", padding: "10px" }}>
             {getOrderedFiles?.map((file, i) => (
               <FilesItem key={i} id={file.id} file={file} />
             ))}
           </Space>
         ) : (
-          <Row justify="center" style={{ paddingBottom: "50px" }}>
+          <Row justify="center" css={{ paddingBottom: "50px" }}>
             <Col xs={24} md={20} lg={16} xl={12}>
               <List
                 bordered
-                style={{ width: "100%" }}
+                css={{ width: "100%" }}
                 dataSource={getOrderedFiles}
                 renderItem={(file) => <FileItemRow key={file.id} file={file} />}
               />
@@ -192,7 +191,7 @@ function FilesMain() {
         maxFiles={3}
         baseStorageRef={storagePathRef}
         open={pickFileOpen}
-        onClose={() => setPickFileOpen(false)}
+        onClose={closePickFile}
       />
     </Layout.Content>
   );

@@ -15,7 +15,7 @@ import ManageModule from "../ManageApp/ManageModule";
 import NotesList from "./NotesList";
 import NotesRoutes from "./NotesRoutes";
 import notesImage from "../../assets/images/notes.png";
-import { EmptyMainModule } from "./EmptyMainModule";
+import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { recordError } from "../../utils/utils";
 
 function Notes() {

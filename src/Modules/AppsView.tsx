@@ -13,6 +13,7 @@ import shceduleImage from "../assets/images/timetable.png";
 import employeesImage from "../assets/images/hierarchy.png";
 import myShiftsImage from "../assets/images/my_Shifts.png";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+
 const appsElements: {
   name: string;
   path: string;

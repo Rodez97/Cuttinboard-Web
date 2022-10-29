@@ -44,6 +44,7 @@
     "i18next": "^21.9.1",
     "i18next-browser-languagedetector": "^6.1.5",
     "i18next-http-backend": "^1.4.1",
+    "js-file-download": "^0.4.12",
     "linkify-react": "^3.0.4",
     "linkifyjs": "^3.0.5",
     "lottie-react": "^2.3.1",

@@ -6,6 +6,7 @@ import { Button, Form, Input, Modal } from "antd";
 import { addDoc, serverTimestamp } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
+import useDisclose from "../../hooks/useDisclose";
 import { recordError } from "../../utils/utils";
 
 export interface ManageNoteDialogRef {
@@ -17,9 +18,9 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<{ title?: string; content: string }>();
   const { selectedApp } = useCuttinboardModule();
-  const [open, setOpen] = useState(false);
+  const [isOpen, open, close] = useDisclose(false);
   const [title, setTitle] = useState("");
-  const [isSubmitting, setisSubmitting] = useState(false);
+  const [isSubmitting, startSubmit, endSubmit] = useDisclose();
   const [baseNote, setBaseNote] = useState<Note>(null);
 
   useImperativeHandle(ref, () => ({
@@ -29,23 +30,23 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
 
   const openNew = () => {
     setTitle("Add note");
-    setOpen(true);
+    open();
   };
 
   const openEdit = (note: Note) => {
     setTitle("Edit note");
     setBaseNote(note);
-    setOpen(true);
+    open();
   };
 
   const handleClose = () => {
-    setOpen(false);
+    close();
     setBaseNote(null);
     form.resetFields();
   };
 
   const onFinish = async (values: { title?: string; content: string }) => {
-    setisSubmitting(true);
+    startSubmit();
     try {
       if (baseNote) {
         await baseNote.edit(values.title, values.content);
@@ -57,17 +58,17 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
           authorName: Auth.currentUser.displayName,
         });
       }
-      setisSubmitting(false);
+      endSubmit();
       handleClose();
     } catch (error) {
       recordError(error);
-      setisSubmitting(false);
+      endSubmit();
     }
   };
 
   return (
     <Modal
-      open={open}
+      open={isOpen}
       title={t(title)}
       onCancel={handleClose}
       footer={[

@@ -43,6 +43,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
   const { location } = useLocation();
   const { selectedApp } = useCuttinboardModule();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
   const close = () => {
@@ -64,8 +65,11 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
     onRemove: (file) => {
       const index = fileList.indexOf(file);
       const newFileList = fileList.slice();
+      const newFilesToUpload = filesToUpload.slice();
       newFileList.splice(index, 1);
+      newFilesToUpload.splice(index, 1);
       setFileList(newFileList);
+      setFilesToUpload(newFilesToUpload);
     },
     beforeUpload: (file) => {
       if (file.size > maxSize) {
@@ -76,8 +80,8 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
         );
       } else {
         setFileList([...fileList, file]);
+        setFilesToUpload([...filesToUpload, file]);
       }
-
       return false;
     },
     fileList,
@@ -94,7 +98,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
       );
     }
     setUploading(true);
-    for await (const file of fileList) {
+    for await (const file of filesToUpload) {
       const fileId = nanoid();
       const fileName = `${fileId}.${file.name.split(".").pop()}`;
       const fileRef = storageRef(
@@ -102,7 +106,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
         `${baseStorageRef.fullPath}/${fileName}`
       );
       try {
-        await uploadBytes(fileRef, file.originFileObj, {
+        await uploadBytes(fileRef, file, {
           contentType: file.type,
           customMetadata: { fileId },
         });
@@ -129,6 +133,8 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
         continue;
       }
     }
+    setFileList([]);
+    setFilesToUpload([]);
     setUploading(false);
     close();
   };

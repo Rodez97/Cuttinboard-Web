@@ -15,7 +15,7 @@ import TasksList from "./TasksList";
 import TasksRoutes from "./TasksRoutes";
 import tasksImage from "../../assets/images/to-do-list.png";
 import { useTranslation } from "react-i18next";
-import { EmptyMainModule } from "../Notes/EmptyMainModule";
+import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { recordError } from "../../utils/utils";
 
 function Tasks() {

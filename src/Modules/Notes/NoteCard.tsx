@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import React, { useState } from "react";
 import ReadonlyNoteDialog from "./ReadonlyNoteDialog";
 import { useTranslation } from "react-i18next";
-import { StickyNoteCard } from "./StickyNoteCard";
+import { StickyNoteCard } from "../../components/StickyNoteCard";
 import Linkify from "linkify-react";
 import { ManageNoteDialogRef } from "./ManageNoteDialog";
 import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";

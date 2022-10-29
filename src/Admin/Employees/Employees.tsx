@@ -2,12 +2,6 @@
 import { jsx } from "@emotion/react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  TitleBoxBlue,
-  TitleBoxGreen,
-  TitleBoxOwner,
-  TitleBoxYellow,
-} from "../../theme/styledComponents";
 import EmployeeCard from "./EmployeeCard";
 import { useNavigate } from "react-router-dom";
 import { matchSorter } from "match-sorter";
@@ -23,7 +17,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
-  AutoComplete,
   Button,
   Divider,
   Input,
@@ -42,11 +35,6 @@ import {
 import Icon from "@ant-design/icons";
 import AccountGroupOutline from "@mdi/svg/svg/account-group-outline.svg";
 import { recordError } from "../../utils/utils";
-import { deleteField, doc, setDoc } from "firebase/firestore";
-import {
-  Auth,
-  Firestore,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import ManagePositions from "./ManagePositions";
 import { GrayPageHeader } from "../../components/PageHeaders";
 

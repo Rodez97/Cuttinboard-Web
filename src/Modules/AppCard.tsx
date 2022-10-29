@@ -1,6 +1,8 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { useNotificationsBadges } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Badge, Card, Tooltip } from "antd";
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +30,7 @@ function AppCard({
     <Tooltip title={t(description)} placement="bottom">
       <Badge count={badge && getBadgeByModule(badge)}>
         <Card
-          style={{
+          css={{
             width: 300,
           }}
           hoverable

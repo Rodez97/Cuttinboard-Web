@@ -31,7 +31,7 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
   const { canManage } = useCuttinboardModule();
 
   const handleTaskChange = async (key: string, status: boolean) => {
-    if (taskBlock?.assignedTo.id === Auth.currentUser.uid || canManage) {
+    if (taskBlock.assignedTo?.id === Auth.currentUser.uid || canManage) {
       try {
         await taskBlock.changeTaskStatus(key, status);
       } catch (error) {
@@ -104,14 +104,14 @@ function TaskBlock({ taskBlock, onEdit }: TaskBlockProps) {
         >
           {`${taskBlock.tasksSummary.done}/${taskBlock.tasksSummary.total}`}
         </Tag>,
-        taskBlock?.assignedTo && (
+        taskBlock.assignedTo && (
           <Tag key="assignedTo" icon={<UserOutlined />}>
             {taskBlock.assignedTo.name}
           </Tag>
         ),
       ]}
       extra={[
-        taskBlock?.dueDate && (
+        taskBlock.dueDate && (
           <Tag icon={<CalendarOutlined />}>
             {dayjs(taskBlock.convertedDueDate).format("MMMM D, YYYY, hh:mm a")}
           </Tag>

@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
@@ -48,9 +50,9 @@ function ShiftCard({ shift }: ShiftCardProps) {
   };
 
   return (
-    <>
+    <React.Fragment>
       <List.Item
-        style={{
+        css={{
           backgroundColor: Colors.MainOnWhite,
           padding: 5,
           margin: 5,
@@ -82,7 +84,7 @@ function ShiftCard({ shift }: ShiftCardProps) {
         />
 
         {shift.position && (
-          <Space style={{ display: "flex", justifyContent: "space-evenly" }}>
+          <Space css={{ display: "flex", justifyContent: "space-evenly" }}>
             {shift.position && <Tag color="processing">{shift.position}</Tag>}
           </Space>
         )}
@@ -97,7 +99,7 @@ function ShiftCard({ shift }: ShiftCardProps) {
       >
         <SimpleTodo tasks={shift?.tasks} onChange={handleTaskChange} />
       </Modal>
-    </>
+    </React.Fragment>
   );
 }
 

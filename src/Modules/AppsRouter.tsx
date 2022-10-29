@@ -1,6 +1,7 @@
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
+import PageLoading from "../components/PageLoading";
 import AppsView from "./AppsView";
 
 const Tasks = lazy(() => import("./Tasks/Tasks"));
@@ -22,7 +23,7 @@ function AppsRouter() {
         <Route
           path={`to-do/*`}
           element={
-            <Suspense fallback={<>...</>}>
+            <Suspense fallback={<PageLoading />}>
               <Tasks />
             </Suspense>
           }
@@ -30,7 +31,7 @@ function AppsRouter() {
         <Route
           path={`notes/*`}
           element={
-            <Suspense fallback={<>...</>}>
+            <Suspense fallback={<PageLoading />}>
               <Notes />
             </Suspense>
           }
@@ -38,7 +39,7 @@ function AppsRouter() {
         <Route
           path={`my-shifts/*`}
           element={
-            <Suspense fallback={<>...</>}>
+            <Suspense fallback={<PageLoading />}>
               <Shifts />
             </Suspense>
           }
@@ -46,7 +47,7 @@ function AppsRouter() {
         <Route
           path={`storage/*`}
           element={
-            <Suspense fallback={<>...</>}>
+            <Suspense fallback={<PageLoading />}>
               <Storage />
             </Suspense>
           }
@@ -54,7 +55,7 @@ function AppsRouter() {
         <Route
           path={`lochecklist/*`}
           element={
-            <Suspense fallback={<>...</>}>
+            <Suspense fallback={<PageLoading />}>
               <GlobalChecklist />
             </Suspense>
           }
@@ -64,7 +65,7 @@ function AppsRouter() {
             key="emp"
             path={`employees/*`}
             element={
-              <Suspense fallback={<>...</>}>
+              <Suspense fallback={<PageLoading />}>
                 <Employees />
               </Suspense>
             }
@@ -73,7 +74,7 @@ function AppsRouter() {
             key="sch"
             path={`schedule/*`}
             element={
-              <Suspense fallback={<>...</>}>
+              <Suspense fallback={<PageLoading />}>
                 <Schedule />
               </Suspense>
             }
@@ -82,7 +83,7 @@ function AppsRouter() {
             key="uts"
             path={`utensils/*`}
             element={
-              <Suspense fallback={<>...</>}>
+              <Suspense fallback={<PageLoading />}>
                 <Utensils />
               </Suspense>
             }

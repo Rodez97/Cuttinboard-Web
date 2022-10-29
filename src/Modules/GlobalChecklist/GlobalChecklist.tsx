@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
@@ -9,7 +11,11 @@ import {
   Auth,
   Firestore,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { LocationCheckList } from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
+  FirebaseSignature,
+  ILocationCheckList,
+  LocationCheckList,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Col, Input, Layout, Row, Space, Typography } from "antd";
@@ -20,13 +26,15 @@ import {
   getDocs,
   limitToLast,
   orderBy,
+  PartialWithFieldValue,
   query,
   serverTimestamp,
   setDoc,
   Timestamp,
+  where,
 } from "firebase/firestore";
 import { nanoid } from "nanoid";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -134,21 +142,27 @@ function GlobalChecklist() {
         location.organizationId,
         "locationChecklist"
       ),
+      where("locationId", "==", location.id),
       orderBy("checklistDate"),
       limitToLast(1)
-    );
+    ).withConverter(LocationCheckList.Converter);
     try {
       const docsSnap = await getDocs(collRef);
       if (docsSnap.docs.length === 0) {
         return;
       }
-      const update: any = {
-        tasks: docsSnap.docs[0].get("tasks"),
+      const lastChecklist = docsSnap.docs[0].data();
+      const update: PartialWithFieldValue<
+        ILocationCheckList & FirebaseSignature
+      > = {
+        tasks: lastChecklist.tasks,
       };
       if (!checklistData) {
         update.checklistDate = Timestamp.fromDate(selectedDate.toDate());
-        update.createdAt = Timestamp.now();
+        update.createdAt = serverTimestamp();
         update.createdBy = Auth.currentUser.uid;
+        update.signedBy = Auth.currentUser.uid;
+        update.locationId = location.id;
       }
       await setDoc(docRef, update, { merge: true });
     } catch (error) {
@@ -170,6 +184,7 @@ function GlobalChecklist() {
   if (error) {
     return <PageError error={error} />;
   }
+
   return (
     <Layout.Content>
       <GrayPageHeader
@@ -181,19 +196,19 @@ function GlobalChecklist() {
       {loading ? (
         <PageLoading />
       ) : (
-        <Row justify="center" style={{ paddingBottom: "50px" }}>
+        <Row justify="center" css={{ paddingBottom: "50px" }}>
           <Col
             xs={24}
             md={20}
             lg={16}
-            style={{
+            css={{
               display: "flex",
               flexDirection: "column",
               gap: "20px",
               paddingTop: "10px",
             }}
           >
-            <Space style={{ display: "flex", justifyContent: "center" }}>
+            <Space css={{ display: "flex", justifyContent: "center" }}>
               <Button
                 onClick={() => setSelectedDate((sd) => sd.subtract(1, "day"))}
                 icon={<ArrowLeftOutlined />}
@@ -214,7 +229,7 @@ function GlobalChecklist() {
               <Space
                 align="center"
                 size="large"
-                style={{ display: "flex", justifyContent: "center" }}
+                css={{ display: "flex", justifyContent: "center" }}
               >
                 <Button
                   onClick={cloneLastChecklist}
@@ -229,7 +244,7 @@ function GlobalChecklist() {
                 </Button>
               </Space>
             )}
-            <Space direction="vertical" style={{ display: "flex" }}>
+            <Space direction="vertical" css={{ display: "flex" }}>
               {canUse && (
                 <Input
                   placeholder={t("Add a task")}

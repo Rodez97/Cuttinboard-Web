@@ -5,7 +5,16 @@ import {
   useCuttinboard,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Badge, Card, message, Modal, Spin, Typography } from "antd";
+import {
+  Badge,
+  Button,
+  Card,
+  List,
+  message,
+  Modal,
+  Spin,
+  Typography,
+} from "antd";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import useSelectedLocation from "../../hooks/useSelectedLocation";
@@ -16,6 +25,8 @@ import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import styled from "@emotion/styled";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import "./LocationCard.scss";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import React from "react";
 
 const { Meta } = Card;
 
@@ -110,13 +121,44 @@ function LocationCard({ location, actions }: LocationCardProps) {
     setLoadingLocation(true);
     try {
       selectLocId(location.id);
-      console.log({ organizationKey });
       await selectLocation(location);
       navigate(`/location/${location.id}`);
     } catch (error) {
       recordError(error);
     }
     setLoadingLocation(false);
+  };
+
+  const showInfo = () => {
+    Modal.info({
+      title: location.name,
+      content: (
+        <React.Fragment>
+          <List
+            size="small"
+            dataSource={[
+              ["Description", "description"],
+              ["Phone", "phoneNumber"],
+              ["Email", "email"],
+              ["City", "address.city"],
+              ["State", "address.state"],
+              ["Country", "address.country"],
+              ["Zip Code", "address.zip"],
+            ]}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  title={t(item[0])}
+                  description={item[1]
+                    .split(".")
+                    .reduce((o, i) => o[i] ?? "---", location)}
+                />
+              </List.Item>
+            )}
+          />
+        </React.Fragment>
+      ),
+    });
   };
 
   return (
@@ -131,17 +173,21 @@ function LocationCard({ location, actions }: LocationCardProps) {
           actions={actions}
           haveActions={Boolean(actions?.length)}
           deleting={Boolean(location.subscriptionStatus === "canceled")}
+          extra={
+            <Button
+              type="text"
+              shape="circle"
+              icon={<InfoCircleOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                showInfo();
+              }}
+            />
+          }
+          title={location?.name}
         >
           <Meta
             css={{ color: "inherit" }}
-            title={
-              <Typography.Paragraph
-                ellipsis={{ rows: 2, expandable: false, symbol: "..." }}
-                css={{ color: "inherit" }}
-              >
-                {location?.name}
-              </Typography.Paragraph>
-            }
             description={`${
               location.members ? location.members.length : 0
             } Member(s)`}

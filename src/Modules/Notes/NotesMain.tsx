@@ -17,7 +17,7 @@ import Icon, { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { NotePlus } from "./notesIcons";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import { matchSorter } from "match-sorter";
-import { EmptyMainModule } from "./EmptyMainModule";
+import { EmptyMainModule } from "../../components/EmptyMainModule";
 
 function NotesMain() {
   const { t } = useTranslation();

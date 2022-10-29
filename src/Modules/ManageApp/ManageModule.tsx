@@ -17,6 +17,7 @@ import {
 import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader } from "../../components/PageHeaders";
+import useDisclose from "../../hooks/useDisclose";
 
 type FormType = {
   name: string;
@@ -24,13 +25,12 @@ type FormType = {
   position?: string;
   privacyLevel: PrivacyLevel;
 };
-// TODO: Crear una cceso directo para manejar los miembros
 
 const ManageModule = () => {
   const { t } = useTranslation();
   const [form] = Form.useForm<FormType>();
   const privacyLevel = Form.useWatch("privacyLevel", form);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, startSubmit, endSubmit] = useDisclose();
   const { newElement, selectedApp, canManage } = useCuttinboardModule();
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const ManageModule = () => {
     if (!canManage) {
       return;
     }
-    setIsSubmitting(true);
+    startSubmit();
     try {
       if (selectedApp) {
         const { privacyLevel, position, ...others } = values;
@@ -70,10 +70,10 @@ const ManageModule = () => {
         }
         navigate(pathname.replace("new", newId));
       }
-      setIsSubmitting(false);
+      endSubmit();
     } catch (error) {
       recordError(error);
-      setIsSubmitting(false);
+      endSubmit();
     }
   };
 

@@ -38,15 +38,6 @@ function MainRouter() {
     return organizationKey !== null && selectedLocation !== null;
   }, [organizationKey, selectedLocation]);
 
-  const onError = (error: FirebaseError | CuttinboardError) => {
-    recordError(error);
-
-    if (error?.code && error.code === "UNDEFINED_LOCATION") {
-      return <Navigate to="dashboard" />;
-    }
-    return <PageError error={error} />;
-  };
-
   return (
     <Layout>
       <Routes>
