@@ -63,7 +63,7 @@ function NewDMByEmail({
       const recipientSnap = await getDocs<CuttinboardUser>(
         query(
           collection(Firestore, "Users"),
-          where("email", "==", email)
+          where("email", "==", email.toLowerCase())
         ).withConverter(CuttinboardUser.Converter)
       );
       if (recipientSnap.size !== 1) {
