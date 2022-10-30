@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { MessageOutlined, OrderedListOutlined } from "@ant-design/icons";
 import {
   Employee,
@@ -6,9 +8,9 @@ import {
 import { getShiftDate } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
-import { Space, Typography } from "antd";
-import { isEmpty } from "lodash";
-import React, { useState } from "react";
+import { Badge, Space, Tag, Typography } from "antd";
+import { isEmpty, orderBy } from "lodash";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CellItemDialog from "./CellItemDialog";
 
@@ -29,7 +31,8 @@ const Container = styled(Space)<{
   $deleting: boolean;
 }>`
   cursor: pointer;
-  width: 100%;
+  min-width: 130px !important;
+  width: calc((100vw - 250px) / 7) !important;
   height: 100%;
   background: ${(props) =>
     props.$deleting
@@ -63,11 +66,15 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
     setShiftsDialogOpen(true);
   };
 
-  const getShiftData = (shift: Shift = shifts[0]) => {
+  const getShiftData = useMemo(() => {
+    // order the shift by start time and get the first one
+    const shift = orderBy(shifts, (e) => e.getStartDayjsDate, ["asc"])[0];
+
     let time = "";
     let shiftPosition = "";
     let hasTasks = false;
     let hasNotes = false;
+    let wage = 0;
     const shiftsCount = shifts.length;
     if (shift.hasPendingUpdates) {
       const { start, end, tasks, notes, position } = shift.pendingUpdate;
@@ -88,12 +95,70 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       shiftPosition = shift.position;
       hasTasks = !isEmpty(shift.tasks);
       hasNotes = Boolean(shift.notes);
+      wage = shift.hourlyWage ?? 0;
     }
-    return { time, shiftPosition, hasTasks, hasNotes, shiftsCount };
-  };
+    return { time, shiftPosition, hasTasks, hasNotes, shiftsCount, wage };
+  }, [shifts]);
 
+  const ExtraIcons = (
+    <Space style={{ display: "flex" }}>
+      {getShiftData.hasTasks && (
+        <OrderedListOutlined style={{ color: "inherit" }} />
+      )}
+      {getShiftData.hasNotes && (
+        <MessageOutlined style={{ color: "inherit" }} />
+      )}
+    </Space>
+  );
+  const SecondRow = (
+    <div
+      css={{
+        backgroundColor: Colors.MainDark,
+        padding: 5,
+        flexDirection: "row",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <Tag color={getShiftData.wage > 0 ? "processing" : "error"}>
+        {getShiftData.wage.toLocaleString("EN-us", {
+          style: "currency",
+          currency: "USD",
+        }) + "/hr"}
+      </Tag>
+
+      {ExtraIcons}
+    </div>
+  );
+  const ExtraShifts = getShiftData.shiftsCount > 1 && (
+    <Badge count={`+${getShiftData.shiftsCount - 1}`} size="small" />
+  );
+  const FirstRow = (
+    <div
+      css={{
+        backgroundColor: Colors.MainDark,
+        padding: 5,
+        flexDirection: "row",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      {getShiftData?.shiftPosition ? (
+        <PositionElement type="secondary" ellipsis>
+          {getShiftData.shiftPosition}
+        </PositionElement>
+      ) : (
+        <Tag color="error">{t("No position")}</Tag>
+      )}
+
+      {ExtraShifts}
+    </div>
+  );
   return (
-    <>
+    <React.Fragment>
       <Container
         onClick={handleShiftClick}
         direction="vertical"
@@ -102,45 +167,47 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
         )}
         $deleting={Boolean(shifts[0].deleting)}
       >
-        {getShiftData()?.shiftPosition && (
-          <div
-            style={{
-              backgroundColor: Colors.MainDark,
-              padding: 1,
-              textAlign: "center",
-            }}
-          >
-            <PositionElement type="secondary">
-              {getShiftData().shiftPosition}
-            </PositionElement>
+        {employee.locationRole > 2 && (
+          <div>
+            {FirstRow}
+            {SecondRow}
           </div>
         )}
-        <Space direction="vertical" style={{ display: "flex" }}>
-          <Typography
-            style={{
-              justifyContent: "center",
-              display: "flex",
-              color: "inherit",
-            }}
-          >
-            {getShiftData().time}
-          </Typography>
-          <Space style={{ justifyContent: "space-evenly", display: "flex" }}>
-            {getShiftData().hasTasks && (
-              <OrderedListOutlined style={{ color: "inherit" }} />
-            )}
-            {getShiftData().hasNotes && (
-              <MessageOutlined style={{ color: "inherit" }} />
-            )}
-          </Space>
-          <Space style={{ justifyContent: "space-evenly", display: "flex" }}>
-            {getShiftData().shiftsCount > 1 && (
-              <Typography style={{ color: "inherit" }}>{`+${
-                getShiftData().shiftsCount - 1
-              }`}</Typography>
-            )}
-          </Space>
-        </Space>
+
+        {employee.locationRole === 2 ? (
+          getShiftData.shiftPosition ? (
+            <div>
+              {FirstRow}
+              {SecondRow}
+            </div>
+          ) : (
+            <div
+              css={{
+                backgroundColor: Colors.MainDark,
+                flexDirection: "row",
+                padding: "0px 7px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              {ExtraIcons}
+              {ExtraShifts}
+            </div>
+          )
+        ) : null}
+
+        <Typography.Text
+          css={{
+            color: "inherit",
+            textAlign: "center",
+            width: "100%",
+            display: "block",
+          }}
+        >
+          {getShiftData.time}
+        </Typography.Text>
       </Container>
       <CellItemDialog
         column={column}
@@ -149,7 +216,7 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
         onClose={handleClose}
         employee={employee}
       />
-    </>
+    </React.Fragment>
   );
 }
 

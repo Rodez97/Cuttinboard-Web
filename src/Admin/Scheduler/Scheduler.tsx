@@ -32,6 +32,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Positions,
+  RoleAccessLevels,
   WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Table, { ColumnsType } from "antd/lib/table";
@@ -110,11 +111,16 @@ function Scheduler() {
   };
 
   const employees = useMemo(() => {
+    // Get all employees except the supervisor
+    const emp = getEmployees.filter(
+      (e) => e.locationRole !== RoleAccessLevels.ADMIN
+    );
+
     const byName = searchQuery
-      ? matchSorter(getEmployees, searchQuery, {
+      ? matchSorter(emp, searchQuery, {
           keys: [(e) => e.fullName],
         })
-      : getEmployees;
+      : emp;
     return selectedTag
       ? matchSorter(byName, selectedTag, {
           keys: [(e) => e.positions],

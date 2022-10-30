@@ -36,6 +36,7 @@ import {
   Modal,
   Row,
   Select,
+  Tag,
   TimePicker,
   Typography,
 } from "antd";
@@ -357,17 +358,25 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                 })}
               </Select>
             </Form.Item>
-            <Typography.Text
-              style={{ display: "flex", justifyContent: "center" }}
+            <div
+              css={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 8,
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              {t("Hourly Wage")}:
-              <Typography.Text mark>
+              <Typography.Text>{t("Hourly Wage")}:</Typography.Text>
+              <Tag color={getHourlyWage() > 0 ? "processing" : "error"}>
                 {getHourlyWage()?.toLocaleString("en-US", {
                   style: "currency",
                   currency: "USD",
-                })}
-              </Typography.Text>
-            </Typography.Text>
+                }) + "/hr"}
+              </Tag>
+            </div>
+
             <Divider />
           </React.Fragment>
         )}

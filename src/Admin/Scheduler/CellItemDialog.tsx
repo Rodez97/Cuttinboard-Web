@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -14,23 +14,26 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Avatar, Button, List, Modal } from "antd";
-import Icon, {
-  DeleteFilled,
-  ExclamationCircleOutlined,
-  PlusCircleFilled,
-  ScheduleFilled,
-} from "@ant-design/icons";
-import styled from "@emotion/styled";
+import { Button, Card, List, Modal, Space, Tag } from "antd";
+import { ExclamationCircleOutlined, PlusCircleFilled } from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import mdiDeleteRestore from "@mdi/svg/svg/delete-restore.svg";
 import { recordError } from "../../utils/utils";
 
-const HoverListItem = styled(List.Item)`
-  cursor: pointer;
-  :hover {
-    background-color: ${Colors.MainOnWhite};
-  }
+const BaseCard = css`
+  width: 100%;
+  margin-bottom: 7px;
+`;
+
+const DeletingCard = css`
+  border: 3px dashed #f33d61;
+`;
+
+const DraftOrEditedCard = css`
+  border: 3px dashed #606060;
+`;
+
+const PublisheCard = css`
+  border: 3px solid ${Colors.MainBlue};
 `;
 
 interface CellItemDialogProps {
@@ -51,13 +54,6 @@ function CellItemDialog({
   const { editShift, newShift } = useScheduler();
   const { t } = useTranslation();
   const { locationAccessKey } = useLocation();
-
-  const handleShiftClick =
-    (shift: Shift) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      e.stopPropagation();
-      onClose();
-      editShift(employee, shift);
-    };
 
   const handleOnClose = () => {
     onClose();
@@ -123,6 +119,29 @@ function CellItemDialog({
     return { time, shiftPosition };
   };
 
+  const getShiftStatusText = (shift: Shift) => {
+    if (shift.deleting) {
+      return t("Pending Deletion");
+    }
+    if (shift.hasPendingUpdates || shift.status === "draft") {
+      return t("Draft");
+    }
+    return t("Published");
+  };
+
+  const Tags = (shift: Shift) => (
+    <React.Fragment>
+      {!Boolean(shift.position) && <Tag color="error">{t("No position")}</Tag>}
+      {
+        <Tag color={shift.hourlyWage > 0 ? "processing" : "error"}>
+          {(shift.hourlyWage ?? 0).toLocaleString("EN-us", {
+            style: "currency",
+            currency: "USD",
+          }) + "/hr"}
+        </Tag>
+      }
+    </React.Fragment>
+  );
   return (
     <React.Fragment>
       <Modal
@@ -138,32 +157,50 @@ function CellItemDialog({
         <List
           dataSource={shifts}
           split
-          renderItem={(shift, index) => (
-            <HoverListItem
-              key={index}
+          renderItem={(shift) => (
+            <Card
+              key={shift.id}
+              onClick={() => editShift(employee, shift)}
+              hoverable
+              css={[
+                BaseCard,
+                shift.deleting
+                  ? DeletingCard
+                  : shift.hasPendingUpdates || shift.status === "draft"
+                  ? DraftOrEditedCard
+                  : PublisheCard,
+              ]}
+              size="small"
+              title={
+                <Space direction="horizontal">
+                  {getShiftData(shift).time}
+
+                  {employee.locationRole > 2 && Tags(shift)}
+
+                  {employee.locationRole === 2 && shift.position && Tags(shift)}
+                </Space>
+              }
               extra={
                 shift.deleting ? (
-                  <Button
-                    icon={<Icon component={mdiDeleteRestore} />}
-                    type="primary"
-                    onClick={(e) => restoreShift(shift, e)}
-                  />
+                  <Button type="link" onClick={(e) => restoreShift(shift, e)}>
+                    {t("Restore")}
+                  </Button>
                 ) : (
                   <Button
-                    icon={<DeleteFilled />}
+                    type="link"
                     danger
                     onClick={(e) => showPromiseConfirm(shift, e)}
-                  />
+                  >
+                    {t("Delete")}
+                  </Button>
                 )
               }
-              onClick={handleShiftClick(shift)}
             >
-              <List.Item.Meta
-                avatar={<Avatar icon={<ScheduleFilled />} />}
-                title={getShiftData(shift).time}
-                description={getShiftData(shift).shiftPosition}
+              <Card.Meta
+                title={getShiftData(shift).shiftPosition}
+                description={getShiftStatusText(shift)}
               />
-            </HoverListItem>
+            </Card>
           )}
         />
 
@@ -177,13 +214,6 @@ function CellItemDialog({
           {t("Add")}
         </Button>
       </Modal>
-      {/* {shifts[selectedShiftIndex] && (
-        <ReadonlyShiftDialog
-          open={readonlyShiftDialogOpen}
-          shift={shifts[selectedShiftIndex]}
-          onClose={() => setReadonlyShiftDialogOpen(false)}
-        />
-      )} */}
     </React.Fragment>
   );
 }
