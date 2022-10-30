@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React, {
   forwardRef,
@@ -46,6 +48,7 @@ import {
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { serverTimestamp } from "firebase/firestore";
+import { isEmpty } from "lodash";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -61,7 +64,7 @@ type FormDataType = {
   notes?: string;
   position?: string;
   tasks?: string[];
-  timeRange: [moment.Moment, moment.Moment];
+  timeRange: { start: moment.Moment; end: moment.Moment };
 };
 
 const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
@@ -94,7 +97,10 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     setBaseDate(date);
     form.setFieldsValue({
       applyTo: [weekDay],
-      timeRange: [moment(date).add(8, "hours"), moment(date).add(16, "hours")],
+      timeRange: {
+        start: moment(date).add(8, "hours"),
+        end: moment(date).add(16, "hours"),
+      },
       position,
     });
     setOpen(true);
@@ -110,10 +116,10 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       notes: shiftData.notes ?? "",
       position: shiftData.position ?? "",
       tasks: Object.values(shiftData.tasks ?? {}).map((tsk) => tsk.name),
-      timeRange: [
-        moment(getShiftDate(shiftData.start).toDate()),
-        moment(getShiftDate(shiftData.end).toDate()),
-      ],
+      timeRange: {
+        start: moment(getShiftDate(shiftData.start).toDate()),
+        end: moment(getShiftDate(shiftData.end).toDate()),
+      },
     });
     setOpen(true);
   };
@@ -127,8 +133,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     const { applyTo, notes, position, tasks, timeRange } = values;
 
     const shiftToSave: Partial<IShift> = {
-      start: getShiftString(timeRange[0].toDate()),
-      end: getShiftString(timeRange[1].toDate()),
+      start: getShiftString(timeRange.start.toDate()),
+      end: getShiftString(timeRange.end.toDate()),
       notes,
       position,
       hourlyWage: getHourlyWage(),
@@ -182,11 +188,11 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   };
 
   const getDuration = useCallback(() => {
-    if (!timeRange) {
+    if (isEmpty(timeRange) || !timeRange.start || !timeRange.end) {
       return;
     }
-    const start = dayjs(timeRange[0].toDate());
-    const end = dayjs(timeRange[1].toDate());
+    const start = dayjs(timeRange.start.toDate());
+    const end = dayjs(timeRange.end.toDate());
     return dayjs.duration(end.diff(start)).format("[🕘] H[h] m[min]");
   }, [timeRange]);
 
@@ -229,13 +235,13 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
         open={open}
         onCancel={handleClose}
         title={
-          <>
+          <React.Fragment>
             {t(isNewShift ? "Add Shift" : "Edit Shift")}
             <Divider type="vertical" />
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               {getDuration()}
             </Typography.Text>
-          </>
+          </React.Fragment>
         }
         footer={[
           baseShift?.pendingUpdate && (
@@ -262,17 +268,51 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           </Button>,
         ]}
       >
-        <Form.Item
-          name="timeRange"
-          required
-          rules={[{ required: true, message: "" }]}
-        >
-          <TimePicker.RangePicker
-            placeholder={["Start", "End"]}
-            use12Hours
-            format="hh:mm A"
-            style={{ width: "100%" }}
-          />
+        <Form.Item name="timeRange">
+          <div
+            css={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 1,
+              width: "100%",
+            }}
+          >
+            <Form.Item
+              name={["timeRange", "start"]}
+              css={{ width: "100%" }}
+              trigger="onSelect"
+              rules={[{ required: true, message: "" }]}
+              required
+              help={t("Start time of the shift")}
+            >
+              <TimePicker
+                allowClear={false}
+                placeholder={t("Start")}
+                minuteStep={5}
+                format="hh:mm a"
+                use12Hours
+                css={{ width: "100%" }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name={["timeRange", "end"]}
+              css={{ width: "100%" }}
+              trigger="onSelect"
+              rules={[{ required: true, message: "" }]}
+              required
+              help={t("End time of the shift")}
+            >
+              <TimePicker
+                allowClear={false}
+                placeholder={t("End")}
+                minuteStep={5}
+                format="hh:mm a"
+                use12Hours
+                css={{ width: "100%" }}
+              />
+            </Form.Item>
+          </div>
         </Form.Item>
 
         {isNewShift && (
@@ -297,7 +337,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
         )}
 
         {employee?.role === "employee" && (
-          <>
+          <React.Fragment>
             <Form.Item name="position">
               <Select placeholder={t("Select Position")}>
                 <Select.Option value="">{t("No Position")}</Select.Option>
@@ -329,7 +369,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
               </Typography.Text>
             </Typography.Text>
             <Divider />
-          </>
+          </React.Fragment>
         )}
 
         <Form.Item name="notes">
@@ -343,7 +383,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
 
         <Form.List name="tasks">
           {(fields, { add, remove }, { errors }) => (
-            <>
+            <React.Fragment>
               {fields.map(({ key, ...field }) => (
                 <Form.Item key={key} required={false}>
                   <Form.Item
@@ -388,7 +428,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                 </Button>
                 <Form.ErrorList errors={errors} />
               </Form.Item>
-            </>
+            </React.Fragment>
           )}
         </Form.List>
       </Modal>
