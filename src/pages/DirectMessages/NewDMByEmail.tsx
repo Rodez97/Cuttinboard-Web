@@ -63,7 +63,7 @@ function NewDMByEmail({
       const recipientSnap = await getDocs<CuttinboardUser>(
         query(
           collection(Firestore, "Users"),
-          where("email", "==", email.toLowerCase())
+          where("email", "==", email)
         ).withConverter(CuttinboardUser.Converter)
       );
       if (recipientSnap.size !== 1) {
@@ -107,6 +107,7 @@ function NewDMByEmail({
       <Form layout="vertical" autoComplete="off">
         <Form.Item
           name="email"
+          normalize={(value: string) => value?.toLowerCase()}
           label={
             <Typography.Text type="secondary" css={{ fontSize: 18 }}>
               {t("Start a chat with someone in your organizations")}

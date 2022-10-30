@@ -81,7 +81,7 @@ function GlobalChecklist() {
       return;
     }
     const task = {
-      name: newTaskName,
+      name: newTaskName.trim(),
       status: false,
       createdAt: serverTimestamp(),
     };

@@ -157,6 +157,22 @@ function CreateEmployee() {
                 max: 20,
                 message: t("Name must be 20 characters or less"),
               },
+              {
+                whitespace: true,
+                message: t("Name cannot be empty"),
+              },
+              {
+                validator: async (_, value) => {
+                  // Check if value dont hace tailing or leading spaces
+                  if (value !== value.trim()) {
+                    return Promise.reject(
+                      new Error(
+                        t("Name cannot have leading or trailing spaces")
+                      )
+                    );
+                  }
+                },
+              },
             ]}
           >
             <Input maxLength={20} showCount />
@@ -171,6 +187,22 @@ function CreateEmployee() {
                 max: 20,
                 message: t("Last Name must be 20 characters or less"),
               },
+              {
+                whitespace: true,
+                message: t("Name cannot be empty"),
+              },
+              {
+                validator: async (_, value) => {
+                  // Check if value dont hace tailing or leading spaces
+                  if (value !== value.trim()) {
+                    return Promise.reject(
+                      new Error(
+                        t("Name cannot have leading or trailing spaces")
+                      )
+                    );
+                  }
+                },
+              },
             ]}
           >
             <Input maxLength={20} showCount />
@@ -178,9 +210,24 @@ function CreateEmployee() {
           <Form.Item
             label={t("Email")}
             name="email"
+            normalize={(value) => value?.toLowerCase()}
             rules={[
               { required: true, message: "" },
               { type: "email", message: t("Must be a valid email") },
+              {
+                whitespace: true,
+                message: t("Cannot be empty"),
+              },
+              {
+                validator: async (_, value) => {
+                  // Check if value dont hace tailing or leading spaces
+                  if (value !== value.trim()) {
+                    return Promise.reject(
+                      new Error(t("Cannot have leading or trailing spaces"))
+                    );
+                  }
+                },
+              },
             ]}
           >
             <Input type="email" maxLength={255} showCount />

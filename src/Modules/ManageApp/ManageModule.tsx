@@ -113,7 +113,23 @@ const ManageModule = () => {
               required
               name="name"
               label={t("Name")}
-              rules={[{ required: true, message: "" }]}
+              rules={[
+                { required: true, message: "" },
+                {
+                  whitespace: true,
+                  message: t("Cannot be empty"),
+                },
+                {
+                  validator: async (_, value) => {
+                    // Check if value dont hace tailing or leading spaces
+                    if (value !== value.trim()) {
+                      return Promise.reject(
+                        new Error(t("Cannot have leading or trailing spaces"))
+                      );
+                    }
+                  },
+                },
+              ]}
             >
               <Input maxLength={80} showCount />
             </Form.Item>

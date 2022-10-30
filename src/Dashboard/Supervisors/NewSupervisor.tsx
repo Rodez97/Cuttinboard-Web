@@ -138,6 +138,22 @@ function NewSupervisor() {
                   max: 20,
                   message: t("Name must be 20 characters or less"),
                 },
+                {
+                  whitespace: true,
+                  message: t("Name cannot be empty"),
+                },
+                {
+                  validator: async (_, value) => {
+                    // Check if value dont hace tailing or leading spaces
+                    if (value !== value.trim()) {
+                      return Promise.reject(
+                        new Error(
+                          t("Name cannot have leading or trailing spaces")
+                        )
+                      );
+                    }
+                  },
+                },
               ]}
             >
               <Input placeholder={t("Name")} maxLength={20} showCount />
@@ -154,6 +170,20 @@ function NewSupervisor() {
                   max: 20,
                   message: t("Last Name must be 20 characters or less"),
                 },
+                {
+                  whitespace: true,
+                  message: t("Cannot be empty"),
+                },
+                {
+                  validator: async (_, value) => {
+                    // Check if value dont hace tailing or leading spaces
+                    if (value !== value.trim()) {
+                      return Promise.reject(
+                        new Error(t("Cannot have leading or trailing spaces"))
+                      );
+                    }
+                  },
+                },
               ]}
             >
               <Input placeholder={t("Last Name")} maxLength={20} showCount />
@@ -161,6 +191,7 @@ function NewSupervisor() {
             <Form.Item
               required
               name="email"
+              normalize={(value: string) => value?.toLowerCase()}
               rules={[
                 {
                   required: true,

@@ -100,6 +100,22 @@ function ProfilePanel() {
                 max: 20,
                 message: t("Name must be 20 characters or less"),
               },
+              {
+                whitespace: true,
+                message: t("Name cannot be empty"),
+              },
+              {
+                validator: async (_, value) => {
+                  // Check if value dont hace tailing or leading spaces
+                  if (value !== value.trim()) {
+                    return Promise.reject(
+                      new Error(
+                        t("Name cannot have leading or trailing spaces")
+                      )
+                    );
+                  }
+                },
+              },
             ]}
           >
             <Input maxLength={20} showCount />
@@ -112,6 +128,22 @@ function ProfilePanel() {
               {
                 max: 20,
                 message: t("Last Name must be 20 characters or less"),
+              },
+              {
+                whitespace: true,
+                message: t("Name cannot be empty"),
+              },
+              {
+                validator: async (_, value) => {
+                  // Check if value dont hace tailing or leading spaces
+                  if (value !== value.trim()) {
+                    return Promise.reject(
+                      new Error(
+                        t("Name cannot have leading or trailing spaces")
+                      )
+                    );
+                  }
+                },
               },
             ]}
           >

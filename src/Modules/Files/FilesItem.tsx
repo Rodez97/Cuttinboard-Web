@@ -68,7 +68,7 @@ function FilesItem({ file }: FilesItemProps) {
   const renameFile = async () => {
     setRenaming(true);
     try {
-      await file.rename(newFileName);
+      await file.rename(newFileName.trim());
     } catch (error) {
       recordError(error);
     }

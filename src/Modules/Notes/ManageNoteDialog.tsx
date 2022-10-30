@@ -49,10 +49,11 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
     startSubmit();
     try {
       if (baseNote) {
-        await baseNote.edit(values.title, values.content);
+        await baseNote.edit(values.title?.trim(), values.content.trim());
       } else {
         await addDoc(selectedApp?.contentRef, {
-          ...values,
+          title: values.title?.trim(),
+          content: values.content.trim(),
           createdAt: serverTimestamp(),
           createdBy: Auth.currentUser.uid,
           authorName: Auth.currentUser.displayName,
@@ -93,13 +94,31 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
         initialValues={{ title: baseNote?.title, content: baseNote?.content }}
         autoComplete="off"
       >
-        <Form.Item name="title">
+        <Form.Item
+          name="title"
+          rules={[
+            {
+              whitespace: true,
+              message: t("Cannot be empty"),
+            },
+          ]}
+        >
           <Input placeholder={t("Title")} maxLength={80} showCount />
         </Form.Item>
         <Form.Item
           name="content"
           required
-          rules={[{ required: true, message: "" }]}
+          rules={[
+            { required: true, message: t("Cannot be empty") },
+            {
+              whitespace: true,
+              message: t("Cannot be empty"),
+            },
+            {
+              max: 4000,
+              message: t("Cannot be longer than 4000 characters"),
+            },
+          ]}
         >
           <Input.TextArea
             placeholder={t("Content")}

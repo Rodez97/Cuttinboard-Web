@@ -29,7 +29,7 @@ const FirebaseRegister = () => {
   }) => {
     try {
       await registerUser({
-        email: email.toLowerCase(),
+        email,
         name,
         lastName,
         password,
@@ -69,6 +69,20 @@ const FirebaseRegister = () => {
               max: 20,
               message: t("Name must be 20 characters or less"),
             },
+            {
+              whitespace: true,
+              message: t("Name cannot be empty"),
+            },
+            {
+              validator: async (_, value) => {
+                // Check if value dont hace tailing or leading spaces
+                if (value !== value.trim()) {
+                  return Promise.reject(
+                    new Error(t("Name cannot have leading or trailing spaces"))
+                  );
+                }
+              },
+            },
           ]}
         >
           <Input placeholder={t("First Name")} maxLength={20} showCount />
@@ -85,6 +99,20 @@ const FirebaseRegister = () => {
               max: 20,
               message: t("Last Name must be 20 characters or less"),
             },
+            {
+              whitespace: true,
+              message: t("Name cannot be empty"),
+            },
+            {
+              validator: async (_, value) => {
+                // Check if value dont hace tailing or leading spaces
+                if (value !== value.trim()) {
+                  return Promise.reject(
+                    new Error(t("Name cannot have leading or trailing spaces"))
+                  );
+                }
+              },
+            },
           ]}
         >
           <Input placeholder={t("Last Name")} maxLength={20} showCount />
@@ -92,6 +120,7 @@ const FirebaseRegister = () => {
         <Form.Item
           required
           name="email"
+          normalize={(value: string) => value?.toLowerCase()}
           rules={[
             {
               required: true,
@@ -100,12 +129,7 @@ const FirebaseRegister = () => {
             { type: "email", message: t("Must be a valid email") },
           ]}
         >
-          <Input
-            type="email"
-            placeholder={t("Email")}
-            maxLength={255}
-            showCount
-          />
+          <Input type="email" placeholder={t("Email")} maxLength={255} />
         </Form.Item>
         <Form.Item
           required
@@ -130,6 +154,11 @@ const FirebaseRegister = () => {
               message: t(
                 "Contain both upper and lowercase alphabetic characters (e.g. A-Z, a-z)"
               ),
+            },
+            // min 8 characters
+            {
+              min: 8,
+              message: t("Have at least 8 characters"),
             },
           ]}
         >

@@ -119,7 +119,25 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                     <Form.Item
                       name="name"
                       required
-                      rules={[{ required: true, message: "" }]}
+                      rules={[
+                        { required: true, message: "" },
+                        {
+                          whitespace: true,
+                          message: t("Cannot be empty"),
+                        },
+                        {
+                          validator: async (_, value) => {
+                            // Check if value dont hace tailing or leading spaces
+                            if (value !== value.trim()) {
+                              return Promise.reject(
+                                new Error(
+                                  t("Cannot have leading or trailing spaces")
+                                )
+                              );
+                            }
+                          },
+                        },
+                      ]}
                     >
                       <Input
                         placeholder={t("Title")}
@@ -127,7 +145,31 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                         showCount
                       />
                     </Form.Item>
-                    <Form.Item name="description">
+                    <Form.Item
+                      name="description"
+                      rules={[
+                        {
+                          validator: async (_, value) => {
+                            // Check if value dont hace tailing or leading spaces
+                            if (value !== value.trim()) {
+                              return Promise.reject(
+                                new Error(
+                                  t("Cannot have leading or trailing spaces")
+                                )
+                              );
+                            }
+                          },
+                        },
+                        {
+                          max: 255,
+                          message: t("Max 255 characters"),
+                        },
+                        {
+                          whitespace: true,
+                          message: t("Cannot be empty"),
+                        },
+                      ]}
+                    >
                       <Input.TextArea
                         placeholder={t("Description")}
                         maxLength={255}
