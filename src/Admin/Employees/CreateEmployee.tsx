@@ -32,6 +32,7 @@ import {
 } from "@ant-design/icons";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { compact } from "lodash";
 
 type EmployeeData = {
   name: string;
@@ -203,17 +204,31 @@ function CreateEmployee() {
             name="positions"
             rules={[
               {
-                validator: async (_, positions) => {
-                  if (positions && positions.length >= 10) {
+                validator: async (
+                  _,
+                  positions: { position: string; wage?: number }[]
+                ) => {
+                  const compactPositions = compact(positions);
+                  // Check if there are repeated positions
+                  if (
+                    compactPositions.length !==
+                    new Set(compactPositions.map((p) => p.position)).size
+                  ) {
                     return Promise.reject(
-                      new Error(t("Can't add more than 10 positions"))
+                      new Error(t("Position must be unique"))
+                    );
+                  }
+                  // Check if there are more than 5 positions
+                  if (compactPositions.length > 5) {
+                    return Promise.reject(
+                      new Error(t("Max 5 positions per employee"))
                     );
                   }
                 },
               },
             ]}
           >
-            {(fields, { add, remove }) => (
+            {(fields, { add, remove }, { errors }) => (
               <React.Fragment>
                 {fields.map(({ key, name, ...restField }) => (
                   <div
@@ -237,8 +252,14 @@ function CreateEmployee() {
                       <Form.Item
                         {...restField}
                         name={[name, "position"]}
-                        rules={[{ required: true, message: "" }]}
                         css={{ width: "50%" }}
+                        validateTrigger={["onChange", "onBlur"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: t("Position is required"),
+                          },
+                        ]}
                       >
                         <Select showSearch placeholder={t("Position")}>
                           {location.settings?.positions?.length && (
@@ -289,6 +310,7 @@ function CreateEmployee() {
                     {t("Add Position")}
                   </Button>
                 </Form.Item>
+                <Form.ErrorList errors={errors} css={{ marginBottom: 10 }} />
               </React.Fragment>
             )}
           </Form.List>
