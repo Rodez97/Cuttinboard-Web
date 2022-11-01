@@ -20,11 +20,11 @@ function ScheduleSummary() {
 
   const getProjectedSales = useMemo(() => {
     const percent = Object.values(scheduleDocument?.statsByDay ?? {}).reduce(
-      (acc, val) => acc + val.projectedSales,
+      (acc, { projectedSales }) => acc + (projectedSales ?? 0),
       0
     );
     return isFinite(percent) ? percent : 0;
-  }, [scheduleDocument]);
+  }, [scheduleDocument?.statsByDay]);
 
   const getLaborPercent = useMemo(() => {
     const percent = (totalWage / getProjectedSales) * 100;

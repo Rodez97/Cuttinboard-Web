@@ -121,11 +121,18 @@ function Scheduler() {
           keys: [(e) => e.fullName],
         })
       : emp;
-    return selectedTag
+    const beforeSort = selectedTag
       ? matchSorter(byName, selectedTag, {
           keys: [(e) => e.positions],
         })
       : byName;
+    // Return the array sorted by locationRole and if is the same location role, sort by name
+    return beforeSort.sort((a, b) => {
+      if (a.locationRole !== b.locationRole) {
+        return a.locationRole - b.locationRole;
+      }
+      return a.fullName.localeCompare(b.fullName);
+    });
   }, [searchQuery, selectedTag, getEmployees]);
 
   const togglePublishSchedule = async () => {

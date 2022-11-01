@@ -70,22 +70,23 @@ function Employees() {
   const getEmployeeByRole = useCallback(
     (role: RoleAccessLevels) => {
       const byRole: Employee[] = matchSorter(getEmployees, role.toString(), {
-        keys:
-          role === RoleAccessLevels.OWNER || role === RoleAccessLevels.ADMIN
-            ? [`role`]
-            : [`locations.${location.id}.role`],
+        keys: [(e) => e.locationRole.toString()],
       });
       const byName = searchText
         ? matchSorter(byRole, searchText, {
-            keys: ["name", "lastName"],
+            keys: [(e) => e.fullName],
           })
         : byRole;
 
-      return selectedTag
+      const beforeSort = selectedTag
         ? matchSorter(byName, selectedTag, {
-            keys: [`locations.${location.id}.pos`],
+            keys: [(e) => e.positions],
           })
         : byName;
+      // Return the employees sorted by name
+      return matchSorter(beforeSort, "", {
+        keys: [(e) => e.fullName],
+      });
     },
     [searchText, selectedTag, getEmployees]
   );

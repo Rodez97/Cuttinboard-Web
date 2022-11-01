@@ -100,7 +100,8 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
     return { time, shiftPosition, hasTasks, hasNotes, shiftsCount, wage };
   }, [shifts]);
 
-  const ExtraIcons = (
+  const ExtraIcons: jsx.JSX.Element | undefined = (getShiftData.hasTasks ||
+    getShiftData.hasNotes) && (
     <Space style={{ display: "flex" }}>
       {getShiftData.hasTasks && (
         <OrderedListOutlined style={{ color: "inherit" }} />
@@ -131,9 +132,8 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       {ExtraIcons}
     </div>
   );
-  const ExtraShifts = getShiftData.shiftsCount > 1 && (
-    <Badge count={`+${getShiftData.shiftsCount - 1}`} size="small" />
-  );
+  const ExtraShifts: jsx.JSX.Element | undefined = getShiftData.shiftsCount >
+    1 && <Badge count={`+${getShiftData.shiftsCount - 1}`} size="small" />;
   const FirstRow = (
     <div
       css={{
@@ -181,20 +181,23 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
               {SecondRow}
             </div>
           ) : (
-            <div
-              css={{
-                backgroundColor: Colors.MainDark,
-                flexDirection: "row",
-                padding: "0px 7px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              {ExtraIcons}
-              {ExtraShifts}
-            </div>
+            (ExtraIcons || ExtraShifts) && (
+              <div
+                css={{
+                  backgroundColor: Colors.MainDark,
+                  flexDirection: "row",
+                  padding: 5,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                {ExtraIcons}
+                <div />
+                {ExtraShifts}
+              </div>
+            )
           )
         ) : null}
 
