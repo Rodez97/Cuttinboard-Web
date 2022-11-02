@@ -10,6 +10,7 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import {
   addDoc,
   collection,
@@ -81,6 +82,9 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           );
           await addDoc(dbRef, newAppObject);
         }
+        // Report to analytics
+        const analytics = getAnalytics();
+        logEvent(analytics, "utensil_saved");
       } catch (error) {
         recordError(error);
       }

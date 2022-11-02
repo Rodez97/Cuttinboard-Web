@@ -151,21 +151,28 @@ service cloud.firestore {
             || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]));
       }
 
-      function deleteOrCreateModule(){
+      function deleteModule(){
         return isOwnerOrSupervisor(organizationId) 
             || isGM(organizationId, resource.data.locationId);
+      }
+
+      function createModule(){
+        return (isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId))
+            && request.resource.data.keys().hasAll(["name","accessTags","privacyLevel","locationId"]);
       }
       
       match /conversations/{conversationId} {
           allow read: if readModule();
           allow update: if updateModule();
-          allow delete, create: if deleteOrCreateModule();      
+          allow create: if createModule(); 
+          allow delete: if deleteModule();     
       }
 
       match /notes/{boardId} {
           allow read: if readModule();
           allow update: if updateModule();
-          allow delete, create: if deleteOrCreateModule();
+          allow create: if createModule(); 
+          allow delete: if deleteModule();  
 
           match /content/{contentId} {
             allow read: if readContentModule("notes",boardId);
@@ -176,7 +183,8 @@ service cloud.firestore {
       match /todo/{boardId} {
           allow read: if readModule();
           allow update: if updateModule();
-          allow delete, create: if deleteOrCreateModule();
+          allow create: if createModule(); 
+          allow delete: if deleteModule();  
 
           match /content/{contentId} {
             allow read: if readContentModule("todo",boardId);
@@ -187,7 +195,8 @@ service cloud.firestore {
       match /storage/{boardId} {
           allow read: if readModule();
           allow update: if updateModule();
-          allow delete, create: if deleteOrCreateModule();
+          allow create: if createModule(); 
+          allow delete: if deleteModule();  
 
           match /content/{contentId} {
             allow read: if readContentModule("storage",boardId);

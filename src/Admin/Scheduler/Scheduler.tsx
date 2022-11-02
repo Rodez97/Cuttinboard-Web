@@ -63,6 +63,7 @@ import "./Scheduler.scss";
 import CloneSchedule from "./CloneSchedule";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
+import { getAnalytics, logEvent } from "firebase/analytics";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -95,7 +96,6 @@ function Scheduler() {
     setSelectedTag,
     weekDays,
     updatesCount,
-    error,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
@@ -183,6 +183,11 @@ function Scheduler() {
         try {
           await publish(notifiTo ?? "changed");
           message.success(t("Changes Published"));
+          // Report to analytics
+          const analytics = getAnalytics();
+          logEvent(analytics, "publish_schedule", {
+            notifiTo,
+          });
         } catch (error) {
           recordError(error);
         }
@@ -348,6 +353,7 @@ function Scheduler() {
               css={{
                 width: "100%",
                 position: "relative",
+                borderColor: "transparent",
               }}
               bordered
               components={{

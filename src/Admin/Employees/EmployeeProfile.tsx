@@ -33,7 +33,6 @@ function EmployeeProfile() {
   return (
     <Layout>
       <PageHeader
-        className="site-page-header-responsive"
         onBack={() => navigate(`/location/${location.id}/apps/employees`)}
         title={employee.fullName}
         avatar={{

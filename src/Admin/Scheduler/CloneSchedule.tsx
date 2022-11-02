@@ -15,6 +15,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 import { WEEKFORMAT } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { getAnalytics, logEvent } from "firebase/analytics";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -42,6 +43,11 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     try {
       await cloneWeek(selectedWeek, selectedEmployees);
       props.onCancel();
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "clone_schedule", {
+        week: selectedWeek,
+      });
     } catch (error) {
       recordError(error);
     }

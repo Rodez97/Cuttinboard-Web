@@ -36,6 +36,7 @@ import {
 } from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const { Dragger } = Upload;
 
@@ -81,6 +82,13 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
         },
       });
       setFiles([...files, uploadRef.ref]);
+      // Report to analytics
+      logEvent(getAnalytics(), "file_upload", {
+        file_size: file.size,
+        file_type: file.type,
+        file_location: location.id,
+        from: "employee_documents",
+      });
     } catch (error) {
       recordError(error);
     }

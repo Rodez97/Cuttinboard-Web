@@ -86,6 +86,7 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       shiftPosition = position;
       hasTasks = !isEmpty(tasks);
       hasNotes = Boolean(notes);
+      wage = shift.hourlyWage ?? 0;
     } else {
       time = `${shift.getStartDayjsDate
         .format("h:mma")
@@ -97,7 +98,15 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       hasNotes = Boolean(shift.notes);
       wage = shift.hourlyWage ?? 0;
     }
-    return { time, shiftPosition, hasTasks, hasNotes, shiftsCount, wage };
+    return {
+      time,
+      shiftPosition,
+      hasTasks,
+      hasNotes,
+      shiftsCount,
+      wage,
+      shift,
+    };
   }, [shifts]);
 
   const ExtraIcons: jsx.JSX.Element | undefined = (getShiftData.hasTasks ||
@@ -157,6 +166,7 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
       {ExtraShifts}
     </div>
   );
+
   return (
     <React.Fragment>
       <Container
@@ -207,6 +217,7 @@ function ShiftElement({ employee, column, shifts }: ShiftElementProps) {
             textAlign: "center",
             width: "100%",
             display: "block",
+            fontWeight: "bold",
           }}
         >
           {getShiftData.time}

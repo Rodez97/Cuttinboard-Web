@@ -30,6 +30,7 @@ import {
   SaveFilled,
 } from "@ant-design/icons";
 import { compact } from "lodash";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 type EmployeeRoleData = {
   positions?: { position: string; wage: number }[];
@@ -72,6 +73,11 @@ function EmployeeRolePanel({ employee }: { employee: Employee }) {
         { merge: true }
       );
       message.success(t("Changes saved"));
+      // Report to analytics
+      logEvent(getAnalytics(), "employee_role_wage_updated", {
+        employeeId: employee.id,
+        locationId: location.id,
+      });
     } catch (error) {
       recordError(error);
     }

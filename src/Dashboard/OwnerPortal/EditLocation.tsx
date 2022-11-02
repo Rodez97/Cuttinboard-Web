@@ -9,6 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import LocationEditor from "../../components/LocationEditor";
 import { recordError } from "../../utils/utils";
 import { useOwner } from "./OwnerPortal";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 function EditLocation() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function EditLocation() {
   }: Partial<Location>) => {
     setEditing(true);
     try {
-      await updateDoc(getLocation.docRef, {
+      await getLocation.updateLocation({
         name,
         email,
         description,
@@ -41,6 +42,11 @@ function EditLocation() {
       });
       message.success(t("Changes saved"));
       setEditing(false);
+      // Report location update from card to analytics
+      logEvent(getAnalytics(), "update_location", {
+        location_id: getLocation.id,
+        updated_from: "owner_portal",
+      });
     } catch (error) {
       recordError(error);
       message.error(t("Error saving changes"));

@@ -37,6 +37,7 @@ import AccountGroupOutline from "@mdi/svg/svg/account-group-outline.svg";
 import { recordError } from "../../utils/utils";
 import ManagePositions from "./ManagePositions";
 import { GrayPageHeader } from "../../components/PageHeaders";
+import { orderBy } from "lodash";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();
@@ -83,10 +84,8 @@ function Employees() {
             keys: [(e) => e.positions],
           })
         : byName;
-      // Return the employees sorted by name
-      return matchSorter(beforeSort, "", {
-        keys: [(e) => e.fullName],
-      });
+      // Return the array sorted by locationRole and if is the same location role, sort by name
+      return orderBy(beforeSort, ["locationRole", "fullName"]);
     },
     [searchText, selectedTag, getEmployees]
   );

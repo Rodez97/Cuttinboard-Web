@@ -12,6 +12,7 @@ import {
   List,
   Typography,
 } from "antd";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import { matchSorter } from "match-sorter";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +32,11 @@ function ManagePositions(props: DrawerProps) {
     try {
       await location.addPosition(position);
       setFieldValue("");
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "add_position", {
+        position,
+      });
     } catch (error) {
       recordError(error);
     }

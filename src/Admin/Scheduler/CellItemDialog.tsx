@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { capitalize } from "lodash";
+import { capitalize, orderBy } from "lodash";
 import { useScheduler } from "./Scheduler";
 import {
   Employee,
@@ -97,7 +97,7 @@ function CellItemDialog({
     }
   };
 
-  const getShiftData = (shift: Shift = shifts[0]) => {
+  const getShiftData = (shift: Shift) => {
     let time = "";
     let shiftPosition = "";
     if (shift.hasPendingUpdates) {
@@ -155,7 +155,7 @@ function CellItemDialog({
         ]}
       >
         <List
-          dataSource={shifts}
+          dataSource={orderBy(shifts, (e) => e.getStartDayjsDate, ["asc"])}
           split
           renderItem={(shift) => (
             <Card

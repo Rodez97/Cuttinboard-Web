@@ -27,6 +27,7 @@ import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const { Meta } = Card;
 
@@ -123,6 +124,12 @@ function LocationCard({ location, actions }: LocationCardProps) {
       selectLocId(location.id);
       await selectLocation(location);
       navigate(`/location/${location.id}`);
+      // Report location selected to analytics
+      logEvent(getAnalytics(), "select_location", {
+        location_id: location.id,
+        location_name: location.name,
+        organization_id: location.organizationId,
+      });
     } catch (error) {
       recordError(error);
     }

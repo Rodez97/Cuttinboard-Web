@@ -1,5 +1,6 @@
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import React from "react";
 import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";
@@ -13,6 +14,11 @@ function ModuleManageMembers() {
     }
     try {
       await selectedApp.removeMember(employeeId);
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "remove_member", {
+        from: "module_manage_members",
+      });
     } catch (error) {
       recordError(error);
     }
@@ -24,6 +30,11 @@ function ModuleManageMembers() {
     }
     try {
       await selectedApp.addMembers(addedEmployees);
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "add_members", {
+        from: "module_manage_members",
+      });
     } catch (error) {
       recordError(error);
     }
@@ -35,6 +46,11 @@ function ModuleManageMembers() {
     }
     try {
       await selectedApp.addHost(newHostUser);
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "set_app_host", {
+        from: "module_manage_members",
+      });
     } catch (error) {
       recordError(error);
     }
@@ -46,6 +62,11 @@ function ModuleManageMembers() {
     }
     try {
       await selectedApp.removeHost(host.id);
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "remove_host", {
+        from: "module_manage_members",
+      });
     } catch (error) {
       recordError(error);
     }

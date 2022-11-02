@@ -32,6 +32,7 @@ import {
 import { useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../utils/utils";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const { Dragger } = Upload;
 
@@ -70,6 +71,12 @@ function MyDocuments() {
         contentType: file.type,
       });
       setUserFiles([...userFiles, uploadRef.ref]);
+      // Report document upload to analytics
+      logEvent(getAnalytics(), "upload_document", {
+        contentType: file.type,
+        size: file.size,
+        from: "MyDocuments",
+      });
     } catch (error) {
       recordError(error);
     }

@@ -8,6 +8,7 @@ import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, InputNumber, Modal, Space } from "antd";
 import TextArea from "antd/lib/input/TextArea";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
@@ -35,6 +36,9 @@ function ReportChangeDialog({
     setSubmitting(true);
     try {
       await utensil.addChange(changeQty, reason);
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "report_change");
     } catch (error) {
       recordError(error);
     }

@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   Employee,
   Shift,
@@ -10,6 +12,10 @@ import advancedFormat from "dayjs/plugin/advancedFormat";
 import { PlusOutlined } from "@ant-design/icons";
 import { Space } from "antd";
 import isoWeek from "dayjs/plugin/isoWeek";
+import {
+  Colors,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
@@ -28,18 +34,24 @@ function ShiftCell({ employee, shifts, date, onNewShift }: ShiftCellProps) {
 
   return (
     <div
-      style={{
+      css={{
         display: "flex",
         height: "100%",
         width: "100%",
         justifyContent: "center",
+        backgroundColor:
+          employee.locationRole === RoleAccessLevels.OWNER
+            ? Colors.Yellow.Light
+            : employee.locationRole === RoleAccessLevels.GENERAL_MANAGER
+            ? Colors.Green.Light
+            : Colors.Blue.Light,
       }}
     >
       {shifts?.length > 0 ? (
         <ShiftElement employee={employee} column={date} shifts={shifts} />
       ) : (
         <Space
-          style={{
+          css={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

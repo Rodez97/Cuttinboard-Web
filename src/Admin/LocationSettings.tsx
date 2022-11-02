@@ -12,6 +12,7 @@ import OverflowLayout from "../components/OverflowLayout";
 import { Layout, message, PageHeader } from "antd";
 import LocationEditor from "../components/LocationEditor";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 function LocationSettings() {
   const { t } = useTranslation();
@@ -40,6 +41,11 @@ function LocationSettings() {
       });
       await loadCredential(user);
       message.success(t("Changes saved"));
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "update_location", {
+        from: "location_settings_inner",
+      });
     } catch (error) {
       recordError(error);
     }

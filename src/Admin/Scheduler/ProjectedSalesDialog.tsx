@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const ProjectedSalesTable = styled(Descriptions)`
   .ant-input-number {
@@ -60,6 +61,9 @@ function ProjectedSalesDialog({
   const save = async () => {
     try {
       await editProjectedSales(projectedSalesByDay);
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "projected_sales_edited");
     } catch (error) {
       recordError(error);
     }

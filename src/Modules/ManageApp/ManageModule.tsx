@@ -18,6 +18,7 @@ import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import useDisclose from "../../hooks/useDisclose";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 type FormType = {
   name: string;
@@ -57,6 +58,11 @@ const ManageModule = () => {
         } else {
           await selectedApp.update(others);
         }
+        // Report to analytics
+        const analytics = getAnalytics();
+        logEvent(analytics, "update_module", {
+          module_privacy_level: selectedApp.privacyLevel,
+        });
       } else {
         let newId: string;
         const { position, ...others } = values;
@@ -69,6 +75,11 @@ const ManageModule = () => {
           newId = await newElement(others);
         }
         navigate(pathname.replace("new", newId));
+        // Report to analytics
+        const analytics = getAnalytics();
+        logEvent(analytics, "create_module", {
+          module_privacy_level: others.privacyLevel,
+        });
       }
       endSubmit();
     } catch (error) {

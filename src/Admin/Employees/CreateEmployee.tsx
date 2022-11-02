@@ -33,6 +33,7 @@ import {
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { compact } from "lodash";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 type EmployeeData = {
   name: string;
@@ -109,9 +110,19 @@ function CreateEmployee() {
             "An account has been created and a temporary password has been emailed to this user"
           )
         );
+        // Report to analytics
+        logEvent(getAnalytics(), "employee_created", {
+          employeeId,
+          locationId: location.id,
+        });
       }
       if (["ADDED", "ALREADY_MEMBER"].includes(status)) {
         message.success(t("Changes saved"));
+        // Report to analytics
+        logEvent(getAnalytics(), "employee_added", {
+          employeeId,
+          locationId: location.id,
+        });
       }
       navigate(`/location/${location.id}/apps/employees/${employeeId}`);
     } catch (error) {
@@ -121,11 +132,7 @@ function CreateEmployee() {
 
   return (
     <Layout>
-      <PageHeader
-        className="site-page-header-responsive"
-        onBack={() => navigate(-1)}
-        title={t("Add Employee")}
-      />
+      <PageHeader onBack={() => navigate(-1)} title={t("Add Employee")} />
 
       <Layout.Content>
         <Form<EmployeeData>
