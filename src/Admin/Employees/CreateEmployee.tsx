@@ -17,6 +17,8 @@ import {
 import {
   Alert,
   Button,
+  Drawer,
+  DrawerProps,
   Form,
   Input,
   InputNumber,
@@ -46,7 +48,7 @@ type EmployeeData = {
 /**
  * Form for creating a new employee.
  */
-function CreateEmployee() {
+function CreateEmployee(props: DrawerProps) {
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const { getAviablePositions, location } = useLocation();
@@ -124,266 +126,257 @@ function CreateEmployee() {
           locationId: location.id,
         });
       }
-      navigate(`/location/${location.id}/apps/employees/${employeeId}`);
     } catch (error) {
       recordError(error);
     }
   };
 
   return (
-    <Layout>
-      <PageHeader onBack={() => navigate(-1)} title={t("Add Employee")} />
-
-      <Layout.Content>
-        <Form<EmployeeData>
-          css={{ minWidth: 280, maxWidth: 500, margin: "auto" }}
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{
-            name: "",
-            lastName: "",
-            email: "",
-            role: RoleAccessLevels.STAFF,
-            positions: [],
-          }}
-          disabled={submitting}
-          autoComplete="off"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-            }
-          }}
+    <Drawer {...props} title={t("Add Employee")} placement="right">
+      <Form<EmployeeData>
+        css={{ minWidth: 280, maxWidth: 500, margin: "auto" }}
+        layout="vertical"
+        onFinish={onFinish}
+        initialValues={{
+          name: "",
+          lastName: "",
+          email: "",
+          role: RoleAccessLevels.STAFF,
+          positions: [],
+        }}
+        disabled={submitting}
+        autoComplete="off"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+          }
+        }}
+      >
+        <Form.Item
+          required
+          label={t("Name")}
+          name="name"
+          rules={[
+            { required: true, message: "" },
+            {
+              max: 20,
+              message: t("Name must be 20 characters or less"),
+            },
+            {
+              whitespace: true,
+              message: t("Name cannot be empty"),
+            },
+            {
+              validator: async (_, value) => {
+                // Check if value dont hace tailing or leading spaces
+                if (value !== value.trim()) {
+                  return Promise.reject(
+                    new Error(t("Name cannot have leading or trailing spaces"))
+                  );
+                }
+              },
+            },
+          ]}
         >
-          <Form.Item
-            required
-            label={t("Name")}
-            name="name"
-            rules={[
-              { required: true, message: "" },
-              {
-                max: 20,
-                message: t("Name must be 20 characters or less"),
+          <Input maxLength={20} showCount />
+        </Form.Item>
+        <Form.Item
+          required
+          label={t("Last Name")}
+          name="lastName"
+          rules={[
+            { required: true, message: "" },
+            {
+              max: 20,
+              message: t("Last Name must be 20 characters or less"),
+            },
+            {
+              whitespace: true,
+              message: t("Name cannot be empty"),
+            },
+            {
+              validator: async (_, value) => {
+                // Check if value dont hace tailing or leading spaces
+                if (value !== value.trim()) {
+                  return Promise.reject(
+                    new Error(t("Name cannot have leading or trailing spaces"))
+                  );
+                }
               },
-              {
-                whitespace: true,
-                message: t("Name cannot be empty"),
+            },
+          ]}
+        >
+          <Input maxLength={20} showCount />
+        </Form.Item>
+        <Form.Item
+          label={t("Email")}
+          name="email"
+          normalize={(value) => value?.toLowerCase()}
+          rules={[
+            { required: true, message: "" },
+            { type: "email", message: t("Must be a valid email") },
+            {
+              whitespace: true,
+              message: t("Cannot be empty"),
+            },
+            {
+              validator: async (_, value) => {
+                // Check if value dont hace tailing or leading spaces
+                if (value !== value.trim()) {
+                  return Promise.reject(
+                    new Error(t("Cannot have leading or trailing spaces"))
+                  );
+                }
               },
-              {
-                validator: async (_, value) => {
-                  // Check if value dont hace tailing or leading spaces
-                  if (value !== value.trim()) {
-                    return Promise.reject(
-                      new Error(
-                        t("Name cannot have leading or trailing spaces")
-                      )
-                    );
-                  }
-                },
+            },
+          ]}
+        >
+          <Input type="email" maxLength={255} showCount />
+        </Form.Item>
+        <Form.Item
+          label={t("Role")}
+          name="role"
+          rules={[{ required: true, message: "" }]}
+        >
+          <Select
+            defaultValue={RoleAccessLevels.STAFF}
+            options={getAviablePositions
+              .filter((p) => p !== RoleAccessLevels.ADMIN)
+              .map((role) => ({
+                label: t(getRoleTextByNumber(role)),
+                value: role,
+              }))}
+          />
+        </Form.Item>
+        <Form.List
+          name="positions"
+          rules={[
+            {
+              validator: async (
+                _,
+                positions: { position: string; wage?: number }[]
+              ) => {
+                const compactPositions = compact(positions);
+                // Check if there are repeated positions
+                if (
+                  compactPositions.length !==
+                  new Set(compactPositions.map((p) => p.position)).size
+                ) {
+                  return Promise.reject(
+                    new Error(t("Position must be unique"))
+                  );
+                }
+                // Check if there are more than 5 positions
+                if (compactPositions.length > 5) {
+                  return Promise.reject(
+                    new Error(t("Max 5 positions per employee"))
+                  );
+                }
               },
-            ]}
-          >
-            <Input maxLength={20} showCount />
-          </Form.Item>
-          <Form.Item
-            required
-            label={t("Last Name")}
-            name="lastName"
-            rules={[
-              { required: true, message: "" },
-              {
-                max: 20,
-                message: t("Last Name must be 20 characters or less"),
-              },
-              {
-                whitespace: true,
-                message: t("Name cannot be empty"),
-              },
-              {
-                validator: async (_, value) => {
-                  // Check if value dont hace tailing or leading spaces
-                  if (value !== value.trim()) {
-                    return Promise.reject(
-                      new Error(
-                        t("Name cannot have leading or trailing spaces")
-                      )
-                    );
-                  }
-                },
-              },
-            ]}
-          >
-            <Input maxLength={20} showCount />
-          </Form.Item>
-          <Form.Item
-            label={t("Email")}
-            name="email"
-            normalize={(value) => value?.toLowerCase()}
-            rules={[
-              { required: true, message: "" },
-              { type: "email", message: t("Must be a valid email") },
-              {
-                whitespace: true,
-                message: t("Cannot be empty"),
-              },
-              {
-                validator: async (_, value) => {
-                  // Check if value dont hace tailing or leading spaces
-                  if (value !== value.trim()) {
-                    return Promise.reject(
-                      new Error(t("Cannot have leading or trailing spaces"))
-                    );
-                  }
-                },
-              },
-            ]}
-          >
-            <Input type="email" maxLength={255} showCount />
-          </Form.Item>
-          <Form.Item
-            label={t("Role")}
-            name="role"
-            rules={[{ required: true, message: "" }]}
-          >
-            <Select
-              defaultValue={RoleAccessLevels.STAFF}
-              options={getAviablePositions
-                .filter((p) => p !== RoleAccessLevels.ADMIN)
-                .map((role) => ({
-                  label: t(getRoleTextByNumber(role)),
-                  value: role,
-                }))}
-            />
-          </Form.Item>
-          <Form.List
-            name="positions"
-            rules={[
-              {
-                validator: async (
-                  _,
-                  positions: { position: string; wage?: number }[]
-                ) => {
-                  const compactPositions = compact(positions);
-                  // Check if there are repeated positions
-                  if (
-                    compactPositions.length !==
-                    new Set(compactPositions.map((p) => p.position)).size
-                  ) {
-                    return Promise.reject(
-                      new Error(t("Position must be unique"))
-                    );
-                  }
-                  // Check if there are more than 5 positions
-                  if (compactPositions.length > 5) {
-                    return Promise.reject(
-                      new Error(t("Max 5 positions per employee"))
-                    );
-                  }
-                },
-              },
-            ]}
-          >
-            {(fields, { add, remove }, { errors }) => (
-              <React.Fragment>
-                {fields.map(({ key, name, ...restField }) => (
+            },
+          ]}
+        >
+          {(fields, { add, remove }, { errors }) => (
+            <React.Fragment>
+              {fields.map(({ key, name, ...restField }) => (
+                <div
+                  key={key}
+                  css={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: 1,
+                    marginBottom: 8,
+                    width: "100%",
+                  }}
+                >
                   <div
-                    key={key}
                     css={{
                       display: "flex",
                       flexDirection: "row",
                       gap: 1,
-                      marginBottom: 8,
                       width: "100%",
                     }}
                   >
-                    <div
-                      css={{
-                        display: "flex",
-                        flexDirection: "row",
-                        gap: 1,
-                        width: "100%",
-                      }}
+                    <Form.Item
+                      {...restField}
+                      name={[name, "position"]}
+                      css={{ width: "50%" }}
+                      validateTrigger={["onChange", "onBlur"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: t("Position is required"),
+                        },
+                      ]}
                     >
-                      <Form.Item
-                        {...restField}
-                        name={[name, "position"]}
-                        css={{ width: "50%" }}
-                        validateTrigger={["onChange", "onBlur"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: t("Position is required"),
-                          },
-                        ]}
-                      >
-                        <Select showSearch placeholder={t("Position")}>
-                          {location.settings?.positions?.length && (
-                            <Select.OptGroup label={t("Custom")}>
-                              {location.settings.positions.map((pos) => (
-                                <Select.Option value={pos}>{pos}</Select.Option>
-                              ))}
-                            </Select.OptGroup>
-                          )}
-
-                          <Select.OptGroup label={t("Default")}>
-                            {Positions.map((pos) => (
+                      <Select showSearch placeholder={t("Position")}>
+                        {location.settings?.positions?.length && (
+                          <Select.OptGroup label={t("Custom")}>
+                            {location.settings.positions.map((pos) => (
                               <Select.Option value={pos}>{pos}</Select.Option>
                             ))}
                           </Select.OptGroup>
-                        </Select>
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "wage"]}
-                        css={{ width: "50%" }}
-                      >
-                        <InputNumber
-                          min={0}
-                          placeholder={t("Hourly Wage")}
-                          step={0.25}
-                          css={{ width: "100%" }}
-                        />
-                      </Form.Item>
-                    </div>
-                    <Button
-                      css={{ width: 30 }}
-                      type="text"
-                      shape="circle"
-                      onClick={() => remove(name)}
-                      icon={<MinusCircleOutlined />}
-                      disabled={submitting}
-                    />
-                  </div>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    {t("Add Position")}
-                  </Button>
-                </Form.Item>
-                <Form.ErrorList errors={errors} css={{ marginBottom: 10 }} />
-              </React.Fragment>
-            )}
-          </Form.List>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              icon={<SaveFilled />}
-              block
-              loading={submitting}
-            >
-              {t("Save")}
-            </Button>
-          </Form.Item>
+                        )}
 
-          {error && <Alert message={error?.message} type="error" showIcon />}
-        </Form>
-      </Layout.Content>
-    </Layout>
+                        <Select.OptGroup label={t("Default")}>
+                          {Positions.map((pos) => (
+                            <Select.Option value={pos}>{pos}</Select.Option>
+                          ))}
+                        </Select.OptGroup>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "wage"]}
+                      css={{ width: "50%" }}
+                    >
+                      <InputNumber
+                        min={0}
+                        placeholder={t("Hourly Wage")}
+                        step={0.25}
+                        css={{ width: "100%" }}
+                      />
+                    </Form.Item>
+                  </div>
+                  <Button
+                    css={{ width: 30 }}
+                    type="text"
+                    shape="circle"
+                    onClick={() => remove(name)}
+                    icon={<MinusCircleOutlined />}
+                    disabled={submitting}
+                  />
+                </div>
+              ))}
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  block
+                  icon={<PlusOutlined />}
+                >
+                  {t("Add Position")}
+                </Button>
+              </Form.Item>
+              <Form.ErrorList errors={errors} css={{ marginBottom: 10 }} />
+            </React.Fragment>
+          )}
+        </Form.List>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            icon={<SaveFilled />}
+            block
+            loading={submitting}
+          >
+            {t("Save")}
+          </Button>
+        </Form.Item>
+
+        {error && <Alert message={error?.message} type="error" showIcon />}
+      </Form>
+    </Drawer>
   );
 }
 

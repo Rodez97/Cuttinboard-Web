@@ -224,50 +224,51 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   }
 
   return (
-    <Form<FormDataType>
-      form={form}
-      onFinish={onFinish}
-      disabled={saving}
-      size="small"
-      layout="vertical"
-      autoComplete="off"
-    >
-      <Modal
-        open={open}
-        onCancel={handleClose}
-        title={
-          <React.Fragment>
-            {t(isNewShift ? "Add Shift" : "Edit Shift")}
-            <Divider type="vertical" />
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {getDuration()}
-            </Typography.Text>
-          </React.Fragment>
-        }
-        footer={[
-          baseShift?.pendingUpdate && (
-            <Button
-              key="reset"
-              danger
-              type="dashed"
-              disabled={saving}
-              onClick={cancelPendingUpdate}
-            >
-              {t("Cancel Update")}
-            </Button>
-          ),
-          <Button key="back" onClick={handleClose} disabled={saving}>
-            {t("Cancel")}
-          </Button>,
+    <Modal
+      open={open}
+      zIndex={1000}
+      onCancel={handleClose}
+      title={
+        <React.Fragment>
+          {t(isNewShift ? "Add Shift" : "Edit Shift")}
+          <Divider type="vertical" />
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {getDuration()}
+          </Typography.Text>
+        </React.Fragment>
+      }
+      footer={[
+        baseShift?.pendingUpdate && (
           <Button
-            key="submit"
-            type="primary"
-            loading={saving}
-            onClick={form.submit}
+            key="reset"
+            danger
+            type="dashed"
+            disabled={saving}
+            onClick={cancelPendingUpdate}
           >
-            {t("Accept")}
-          </Button>,
-        ]}
+            {t("Cancel Update")}
+          </Button>
+        ),
+        <Button key="back" onClick={handleClose} disabled={saving}>
+          {t("Cancel")}
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          loading={saving}
+          onClick={form.submit}
+        >
+          {t("Accept")}
+        </Button>,
+      ]}
+    >
+      <Form<FormDataType>
+        form={form}
+        onFinish={onFinish}
+        disabled={saving}
+        size="small"
+        layout="vertical"
+        autoComplete="off"
       >
         <Form.Item name="timeRange">
           <div
@@ -440,8 +441,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
             </React.Fragment>
           )}
         </Form.List>
-      </Modal>
-    </Form>
+      </Form>
+    </Modal>
   );
 });
 

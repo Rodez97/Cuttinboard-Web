@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { LoadingScreen } from "./components/LoadingScreen";
 import PageLoading from "./components/PageLoading";
 import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
@@ -39,7 +41,7 @@ function MainRouter() {
   }, [organizationKey, selectedLocation]);
 
   return (
-    <Layout>
+    <Layout css={{ overflow: "auto" }}>
       <Routes>
         <Route path="/">
           {isLocationSelected ? (

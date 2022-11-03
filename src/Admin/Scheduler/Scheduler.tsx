@@ -242,13 +242,13 @@ function Scheduler() {
   );
 
   return (
-    <ScheduleContext.Provider
-      value={{
-        editShift,
-        newShift,
-      }}
-    >
-      <Layout css={{ overflow: "auto" }}>
+    <Layout css={{ overflow: "auto" }}>
+      <ScheduleContext.Provider
+        value={{
+          editShift,
+          newShift,
+        }}
+      >
         <ManageShiftDialog ref={manageShiftDialogRef} />
         <GrayPageHeader
           onBack={handleBack}
@@ -339,47 +339,44 @@ function Scheduler() {
         </Space>
 
         <ScheduleSummary />
-        <div
-          css={{
-            width: "100vw",
-            overflow: "auto",
-            boxSizing: "border-box",
-          }}
-        >
-          {rosterMode ? (
-            <RosterView employees={employees} />
-          ) : (
-            <Table
-              css={{
-                width: "100%",
-                position: "relative",
-                borderColor: "transparent",
-              }}
-              bordered
-              components={{
-                body: {
-                  cell: ({ children, ...props }) => (
-                    <td {...props} className="shift-cell">
-                      {children}
-                    </td>
+        <Layout.Content css={{ overflow: "auto" }}>
+          <div css={{ display: "flex", flexDirection: "column" }}>
+            {rosterMode ? (
+              <RosterView employees={employees} />
+            ) : (
+              <Table
+                css={{
+                  width: "100%",
+                  position: "relative",
+                  borderColor: "transparent",
+                  minWidth: 1000,
+                }}
+                bordered
+                components={{
+                  body: {
+                    cell: ({ children, ...props }) => (
+                      <td {...props} className="shift-cell">
+                        {children}
+                      </td>
+                    ),
+                  },
+                }}
+                columns={columns}
+                dataSource={employees?.map((emp) => ({
+                  key: emp.id,
+                  employee: emp,
+                  empShifts: employeeShiftsCollection?.find(
+                    (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
                   ),
-                },
-              }}
-              columns={columns}
-              dataSource={employees?.map((emp) => ({
-                key: emp.id,
-                employee: emp,
-                empShifts: employeeShiftsCollection?.find(
-                  (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
-                ),
-              }))}
-              summary={(pageData) => <TableFooter data={pageData} />}
-              pagination={false}
-              rowKey={(e) => e.employee.id}
-              rowClassName="scheduler-row"
-            />
-          )}
-        </div>
+                }))}
+                summary={(pageData) => <TableFooter data={pageData} />}
+                pagination={false}
+                rowKey={(e) => e.employee.id}
+                rowClassName="scheduler-row"
+              />
+            )}
+          </div>
+        </Layout.Content>
         <ProjectedSalesDialog
           visible={projectedSalesOpen}
           onClose={() => setProjectedSalesOpen(false)}
@@ -388,8 +385,8 @@ function Scheduler() {
           open={cloneDialogOpen}
           onCancel={() => setCloneDialogOpen(false)}
         />
-      </Layout>
-    </ScheduleContext.Provider>
+      </ScheduleContext.Provider>
+    </Layout>
   );
 }
 

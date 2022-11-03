@@ -64,6 +64,11 @@ function CellItemDialog({
     newShift(employee, column);
   };
 
+  const handleOnEditShift = (shift: Shift) => {
+    onClose();
+    editShift(employee, shift);
+  };
+
   const showPromiseConfirm = (
     shift: Shift,
     e: React.MouseEvent<HTMLElement, MouseEvent>
@@ -160,7 +165,7 @@ function CellItemDialog({
           renderItem={(shift) => (
             <Card
               key={shift.id}
-              onClick={() => editShift(employee, shift)}
+              onClick={() => handleOnEditShift(shift)}
               hoverable
               css={[
                 BaseCard,

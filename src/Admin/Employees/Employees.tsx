@@ -38,6 +38,8 @@ import { recordError } from "../../utils/utils";
 import ManagePositions from "./ManagePositions";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import { orderBy } from "lodash";
+import CreateEmployee from "./CreateEmployee";
+import useDisclose from "../../hooks/useDisclose";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();
@@ -48,6 +50,8 @@ function Employees() {
   const [managePositionsOpen, setManagePositionsOpen] = useState(false);
   const { isOwner, isAdmin, location } = useLocation();
   const navigate = useNavigate();
+  const [isCreateEmployeeOpen, openCreateEmployee, closeCreateEmployee] =
+    useDisclose(false);
 
   const addPrimaryOwner = async () => {
     await location.ownerJoin(true);
@@ -116,7 +120,7 @@ function Employees() {
   return (
     <Layout>
       <GrayPageHeader
-        onBack={() => navigate(`/location/${location.id}/apps`)}
+        onBack={() => navigate(-1)}
         avatar={{ icon: <Icon component={AccountGroupOutline} /> }}
         title={t("Employees")}
         subTitle={`${location.usage.employeesCount} / ${location.usage.employeesLimit}`}
@@ -138,7 +142,7 @@ function Employees() {
           >
             <Button
               icon={<UserAddOutlined />}
-              onClick={() => navigate(`create`)}
+              onClick={openCreateEmployee}
               type="primary"
               disabled={
                 location.usage.employeesCount === location.usage.employeesLimit
@@ -277,6 +281,10 @@ function Employees() {
       <ManagePositions
         open={managePositionsOpen}
         onClose={() => setManagePositionsOpen(false)}
+      />
+      <CreateEmployee
+        open={isCreateEmployeeOpen}
+        onClose={closeCreateEmployee}
       />
     </Layout>
   );

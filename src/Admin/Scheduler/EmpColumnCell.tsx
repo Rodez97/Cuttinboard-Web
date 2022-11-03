@@ -21,6 +21,10 @@ interface EmpColumnCellProps {
 function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
   const getSecondaryText = useCallback(() => {
     if (!empShifts) {
+      if (employee.locationRole === RoleAccessLevels.OWNER) {
+        return `${0}h ${0}min`;
+      }
+
       return `${0}h ${0}min - ${Number(0).toLocaleString("en-US", {
         style: "currency",
         currency: "USD",
@@ -28,6 +32,11 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
     }
 
     const totalTime = getDurationText(empShifts.userSummary.totalHours * 60);
+
+    if (employee.locationRole === RoleAccessLevels.OWNER) {
+      return totalTime;
+    }
+
     return `${totalTime} - ${empShifts.userSummary.totalWage.toLocaleString(
       "en-US",
       {
@@ -35,7 +44,7 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
         currency: "USD",
       }
     )}`;
-  }, [empShifts]);
+  }, [empShifts, employee]);
 
   return (
     <Card

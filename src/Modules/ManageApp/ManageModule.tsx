@@ -8,7 +8,6 @@ import {
   Positions,
   PrivacyLevel,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useState } from "react";
 import { recordError } from "../../utils/utils";
 import {
   useNavigate,
