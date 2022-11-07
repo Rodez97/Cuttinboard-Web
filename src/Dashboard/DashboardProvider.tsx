@@ -66,6 +66,7 @@ function DashboardProvider({ children }: { children: ReactNode }) {
   return (
     <DashboardContext.Provider
       value={{ userDocument, subscriptionDocument, organization }}
+      key="DashboardContext"
     >
       {children}
     </DashboardContext.Provider>

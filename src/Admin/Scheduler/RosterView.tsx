@@ -15,6 +15,7 @@ import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
 import "./RosterView.scss";
 import { groupBy } from "lodash";
+import { getDurationText } from "./getDurationText";
 
 type RosterData = {
   employee: Employee;
@@ -66,9 +67,31 @@ function RosterView({ employees }: { employees: Employee[] }) {
         dataIndex: "time",
         key: "time",
         render: (_, { shift }) => {
-          return dayjs
-            .duration(shift.shiftDuration.totalMinutes, "minutes")
-            .format("[🕘] H[h] m[min]");
+          return getDurationText(shift.shiftDuration.totalMinutes);
+        },
+      },
+      {
+        title: t("Overtime"),
+        dataIndex: "overtime",
+        key: "overtime",
+        render: (_, { shift }) => {
+          return getDurationText(shift.wageData.overtimeHours * 60);
+        },
+      },
+      {
+        title: t("Overtime pay"),
+        dataIndex: "overtimePay",
+        key: "overtimePay",
+        render: (_, { shift }) => {
+          return `$${shift.wageData.overtimeWage.toFixed(2)}`;
+        },
+      },
+      {
+        title: t("Final wage"),
+        dataIndex: "wage",
+        key: "wage",
+        render: (_, { shift }) => {
+          return `$${shift.wageData.totalWage.toFixed(2)}`;
         },
       },
     ],

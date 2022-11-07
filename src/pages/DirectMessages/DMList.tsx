@@ -49,11 +49,11 @@ function DMList({
       filteredLocations = chats;
     }
     const sorted = matchSorter(filteredLocations, searchQuery, {
-      keys: [(e) => e.recipient.name],
+      keys: [(e) => e.recipient.fullName],
     });
 
     return orderBy(sorted, "getOrderTime", "desc")?.map((el) => {
-      const { id, name } = el.recipient;
+      const { id, fullName, avatar } = el.recipient;
       return {
         label: (
           <Badge
@@ -62,11 +62,11 @@ function DMList({
             css={{ color: "inherit" }}
             offset={[10, 0]}
           >
-            <p>{name}</p>
+            <p>{fullName}</p>
           </Badge>
         ),
         value: el.id,
-        icon: <Avatar src={getAvatarByUID(id)} icon={<UserOutlined />} />,
+        icon: <Avatar src={avatar} icon={<UserOutlined />} />,
         key: el.id,
       };
     });

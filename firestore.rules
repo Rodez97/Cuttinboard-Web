@@ -67,8 +67,8 @@ service cloud.firestore {
       allow update: if isAuthenticated() && request.auth.uid in resource.data.membersList && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]);
 		}
 
-		match /Locations/{locationId} {
-			allow read: if true;// isAuthenticated() && (isOwner(resource.data.organizationId) || request.auth.uid in resource.data.supervisors || request.auth.uid in resource.data.members) ;
+		match /Locations/{document=**} {
+			allow read: if isAuthenticated();
       allow create: if isOwner(resource.data.organizationId) && request.resource.data.keys().hasAll(["organizationId","subItemId","name"]);
       allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus","supervisors"]) == false
                     && isOwnerOrSupervisor(resource.data.organizationId))
@@ -78,9 +78,14 @@ service cloud.firestore {
 
     match /Organizations/{organizationId} {
       allow read: if isAuthenticated();
+
+      match /settings/{settingId} {
+        allow read: if isAuthenticated() && orgMember(organizationId);
+        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, settingId.replace("schedule_",""));
+      }
       
       // Employees
-      match /employees/{employeeId} {
+      match /employees/{document=**} {
     	  allow read: if orgMember(organizationId);
         allow delete: if orgMember(organizationId)
                       && resource.data.locations.keys().size() == 1
@@ -90,26 +95,27 @@ service cloud.firestore {
                       || (isOwner(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisingLocations"]));
       }
 
-      match /locationChecklist/{checklistId} {
-    	  allow read: if isOwnerOrSupervisor(organizationId) || locMember(organizationId, resource.data.locationId);
+      match /locationChecklist/{document=**} {
+    	  allow read: if orgMember(organizationId);
         allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
         allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
                       || (locMember(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["tasks"]));
       }
 
-      match /utensils/{utensilId} {
+      match /utensils/{document=**} {
         allow read: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
         allow create, delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId);
         allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)
                       || (isManager(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["changes","currentQuantity"]));
       }
 
-      match /scheduleDocs/{sdId} {
-				allow read, write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+      match /scheduleDocs/{document=**} {
+				allow read: if orgMember(organizationId);
+        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
 			}
 
-      match /shifts/{empShiftsId} {
-        allow read: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId) || resource.data.employeeId == request.auth.uid;
+      match /shifts/{document=**} {
+        allow read: if orgMember(organizationId);
         allow create, delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
         allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
                       || resource.data.employeeId == request.auth.uid;

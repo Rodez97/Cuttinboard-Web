@@ -8,11 +8,12 @@ import {
   useCuttinboard,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import OverflowLayout from "../components/OverflowLayout";
-import { Layout, message, PageHeader } from "antd";
+import { message, Typography } from "antd";
 import LocationEditor from "../components/LocationEditor";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import React from "react";
+import { GrayPageHeader } from "../components/PageHeaders";
 
 function LocationSettings() {
   const { t } = useTranslation();
@@ -53,28 +54,23 @@ function LocationSettings() {
   };
 
   return (
-    <OverflowLayout>
-      <PageHeader
-        onBack={() => navigate(-1)}
-        title={t("Location information")}
-        subTitle={location.name}
-      />
-      <Layout.Content
-        css={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: 20,
-        }}
-      >
-        <LocationEditor
-          baseLocation={location}
-          onChange={handleChange}
-          onCancel={() => navigate(-1)}
-          loading={isSubmitting}
-        />
-      </Layout.Content>
-    </OverflowLayout>
+    <React.Fragment>
+      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+        <div
+          css={{ minWidth: 270, maxWidth: 400, margin: "auto", width: "100%" }}
+        >
+          <Typography.Title css={{ textAlign: "center" }}>
+            {t("Location information")}
+          </Typography.Title>
+          <LocationEditor
+            baseLocation={location}
+            onChange={handleChange}
+            onCancel={() => navigate(-1)}
+            loading={isSubmitting}
+          />
+        </div>
+      </div>
+    </React.Fragment>
   );
 }
 

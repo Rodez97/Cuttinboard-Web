@@ -28,6 +28,11 @@ import {
 import Picker from "emoji-picker-react";
 import { GrayPageHeader } from "../PageHeaders";
 import { recordError } from "../../utils/utils";
+import {
+  Auth,
+  Storage,
+} from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 interface ChatInputProps {
   replyTargetMessage?: Message;
@@ -42,7 +47,7 @@ function ChatInput({
   cancelReply,
   type,
 }: ChatInputProps) {
-  const { sendMessage, attachFiles } =
+  const { sendMessage, getAttachmentRefPath } =
     type === "chats" ? useDirectMessages() : useConversationMessages();
   const [messageTxt, setMessageTxt] = useState("");
   const inputRef = useRef<InputRef>(null);
@@ -56,7 +61,7 @@ function ChatInput({
     isImage?: boolean;
   }>(null);
 
-  const submitMessage = () => {
+  const submitMessage = async () => {
     if (!messageTxt && !selectedFile) {
       return;
     }
@@ -64,34 +69,50 @@ function ChatInput({
       message.error(t("You've surpassed the 2000 character limit"));
       return;
     }
+    const messageTextContent = messageTxt.trim();
+    setMessageTxt("");
     if (selectedFile) {
-      uploadFile();
+      setSendingAttachment(true);
+      const attachmentData = await uploadFile();
+      sendMessage(messageTextContent, replyTargetMessage, attachmentData);
       setSelectedFile(null);
+      setSendingAttachment(false);
     } else {
-      const messageTextContent = messageTxt.trim();
-      setMessageTxt("");
       sendMessage(messageTextContent, replyTargetMessage);
     }
     onSendMessage();
   };
 
-  const uploadFile = async () => {
-    if (selectedFile === null) {
-      return;
-    }
-    setSendingAttachment(true);
+  const uploadFile = async (): Promise<{
+    downloadUrl: string;
+    fileName: string;
+    mimeType: string;
+    storageSourcePath: string;
+  }> => {
     try {
-      await attachFiles(
-        selectedFile.file,
-        selectedFile.name,
-        selectedFile.mimeType,
-        Boolean(messageTxt) && messageTxt.trim(),
-        replyTargetMessage
-      );
+      const refPath = getAttachmentRefPath(selectedFile.name);
+      const fileRef = ref(Storage, refPath);
+
+      const uploadRef = await uploadBytes(fileRef, selectedFile.file, {
+        contentType: selectedFile.mimeType,
+        customMetadata: {
+          senderId: Auth.currentUser.uid,
+          senderName: Auth.currentUser.displayName,
+        },
+      });
+
+      const downloadUrl = await getDownloadURL(uploadRef.ref);
+
+      return {
+        downloadUrl,
+        fileName: selectedFile.name,
+        mimeType: selectedFile.mimeType,
+        storageSourcePath: refPath,
+      };
     } catch (error) {
       recordError(error);
+      throw error;
     }
-    setSendingAttachment(false);
   };
 
   useEffect(() => {

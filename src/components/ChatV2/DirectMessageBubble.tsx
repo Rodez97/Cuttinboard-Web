@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import MessageReactionPicker from "./MessageReactionPicker";
 import { useInView } from "react-intersection-observer";
 import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
@@ -15,7 +15,8 @@ import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
 import SeenByElement from "./SeenByElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { getAvatarByUID, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
+import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`
@@ -65,6 +66,7 @@ function DirectMessageBubble({
   allMessagesLength,
   onReply,
 }: DirectMessageBubbleProps) {
+  const { selectedChat } = useDMs();
   const { ref, inView } = useInView({
     /* Optional options */
     threshold: 1,
@@ -99,7 +101,7 @@ function DirectMessageBubble({
     [prevMessage, currentMessage, allMessagesLength]
   );
 
-  const replySender = () => {
+  const replySender = useMemo(() => {
     if (!currentMessage.replyTarget) {
       return null;
     }
@@ -109,11 +111,14 @@ function DirectMessageBubble({
     return {
       id,
       name,
-      avatar: getAvatarByUID(id),
+      avatar: selectedChat.members[id]?.avatar,
     };
-  };
+  }, [currentMessage, selectedChat]);
 
-  const avatar = getAvatarByUID(currentMessage.sender.id);
+  const avatar = useMemo(
+    () => selectedChat.members[currentMessage.sender.id]?.avatar,
+    [currentMessage, selectedChat]
+  );
 
   const deleteMessage = async () => {
     try {
@@ -157,8 +162,8 @@ function DirectMessageBubble({
               <div css={{ width: 20, alignSelf: "flex-start" }}>
                 <Avatar
                   size={20}
-                  src={replySender().avatar}
-                  alt={replySender().name}
+                  src={replySender.avatar}
+                  alt={replySender.name}
                   icon={<UserOutlined />}
                 />
               </div>
@@ -170,7 +175,7 @@ function DirectMessageBubble({
                 }}
               >
                 <Typography.Text css={{ margin: "0px 2px", fontSize: "1rem" }}>
-                  {replySender().name}
+                  {replySender.name}
                   <Tooltip
                     placement="top"
                     title={dayjs(currentMessage.replyTarget.createdAt).format(

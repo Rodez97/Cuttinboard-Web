@@ -2,6 +2,7 @@
 import { jsx } from "@emotion/react";
 import {
   Employee,
+  EmployeeShifts,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import dayjs from "dayjs";
@@ -25,9 +26,16 @@ interface ShiftCellProps {
   shifts?: Shift[];
   date: Date;
   onNewShift: (employee: Employee, date: Date) => void;
+  empShifts: EmployeeShifts;
 }
 
-function ShiftCell({ employee, shifts, date, onNewShift }: ShiftCellProps) {
+function ShiftCell({
+  employee,
+  shifts,
+  date,
+  onNewShift,
+  empShifts,
+}: ShiftCellProps) {
   const handleCellClick = () => {
     onNewShift(employee, date);
   };
@@ -48,7 +56,7 @@ function ShiftCell({ employee, shifts, date, onNewShift }: ShiftCellProps) {
       }}
     >
       {shifts?.length > 0 ? (
-        <ShiftElement employee={employee} column={date} shifts={shifts} />
+        <ShiftElement employee={employee} column={date} empShifts={empShifts} />
       ) : (
         <Space
           css={{

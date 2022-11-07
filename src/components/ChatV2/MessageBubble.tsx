@@ -13,7 +13,8 @@ import styled from "@emotion/styled";
 import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { getAvatarByUID, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`
@@ -65,6 +66,8 @@ function MessageBubble({
   onReply,
   canUseApp,
 }: MessageBubbleProps) {
+  const { getEmployeeById, getEmployees } = useEmployeesList();
+
   const handleReplyMsg = () => {
     onReply(currentMessage);
   };
@@ -88,7 +91,7 @@ function MessageBubble({
     [prevMessage, currentMessage, allMessagesLength]
   );
 
-  const replySender = () => {
+  const replySender = useMemo(() => {
     if (!currentMessage.replyTarget) {
       return null;
     }
@@ -98,11 +101,14 @@ function MessageBubble({
     return {
       id,
       name,
-      avatar: getAvatarByUID(id),
+      avatar: getEmployeeById(id)?.avatar,
     };
-  };
+  }, [currentMessage, getEmployees]);
 
-  const avatar = getAvatarByUID(currentMessage.sender.id);
+  const avatar = useMemo(
+    () => getEmployeeById(currentMessage.sender.id)?.avatar,
+    [currentMessage, getEmployees]
+  );
 
   const deleteMessage = async () => {
     try {
@@ -145,8 +151,8 @@ function MessageBubble({
               <div css={{ width: 20, alignSelf: "flex-start" }}>
                 <Avatar
                   size={20}
-                  src={replySender().avatar}
-                  alt={replySender().name}
+                  src={replySender.avatar}
+                  alt={replySender.name}
                   icon={<UserOutlined />}
                 />
               </div>
@@ -158,7 +164,7 @@ function MessageBubble({
                 }}
               >
                 <Typography.Text css={{ margin: "0px 2px", fontSize: "1rem" }}>
-                  {replySender().name}
+                  {replySender.name}
                   <Tooltip
                     placement="top"
                     title={dayjs(currentMessage.replyTarget.createdAt).format(

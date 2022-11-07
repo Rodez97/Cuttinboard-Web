@@ -64,6 +64,7 @@ import CloneSchedule from "./CloneSchedule";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import useSize from "@react-hook/size";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -105,6 +106,8 @@ function Scheduler() {
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
   const { getEmployees } = useEmployeesList();
   const { location } = useLocation();
+  const target = useRef<HTMLDivElement>(null);
+  const [_, height] = useSize(target);
 
   const handleBack = () => {
     navigate(-1);
@@ -221,6 +224,35 @@ function Scheduler() {
         fixed: "left",
         width: 250,
         className: "employee-column",
+        filters: [
+          { text: t("All Employees"), value: "all" },
+          {
+            text: t("Scheduled Only"),
+            value: "all_scheduled",
+          },
+          {
+            text: t("Changed"),
+            value: "changed",
+          },
+          {
+            text: t("Staff Only"),
+            value: "staff_only",
+          },
+        ],
+        onFilter: (value: string, record) => {
+          switch (value) {
+            case "all":
+              return true;
+            case "all_scheduled":
+              return record.empShifts?.shiftsArray.length > 0;
+            case "changed":
+              return record.empShifts?.haveChanges;
+            case "staff_only":
+              return record.employee.locationRole === RoleAccessLevels.STAFF;
+            default:
+              return true;
+          }
+        },
       },
       ...weekDays.map((wd) => ({
         title: dayjs(wd).format("ddd DD"),
@@ -234,6 +266,7 @@ function Scheduler() {
             )}
             date={wd}
             onNewShift={newShift}
+            empShifts={empShifts}
           />
         ),
       })),
@@ -242,7 +275,7 @@ function Scheduler() {
   );
 
   return (
-    <Layout css={{ overflow: "auto" }}>
+    <Layout css={{ overflowX: "auto" }}>
       <ScheduleContext.Provider
         value={{
           editShift,
@@ -324,14 +357,18 @@ function Scheduler() {
               {location.settings?.positions?.length && (
                 <Select.OptGroup label={t("Custom")}>
                   {location.settings.positions.map((pos) => (
-                    <Select.Option value={pos}>{pos}</Select.Option>
+                    <Select.Option value={pos} key={pos}>
+                      {pos}
+                    </Select.Option>
                   ))}
                 </Select.OptGroup>
               )}
 
               <Select.OptGroup label={t("Default")}>
                 {Positions.map((pos) => (
-                  <Select.Option value={pos}>{pos}</Select.Option>
+                  <Select.Option value={pos} key={pos}>
+                    {pos}
+                  </Select.Option>
                 ))}
               </Select.OptGroup>
             </Select>
@@ -339,43 +376,40 @@ function Scheduler() {
         </Space>
 
         <ScheduleSummary />
-        <Layout.Content css={{ overflow: "auto" }}>
-          <div css={{ display: "flex", flexDirection: "column" }}>
-            {rosterMode ? (
-              <RosterView employees={employees} />
-            ) : (
-              <Table
-                css={{
-                  width: "100%",
-                  position: "relative",
-                  borderColor: "transparent",
-                  minWidth: 1000,
-                }}
-                bordered
-                components={{
-                  body: {
-                    cell: ({ children, ...props }) => (
-                      <td {...props} className="shift-cell">
-                        {children}
-                      </td>
-                    ),
-                  },
-                }}
-                columns={columns}
-                dataSource={employees?.map((emp) => ({
-                  key: emp.id,
-                  employee: emp,
-                  empShifts: employeeShiftsCollection?.find(
-                    (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
+        <Layout.Content ref={target} css={{ overflowY: "hidden" }}>
+          {rosterMode ? (
+            <RosterView employees={employees} />
+          ) : (
+            <Table
+              scroll={{ x: 1300, y: height - 55 - 150 }}
+              bordered
+              components={{
+                body: {
+                  cell: ({ children, ...props }) => (
+                    <td {...props} className="shift-cell">
+                      {children}
+                    </td>
                   ),
-                }))}
-                summary={(pageData) => <TableFooter data={pageData} />}
-                pagination={false}
-                rowKey={(e) => e.employee.id}
-                rowClassName="scheduler-row"
-              />
-            )}
-          </div>
+                },
+              }}
+              columns={columns}
+              dataSource={employees?.map((emp) => ({
+                key: emp.id,
+                employee: emp,
+                empShifts: employeeShiftsCollection?.find(
+                  (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
+                ),
+              }))}
+              summary={(pageData) => (
+                <Table.Summary fixed>
+                  <TableFooter data={pageData} />
+                </Table.Summary>
+              )}
+              pagination={false}
+              rowKey={(e) => e.employee.id}
+              rowClassName="scheduler-row"
+            />
+          )}
         </Layout.Content>
         <ProjectedSalesDialog
           visible={projectedSalesOpen}

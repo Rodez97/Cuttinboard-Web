@@ -23,7 +23,7 @@ function UserInfoElement({ employee }: QuickUserDialogProps) {
     <List>
       <List.Item css={{ justifyContent: "center" }}>
         <Avatar
-          src={employee.getAvatar}
+          src={employee.avatar}
           size={60}
           alt={employee.name}
           icon={<UserOutlined />}
@@ -90,7 +90,7 @@ export function QuickUserDialogAvatar({
   return (
     <Avatar
       size={size}
-      src={employee.getAvatar}
+      src={employee.avatar}
       onClick={handleOpen}
       css={{ cursor: "pointer" }}
       icon={<UserOutlined />}

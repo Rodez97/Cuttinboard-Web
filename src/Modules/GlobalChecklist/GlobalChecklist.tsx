@@ -188,7 +188,9 @@ function GlobalChecklist() {
   return (
     <Layout.Content>
       <GrayPageHeader
-        onBack={() => navigate(-1)}
+        onBack={() =>
+          navigate(`/location/${location.id}/apps`, { replace: true })
+        }
         title={t("Daily Checklists")}
         subTitle={`(${checklistData?.tasksSummary?.total ?? 0})`}
       />

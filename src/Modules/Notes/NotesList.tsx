@@ -48,7 +48,9 @@ function NotesList() {
     >
       <DarkPageHeader
         title={t("Notes")}
-        onBack={() => navigate(`/location/${location.id}/apps`)}
+        onBack={() =>
+          navigate(`/location/${location.id}/apps`, { replace: true })
+        }
         css={{ paddingBottom: 0, paddingTop: 0 }}
       />
       {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (

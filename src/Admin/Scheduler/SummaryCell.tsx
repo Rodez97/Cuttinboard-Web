@@ -46,7 +46,7 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
         const { minutes, wage } = acc;
         return {
           minutes: minutes + shift.shiftDuration.totalMinutes,
-          wage: wage + shift.getWage,
+          wage: wage + shift.wageData.totalWage || 0,
         };
       },
       { minutes: 0, wage: 0 }

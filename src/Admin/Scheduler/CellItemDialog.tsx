@@ -9,15 +9,26 @@ import {
   Employee,
   Shift,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  getShiftDate,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Card, List, Modal, Space, Tag } from "antd";
-import { ExclamationCircleOutlined, PlusCircleFilled } from "@ant-design/icons";
+import {
+  Button,
+  Card,
+  List,
+  Modal,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
+import Icon, {
+  ExclamationCircleOutlined,
+  PlusCircleFilled,
+} from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
+import mdiClockAlert from "@mdi/svg/svg/clock-alert.svg";
+import { getDurationText } from "./getDurationText";
 
 const BaseCard = css`
   width: 100%;
@@ -107,9 +118,9 @@ function CellItemDialog({
     let shiftPosition = "";
     if (shift.hasPendingUpdates) {
       const { start, end, position } = shift.pendingUpdate;
-      time = `${getShiftDate(start)
+      time = `${Shift.toDate(start)
         .format("h:mma")
-        .replace("m", "")} - ${getShiftDate(end)
+        .replace("m", "")} - ${Shift.toDate(end)
         .format("h:mma")
         .replace("m", "")}`;
       shiftPosition = position;
@@ -134,19 +145,60 @@ function CellItemDialog({
     return t("Published");
   };
 
-  const Tags = (shift: Shift) => (
-    <React.Fragment>
-      {!Boolean(shift.position) && <Tag color="error">{t("No position")}</Tag>}
-      {
-        <Tag color={shift.hourlyWage > 0 ? "processing" : "error"}>
-          {(shift.hourlyWage ?? 0).toLocaleString("EN-us", {
-            style: "currency",
-            currency: "USD",
-          }) + "/hr"}
-        </Tag>
-      }
-    </React.Fragment>
-  );
+  const Tags = (shift: Shift) => {
+    let overtimeTime = "";
+    const { wageData, hourlyWage } = shift;
+    if (wageData.overtimeHours > 0) {
+      overtimeTime = getDurationText(wageData.overtimeHours * 60);
+    }
+    return (
+      <React.Fragment>
+        {!Boolean(shift.position) && (
+          <Tag color="error">{t("No position")}</Tag>
+        )}
+        {Boolean(overtimeTime) ? (
+          <Tooltip
+            title={
+              <Space direction="vertical">
+                <Typography.Text
+                  css={{ color: "inherit" }}
+                >{`OT: ${overtimeTime}`}</Typography.Text>
+                <Typography.Text css={{ color: "inherit" }}>{`OT pay: ${Number(
+                  wageData.overtimeWage
+                ).toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                })}`}</Typography.Text>
+              </Space>
+            }
+          >
+            <Tag color="warning">
+              {hourlyWage.toLocaleString("EN-us", {
+                style: "currency",
+                currency: "USD",
+              }) + "/hr"}
+            </Tag>
+          </Tooltip>
+        ) : (
+          <Tag color={hourlyWage > 0 ? "processing" : "error"}>
+            {(hourlyWage ?? 0).toLocaleString("EN-us", {
+              style: "currency",
+              currency: "USD",
+            }) + "/hr"}
+          </Tag>
+        )}
+        {shift.wageData.overtimeHours > 0 && (
+          <Tooltip title={t("Overtime")}>
+            <Icon
+              component={mdiClockAlert}
+              css={{ color: Colors.Error.errorMain }}
+            />
+          </Tooltip>
+        )}
+      </React.Fragment>
+    );
+  };
+
   return (
     <React.Fragment>
       <Modal

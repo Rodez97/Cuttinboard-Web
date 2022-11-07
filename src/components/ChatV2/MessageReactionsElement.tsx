@@ -27,14 +27,14 @@ function MessageReactionsElement({
 
   return (
     <div css={{ display: "flex", flexDirection: "row", gap: 5 }}>
-      {getReactions.map(([emoji, reactionObject]) => {
+      {getReactions.map(([emoji, reactionObject], index) => {
         const count = reactionObject.length;
         const names = reactionObject.reduce(
           (acc, val, i) => `${acc} ${val.name};`,
           ""
         );
         return (
-          <Tooltip title={names}>
+          <Tooltip title={names} key={index}>
             <Tag>{`${emoji} ${count}`}</Tag>
           </Tooltip>
         );

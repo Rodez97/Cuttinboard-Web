@@ -6,7 +6,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAvatarByUID } from "../../utils/utils";
 import ChatMain from "../../components/ChatV2/ChatMain";
 import { GrayPageHeader } from "../../components/PageHeaders";
 
@@ -30,13 +29,13 @@ function DMMain() {
         backIcon={false}
         avatar={{
           icon: <UserOutlined />,
-          src: getAvatarByUID(selectedChat.recipient.id),
+          src: selectedChat.recipient.avatar,
           onClick: () => navigate("details"),
           style: { cursor: "pointer" },
         }}
         title={
           selectedChat.recipient
-            ? selectedChat.recipient.name
+            ? selectedChat.recipient.fullName
             : "Removed Employee"
         }
       />

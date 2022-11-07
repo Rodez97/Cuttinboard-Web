@@ -90,7 +90,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
             }
           >
             <List.Item.Meta
-              avatar={<Avatar icon={<UserOutlined />} src={emp.getAvatar} />}
+              avatar={<Avatar icon={<UserOutlined />} src={emp.avatar} />}
               title={emp.fullName}
             />
           </List.Item>

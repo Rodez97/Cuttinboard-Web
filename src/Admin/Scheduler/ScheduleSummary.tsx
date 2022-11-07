@@ -10,7 +10,8 @@ function ScheduleSummary() {
   const { t } = useTranslation();
   const {
     scheduleDocument,
-    scheduleSummary: { totalHours, totalShifts, totalPeople, totalWage },
+    scheduleSummary: { totalHours, totalPeople, totalWage },
+    employeeShiftsCollection,
   } = useSchedule();
 
   const getHours = useMemo(
@@ -30,6 +31,14 @@ function ScheduleSummary() {
     const percent = (totalWage / getProjectedSales) * 100;
     return isFinite(percent) ? percent : 0;
   }, [totalWage, getProjectedSales]);
+
+  // Get total shifts
+  const totalShifts = useMemo(() => {
+    return employeeShiftsCollection?.reduce(
+      (acc, { shiftsArray }) => acc + shiftsArray.length,
+      0
+    );
+  }, [employeeShiftsCollection]);
 
   return (
     <Space

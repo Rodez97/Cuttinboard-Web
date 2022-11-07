@@ -3,8 +3,9 @@ import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React, {
   forwardRef,
-  useCallback,
   useImperativeHandle,
+  useMemo,
+  useRef,
   useState,
 } from "react";
 import { nanoid } from "nanoid";
@@ -19,14 +20,10 @@ import {
   Shift,
   Todo_Task,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  getShiftDate,
-  getShiftString,
-  useLocation,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
+  Alert,
   Button,
   Checkbox,
   Col,
@@ -70,17 +67,18 @@ type FormDataType = {
 
 const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   const [form] = Form.useForm<FormDataType>();
-  const position = Form.useWatch("position", form);
-  const timeRange = Form.useWatch("timeRange", form);
-  const [baseShift, setBaseShift] = useState<Shift>(null);
   const [saving, setSaving] = useState(false);
-  const { location } = useLocation();
-  const { createShift, weekDays } = useSchedule();
+  const {
+    createShift,
+    weekDays,
+    employeeShiftsCollection,
+    scheduleSettingsData,
+  } = useSchedule();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [isNewShift, setIsNewShift] = useState(false);
-  const [baseDate, setBaseDate] = useState<Date>();
-  const [employee, setEmployee] = useState<Employee>(null);
+  const baseShift = useRef<Shift>(null);
+  const baseDate = useRef<Date>(null);
+  const baseEmployee = useRef<Employee>(null);
 
   useImperativeHandle(ref, () => ({
     openNew,
@@ -93,9 +91,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       employee.role === "employee"
         ? employee.mainPosition ?? employee.positions[0]
         : null;
-    setIsNewShift(true);
-    setEmployee(employee);
-    setBaseDate(date);
+    baseEmployee.current = employee;
+    baseDate.current = date;
     form.setFieldsValue({
       applyTo: [weekDay],
       timeRange: {
@@ -108,42 +105,50 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
   };
 
   const openEdit = (employee: Employee, shift: Shift) => {
-    setIsNewShift(false);
-    setEmployee(employee);
-    setBaseShift(shift);
+    baseEmployee.current = employee;
+    baseShift.current = shift;
     const shiftData = shift.hasPendingUpdates ? shift.pendingUpdate : shift;
+    // get the date of the shift
+    const startDate = Shift.toDate(shiftData.start);
+    baseDate.current = startDate.toDate();
     form.setFieldsValue({
-      applyTo: [getShiftDate(shiftData.start).isoWeekday()],
+      applyTo: [startDate.isoWeekday()],
       notes: shiftData.notes ?? "",
       position: shiftData.position ?? "",
       tasks: Object.values(shiftData.tasks ?? {}).map((tsk) => tsk.name),
       timeRange: {
-        start: moment(getShiftDate(shiftData.start).toDate()),
-        end: moment(getShiftDate(shiftData.end).toDate()),
+        start: moment(startDate.toDate()),
+        end: moment(Shift.toDate(shiftData.end).toDate()),
       },
     });
     setOpen(true);
   };
 
   const handleClose = () => {
+    // Reset form, state and close dialog
     setOpen(false);
-    form?.resetFields();
+    baseShift.current = null;
+    baseDate.current = null;
+    baseEmployee.current = null;
+    form.resetFields();
   };
 
   const onFinish = async (values: FormDataType) => {
     const { applyTo, notes, position, tasks, timeRange } = values;
 
+    const hourlyWage = baseEmployee.current?.getHourlyWage(position) ?? 0;
+
     const shiftToSave: Partial<IShift> = {
-      start: getShiftString(timeRange.start.toDate()),
-      end: getShiftString(timeRange.end.toDate()),
+      start: Shift.toString(timeRange.start.toDate()),
+      end: Shift.toString(timeRange.end.toDate()),
       notes,
       position,
-      hourlyWage: getHourlyWage(),
+      hourlyWage,
     };
 
     setSaving(true);
     try {
-      if (isNewShift) {
+      if (!baseShift.current) {
         const transformedTasks = tasks?.reduce<Record<string, Todo_Task>>(
           (acc, task, index) => {
             return {
@@ -162,7 +167,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           weekDays,
           applyTo,
           nanoid(),
-          employee.id
+          baseEmployee.current?.id
         );
       } else {
         const transformedTasks = tasks?.reduce<Record<string, Todo_Task>>(
@@ -177,9 +182,12 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
               },
             };
           },
-          baseShift.tasks ?? {}
+          baseShift.current.tasks ?? {}
         );
-        await baseShift.editShift({ ...shiftToSave, tasks: transformedTasks });
+        await baseShift.current.editShift({
+          ...shiftToSave,
+          tasks: transformedTasks,
+        });
       }
       handleClose();
     } catch (error) {
@@ -188,20 +196,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
     setSaving(false);
   };
 
-  const getDuration = useCallback(() => {
-    if (isEmpty(timeRange) || !timeRange.start || !timeRange.end) {
-      return;
-    }
-    const start = dayjs(timeRange.start.toDate());
-    const end = dayjs(timeRange.end.toDate());
-    return dayjs.duration(end.diff(start)).format("[🕘] H[h] m[min]");
-  }, [timeRange]);
-
-  const getHourlyWage = useCallback(
-    (pos: string = position) => employee.getHourlyWage(pos),
-    [employee, location.id, position]
-  );
-
   const cancelPendingUpdate = async () => {
     Modal.confirm({
       title: t("Are you sure to cancel this update?"),
@@ -209,7 +203,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
-          await baseShift.cancelUpdate();
+          await baseShift.current.cancelUpdate();
           handleClose();
         } catch (error) {
           recordError(error);
@@ -218,6 +212,16 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       onCancel() {},
     });
   };
+
+  // Get Employee shifts
+  const shiftsDoc = useMemo(() => {
+    if (!baseEmployee.current) {
+      return null;
+    }
+    return employeeShiftsCollection.find(
+      (shift) => shift.employeeId === baseEmployee.current?.id
+    );
+  }, [baseEmployee.current, employeeShiftsCollection]);
 
   if (!form) {
     return null;
@@ -228,17 +232,9 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
       open={open}
       zIndex={1000}
       onCancel={handleClose}
-      title={
-        <React.Fragment>
-          {t(isNewShift ? "Add Shift" : "Edit Shift")}
-          <Divider type="vertical" />
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            {getDuration()}
-          </Typography.Text>
-        </React.Fragment>
-      }
+      title={t(!baseShift.current ? "Add Shift" : "Edit Shift")}
       footer={[
-        baseShift?.pendingUpdate && (
+        baseShift.current?.pendingUpdate && (
           <Button
             key="reset"
             danger
@@ -270,7 +266,43 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
         layout="vertical"
         autoComplete="off"
       >
-        <Form.Item name="timeRange">
+        <Form.Item
+          name="timeRange"
+          dependencies={[
+            ["timeRange", "start"],
+            ["timeRange", "end"],
+          ]}
+          rules={[
+            {
+              validator: async (_, value: FormDataType["timeRange"]) => {
+                if (!value) {
+                  return Promise.reject(t("Please select a time range"));
+                }
+                const { start, end } = value;
+
+                // Convert to dayjs
+                const startDayjs = dayjs(start.toDate());
+                const endDayjs = dayjs(end.toDate());
+
+                // Check if overlaps
+                const shiftOverlaps = shiftsDoc?.checkForOverlappingShifts(
+                  startDayjs,
+                  endDayjs,
+                  baseShift.current?.id ?? ""
+                );
+
+                if (shiftOverlaps) {
+                  return Promise.reject(
+                    t(
+                      "This shift overlaps with another shift for this employee"
+                    )
+                  );
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
           <div
             css={{
               display: "flex",
@@ -286,6 +318,22 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
               rules={[{ required: true, message: "" }]}
               required
               help={t("Start time of the shift")}
+              normalize={(
+                value: FormDataType["timeRange"]["start"],
+                _,
+                all: FormDataType
+              ) => {
+                // If end time is before start time, add a day to the end time
+                if (all?.timeRange?.end?.isBefore(value)) {
+                  form.setFieldsValue({
+                    timeRange: {
+                      ...all.timeRange,
+                      end: all.timeRange.end.add(1, "day"),
+                    },
+                  });
+                }
+                return value;
+              }}
             >
               <TimePicker
                 allowClear={false}
@@ -297,13 +345,24 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
               />
             </Form.Item>
 
-            <Form.Item
+            <Form.Item<FormDataType["timeRange"]>
               name={["timeRange", "end"]}
               css={{ width: "100%" }}
               trigger="onSelect"
               rules={[{ required: true, message: "" }]}
               required
               help={t("End time of the shift")}
+              normalize={(
+                value: FormDataType["timeRange"]["end"],
+                _,
+                all: FormDataType
+              ) => {
+                // If end time is before start time, add a day to the end time
+                const end = value?.isBefore(all?.timeRange?.start)
+                  ? value?.add(1, "day")
+                  : value;
+                return end;
+              }}
             >
               <TimePicker
                 allowClear={false}
@@ -314,10 +373,87 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                 css={{ width: "100%" }}
               />
             </Form.Item>
+            <Form.Item
+              css={{ width: 230, textAlign: "center" }}
+              shouldUpdate={(
+                prevValues: FormDataType,
+                curValues: FormDataType
+              ) =>
+                // Only update if the time range changes
+                prevValues.timeRange !== curValues.timeRange
+              }
+            >
+              {({ getFieldValue }) => {
+                const timeRange = getFieldValue("timeRange");
+                if (isEmpty(timeRange) || !timeRange.start || !timeRange.end) {
+                  return null;
+                }
+                const start = dayjs(timeRange?.start?.toDate());
+                const end = dayjs(timeRange?.end?.toDate());
+                const duration = dayjs
+                  .duration(end.diff(start))
+                  .format("[🕘] HH[h] mm[min]");
+
+                return (
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {duration}
+                  </Typography.Text>
+                );
+              }}
+            </Form.Item>
           </div>
+
+          {/**
+           * Quick add buttons
+           */}
+          {scheduleSettingsData.presetTimes?.length > 0 && (
+            <Form.Item css={{ marginTop: 20 }}>
+              <Button.Group>
+                {scheduleSettingsData.presetTimes.map((presetTime, index) => {
+                  const startTime = dayjs(presetTime.start, "HH:mm");
+                  const endTime = dayjs(presetTime.end, "HH:mm");
+                  // create moment objects for the start and end times based on the current date
+                  const startMoment = dayjs(baseDate.current)
+                    .set("hour", startTime.hour())
+                    .set("minute", startTime.minute());
+                  const endMoment = dayjs(baseDate.current)
+                    .set("hour", endTime.hour())
+                    .set("minute", endTime.minute());
+                  // If the end time is before the start time, add a day to the end time
+                  if (endMoment.isBefore(startMoment)) {
+                    endMoment.add(1, "day");
+                  }
+                  // Create a string for the button label based on the preset times as 12 hour time (e.g. 9:00 AM - 5:00 PM)
+                  const label = `${startTime.format(
+                    "h:mm A"
+                  )} - ${endTime.format("h:mm A")}`;
+
+                  return (
+                    <Button
+                      key={index}
+                      type="dashed"
+                      onClick={() => {
+                        form.setFieldsValue({
+                          ...form.getFieldsValue(),
+                          timeRange: {
+                            start: startMoment,
+                            end: endMoment,
+                          },
+                        });
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  );
+                })}
+              </Button.Group>
+            </Form.Item>
+          )}
         </Form.Item>
 
-        {isNewShift && (
+        <Divider />
+
+        {!baseShift.current && (
           <Form.Item label={t("Apply to:")} name="applyTo">
             <Checkbox.Group>
               <Row>
@@ -326,7 +462,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                     <Checkbox
                       value={dayjs(wd).isoWeekday()}
                       disabled={Boolean(
-                        dayjs(wd).isoWeekday() === dayjs(baseDate).isoWeekday()
+                        dayjs(wd).isoWeekday() ===
+                          dayjs(baseDate.current).isoWeekday()
                       )}
                     >
                       {dayjs(wd).format("dddd")}
@@ -338,13 +475,14 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           </Form.Item>
         )}
 
-        {employee?.role === "employee" && (
+        {baseEmployee.current?.role === "employee" && (
           <React.Fragment>
             <Form.Item name="position">
               <Select placeholder={t("Select Position")}>
                 <Select.Option value="">{t("No Position")}</Select.Option>
-                {employee.positions.map((position) => {
-                  const isMainPos = employee.mainPosition === position;
+                {baseEmployee.current?.positions.map((position) => {
+                  const isMainPos =
+                    baseEmployee.current?.mainPosition === position;
                   return (
                     <Select.Option
                       key={position}
@@ -359,24 +497,43 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                 })}
               </Select>
             </Form.Item>
-            <div
-              css={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 8,
-                width: "100%",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+            <Form.Item
+              shouldUpdate={(
+                prevValues: FormDataType,
+                curValues: FormDataType
+              ) =>
+                // Only update if the position changes
+                prevValues.position !== curValues.position
+              }
             >
-              <Typography.Text>{t("Hourly Wage")}:</Typography.Text>
-              <Tag color={getHourlyWage() > 0 ? "processing" : "error"}>
-                {getHourlyWage()?.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }) + "/hr"}
-              </Tag>
-            </div>
+              {() => {
+                const position: FormDataType["position"] = form.getFieldValue([
+                  "position",
+                ]);
+                const hWage =
+                  baseEmployee.current?.getHourlyWage(position) ?? 0;
+                return (
+                  <div
+                    css={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: 8,
+                      width: "100%",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography.Text>{t("Hourly Wage")}:</Typography.Text>
+                    <Tag color={hWage > 0 ? "processing" : "error"}>
+                      {hWage.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }) + "/hr"}
+                    </Tag>
+                  </div>
+                );
+              }}
+            </Form.Item>
 
             <Divider />
           </React.Fragment>

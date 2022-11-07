@@ -8,9 +8,8 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Dropdown, Menu, MenuProps, Space } from "antd";
+import { Avatar, Dropdown, Menu, MenuProps } from "antd";
 import { signOut } from "firebase/auth";
-import React from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +19,7 @@ function UserMenu({ color }: { color?: string }) {
   const [user] = useAuthState(Auth);
   const navigate = useNavigate();
 
-  const onMenuClick: MenuProps["onClick"] = async ({ key }) => {
+  const onClick: MenuProps["onClick"] = async ({ key }) => {
     switch (key) {
       case "dashboard":
         navigate("/dashboard");
@@ -40,41 +39,40 @@ function UserMenu({ color }: { color?: string }) {
     }
   };
 
-  const menu = (
-    <Menu
-      onClick={onMenuClick}
-      items={[
-        {
-          key: "email",
-          label: Auth.currentUser.email,
-          disabled: true,
-        },
-        {
-          key: "dashboard",
-          label: t("Dashboard"),
-          icon: <DashboardOutlined />,
-        },
-        {
-          key: "account",
-          label: t("Account"),
-          icon: <UserOutlined />,
-        },
-        {
-          key: "helpCenter",
-          label: t("Help Center"),
-          icon: <QuestionCircleOutlined />,
-        },
-        {
-          key: "signOut",
-          label: t("Sign Out"),
-          icon: <LogoutOutlined />,
-        },
-      ]}
-    />
-  );
-
   return (
-    <Dropdown overlay={menu} trigger={["click"]}>
+    <Dropdown
+      menu={{
+        items: [
+          {
+            key: "email",
+            label: Auth.currentUser.email,
+            disabled: true,
+          },
+          {
+            key: "dashboard",
+            label: t("Dashboard"),
+            icon: <DashboardOutlined />,
+          },
+          {
+            key: "account",
+            label: t("Account"),
+            icon: <UserOutlined />,
+          },
+          {
+            key: "helpCenter",
+            label: t("Help Center"),
+            icon: <QuestionCircleOutlined />,
+          },
+          {
+            key: "signOut",
+            label: t("Sign Out"),
+            icon: <LogoutOutlined />,
+          },
+        ],
+        onClick,
+      }}
+      trigger={["click"]}
+    >
       <div css={{ cursor: "pointer" }}>
         <Avatar
           src={user.photoURL ?? undefined}

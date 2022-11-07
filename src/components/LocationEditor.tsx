@@ -24,7 +24,7 @@ function LocationEditor({
       layout="vertical"
       onFinish={onChange}
       initialValues={baseLocation}
-      css={{ width: 300, paddingBottom: 20 }}
+      css={{ width: "100%", paddingBottom: 20 }}
       disabled={loading}
       size="small"
       autoComplete="off"

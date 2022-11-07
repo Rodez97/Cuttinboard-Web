@@ -6,12 +6,13 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCallback } from "react";
 import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
-import { Card } from "antd";
+import { Card, Space, Tag, Tooltip, Typography } from "antd";
 import { getDurationText } from "./getDurationText";
 import {
   Colors,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 interface EmpColumnCellProps {
   employee: Employee;
@@ -19,32 +20,77 @@ interface EmpColumnCellProps {
 }
 
 function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
-  const getSecondaryText = useCallback(() => {
+  const { scheduleSettingsData } = useSchedule();
+  const getSecondaryElement = useCallback(() => {
     if (!empShifts) {
       if (employee.locationRole === RoleAccessLevels.OWNER) {
-        return `${0}h ${0}min`;
+        return <Tag color="processing">{`${0}h ${0}min`}</Tag>;
       }
 
-      return `${0}h ${0}min - ${Number(0).toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-      })}`;
+      return (
+        <Tag color="processing">{`${0}h ${0}min - ${Number(0).toLocaleString(
+          "en-US",
+          {
+            style: "currency",
+            currency: "USD",
+          }
+        )}`}</Tag>
+      );
     }
 
-    const totalTime = getDurationText(empShifts.userSummary.totalHours * 60);
+    const totalTime = getDurationText(empShifts.wageData.totalHours * 60);
 
     if (employee.locationRole === RoleAccessLevels.OWNER) {
-      return totalTime;
+      return <Tag color="processing">{totalTime}</Tag>;
     }
 
-    return `${totalTime} - ${empShifts.userSummary.totalWage.toLocaleString(
-      "en-US",
-      {
-        style: "currency",
-        currency: "USD",
-      }
-    )}`;
-  }, [empShifts, employee]);
+    const totalWage = empShifts.wageData.totalWage;
+
+    const haveOvertime = empShifts.wageData.overtimeHours > 0;
+
+    if (haveOvertime) {
+      const overtimeTime = getDurationText(
+        empShifts.wageData.overtimeHours * 60
+      );
+      const overtimeWage = empShifts.wageData.overtimeWage;
+
+      return (
+        <Tooltip
+          title={
+            <Space direction="vertical">
+              <Typography.Text
+                css={{ color: "inherit" }}
+              >{`OT: ${overtimeTime}`}</Typography.Text>
+              <Typography.Text css={{ color: "inherit" }}>{`OT pay: ${Number(
+                overtimeWage
+              ).toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              })}`}</Typography.Text>
+            </Space>
+          }
+        >
+          <Tag color="error">{`${totalTime} - ${totalWage.toLocaleString(
+            "en-US",
+            {
+              style: "currency",
+              currency: "USD",
+            }
+          )}`}</Tag>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <Tag color="processing">{`${totalTime} - ${totalWage.toLocaleString(
+        "en-US",
+        {
+          style: "currency",
+          currency: "USD",
+        }
+      )}`}</Tag>
+    );
+  }, [empShifts, employee, scheduleSettingsData]);
 
   return (
     <Card
@@ -57,12 +103,13 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
             : employee.locationRole === RoleAccessLevels.GENERAL_MANAGER
             ? Colors.Green.Light
             : Colors.Blue.Light,
+        height: "100%",
       }}
     >
       <Card.Meta
-        avatar={<QuickUserDialogAvatar employee={employee} />}
+        avatar={<QuickUserDialogAvatar employee={employee} size={25} />}
         title={`${employee.fullName}`}
-        description={getSecondaryText()}
+        description={getSecondaryElement()}
       />
     </Card>
   );

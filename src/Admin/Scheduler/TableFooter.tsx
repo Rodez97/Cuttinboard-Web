@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -15,7 +17,7 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
   const { weekDays } = useSchedule();
 
   return (
-    <Table.Summary.Row>
+    <Table.Summary.Row css={{ height: 150 }}>
       <Table.Summary.Cell index={0}>
         <Space direction="vertical" size="small">
           <Typography.Text strong>{t("SCHEDULED HOURS")}</Typography.Text>

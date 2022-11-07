@@ -21,3 +21,7 @@
     z-index: 1;
   }
 }
+
+table tfoot {
+  inset-block-end: 0; /* "bottom" */
+}

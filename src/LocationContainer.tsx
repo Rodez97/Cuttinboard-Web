@@ -24,7 +24,7 @@ import { getRoleTextByNumber } from "./Admin/Employees/employee-utils";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { DarkPageHeader } from "./components/PageHeaders";
 
-const LocationSettings = lazy(() => import("./Admin/LocationSettings"));
+const Settings = lazy(() => import("./Admin/Settings"));
 const DM = lazy(() => import("./pages/DirectMessages/DM"));
 const AppsRouter = lazy(() => import("./Modules/AppsRouter"));
 const Conversations = lazy(() => import("./pages/Conversations/Conv"));
@@ -65,7 +65,7 @@ export function LocationContainer() {
                 pathname.split("/")[3] === "conversations" ? "primary" : "text"
               }
               shape="circle"
-              onClick={() => navigate("conversations", { replace: true })}
+              onClick={() => navigate("conversations")}
             />
           </Badge>,
 
@@ -79,7 +79,7 @@ export function LocationContainer() {
               icon={<Icon component={MessageTextLock} />}
               type={pathname.split("/")[3] === "chats" ? "primary" : "text"}
               shape="circle"
-              onClick={() => navigate("chats", { replace: true })}
+              onClick={() => navigate("chats")}
             />
           </Badge>,
           <Button
@@ -88,7 +88,7 @@ export function LocationContainer() {
             key="locSettings"
             type={pathname.split("/")[3] === "locSettings" ? "primary" : "text"}
             shape="circle"
-            onClick={() => navigate("locSettings", { replace: true })}
+            onClick={() => navigate("locSettings")}
             className="settings-btn"
             css={{ marginRight: 15 }}
           />,
@@ -124,10 +124,10 @@ export function LocationContainer() {
           />
           {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
             <Route
-              path={`locSettings`}
+              path={`locSettings/*`}
               element={
                 <Suspense fallback={<PageLoading />}>
-                  <LocationSettings />
+                  <Settings />
                 </Suspense>
               }
             />
