@@ -8,9 +8,8 @@ import { useDocumentData } from "react-firebase-hooks/firestore";
 import styled from "@emotion/styled";
 import { recordError } from "../utils/utils";
 import LiteAvatar from "../assets/images/cuttinboardLite.png";
-import PageLoading from "../components/PageLoading";
-import PageError from "../components/PageError";
 import {
+  Auth,
   Firestore,
   Functions,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
@@ -24,6 +23,8 @@ import {
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { STRIPE_PRICE_ID, STRIPE_PRODUCT_ID } from "../VARS";
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { PageError, PageLoading } from "../components";
 
 const PlanCard = styled.div`
   background: #f7f7f7;
@@ -67,6 +68,13 @@ function UpgradeAccount() {
   const upgradeToBusiness = async () => {
     try {
       await upgradeAccount(STRIPE_PRICE_ID);
+      // Report to analytics
+      logEvent(getAnalytics(), "upgrade_account", {
+        method: "stripe",
+        price: STRIPE_PRICE_ID,
+        uid: Auth.currentUser.uid,
+      });
+      // REdirect to dashboard
       navigate("/dashboard/owner-portal");
     } catch (error) {
       recordError(error);

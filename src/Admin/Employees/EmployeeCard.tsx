@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 import { useNavigate } from "react-router-dom";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
@@ -20,6 +19,7 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
+import { QuickUserDialogAvatar } from "../../components";
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -28,7 +28,7 @@ interface EmployeeCardProps {
 function EmployeeCard({ employee }: EmployeeCardProps) {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
-  const { location, locationAccessKey } = useLocation();
+  const { locationAccessKey } = useLocation();
   const navigate = useNavigate();
 
   const handleRemoveEmployee = async () => {

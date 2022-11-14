@@ -2,7 +2,6 @@
 import { jsx } from "@emotion/react";
 import { addDoc, serverTimestamp } from "firebase/firestore";
 import { useRef, useState } from "react";
-import QuickTodo, { QuickTodoRef } from "../../components/QuickTodo";
 import { useTranslation } from "react-i18next";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
@@ -14,10 +13,11 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import AssignUser from "./AssignUser";
 import { getAvatarByUID, recordError } from "../../utils/utils";
 import { Avatar, Button, DatePicker, Form, Input, List } from "antd";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import { DeleteOutlined, UserOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { Timestamp } from "firebase/firestore";
+import QuickTodo, { QuickTodoRef } from "../../components/QuickTodo";
+import { GrayPageHeader } from "../../components";
 
 export interface ManageTodoProps {
   todos: Todo[];

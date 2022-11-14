@@ -16,7 +16,7 @@ interface QuickUserDialogProps {
   employee: Employee;
 }
 
-function UserInfoElement({ employee }: QuickUserDialogProps) {
+export function UserInfoElement({ employee }: QuickUserDialogProps) {
   const { t } = useTranslation();
 
   return (
@@ -97,5 +97,3 @@ export function QuickUserDialogAvatar({
     />
   );
 }
-
-export default UserInfoElement;

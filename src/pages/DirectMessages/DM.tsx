@@ -7,12 +7,12 @@ import PageLoading from "../../components/PageLoading";
 import DMList from "./DMList";
 import DMRoutes from "./DMRoutes";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
 import dmImage from "../../assets/images/encrypted-data.png";
 import { useTranslation } from "react-i18next";
 import NewDM from "./NewDM";
 import { useState } from "react";
 import { recordError } from "../../utils/utils";
+import { EmptyMainModule } from "../../components";
 
 const DM = ({ locationId }: { locationId?: string }) => {
   const { t } = useTranslation();

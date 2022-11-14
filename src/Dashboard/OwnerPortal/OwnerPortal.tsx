@@ -10,8 +10,7 @@ import { collection, query, where } from "firebase/firestore";
 import { createContext, lazy, Suspense, useContext } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { Route, Routes } from "react-router-dom";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
+import { PageError, PageLoading } from "../../components";
 
 const SupervisorsRouter = lazy(
   () => import("../Supervisors/SupervisorsRouter")

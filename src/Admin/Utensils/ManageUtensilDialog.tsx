@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
@@ -10,14 +12,13 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
-import { getAnalytics, logEvent } from "firebase/analytics";
 import {
   addDoc,
   collection,
   PartialWithFieldValue,
   serverTimestamp,
 } from "firebase/firestore";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 
@@ -82,9 +83,6 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           );
           await addDoc(dbRef, newAppObject);
         }
-        // Report to analytics
-        const analytics = getAnalytics();
-        logEvent(analytics, "utensil_saved");
       } catch (error) {
         recordError(error);
       }
@@ -94,8 +92,9 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
 
     return (
       <Modal
-        visible={open}
+        open={open}
         title={t(title)}
+        maskClosable={false}
         onCancel={handleClose}
         footer={[
           <Button disabled={saving} onClick={handleClose} key="cancel">
@@ -119,6 +118,12 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           layout="vertical"
           disabled={saving}
           autoComplete="off"
+          initialValues={{
+            name: "",
+            description: "",
+            optimalQuantity: 1,
+            currentQuantity: 0,
+          }}
         >
           <Form.Item
             name="name"
@@ -126,36 +131,49 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
             required
             rules={[{ required: true, message: "" }]}
           >
-            <Input />
+            <Input maxLength={80} showCount />
           </Form.Item>
+
+          <div
+            css={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 5,
+              width: "100%",
+            }}
+          >
+            <Form.Item
+              css={{ width: "100%" }}
+              required
+              name="optimalQuantity"
+              label={t("Optimal Quantity")}
+              rules={[
+                { type: "number", message: "" },
+                { required: true, message: t("Optimal quantity is required") },
+              ]}
+            >
+              <InputNumber min={1} css={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              css={{ width: "100%" }}
+              required
+              name="currentQuantity"
+              label={t("Current Quantity")}
+              rules={[
+                { type: "number", message: "" },
+                { required: true, message: t("Current quantity is required") },
+              ]}
+            >
+              <InputNumber min={0} css={{ width: "100%" }} />
+            </Form.Item>
+          </div>
+
           <Form.Item
             name="description"
             label={t("Description")}
             rules={[{ max: 250, message: "" }]}
           >
-            <Input showCount max={250} />
-          </Form.Item>
-          <Form.Item
-            required
-            name="optimalQuantity"
-            label={t("Optimal Quantity")}
-            rules={[
-              { type: "number", message: "" },
-              { required: true, message: t("Optimal quantity is required") },
-            ]}
-          >
-            <InputNumber min={1} />
-          </Form.Item>
-          <Form.Item
-            required
-            name="currentQuantity"
-            label={t("Current Quantity")}
-            rules={[
-              { type: "number", message: "" },
-              { required: true, message: t("Current quantity is required") },
-            ]}
-          >
-            <InputNumber min={0} />
+            <Input.TextArea rows={3} maxLength={250} showCount />
           </Form.Item>
         </Form>
       </Modal>

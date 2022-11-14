@@ -2,7 +2,7 @@ import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/servi
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import VerifyEmail from "../Auth/VerifyEmail";
-import PageLoading from "../components/PageLoading";
+import { PageLoading } from "../components";
 import { useDashboard } from "./DashboardProvider";
 import UpgradeAccount from "./UpgradeAccount";
 

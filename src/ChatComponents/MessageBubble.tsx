@@ -1,9 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import MessageReactionPicker from "./MessageReactionPicker";
-import { useInView } from "react-intersection-observer";
 import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Avatar, Button, Divider, Tooltip, Typography } from "antd";
@@ -13,10 +12,9 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import styled from "@emotion/styled";
 import Icon, { DeleteFilled, UserOutlined } from "@ant-design/icons";
 import MessageElement from "./MessageElement";
-import SeenByElement from "./SeenByElement";
 import MessageReactionsElement from "./MessageReactionsElement";
-import { recordError } from "../../utils/utils";
-import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { recordError } from "../utils/utils";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 dayjs.extend(relativeTime);
 
 const MessageContent = styled.div`
@@ -51,32 +49,24 @@ const MessageWrap = styled.div`
   }
 `;
 
-interface DirectMessageBubbleProps {
+interface MessageBubbleProps {
   prevMessage?: Message;
   currentMessage?: Message;
   i: number;
   allMessagesLength: number;
   onReply: (message: Message) => void;
+  canUseApp?: boolean;
 }
 
-function DirectMessageBubble({
+function MessageBubble({
   prevMessage,
   currentMessage,
   i = 0,
   allMessagesLength,
   onReply,
-}: DirectMessageBubbleProps) {
-  const { selectedChat } = useDMs();
-  const { ref, inView } = useInView({
-    /* Optional options */
-    threshold: 1,
-  });
-
-  useEffect(() => {
-    if (!Boolean(currentMessage.seenBy[Auth.currentUser.uid]) && inView) {
-      currentMessage.updateLastVisitedBy();
-    }
-  }, [inView]);
+  canUseApp,
+}: MessageBubbleProps) {
+  const { getEmployeeById, getEmployees } = useEmployeesList();
 
   const handleReplyMsg = () => {
     onReply(currentMessage);
@@ -111,13 +101,13 @@ function DirectMessageBubble({
     return {
       id,
       name,
-      avatar: selectedChat.members[id]?.avatar,
+      avatar: getEmployeeById(id)?.avatar,
     };
-  }, [currentMessage, selectedChat]);
+  }, [currentMessage, getEmployees]);
 
   const avatar = useMemo(
-    () => selectedChat.members[currentMessage.sender.id]?.avatar,
-    [currentMessage, selectedChat]
+    () => getEmployeeById(currentMessage.sender.id)?.avatar,
+    [currentMessage, getEmployees]
   );
 
   const deleteMessage = async () => {
@@ -130,7 +120,6 @@ function DirectMessageBubble({
 
   return (
     <div
-      ref={ref}
       css={{
         display: "flex",
         flexDirection: "column",
@@ -224,7 +213,7 @@ function DirectMessageBubble({
           >
             {(showAvatar || showDate || currentMessage.replyTarget) && (
               <Typography.Text css={{ margin: "0px 2px", fontSize: "1rem" }}>
-                {currentMessage.sender.name}
+                {currentMessage.sender?.name}
                 <Tooltip
                   placement="top"
                   title={currentMessage.createdAtDate.format(
@@ -254,24 +243,25 @@ function DirectMessageBubble({
               }}
             >
               <MessageElement targetMsg={currentMessage} />
-              <SeenByElement message={currentMessage} />
             </div>
             <MessageReactionsElement reactions={currentMessage.reactions} />
           </div>
         </MessageContent>
-        <Button.Group className="optionsBtn">
-          <Button
-            onClick={handleReplyMsg}
-            icon={<Icon component={mdiReply} />}
-          />
-          <MessageReactionPicker message={currentMessage} />
-          {Auth.currentUser.uid === currentMessage?.sender?.id && (
-            <Button onClick={deleteMessage} danger icon={<DeleteFilled />} />
-          )}
-        </Button.Group>
+        {canUseApp && (
+          <Button.Group className="optionsBtn">
+            <Button
+              onClick={handleReplyMsg}
+              icon={<Icon component={mdiReply} />}
+            />
+            <MessageReactionPicker message={currentMessage} />
+            {Auth.currentUser.uid === currentMessage?.sender?.id && (
+              <Button onClick={deleteMessage} danger icon={<DeleteFilled />} />
+            )}
+          </Button.Group>
+        )}
       </MessageWrap>
     </div>
   );
 }
 
-export default DirectMessageBubble;
+export default MessageBubble;

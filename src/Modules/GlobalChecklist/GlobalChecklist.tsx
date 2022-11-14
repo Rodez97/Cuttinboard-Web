@@ -38,11 +38,13 @@ import { useMemo, useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import PageError from "../../components/PageError";
-import { GrayPageHeader } from "../../components/PageHeaders";
-import PageLoading from "../../components/PageLoading";
-import SimpleTodo from "../../components/SimpleTodo";
 import { recordError } from "../../utils/utils";
+import {
+  GrayPageHeader,
+  PageError,
+  PageLoading,
+  SimpleTodo,
+} from "../../components";
 
 function GlobalChecklist() {
   const { t } = useTranslation();

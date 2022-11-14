@@ -7,8 +7,6 @@ import { useNavigate } from "react-router-dom";
 import FilesItem from "./FilesItem";
 import { orderBy } from "lodash";
 import { useTranslation } from "react-i18next";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
 import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   useCuttinboardModule,
@@ -18,7 +16,6 @@ import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import ToolBar from "../ToolBar";
 import FileItemRow from "./FileItemRow";
 import { Button, Col, Layout, List, Row, Segmented, Space } from "antd";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import {
   AppstoreOutlined,
   BarsOutlined,
@@ -28,8 +25,13 @@ import {
 } from "@ant-design/icons";
 import PickFile from "./PickFile";
 import { matchSorter } from "match-sorter";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
-import useDisclose from "../../hooks/useDisclose";
+import { useDisclose } from "../../hooks";
+import {
+  EmptyMainModule,
+  GrayPageHeader,
+  PageError,
+  PageLoading,
+} from "../../components";
 
 function FilesMain() {
   const navigate = useNavigate();

@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import PageLoading from "./components/PageLoading";
 import { lazy, Suspense } from "react";
 import {
   Navigate,
@@ -19,10 +18,9 @@ import { useTranslation } from "react-i18next";
 import Icon, { SettingFilled, SwapOutlined } from "@ant-design/icons";
 import Forum from "@mdi/svg/svg/forum.svg";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import UserMenu from "./components/UserMenu";
 import { getRoleTextByNumber } from "./Admin/Employees/employee-utils";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { DarkPageHeader } from "./components/PageHeaders";
+import { DarkPageHeader, PageLoading, UserMenu } from "./components";
 
 const Settings = lazy(() => import("./Admin/Settings"));
 const DM = lazy(() => import("./pages/DirectMessages/DM"));

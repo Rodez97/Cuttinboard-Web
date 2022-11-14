@@ -9,8 +9,7 @@ import { Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
+import { PageError, PageLoading } from "../../components";
 import LocationCard from "./LocationCard";
 
 function MemberLocations() {

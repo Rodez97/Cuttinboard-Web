@@ -20,7 +20,7 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
   const { weekDays, employeeShiftsCollection, scheduleDocument } =
     useSchedule();
 
-  const { totalHours, totalEmployees, wages, laborPercent } = useMemo(() => {
+  const { totalHours, wages, laborPercent } = useMemo(() => {
     const columnShifts = compact(
       data.flatMap(({ empShifts }) =>
         empShifts?.shiftsArray.filter(
@@ -32,7 +32,6 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
     if (isEmpty(columnShifts)) {
       return {
         totalHours: `0h 0min`,
-        totalEmployees: 0,
         wages: 0,
         laborPercent: "0.00%",
       };
@@ -46,21 +45,13 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
         const { minutes, wage } = acc;
         return {
           minutes: minutes + shift.shiftDuration.totalMinutes,
-          wage: wage + shift.wageData.totalWage || 0,
+          wage: wage + shift.wageData.totalWage ?? 0,
         };
       },
       { minutes: 0, wage: 0 }
     );
 
     const totalHours = getDurationText(timeAndWages.minutes);
-
-    const totalEmployees = Number(
-      employeeShiftsCollection.filter((esc) =>
-        esc.shiftsArray.some(({ getStartDayjsDate }) =>
-          getStartDayjsDate.isSame(weekDay, "day")
-        )
-      ).length
-    );
 
     const laborPercent = (() => {
       const wage = timeAndWages.wage ?? 0;
@@ -73,7 +64,6 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
 
     return {
       totalHours,
-      totalEmployees,
       wages: timeAndWages.wage ?? 0,
       laborPercent,
     };
@@ -83,14 +73,14 @@ export const SummaryCell = ({ index, weekDay, data }: SummaryCellProps) => {
     <Table.Summary.Cell index={index}>
       <Space direction="vertical" size="small">
         <Typography.Text>{totalHours}</Typography.Text>
-        <Typography.Text>{totalEmployees}</Typography.Text>
         <Typography.Text>
           {wages.toLocaleString("en-US", {
             style: "currency",
             currency: "USD",
           })}
+          {" - "}
+          <b>({laborPercent})</b>
         </Typography.Text>
-        <Typography.Text>{laborPercent}</Typography.Text>
       </Space>
     </Table.Summary.Cell>
   );

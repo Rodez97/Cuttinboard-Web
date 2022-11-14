@@ -3,7 +3,7 @@ import { message } from "antd";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../utils/utils";
 
-function useFileItem(file: Cuttinboard_File) {
+export function useFileItem(file: Cuttinboard_File) {
   const { t } = useTranslation();
 
   const copyToClipboard = async () => {
@@ -34,5 +34,3 @@ function useFileItem(file: Cuttinboard_File) {
   };
   return { copyToClipboard, openFile, deleteFile };
 }
-
-export default useFileItem;

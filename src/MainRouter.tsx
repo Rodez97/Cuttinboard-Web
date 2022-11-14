@@ -1,25 +1,20 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { LoadingScreen } from "./components/LoadingScreen";
-import PageLoading from "./components/PageLoading";
-import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import useSelectedLocation from "./hooks/useSelectedLocation";
 import { LocationContainer } from "./LocationContainer";
-import PageError from "./components/PageError";
-import { FirebaseError } from "firebase/app";
-import { recordError } from "./utils/utils";
 import {
   EmployeesProvider,
   LocationProvider,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { CuttinboardError } from "@cuttinboard-solutions/cuttinboard-library/models";
 import DashboardProvider from "./Dashboard/DashboardProvider";
 import { Layout } from "antd";
 import runOneSignal from "runOneSignal";
 import OneSignal from "react-onesignal";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useSelectedLocation } from "./hooks";
+import { LoadingScreen, PageError, PageLoading } from "./components";
 const Dashboard = lazy(() => import("./Dashboard/Dashboard"));
 
 function MainRouter() {

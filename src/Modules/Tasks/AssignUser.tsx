@@ -14,9 +14,11 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import { GrayPageHeader } from "../../components/PageHeaders";
-import { TitleBoxGreen } from "../../components/ColorTextDividers";
-import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
+import {
+  GrayPageHeader,
+  QuickUserDialogAvatar,
+  TitleBoxGreen,
+} from "../../components";
 
 interface AssignUserProps {
   onSelectedEmployee: (employee: Employee) => void;

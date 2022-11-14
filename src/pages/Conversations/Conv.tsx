@@ -7,11 +7,11 @@ import { ConversationsProvider } from "@cuttinboard-solutions/cuttinboard-librar
 import PageLoading from "../../components/PageLoading";
 import ConversationsRoutes from "./ConversationsRoutes";
 import ConversationsList from "./ConversationsList";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import convImage from "../../assets/images/chat.png";
 import ManageConversation from "./ManageConversation";
 import { recordError } from "../../utils/utils";
+import { EmptyMainModule } from "../../components";
 
 const Conv = () => {
   const { t } = useTranslation();

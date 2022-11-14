@@ -45,7 +45,7 @@ function ConvManageMembers() {
       return;
     }
     try {
-      await selectedConversation.removeHost(host.id);
+      await selectedConversation.removeHost(host);
     } catch (error) {
       recordError(error);
     }
@@ -54,13 +54,13 @@ function ConvManageMembers() {
   return (
     <ManageMembers
       readonly={!canManage}
-      members={selectedConversation.accessTags}
+      members={selectedConversation.members}
       removeMember={handleRemoveMember}
       addMembers={handleAddMembers}
       setAppHost={handleSetAppHost}
       removeHost={handleRemoveHost}
       privacyLevel={selectedConversation.privacyLevel}
-      positions={selectedConversation.accessTags}
+      positions={[selectedConversation.position]}
       hosts={selectedConversation?.hosts}
     />
   );

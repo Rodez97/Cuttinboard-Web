@@ -17,13 +17,11 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
   const { weekDays } = useSchedule();
 
   return (
-    <Table.Summary.Row css={{ height: 150 }}>
+    <Table.Summary.Row css={{ height: 85 }}>
       <Table.Summary.Cell index={0}>
         <Space direction="vertical" size="small">
           <Typography.Text strong>{t("SCHEDULED HOURS")}</Typography.Text>
-          <Typography.Text strong>{t("EMPLOYEES")}</Typography.Text>
           <Typography.Text strong>{t("LABOR COST")}</Typography.Text>
-          <Typography.Text strong>{t("LABOR %")}</Typography.Text>
         </Space>
       </Table.Summary.Cell>
       {weekDays.map((wd, i) => {

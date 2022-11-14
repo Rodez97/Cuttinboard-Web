@@ -5,13 +5,13 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { useTranslation } from "react-i18next";
-import SimpleTodo from "../../components/SimpleTodo";
 import { Shift } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Button, List, Modal, Space, Tag } from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import Icon, { OrderedListOutlined } from "@ant-design/icons";
 import { Note } from "../Notes/notesIcons";
 import { recordError } from "../../utils/utils";
+import { SimpleTodo } from "../../components";
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 

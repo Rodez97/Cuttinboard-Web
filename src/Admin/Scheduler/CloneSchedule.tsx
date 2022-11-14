@@ -6,7 +6,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Alert, Avatar, Checkbox, List, Modal } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -23,7 +23,7 @@ dayjs.extend(customParseFormat);
 function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
   const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
-  const { cloneWeek, weekId } = useSchedule();
+  const { cloneWeek, weekId, scheduleSummary } = useSchedule();
   const [isCloning, setIsCloning] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState(dayjs().format(WEEKFORMAT));
   const [selectedEmployees, setSelectedEmployees] = useState(
@@ -46,7 +46,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
       // Report to analytics
       const analytics = getAnalytics();
       logEvent(analytics, "clone_schedule", {
-        week: selectedWeek,
+        noOfEmployees: selectedEmployees.length,
       });
     } catch (error) {
       recordError(error);
@@ -54,13 +54,26 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     setIsCloning(false);
   };
 
+  const canClone = useMemo(() => {
+    if (selectedEmployees.length === 0) {
+      return false;
+    }
+    if (selectedWeek === weekId) {
+      return false;
+    }
+    if (scheduleSummary?.totalShifts > 0) {
+      return false;
+    }
+    return true;
+  }, [weekId, selectedWeek, scheduleSummary]);
+
   return (
     <Modal
       title={t("Clone Schedule")}
       {...props}
       onOk={clone}
       confirmLoading={isCloning}
-      okButtonProps={{ disabled: Boolean(weekId === selectedWeek) }}
+      okButtonProps={{ disabled: !canClone }}
     >
       <div css={{ display: "flex", justifyContent: "center", margin: 10 }}>
         <WeekNavigator
@@ -76,6 +89,14 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
           message={t("Cannot clone the same week")}
         />
       )}
+      {scheduleSummary?.totalShifts > 0 && (
+        <Alert
+          css={{ marginTop: 10 }}
+          showIcon
+          type="warning"
+          message={t("Cannot clone a week with shifts")}
+        />
+      )}
       <List
         dataSource={getEmployees}
         renderItem={(emp) => (
@@ -85,7 +106,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
               <Checkbox
                 checked={selectedEmployees.includes(emp.id)}
                 onChange={() => handleSelectedEmpChange(emp.id)}
-                disabled={Boolean(weekId === selectedWeek)}
+                disabled={!canClone}
               />
             }
           >

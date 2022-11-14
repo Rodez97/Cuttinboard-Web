@@ -8,16 +8,16 @@ import {
   Positions,
   PrivacyLevel,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { recordError } from "../../utils/utils";
+import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
 import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
 import { Button, Form, Input, Radio, Select, Space, Spin } from "antd";
 import { useTranslation } from "react-i18next";
-import { GrayPageHeader } from "../../components/PageHeaders";
-import useDisclose from "../../hooks/useDisclose";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { useDisclose } from "../../hooks";
+import { GrayPageHeader } from "../../components";
 
 type FormType = {
   name: string;
@@ -152,13 +152,13 @@ const ManageModule = () => {
               <Radio.Group disabled={Boolean(selectedApp)}>
                 <Space direction="vertical">
                   <Radio value={PrivacyLevel.PUBLIC}>
-                    {t(PrivacyLevel.PUBLIC)}
+                    {t(getPrivacyLevelTextByNumber(PrivacyLevel.PUBLIC))}
                   </Radio>
                   <Radio value={PrivacyLevel.POSITIONS}>
-                    {t(PrivacyLevel.POSITIONS)}
+                    {t(getPrivacyLevelTextByNumber(PrivacyLevel.POSITIONS))}
                   </Radio>
                   <Radio value={PrivacyLevel.PRIVATE}>
-                    {t(PrivacyLevel.PRIVATE)}
+                    {t(getPrivacyLevelTextByNumber(PrivacyLevel.PRIVATE))}
                   </Radio>
                 </Space>
               </Radio.Group>

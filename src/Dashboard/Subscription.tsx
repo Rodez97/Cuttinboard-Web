@@ -8,6 +8,7 @@ import { useDashboard } from "./DashboardProvider";
 import { Alert, Button, Descriptions, Space, Typography } from "antd";
 import { CreditCardTwoTone } from "@ant-design/icons";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 function Subscription() {
   const { subscriptionDocument, organization, userDocument } = useDashboard();
@@ -20,6 +21,13 @@ function Subscription() {
   const createManageSubSession = async () => {
     try {
       const { data } = await createBillingSession(window.location.href);
+      // Report to analytics
+      logEvent(getAnalytics(), "manage_subscription", {
+        method: "stripe",
+        organization: organization.subscriptionId,
+        uid: userDocument.id,
+      });
+      // Redirect to Stripe
       location.assign(data);
     } catch (error) {
       recordError(error);

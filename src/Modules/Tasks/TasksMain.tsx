@@ -19,7 +19,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
+import { EmptyMainModule } from "../../components";
 
 function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   const navigate = useNavigate();

@@ -9,11 +9,10 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { message, Typography } from "antd";
-import LocationEditor from "../components/LocationEditor";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import React from "react";
-import { GrayPageHeader } from "../components/PageHeaders";
+import { LocationEditor } from "../components";
 
 function LocationSettings() {
   const { t } = useTranslation();

@@ -23,7 +23,6 @@ import {
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
-  Alert,
   Button,
   Checkbox,
   Col,
@@ -33,6 +32,7 @@ import {
   Modal,
   Row,
   Select,
+  Space,
   Tag,
   TimePicker,
   Typography,
@@ -271,6 +271,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           dependencies={[
             ["timeRange", "start"],
             ["timeRange", "end"],
+            "applyTo",
           ]}
           rules={[
             {
@@ -278,26 +279,45 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                 if (!value) {
                   return Promise.reject(t("Please select a time range"));
                 }
+
+                const applyTo: FormDataType["applyTo"] =
+                  form.getFieldValue("applyTo");
+
                 const { start, end } = value;
 
                 // Convert to dayjs
                 const startDayjs = dayjs(start.toDate());
                 const endDayjs = dayjs(end.toDate());
 
-                // Check if overlaps
-                const shiftOverlaps = shiftsDoc?.checkForOverlappingShifts(
-                  startDayjs,
-                  endDayjs,
-                  baseShift.current?.id ?? ""
-                );
-
-                if (shiftOverlaps) {
-                  return Promise.reject(
-                    t(
-                      "This shift overlaps with another shift for this employee"
-                    )
+                for (const day of applyTo) {
+                  const weekDay = weekDays.find(
+                    (wd) => dayjs(wd).isoWeekday() === day
                   );
+                  if (!weekDay) {
+                    return Promise.reject(t("Invalid day"));
+                  }
+                  const start = dayjs(weekDay)
+                    .set("hour", startDayjs.hour())
+                    .set("minute", startDayjs.minute());
+                  const end = dayjs(weekDay)
+                    .set("hour", endDayjs.hour())
+                    .set("minute", endDayjs.minute());
+                  // Check if overlaps
+                  const shiftOverlaps = shiftsDoc?.checkForOverlappingShifts(
+                    start,
+                    end,
+                    baseShift.current?.id ?? ""
+                  );
+
+                  if (shiftOverlaps) {
+                    return Promise.reject(
+                      t(
+                        "This shift overlaps with another shift for this employee"
+                      )
+                    );
+                  }
                 }
+
                 return Promise.resolve();
               },
             },
@@ -406,9 +426,9 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
           {/**
            * Quick add buttons
            */}
-          {scheduleSettingsData.presetTimes?.length > 0 && (
+          {scheduleSettingsData?.presetTimes?.length > 0 && (
             <Form.Item css={{ marginTop: 20 }}>
-              <Button.Group>
+              <Space wrap>
                 {scheduleSettingsData.presetTimes.map((presetTime, index) => {
                   const startTime = dayjs(presetTime.start, "HH:mm");
                   const endTime = dayjs(presetTime.end, "HH:mm");
@@ -446,7 +466,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, {}>((_, ref) => {
                     </Button>
                   );
                 })}
-              </Button.Group>
+              </Space>
             </Form.Item>
           )}
         </Form.Item>

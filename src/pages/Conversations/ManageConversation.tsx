@@ -6,11 +6,8 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { useState } from "react";
-import { recordError } from "../../utils/utils";
-import {
-  useNavigate,
-  useLocation as useRouterLocation,
-} from "react-router-dom";
+import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
+import { useNavigate } from "react-router-dom";
 import {
   Positions,
   PrivacyLevel,
@@ -27,7 +24,7 @@ interface ManageConversationProps {
 type FormType = {
   name: string;
   description?: string;
-  position: string;
+  position?: string;
   privacyLevel: PrivacyLevel;
 };
 
@@ -37,9 +34,9 @@ function ManageConversation({ baseConversation }: ManageConversationProps) {
   const [form] = Form.useForm<FormType>();
   const privacyLevel = Form.useWatch("privacyLevel", form);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createConversation, canManage } = useConversations();
+  const { createConversation, canManage, updateConversation } =
+    useConversations();
   const { location } = useLocation();
-  const { pathname } = useRouterLocation();
   const navigate = useNavigate();
 
   const onFinish = async (values: FormType) => {
@@ -49,26 +46,13 @@ function ManageConversation({ baseConversation }: ManageConversationProps) {
     setIsSubmitting(true);
     try {
       if (isEditing) {
-        const { privacyLevel, position, ...others } = values;
-        if (baseConversation.privacyLevel === PrivacyLevel.POSITIONS) {
-          const hosts = baseConversation.accessTags?.filter((at) =>
-            at.startsWith("hostId_")
-          );
-          const accessTags = [...hosts, position];
-          await baseConversation.update({ ...others, accessTags });
-        } else {
-          await baseConversation.update(others);
-        }
+        const { privacyLevel, ...others } = values;
+        await updateConversation(others);
+        navigate(-1);
       } else {
-        let newId: string;
-        const { position, ...others } = values;
-        if (others.privacyLevel === PrivacyLevel.POSITIONS) {
-          const accessTags = [position];
-          newId = await createConversation({ ...others, accessTags });
-        } else {
-          newId = await createConversation(others);
-        }
-        navigate(pathname.replace("new", newId));
+        const newId = await createConversation(values);
+        navigate(-1);
+        navigate(newId);
       }
       setIsSubmitting(false);
     } catch (error) {
@@ -77,17 +61,15 @@ function ManageConversation({ baseConversation }: ManageConversationProps) {
     }
   };
 
-  const getInitialValues = () => {
+  const getInitialValues = (): FormType => {
     if (isEditing) {
-      const { privacyLevel, accessTags, name, description } = baseConversation;
-      if (privacyLevel === PrivacyLevel.POSITIONS) {
-        const position = accessTags?.find((at) => !at.startsWith("hostId_"));
-        return { name, description, privacyLevel, position };
-      } else {
-        return { name, description, privacyLevel };
-      }
+      return baseConversation;
     }
-    return {};
+    return {
+      name: "",
+      description: "",
+      privacyLevel: PrivacyLevel.PUBLIC,
+    };
   };
 
   return (
@@ -136,13 +118,13 @@ function ManageConversation({ baseConversation }: ManageConversationProps) {
               <Radio.Group disabled={isEditing}>
                 <Space direction="vertical">
                   <Radio value={PrivacyLevel.PUBLIC}>
-                    {t(PrivacyLevel.PUBLIC)}
+                    {t(getPrivacyLevelTextByNumber(PrivacyLevel.PUBLIC))}
                   </Radio>
                   <Radio value={PrivacyLevel.POSITIONS}>
-                    {t(PrivacyLevel.POSITIONS)}
+                    {t(getPrivacyLevelTextByNumber(PrivacyLevel.POSITIONS))}
                   </Radio>
                   <Radio value={PrivacyLevel.PRIVATE}>
-                    {t(PrivacyLevel.PRIVATE)}
+                    {t(getPrivacyLevelTextByNumber(PrivacyLevel.PRIVATE))}
                   </Radio>
                 </Space>
               </Radio.Group>

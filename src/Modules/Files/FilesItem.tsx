@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
-import useFileItem from "../../hooks/useFileItem";
 import {
   Dropdown,
   Image,
@@ -29,6 +28,7 @@ import fileSize from "filesize";
 import { recordError } from "../../utils/utils";
 import axios from "axios";
 import fileDownload from "js-file-download";
+import { useFileItem } from "../../hooks";
 
 interface FilesItemProps {
   id: string;
@@ -106,45 +106,43 @@ function FilesItem({ file }: FilesItemProps) {
     <React.Fragment>
       <Tooltip title={file.name}>
         <Dropdown
-          overlay={
-            <Menu
-              items={[
-                {
-                  label: t("Copy link"),
-                  key: "onCopyToClipboardClick",
-                  icon: <CopyOutlined />,
-                  onClick: copyToClipboard,
-                },
-                {
-                  label: t("Download"),
-                  key: "onDownload",
-                  icon: <DownloadOutlined />,
-                  onClick: downloadFile,
-                },
-                {
-                  label: t("Rename"),
-                  key: "renameFile",
-                  icon: <FormOutlined />,
-                  disabled: !canManage,
-                  onClick: () => setRenameDialogOpen(true),
-                },
-                {
-                  label: t("Delete"),
-                  key: "deleteFile",
-                  icon: <DeleteOutlined />,
-                  disabled: !canManage,
-                  danger: true,
-                  onClick: handleDelete,
-                },
-                {
-                  label: fileSize(file.size),
-                  key: "fileSize",
-                  icon: <FileExclamationOutlined />,
-                  disabled: true,
-                },
-              ]}
-            />
-          }
+          menu={{
+            items: [
+              {
+                label: t("Copy link"),
+                key: "onCopyToClipboardClick",
+                icon: <CopyOutlined />,
+                onClick: copyToClipboard,
+              },
+              {
+                label: t("Download"),
+                key: "onDownload",
+                icon: <DownloadOutlined />,
+                onClick: downloadFile,
+              },
+              {
+                label: t("Rename"),
+                key: "renameFile",
+                icon: <FormOutlined />,
+                disabled: !canManage,
+                onClick: () => setRenameDialogOpen(true),
+              },
+              {
+                label: t("Delete"),
+                key: "deleteFile",
+                icon: <DeleteOutlined />,
+                disabled: !canManage,
+                danger: true,
+                onClick: handleDelete,
+              },
+              {
+                label: fileSize(file.size),
+                key: "fileSize",
+                icon: <FileExclamationOutlined />,
+                disabled: true,
+              },
+            ],
+          }}
           trigger={["contextMenu"]}
         >
           <Space

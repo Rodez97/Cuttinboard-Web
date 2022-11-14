@@ -25,7 +25,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { useCallback } from "react";
-import { recordError } from "../../utils/utils";
+import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
 import {
   PrivacyLevel,
   RoleAccessLevels,
@@ -100,7 +100,9 @@ function ConvDetails() {
                 )
               }
               title={t("Privacy Level")}
-              description={t(selectedConversation.privacyLevel)}
+              description={t(
+                getPrivacyLevelTextByNumber(selectedConversation.privacyLevel)
+              )}
             />
           </List.Item>
           {Boolean(hosts.length) && (
@@ -147,6 +149,7 @@ function ConvDetails() {
             )}
           <Divider />
           <List.Item
+            hidden={!selectedConversation.iAmMember}
             extra={
               <Switch
                 checked={selectedConversation.isMuted}

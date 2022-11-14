@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { recordError } from "../../utils/utils";
+import { recordError } from "../utils/utils";
 import mdiHeartMinus from "@mdi/svg/svg/heart-minus.svg";
 import mdiHeartPlus from "@mdi/svg/svg/heart-plus.svg";
 import Icon from "@ant-design/icons";
-import { Button, Dropdown } from "antd";
+import { Button, Dropdown, Popover } from "antd";
 import styled from "@emotion/styled";
 import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCallback } from "react";
@@ -41,8 +41,8 @@ function MessageReactionPicker({ message }: { message: Message }) {
   }, [message]);
 
   return (
-    <Dropdown
-      overlay={
+    <Popover
+      content={
         <div css={{ display: "flex", flexDirection: "row" }}>
           {emojis.map((emoji, i) => (
             <EmojiButton key={i} onClick={addReactionToMessage(emoji)}>
@@ -64,7 +64,7 @@ function MessageReactionPicker({ message }: { message: Message }) {
           )
         }
       />
-    </Dropdown>
+    </Popover>
   );
 }
 

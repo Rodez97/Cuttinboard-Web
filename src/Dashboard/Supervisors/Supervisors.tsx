@@ -6,7 +6,7 @@ import { jsx } from "@emotion/react";
 import { Button, Empty, Layout, List, PageHeader, Tag } from "antd";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
+import { QuickUserDialogAvatar } from "../../components";
 
 function Supervisors({ supervisors }: { supervisors: Employee[] }) {
   const navigate = useNavigate();

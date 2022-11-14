@@ -10,6 +10,7 @@ import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Button, Layout, message, Result, Space, Steps, Tooltip } from "antd";
 import { recordError } from "../../../utils/utils";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 interface AddLocationContextProps {
   location: Partial<Location>;
@@ -90,6 +91,15 @@ function AddLocation() {
         generalManager,
       });
       hide();
+      message.success(t("Location added successfully"));
+      // Report to analytics
+      const analytics = getAnalytics();
+      logEvent(analytics, "location_added", {
+        locationId: location.id,
+        locationName: location.name,
+        withGeneralManager: !!generalManager,
+      });
+      // Go back to the previous page
       navigate(-1);
     } catch (error) {
       recordError(error);

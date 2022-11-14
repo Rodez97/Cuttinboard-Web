@@ -5,19 +5,9 @@ import {
   useCuttinboard,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Badge,
-  Button,
-  Card,
-  List,
-  message,
-  Modal,
-  Spin,
-  Typography,
-} from "antd";
+import { Badge, Button, Card, List, message, Modal, Spin } from "antd";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import useSelectedLocation from "../../hooks/useSelectedLocation";
 import { recordError } from "../../utils/utils";
 import { ReactNode, useState } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
@@ -28,6 +18,7 @@ import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { useSelectedLocation } from "../../hooks";
 
 const { Meta } = Card;
 
@@ -85,6 +76,15 @@ function LocationCard({ location, actions }: LocationCardProps) {
           const { data } = await createBillingSession({
             return_url: window.location.href,
           });
+          // Report to analytics
+          const analytics = getAnalytics();
+          logEvent(analytics, "billing_session_created", {
+            location_id: location.id,
+            organization_id: organizationKey.orgId,
+            from: "location_card",
+            for: "activate_location",
+          });
+          // Redirect to Stripe Billing Portal
           window.location.assign(data);
         } catch {
           recordError(error);

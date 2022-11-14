@@ -1,6 +1,6 @@
-import { LoadingScreen } from "./components/LoadingScreen";
 import React, { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { LoadingScreen } from "./components";
 import { MainApp } from "./index";
 
 export default () => (

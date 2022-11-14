@@ -16,7 +16,7 @@ import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import SplitButton from "../../components/SplitButton";
+import { SplitButton } from "../../components";
 import { useDashboard } from "../DashboardProvider";
 import LocationCard from "../Locations/LocationCard";
 import { customOrderSorter } from "./customOrderSorter";

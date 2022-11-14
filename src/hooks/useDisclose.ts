@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 export type DiscloseHook = [boolean, () => void, () => void, () => void];
 
-function useDisclose(initialState = false): DiscloseHook {
+export function useDisclose(initialState = false): DiscloseHook {
   const [isOpen, setIsOpen] = useState(initialState);
 
   const open = () => setIsOpen(true);
@@ -15,5 +15,3 @@ function useDisclose(initialState = false): DiscloseHook {
 
   return useMemo<DiscloseHook>(() => resArray, resArray);
 }
-
-export default useDisclose;

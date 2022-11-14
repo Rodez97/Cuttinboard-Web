@@ -2,7 +2,6 @@
 import { jsx } from "@emotion/react";
 import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
 import { useMemo } from "react";
-import UserMenu from "../components/UserMenu";
 import DashboardRouter from "./DashboardRouter";
 import { Badge, Button, Layout, Menu, MenuProps, Typography } from "antd";
 import { useDashboard } from "./DashboardProvider";
@@ -22,14 +21,15 @@ import Icon, {
   ShopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import {
-  NormalContainer,
-  OwnerGoldContainer,
-} from "../components/BusinessPaper";
-import { DarkPageHeader } from "../components/PageHeaders";
 import mdiMessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import { useNotificationsBadges } from "@cuttinboard-solutions/cuttinboard-library/services";
 import DM from "../pages/DirectMessages/DM";
+import {
+  DarkPageHeader,
+  NormalContainer,
+  OwnerGoldContainer,
+  UserMenu,
+} from "../components";
 
 const { Content, Footer, Sider } = Layout;
 
@@ -94,7 +94,6 @@ function Dashboard() {
   return (
     <Layout>
       <DarkPageHeader
-        className="site-page-header"
         title={<AllWhiteLogo width={150} />}
         extra={[
           <Badge

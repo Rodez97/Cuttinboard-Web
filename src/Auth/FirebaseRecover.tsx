@@ -8,6 +8,7 @@ import { Alert, Button, Form, Input, message, Typography } from "antd";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../utils/utils";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const initialCounterTime = new Date();
 
@@ -35,6 +36,10 @@ function FirebaseRecover() {
       message.success(
         t("Email sent, if you don't see it check your spam folder")
       );
+      // Report to analytics
+      logEvent(getAnalytics(), "recover_password", {
+        method: "email",
+      });
     } catch (error) {
       recordError(error);
     }
@@ -47,7 +52,7 @@ function FirebaseRecover() {
       }}
     >
       <Typography.Title level={4} css={{ marginBottom: "20px !important" }}>
-        {t("Recover your password")}
+        {t("Recover your password")};
       </Typography.Title>
       <Form disabled={Boolean(count) || sending} onFinish={onFinish}>
         <Form.Item

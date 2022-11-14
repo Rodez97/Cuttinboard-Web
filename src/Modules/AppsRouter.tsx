@@ -1,7 +1,7 @@
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import PageLoading from "../components/PageLoading";
+import { PageLoading } from "../components";
 import AppsView from "./AppsView";
 
 const Tasks = lazy(() => import("./Tasks/Tasks"));

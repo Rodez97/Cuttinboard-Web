@@ -16,7 +16,7 @@ import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
-import { DarkPageHeader } from "../components/PageHeaders";
+import { DarkPageHeader } from "../components";
 import LocationSettings from "./LocationSettings";
 import ScheduleSettings from "./ScheduleSettings";
 

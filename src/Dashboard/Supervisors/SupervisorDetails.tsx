@@ -22,7 +22,6 @@ import {
   Divider,
   Dropdown,
   Layout,
-  Menu,
   Modal,
   PageHeader,
   Result,
@@ -42,7 +41,8 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import LocationsPicker from "./LocationsPicker";
 import { useOwner } from "../OwnerPortal/OwnerPortal";
-import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { QuickUserDialogAvatar } from "../../components";
 
 function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
   const { supervisorId } = useParams();
@@ -69,6 +69,10 @@ function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
         try {
           navigate(-1);
           await deleteDoc(getSupervisor.docRef);
+          // Report to analytics
+          logEvent(getAnalytics(), "delete_supervisor", {
+            supervisorId: getSupervisor.id,
+          });
         } catch (error) {
           recordError(error);
         }
@@ -76,26 +80,6 @@ function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
       onCancel() {},
     });
   };
-
-  const menu = (
-    <Menu
-      items={[
-        {
-          key: "assign",
-          label: t("Assign Locations"),
-          icon: <PlusSquareOutlined />,
-          onClick: () => navigate("assign"),
-        },
-        {
-          key: "delete",
-          label: t("Delete Supervisor"),
-          icon: <DeleteOutlined />,
-          danger: true,
-          onClick: deleteSupervisor,
-        },
-      ]}
-    />
-  );
 
   const unassignLocation = (location: Location) => {
     Modal.confirm({
@@ -191,7 +175,27 @@ function SupervisorDetails({ supervisors }: { supervisors: Employee[] }) {
         onBack={() => navigate(-1)}
         title={t("Supervisor Details")}
         extra={[
-          <Dropdown key="1" overlay={menu} trigger={["click"]}>
+          <Dropdown
+            key="1"
+            trigger={["click"]}
+            menu={{
+              items: [
+                {
+                  key: "assign",
+                  label: t("Assign Locations"),
+                  icon: <PlusSquareOutlined />,
+                  onClick: () => navigate("assign"),
+                },
+                {
+                  key: "delete",
+                  label: t("Delete Supervisor"),
+                  icon: <DeleteOutlined />,
+                  danger: true,
+                  onClick: deleteSupervisor,
+                },
+              ],
+            }}
+          >
             <Button icon={<MoreOutlined />} />
           </Dropdown>,
         ]}

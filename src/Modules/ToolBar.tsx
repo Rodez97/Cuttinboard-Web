@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { Input, Space } from "antd";
 import { useTranslation } from "react-i18next";
-import SplitButton from "../components/SplitButton";
+import { SplitButton } from "../components";
 
 interface ToolBarProps {
   index: number;

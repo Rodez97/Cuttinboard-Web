@@ -26,7 +26,7 @@ function DeleteAccountDialog({ open, onClose }: Props) {
     <Modal
       title={t("Are you sure you want to delete your account?")}
       confirmLoading={deleting}
-      visible={open}
+      open={open}
       onOk={form.submit}
       onCancel={onClose}
     >

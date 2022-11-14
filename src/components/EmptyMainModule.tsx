@@ -1,7 +1,7 @@
 import { Empty } from "antd";
 import styled from "@emotion/styled";
 
-export const EmptyMainModule = styled(Empty)`
+export default styled(Empty)`
   height: 100%;
   display: flex;
   flex-direction: column;

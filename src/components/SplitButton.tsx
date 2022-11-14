@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dropdown, Menu } from "antd";
+import { Dropdown } from "antd";
 import {
   FilterOutlined,
   SortAscendingOutlined,
@@ -25,23 +25,17 @@ export default function SplitButton({
     onChageOrder(order === "asc" ? "desc" : "asc");
   };
 
-  const handleMenuItemClick = (index: string) => {
-    const numberIndex = Number.parseInt(index);
-    onChange(numberIndex);
-  };
-
-  const menu = (
-    <Menu
-      onClick={({ key }) => handleMenuItemClick(key)}
-      items={options.map((opt, i) => ({ label: opt, key: i }))}
-    />
-  );
-
   return (
     <React.Fragment>
       <Dropdown.Button
         onClick={handleClick}
-        overlay={menu}
+        menu={{
+          items: options.map((opt, i) => ({
+            label: opt,
+            key: i,
+            onClick: () => onChange(i),
+          })),
+        }}
         icon={
           order === "asc" ? (
             <SortAscendingOutlined />

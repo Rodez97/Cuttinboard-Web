@@ -9,8 +9,7 @@ import {
 import { doc, DocumentData, DocumentReference } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
-import PageError from "../components/PageError";
-import PageLoading from "../components/PageLoading";
+import { PageError, PageLoading } from "../components";
 
 interface DashboardContextProps {
   userDocument: CuttinboardUser;

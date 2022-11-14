@@ -5,10 +5,10 @@ import {
   ReplyRecipient,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Space, Typography } from "antd";
-import AudioMessage from "./CustomMessages/AudioMessage";
-import FileMessage from "./CustomMessages/FileMessage";
-import ImageMessage from "./CustomMessages/ImageMessage";
-import VideoMessage from "./CustomMessages/VideoMessage";
+import AudioMessage from "./MessageElements/AudioMessage";
+import FileMessage from "./MessageElements/FileMessage";
+import ImageMessage from "./MessageElements/ImageMessage";
+import VideoMessage from "./MessageElements/VideoMessage";
 import Linkify from "linkify-react";
 
 interface MessageElementProps {

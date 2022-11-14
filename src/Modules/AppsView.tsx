@@ -7,12 +7,12 @@ import tasksImage from "../assets/images/to-do-list.png";
 import filesImage from "../assets/images/drawer.png";
 import checklistImage from "../assets/images/checklist.png";
 import { Divider, Layout, Space } from "antd";
-import OverflowLayout from "../components/OverflowLayout";
 import utensilsImage from "../assets/images/spatula.png";
 import shceduleImage from "../assets/images/timetable.png";
 import employeesImage from "../assets/images/hierarchy.png";
 import myShiftsImage from "../assets/images/my_Shifts.png";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { OverflowLayout } from "../components";
 
 const appsElements: {
   name: string;

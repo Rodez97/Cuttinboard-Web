@@ -11,6 +11,7 @@ import {
   Modal,
   Typography,
 } from "antd";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { deleteDoc } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
@@ -39,6 +40,13 @@ const DeleteLocationDialog = forwardRef<DeleteLocationDialogRef, {}>(
         );
         await reauthenticateWithCredential(Auth.currentUser, credential);
         await deleteDoc(location.docRef);
+        // Report to analytics
+        const analytics = getAnalytics();
+        logEvent(analytics, "delete_location", {
+          location_id: location.id,
+          location_name: location.name,
+        });
+        // Close dialog
         close();
       } catch (error) {
         setError(error);

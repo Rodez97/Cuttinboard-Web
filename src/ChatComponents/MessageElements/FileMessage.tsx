@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { BaseMediaProps } from "./BaseMediaProps";
-import { getFileIconByType } from "../../../Modules/Files/FileTypeIcons";
+import { getFileIconByType } from "../../Modules/Files/FileTypeIcons";
 import { Avatar, List } from "antd";
 import Icon, { FileFilled } from "@ant-design/icons";
 import mdiOpenInNew from "@mdi/svg/svg/open-in-new.svg";

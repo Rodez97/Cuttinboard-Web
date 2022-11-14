@@ -2,14 +2,13 @@
 import { jsx } from "@emotion/react";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Layout, message, PageHeader } from "antd";
-import { updateDoc } from "firebase/firestore";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import LocationEditor from "../../components/LocationEditor";
 import { recordError } from "../../utils/utils";
 import { useOwner } from "./OwnerPortal";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { LocationEditor } from "../../components";
 
 function EditLocation() {
   const navigate = useNavigate();

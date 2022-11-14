@@ -53,7 +53,7 @@ function DMList({
     });
 
     return orderBy(sorted, "getOrderTime", "desc")?.map((el) => {
-      const { id, fullName, avatar } = el.recipient;
+      const { fullName, avatar } = el.recipient;
       return {
         label: (
           <Badge

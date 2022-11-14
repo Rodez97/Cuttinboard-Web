@@ -7,17 +7,19 @@ import { useNavigate } from "react-router-dom";
 import ManageNoteDialog, { ManageNoteDialogRef } from "./ManageNoteDialog";
 import NoteCard from "./NoteCard";
 import { useTranslation } from "react-i18next";
-import PageError from "../../components/PageError";
 import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
 import { Button, Layout, Space } from "antd";
-import PageLoading from "../../components/PageLoading";
 import Icon, { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { NotePlus } from "./notesIcons";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import { matchSorter } from "match-sorter";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
+import {
+  EmptyMainModule,
+  GrayPageHeader,
+  PageError,
+  PageLoading,
+} from "../../components";
 
 function NotesMain() {
   const { t } = useTranslation();

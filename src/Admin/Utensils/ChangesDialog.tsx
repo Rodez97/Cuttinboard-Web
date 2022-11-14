@@ -23,7 +23,7 @@ function ChangesDialog({ open, onClose, utensil }: ChangesDialogProps) {
   const { t } = useTranslation();
   return (
     <Modal
-      visible={open}
+      open={open}
       title={t("Changes")}
       onCancel={onClose}
       footer={[

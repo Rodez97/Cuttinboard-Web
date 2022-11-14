@@ -36,10 +36,10 @@ import Icon from "@ant-design/icons";
 import AccountGroupOutline from "@mdi/svg/svg/account-group-outline.svg";
 import { recordError } from "../../utils/utils";
 import ManagePositions from "./ManagePositions";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import { orderBy } from "lodash";
 import CreateEmployee from "./CreateEmployee";
-import useDisclose from "../../hooks/useDisclose";
+import { useDisclose } from "../../hooks";
+import { GrayPageHeader } from "../../components";
 
 function Employees() {
   const { getEmployees } = useEmployeesList();
@@ -177,14 +177,18 @@ function Employees() {
           {location.settings?.positions?.length && (
             <Select.OptGroup label={t("Custom")}>
               {location.settings.positions.map((pos) => (
-                <Select.Option value={pos}>{pos}</Select.Option>
+                <Select.Option value={pos} key={pos}>
+                  {pos}
+                </Select.Option>
               ))}
             </Select.OptGroup>
           )}
 
           <Select.OptGroup label={t("Default")}>
             {Positions.map((pos) => (
-              <Select.Option value={pos}>{pos}</Select.Option>
+              <Select.Option value={pos} key={pos}>
+                {pos}
+              </Select.Option>
             ))}
           </Select.OptGroup>
         </Select>

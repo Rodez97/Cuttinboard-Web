@@ -8,15 +8,13 @@ import {
 import { collection } from "@firebase/firestore";
 import { Layout } from "antd";
 import { Navigate, Route, Routes } from "react-router-dom";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
 import ManageModule from "../ManageApp/ManageModule";
 import FilesDrawersList from "./FilesDrawersList";
 import FilesRoutes from "./FilesRoutes";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
 import { recordError } from "../../utils/utils";
+import { EmptyMainModule, PageError, PageLoading } from "../../components";
 
 function Files() {
   const { t } = useTranslation();

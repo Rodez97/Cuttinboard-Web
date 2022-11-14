@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Card } from "antd";
 
-export const StickyNoteCard = styled(Card)`
+export default styled(Card)`
   background-color: #fffb99;
   border-radius: 0;
   border-width: 0;

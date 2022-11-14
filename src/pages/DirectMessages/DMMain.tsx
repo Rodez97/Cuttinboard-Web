@@ -6,7 +6,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import ChatMain from "../../components/ChatV2/ChatMain";
+import ChatMain from "../../ChatComponents/ChatMain";
 import { GrayPageHeader } from "../../components/PageHeaders";
 
 function DMMain() {

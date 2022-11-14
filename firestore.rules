@@ -67,11 +67,11 @@ service cloud.firestore {
       allow update: if isAuthenticated() && request.auth.uid in resource.data.membersList && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]);
 		}
 
-		match /Locations/{document=**} {
+		match /Locations/{locationId} {
 			allow read: if isAuthenticated();
       allow create: if isOwner(resource.data.organizationId) && request.resource.data.keys().hasAll(["organizationId","subItemId","name"]);
       allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus","supervisors"]) == false
-                    && isOwnerOrSupervisor(resource.data.organizationId))
+                    && (isOwnerOrSupervisor(resource.data.organizationId) || isGM(resource.data.organizationId, locationId)))
                     || (isOwner(resource.data.organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisors"]));
       allow delete: if isOwner(resource.data.organizationId);      
 		}
@@ -111,12 +111,14 @@ service cloud.firestore {
 
       match /scheduleDocs/{document=**} {
 				allow read: if orgMember(organizationId);
-        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId) || isManager(organizationId, request.resource.data.locationId);
+        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
 			}
 
       match /shifts/{document=**} {
         allow read: if orgMember(organizationId);
-        allow create, delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId) || isManager(organizationId, request.resource.data.locationId);
+        allow delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
         allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
                       || resource.data.employeeId == request.auth.uid;
 			}
@@ -157,6 +159,12 @@ service cloud.firestore {
             || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]));
       }
 
+      function updateConversation(){
+        return (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name","description","position","hosts","members"]) && (isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)))
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["position","members"]) && request.auth.uid in resource.data.hosts)
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]));
+      }
+
       function deleteModule(){
         return isOwnerOrSupervisor(organizationId) 
             || isGM(organizationId, resource.data.locationId);
@@ -164,13 +172,20 @@ service cloud.firestore {
 
       function createModule(){
         return (isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId))
-            && request.resource.data.keys().hasAll(["name","accessTags","privacyLevel","locationId"]);
+            && ((request.resource.data.privacyLevel != "PRIVATE" && request.resource.data.keys().hasAll(["name","accessTags","privacyLevel","locationId"])) ||
+                (request.resource.data.privacyLevel == "PRIVATE" && request.resource.data.keys().hasAll(["name","privacyLevel","locationId"])));
+      }
+
+      function createConversation(){
+        return (isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId))
+            && ((request.resource.data.privacyLevel == 1 && request.resource.data.keys().hasAll(["name","position","privacyLevel","locationId"])) ||
+                (request.resource.data.privacyLevel != 1 && request.resource.data.keys().hasAll(["name","privacyLevel","locationId"])));
       }
       
       match /conversations/{conversationId} {
           allow read: if readModule();
-          allow update: if updateModule();
-          allow create: if createModule(); 
+          allow update: if updateConversation();
+          allow create: if createConversation(); 
           allow delete: if deleteModule();     
       }
 

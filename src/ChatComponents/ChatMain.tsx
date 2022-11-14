@@ -5,19 +5,15 @@ import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
-import {
-  Message,
-  MessageType,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import dayjs from "dayjs";
+import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Divider, Layout, Space, Spin, Typography } from "antd";
-import PageLoading from "../PageLoading";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   useDirectMessages,
   useConversationMessages,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import DirectMessageBubble from "./DirectMessageBubble";
+import { PageLoading } from "../components";
 
 interface ChatMainProps {
   type: "chats" | "conversations";

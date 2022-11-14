@@ -6,13 +6,12 @@ import styled from "@emotion/styled";
 import { useAddLocation } from "../AddLocation";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc } from "firebase/firestore";
-import PageLoading from "../../../../components/PageLoading";
-import PageError from "../../../../components/PageError";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "../../../DashboardProvider";
 import { List, Space, Typography } from "antd";
 import { ShopOutlined, UserOutlined } from "@ant-design/icons";
+import { PageError, PageLoading } from "../../../../components";
 
 const SummaryNewLocationContainer = styled.div`
   display: flex;

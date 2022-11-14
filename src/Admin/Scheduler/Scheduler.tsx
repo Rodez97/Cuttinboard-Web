@@ -18,7 +18,7 @@ import duration from "dayjs/plugin/duration";
 import { matchSorter } from "match-sorter";
 import ProjectedSalesDialog from "./ProjectedSalesDialog";
 import RosterView from "./RosterView";
-import ScheduleSummary from "./ScheduleSummary";
+import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
 import {
   Employee,
@@ -46,6 +46,7 @@ import {
   message,
   Modal,
   Select,
+  Skeleton,
   Space,
   Tag,
   Typography,
@@ -53,6 +54,7 @@ import {
 import TableFooter from "./TableFooter";
 import {
   ExclamationCircleOutlined,
+  FilePdfOutlined,
   FundProjectionScreenOutlined,
   ScheduleOutlined,
   TeamOutlined,
@@ -61,10 +63,11 @@ import {
 import { recordError } from "../../utils/utils";
 import "./Scheduler.scss";
 import CloneSchedule from "./CloneSchedule";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import useSize from "@react-hook/size";
+import { generateSchedulePdf } from "./generatePdf";
+import { GrayPageHeader, PageError, PageLoading } from "../../components";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -97,12 +100,14 @@ function Scheduler() {
     setSelectedTag,
     weekDays,
     updatesCount,
+    scheduleSummary,
+    loading,
+    error,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
   const manageShiftDialogRef = useRef<IManageShiftDialogRef>(null);
   const { t } = useTranslation();
-  const [rosterMode, setRosterMode] = useState(false);
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
   const { getEmployees } = useEmployeesList();
   const { location } = useLocation();
@@ -190,6 +195,7 @@ function Scheduler() {
           const analytics = getAnalytics();
           logEvent(analytics, "publish_schedule", {
             notifiTo,
+            ...scheduleSummary,
           });
         } catch (error) {
           recordError(error);
@@ -225,7 +231,6 @@ function Scheduler() {
         width: 250,
         className: "employee-column",
         filters: [
-          { text: t("All Employees"), value: "all" },
           {
             text: t("Scheduled Only"),
             value: "all_scheduled",
@@ -241,8 +246,6 @@ function Scheduler() {
         ],
         onFilter: (value: string, record) => {
           switch (value) {
-            case "all":
-              return true;
             case "all_scheduled":
               return record.empShifts?.shiftsArray.length > 0;
             case "changed":
@@ -274,6 +277,21 @@ function Scheduler() {
     [weekDays, employees, employeeShiftsCollection]
   );
 
+  const generatePdf = useCallback(async () => {
+    generateSchedulePdf(
+      employees?.map((emp) => ({
+        key: emp.id,
+        employee: emp,
+        empShifts: employeeShiftsCollection?.find(
+          (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
+        ),
+      })),
+      location.name,
+      weekId,
+      weekDays
+    );
+  }, [weekDays, employees, employeeShiftsCollection]);
+
   return (
     <Layout css={{ overflowX: "auto" }}>
       <ScheduleContext.Provider
@@ -282,11 +300,18 @@ function Scheduler() {
           newShift,
         }}
       >
-        <ManageShiftDialog ref={manageShiftDialogRef} />
         <GrayPageHeader
           onBack={handleBack}
           title={t("Schedule")}
           extra={[
+            <Button
+              onClick={generatePdf}
+              icon={<FilePdfOutlined />}
+              key="generatePdf"
+              type="dashed"
+            >
+              {t("Generate PDF")}
+            </Button>,
             <Button
               key="clone"
               onClick={() => setCloneDialogOpen(true)}
@@ -306,9 +331,9 @@ function Scheduler() {
             <Button
               key="2"
               icon={<TeamOutlined />}
-              onClick={() => setRosterMode(!rosterMode)}
+              onClick={() => navigate("roster")}
             >
-              {t(rosterMode ? "See Schedule" : "See Roster")}
+              {t("See Roster")}
             </Button>,
             <Button
               key="1"
@@ -338,6 +363,7 @@ function Scheduler() {
           css={{ justifyContent: "space-between", padding: 10 }}
         >
           <WeekNavigator onChange={setWeekId} currentWeekId={weekId} />
+
           <Space align="center" wrap>
             <Input.Search
               placeholder={t("Search")}
@@ -374,51 +400,61 @@ function Scheduler() {
             </Select>
           </Space>
         </Space>
-
-        <ScheduleSummary />
+        <ScheduleSummaryElement />
         <Layout.Content ref={target} css={{ overflowY: "hidden" }}>
-          {rosterMode ? (
-            <RosterView employees={employees} />
+          {error ? (
+            <PageError error={error} />
+          ) : loading ? (
+            <PageLoading />
           ) : (
-            <Table
-              scroll={{ x: 1300, y: height - 55 - 150 }}
-              bordered
-              components={{
-                body: {
-                  cell: ({ children, ...props }) => (
-                    <td {...props} className="shift-cell">
-                      {children}
-                    </td>
+            [
+              <Table
+                key="table"
+                scroll={{ x: 1300, y: height - 55 - 85 }}
+                bordered
+                components={{
+                  body: {
+                    cell: ({ children, ...props }) => (
+                      <td {...props} className="shift-cell">
+                        {children}
+                      </td>
+                    ),
+                  },
+                }}
+                columns={columns}
+                dataSource={employees?.map((emp) => ({
+                  key: emp.id,
+                  employee: emp,
+                  empShifts: employeeShiftsCollection?.find(
+                    (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
                   ),
-                },
-              }}
-              columns={columns}
-              dataSource={employees?.map((emp) => ({
-                key: emp.id,
-                employee: emp,
-                empShifts: employeeShiftsCollection?.find(
-                  (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
-                ),
-              }))}
-              summary={(pageData) => (
-                <Table.Summary fixed>
-                  <TableFooter data={pageData} />
-                </Table.Summary>
-              )}
-              pagination={false}
-              rowKey={(e) => e.employee.id}
-              rowClassName="scheduler-row"
-            />
+                }))}
+                summary={(pageData) => (
+                  <Table.Summary fixed>
+                    <TableFooter data={pageData} />
+                  </Table.Summary>
+                )}
+                pagination={false}
+                rowKey={(e) => e.employee.id}
+                rowClassName="scheduler-row"
+              />,
+              <ManageShiftDialog
+                ref={manageShiftDialogRef}
+                key="manageShiftD"
+              />,
+              <ProjectedSalesDialog
+                visible={projectedSalesOpen}
+                onClose={() => setProjectedSalesOpen(false)}
+                key="projectedSalesD"
+              />,
+              <CloneSchedule
+                open={cloneDialogOpen}
+                onCancel={() => setCloneDialogOpen(false)}
+                key="cloneD"
+              />,
+            ]
           )}
         </Layout.Content>
-        <ProjectedSalesDialog
-          visible={projectedSalesOpen}
-          onClose={() => setProjectedSalesOpen(false)}
-        />
-        <CloneSchedule
-          open={cloneDialogOpen}
-          onCancel={() => setCloneDialogOpen(false)}
-        />
       </ScheduleContext.Provider>
     </Layout>
   );

@@ -22,6 +22,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const { Step } = Steps;
 
@@ -51,6 +52,7 @@ function NewSupervisor() {
     }
     return t("Finished");
   };
+
   const getStatus = (stp: number) => {
     if (stp === step) {
       return "process";
@@ -73,11 +75,17 @@ function NewSupervisor() {
         role: RoleAccessLevels.ADMIN,
         supervisingLocations: selectedLocations.map((sl) => sl.id),
       });
+      // Report to analytics
+      logEvent(getAnalytics(), "create_supervisor", {
+        method: "email",
+        locations: selectedLocations.length,
+      });
       navigate(-1);
     } catch (error) {
       recordError(error);
     }
   };
+
   return (
     <Layout
       css={{

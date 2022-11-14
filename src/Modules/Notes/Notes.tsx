@@ -9,14 +9,12 @@ import { Layout } from "antd";
 import { collection } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
 import ManageModule from "../ManageApp/ManageModule";
 import NotesList from "./NotesList";
 import NotesRoutes from "./NotesRoutes";
 import notesImage from "../../assets/images/notes.png";
-import { EmptyMainModule } from "../../components/EmptyMainModule";
 import { recordError } from "../../utils/utils";
+import { EmptyMainModule, PageError, PageLoading } from "../../components";
 
 function Notes() {
   const { t } = useTranslation();

@@ -9,7 +9,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { recordError } from "../../utils/utils";
+import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
 import { Button, Divider, List, Space, Tag } from "antd";
 import {
   CrownOutlined,
@@ -23,7 +23,7 @@ import {
   TagsOutlined,
 } from "@ant-design/icons";
 import { useMemo } from "react";
-import { GrayPageHeader } from "../../components/PageHeaders";
+import { GrayPageHeader } from "../../components";
 
 function ModuleInfo() {
   const { selectedApp, canManage } = useCuttinboardModule();
@@ -82,7 +82,9 @@ function ModuleInfo() {
                 )
               }
               title={t("Privacy Level")}
-              description={t(selectedApp.privacyLevel)}
+              description={t(
+                getPrivacyLevelTextByNumber(selectedApp.privacyLevel)
+              )}
             />
           </List.Item>
           {Boolean(hosts.length) && (

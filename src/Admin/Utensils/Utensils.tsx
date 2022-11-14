@@ -11,7 +11,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import PageLoading from "../../components/PageLoading";
+import { PageLoading } from "../../components";
 import ManageUtensilDialog, {
   IManageUtensilDialogRef,
 } from "./ManageUtensilDialog";
@@ -92,7 +92,7 @@ function Utensils() {
         <Input.Search
           placeholder={t("Search")}
           allowClear
-          onSearch={setSearchText}
+          onChange={(e) => setSearchText(e.target.value)}
           value={searchText}
           style={{ width: 200 }}
         />

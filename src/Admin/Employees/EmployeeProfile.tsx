@@ -33,7 +33,7 @@ function EmployeeProfile() {
   return (
     <Layout>
       <PageHeader
-        onBack={() => navigate(`/location/${location.id}/apps/employees`)}
+        onBack={() => navigate(-1)}
         title={employee.fullName}
         avatar={{
           src: getAvatarByUID(employee.id),

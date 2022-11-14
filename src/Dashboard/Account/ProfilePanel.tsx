@@ -11,9 +11,9 @@ import dayjs from "dayjs";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import EditableAvatar from "../../components/EditableAvatar";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
+import { EditableAvatar } from "../../components";
 
 function ProfilePanel() {
   const [form] = Form.useForm();

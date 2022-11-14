@@ -5,14 +5,13 @@ import {
   EmployeeShifts,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCallback } from "react";
-import { QuickUserDialogAvatar } from "../../components/QuickUserDialog";
 import { Card, Space, Tag, Tooltip, Typography } from "antd";
 import { getDurationText } from "./getDurationText";
 import {
   Colors,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { QuickUserDialogAvatar } from "../../components";
 
 interface EmpColumnCellProps {
   employee: Employee;
@@ -20,7 +19,6 @@ interface EmpColumnCellProps {
 }
 
 function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
-  const { scheduleSettingsData } = useSchedule();
   const getSecondaryElement = useCallback(() => {
     if (!empShifts) {
       if (employee.locationRole === RoleAccessLevels.OWNER) {
@@ -90,7 +88,7 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
         }
       )}`}</Tag>
     );
-  }, [empShifts, employee, scheduleSettingsData]);
+  }, [empShifts, employee]);
 
   return (
     <Card

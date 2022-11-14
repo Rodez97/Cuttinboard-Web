@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import ChatMain from "../../components/ChatV2/ChatMain";
+import ChatMain from "../../ChatComponents/ChatMain";
 import {
   ConversationMessagesProvider,
   useConversations,

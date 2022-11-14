@@ -8,18 +8,14 @@ import {
   InputNumber,
   Layout,
   Space,
-  Switch,
   TimePicker,
   Typography,
 } from "antd";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { Checkbox } from "antd";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc, setDoc } from "firebase/firestore";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import PageError from "../components/PageError";
-import PageLoading from "../components/PageLoading";
 import { recordError } from "../utils/utils";
 import {
   MinusCircleOutlined,
@@ -27,10 +23,10 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
-import { isEqual } from "lodash";
-import { GrayPageHeader } from "../components/PageHeaders";
+import { compact, isEqual } from "lodash";
+import { PageError, PageLoading } from "../components";
 
-type SecheduleFormData = {
+type ScheduleFormData = {
   ot_week: {
     enabled: boolean;
     hours: number;
@@ -81,8 +77,8 @@ const ShakeCss = css`
 // Funtion to calculate overtime from a shift
 export function calculateOvertime(
   shift: number,
-  ot_week: SecheduleFormData["ot_week"],
-  ot_day: SecheduleFormData["ot_day"]
+  ot_week: ScheduleFormData["ot_week"],
+  ot_day: ScheduleFormData["ot_day"]
 ) {
   // Calculate overtime
   let overtime = 0;
@@ -97,7 +93,7 @@ export function calculateOvertime(
 
 function ScheduleSettings() {
   const { t } = useTranslation();
-  const [form] = Form.useForm<SecheduleFormData>();
+  const [form] = Form.useForm<ScheduleFormData>();
   const { location } = useLocation();
   // Get Schedule Settings from Firestore
   const [scheduleSettingsData, loading, error] = useDocumentData(
@@ -110,7 +106,7 @@ function ScheduleSettings() {
     )
   );
 
-  const onFinish = async (values: SecheduleFormData) => {
+  const onFinish = async (values: ScheduleFormData) => {
     // Convert presetTimes to strings
     const presetTimes = values.presetTimes?.map((time) => ({
       start: time.start.format("HH:mm"),
@@ -144,7 +140,7 @@ function ScheduleSettings() {
     return <PageLoading />;
   }
 
-  const initialValues: SecheduleFormData = {
+  const initialValues = {
     ot_week: {
       enabled: scheduleSettingsData?.ot_week?.enabled ?? false,
       hours: scheduleSettingsData?.ot_week?.hours ?? 40,
@@ -177,7 +173,7 @@ function ScheduleSettings() {
           <Typography.Title css={{ textAlign: "center" }}>
             {t("Schedule settings")}
           </Typography.Title>
-          <Form<SecheduleFormData>
+          <Form<ScheduleFormData>
             form={form}
             css={{ width: "100%", gap: 8 }}
             initialValues={initialValues}
@@ -198,9 +194,9 @@ function ScheduleSettings() {
                 name={["ot_week", "enabled"]}
                 valuePropName="checked"
                 normalize={(
-                  value: SecheduleFormData["ot_week"]["enabled"],
+                  value: ScheduleFormData["ot_week"]["enabled"],
                   _,
-                  all: SecheduleFormData
+                  all: ScheduleFormData
                 ) => {
                   // If the weekly overtime is enabled and the daily overtime is enabled, disable the daily overtime
                   if (value && all.ot_day.enabled) {
@@ -261,9 +257,9 @@ function ScheduleSettings() {
                 name={["ot_day", "enabled"]}
                 valuePropName="checked"
                 normalize={(
-                  value: SecheduleFormData["ot_day"]["enabled"],
+                  value: ScheduleFormData["ot_day"]["enabled"],
                   _,
-                  all: SecheduleFormData
+                  all: ScheduleFormData
                 ) => {
                   // If the daily overtime is enabled and the weekly overtime is enabled, disable the weekly overtime
                   if (value && all.ot_week.enabled) {
@@ -312,7 +308,22 @@ function ScheduleSettings() {
 
             <Divider>{t("PRESET TIMES")}</Divider>
 
-            <Form.List name="presetTimes">
+            <Form.List
+              name="presetTimes"
+              rules={[
+                {
+                  validator: async (_, presetTimes) => {
+                    console.log(presetTimes, presetTimes.length);
+                    // Limit the number of preset times to 10
+                    if (presetTimes.length > 10) {
+                      return Promise.reject(
+                        new Error(t("You can only have up to 10 preset times"))
+                      );
+                    }
+                  },
+                },
+              ]}
+            >
               {(fields, { add, remove }) => (
                 <div
                   css={{
@@ -342,7 +353,7 @@ function ScheduleSettings() {
                       >
                         <TimePicker
                           format="hh:mm a"
-                          minuteStep={15}
+                          minuteStep={5}
                           use12Hours
                           allowClear={false}
                         />
@@ -356,7 +367,7 @@ function ScheduleSettings() {
                       >
                         <TimePicker
                           format="hh:mm a"
-                          minuteStep={15}
+                          minuteStep={5}
                           use12Hours
                           allowClear={false}
                         />
@@ -370,6 +381,7 @@ function ScheduleSettings() {
                       onClick={() => add()}
                       block
                       icon={<PlusOutlined />}
+                      disabled={fields.length >= 10}
                     >
                       {t("Add preset time")}
                     </Button>
@@ -380,10 +392,41 @@ function ScheduleSettings() {
 
             <Form.Item shouldUpdate>
               {() => {
-                const hasChanges = !isEqual(
-                  form.getFieldsValue(),
-                  initialValues
+                // Get OT Week
+                const otWeek: ScheduleFormData["ot_week"] = form.getFieldValue([
+                  "ot_week",
+                ]);
+                // Get OT Day
+                const otDay: ScheduleFormData["ot_day"] = form.getFieldValue([
+                  "ot_day",
+                ]);
+                // Get Preset Times
+                const presetTimes: ScheduleFormData["presetTimes"] =
+                  form.getFieldValue(["presetTimes"]);
+                // Compare otWeek to initialValues
+                const otWeekChanged = !isEqual(
+                  otWeek,
+                  scheduleSettingsData?.ot_week
                 );
+                // Compare otDay to initialValues
+                const otDayChanged = !isEqual(
+                  otDay,
+                  scheduleSettingsData?.ot_day
+                );
+                // Compare presetTimes to initialValues
+                const presetTimesToString = compact(presetTimes)?.map(
+                  (time: { start: moment.Moment; end: moment.Moment }) => ({
+                    start: time?.start?.format("HH:mm"),
+                    end: time?.end?.format("HH:mm"),
+                  })
+                );
+                const presetTimesChanged = !isEqual(
+                  presetTimesToString.sort(),
+                  scheduleSettingsData?.presetTimes?.sort()
+                );
+                // If any of the values have changed, enable the submit button
+                const submitEnabled =
+                  otWeekChanged || otDayChanged || presetTimesChanged;
                 return (
                   <Button
                     htmlType="submit"
@@ -391,9 +434,9 @@ function ScheduleSettings() {
                     type="primary"
                     icon={<SaveOutlined />}
                     // Shake the button if there are changes
-                    css={[hasChanges ? ShakeCss : {}, { marginTop: 20 }]}
+                    css={[submitEnabled ? ShakeCss : {}, { marginTop: 20 }]}
                     // Disable the button if there are no changes
-                    disabled={!hasChanges}
+                    disabled={!submitEnabled}
                   >
                     {t("Save")}
                   </Button>

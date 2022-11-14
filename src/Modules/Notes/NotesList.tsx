@@ -15,9 +15,9 @@ import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { DarkPageHeader } from "../../components/PageHeaders";
 import { Note } from "./notesIcons";
 import { useNewElement } from "../../hooks/useNewElement";
+import { DarkPageHeader } from "../../components";
 
 function NotesList() {
   const { t } = useTranslation();

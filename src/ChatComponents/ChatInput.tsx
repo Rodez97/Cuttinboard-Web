@@ -10,10 +10,10 @@ import { Message } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Button,
-  Dropdown,
   Input,
   InputRef,
   message,
+  Popover,
   Typography,
   Upload,
   UploadProps,
@@ -26,13 +26,13 @@ import {
   SmileFilled,
 } from "@ant-design/icons";
 import Picker from "emoji-picker-react";
-import { GrayPageHeader } from "../PageHeaders";
-import { recordError } from "../../utils/utils";
+import { recordError } from "../utils/utils";
 import {
   Auth,
   Storage,
 } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { GrayPageHeader } from "../components";
 
 interface ChatInputProps {
   replyTargetMessage?: Message;
@@ -211,8 +211,8 @@ function ChatInput({
           />
         </Upload>
 
-        <Dropdown
-          overlay={
+        <Popover
+          content={
             <Picker
               onEmojiClick={(_, { emoji }) =>
                 setMessageTxt(`${messageTxt} ${emoji}`)
@@ -225,7 +225,7 @@ function ChatInput({
             disabled={sendingAttachment}
             type="text"
           />
-        </Dropdown>
+        </Popover>
 
         <Input
           maxLength={2000}

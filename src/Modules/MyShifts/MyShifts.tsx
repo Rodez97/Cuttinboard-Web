@@ -5,7 +5,6 @@ import { orderBy } from "lodash";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useNavigate } from "react-router-dom";
-import { TitleBoxGreen } from "../../components/ColorTextDividers";
 import ShiftCard from "./ShiftCard";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -30,9 +29,8 @@ import {
   Colors,
   WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import { useLayoutEffect } from "react";
-import PageError from "../../components/PageError";
+import { GrayPageHeader, PageError, TitleBoxGreen } from "../../components";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);

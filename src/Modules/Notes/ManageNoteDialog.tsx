@@ -6,7 +6,7 @@ import { Button, Form, Input, Modal } from "antd";
 import { addDoc, serverTimestamp } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
-import useDisclose from "../../hooks/useDisclose";
+import { useDisclose } from "../../hooks";
 import { recordError } from "../../utils/utils";
 
 export interface ManageNoteDialogRef {

@@ -12,9 +12,9 @@ import { recordError } from "../utils/utils";
 import axios from "axios";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { useSendEmailVerification } from "react-firebase-hooks/auth";
-import PageError from "../components/PageError";
-import PageLoading from "../components/PageLoading";
 import { Alert, Button, Modal, Typography } from "antd";
+import { getAnalytics, logEvent } from "firebase/analytics";
+import { PageError, PageLoading } from "../components";
 
 const initialCounterTime = new Date();
 
@@ -41,10 +41,10 @@ function VerifyEmail() {
     if (!sentTime) {
       resendVerificationEmail();
     }
-  }, [sentTime]);
+  }, []);
 
   const resendVerificationEmail = async () => {
-    if (count > 0 || sentTime) {
+    if (count > 0 || Boolean(sentTime)) {
       return;
     }
     try {
@@ -55,6 +55,10 @@ function VerifyEmail() {
         content: t(
           "It can take up to 5 minutes to receive verification email. Be patient!"
         ),
+      });
+      // Report to analytics
+      logEvent(getAnalytics(), "email_verification_sent", {
+        email: user?.email,
       });
     } catch (error) {
       recordError(error);
@@ -76,6 +80,10 @@ function VerifyEmail() {
       }
       if (response.data?.users?.[0]?.emailVerified) {
         clearSentTime();
+        // Report to analytics
+        logEvent(getAnalytics(), "email_verified", {
+          email: user?.email,
+        });
         location.reload();
       }
     } catch (error) {

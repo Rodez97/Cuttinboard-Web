@@ -1,0 +1,34 @@
+// @index('./*.{png,jpg,svg}', (f, _) => `export { default as img${_.pascalCase(f.name)} } from '${f.path}${f.ext}'`)
+export { default as imgAllBlackLogo } from "./allBlackLogo.svg";
+export { default as imgAllWhiteLogo } from "./allWhiteLogo.svg";
+export { default as imgAuthImage } from "./authImage.jpg";
+export { default as imgBusinessAvatar } from "./BusinessAvatar.svg";
+export { default as imgChat } from "./chat.png";
+export { default as imgChecklist } from "./checklist.png";
+export { default as imgColorLogo } from "./Color Logo.png";
+export { default as imgColorLogoOnDarkBackgrounds } from "./colorLogoOnDarkBackgrounds.svg";
+export { default as imgColorOnLightBackgrounds } from "./colorOnLightBackgrounds.svg";
+export { default as imgCuttinboardBusiness } from "./cuttinboardBusiness.svg";
+export { default as imgCuttinboardLite } from "./cuttinboardLite.png";
+export { default as imgDrawer } from "./drawer.png";
+export { default as imgEncryptedData } from "./encrypted-data.png";
+export { default as imgHierarchy } from "./hierarchy.png";
+export { default as imgIcon_192x192 } from "./icon-192x192.png";
+export { default as imgIcon_256x256 } from "./icon-256x256.png";
+export { default as imgIcon_384x384 } from "./icon-384x384.png";
+export { default as imgIcon_512x512 } from "./icon-512x512.png";
+export { default as imgLiteAvatar } from "./LiteAvatar.svg";
+export { default as imgLocationAddedCorrectly } from "./Location_added_correctly.png";
+export { default as imgLocationNotAdded } from "./Location_not_added.png";
+export { default as imgMenu } from "./menu.png";
+export { default as imgMyShifts } from "./my_Shifts.png";
+export { default as imgNotes } from "./notes.png";
+export { default as imgOwner } from "./owner.png";
+export { default as imgPlaceholderResultImg } from "./placeholder_result_img.png";
+export { default as imgPreCheckoutImage } from "./Pre-checkout-image.svg";
+export { default as imgRoomService } from "./room-service.png";
+export { default as imgSpatula } from "./spatula.png";
+export { default as imgTimetable } from "./timetable.png";
+export { default as imgToDoList } from "./to-do-list.png";
+export { default as imgUtensils } from "./utensils.png";
+// @endindex

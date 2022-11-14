@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, InputNumber, Modal, Space } from "antd";
+import { Button, Form, InputNumber, Modal, Space } from "antd";
 import TextArea from "antd/lib/input/TextArea";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import React, { useState } from "react";
@@ -24,12 +24,17 @@ function ReportChangeDialog({
   open,
   onClose,
 }: ReportChangeDialogProps) {
-  const [changeQty, setChangeQty] = useState(0);
-  const [reason, setReason] = useState("");
   const { t } = useTranslation();
+  const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
-  const saveChanges = async () => {
+  const saveChanges = async ({
+    changeQty,
+    reason,
+  }: {
+    changeQty: number;
+    reason?: string;
+  }) => {
     if (changeQty === 0) {
       return;
     }
@@ -48,14 +53,14 @@ function ReportChangeDialog({
 
   const handleClose = () => {
     onClose();
-    setChangeQty(0);
-    setReason("");
+    form.resetFields();
   };
 
   return (
     <Modal
-      visible={open}
+      open={open}
       confirmLoading={submitting}
+      maskClosable={false}
       title={t("Report change")}
       onCancel={handleClose}
       footer={[
@@ -64,7 +69,7 @@ function ReportChangeDialog({
         </Button>,
         <Button
           key="ok"
-          onClick={saveChanges}
+          onClick={form.submit}
           type="primary"
           icon={<SaveFilled />}
           loading={submitting}
@@ -73,32 +78,46 @@ function ReportChangeDialog({
         </Button>,
       ]}
     >
-      <Space direction="vertical" style={{ display: "flex" }}>
-        <InputNumber<number>
-          placeholder={t("Change Quantity")}
-          value={changeQty}
-          addonBefore={
-            changeQty > 0 ? (
-              <ArrowUpOutlined style={{ color: Colors.Success.successMain }} />
-            ) : changeQty < 0 ? (
-              <ArrowDownOutlined style={{ color: Colors.Error.errorMain }} />
-            ) : (
-              <MinusOutlined />
-            )
-          }
-          onChange={setChangeQty}
-          style={{ display: "inherit" }}
-          disabled={submitting}
-        />
-        <TextArea
-          rows={3}
-          placeholder={t("Reason")}
-          maxLength={250}
-          showCount
-          onChange={(e) => setReason(e.target.value)}
-          disabled={submitting}
-        />
-      </Space>
+      <Form
+        initialValues={{
+          changeQty: 0,
+          reason: "",
+        }}
+        layout="vertical"
+        disabled={submitting}
+        form={form}
+        onFinish={saveChanges}
+      >
+        <Form.Item label={t("Change quantity")} shouldUpdate name="changeQty">
+          <InputNumber<number>
+            controls={true}
+            addonBefore={
+              <Form.Item shouldUpdate noStyle>
+                {({ getFieldValue }) => {
+                  const changeQty: number = getFieldValue("changeQty");
+                  console.log(changeQty);
+                  return changeQty > 0 ? (
+                    <ArrowUpOutlined
+                      style={{ color: Colors.Success.successMain }}
+                    />
+                  ) : changeQty < 0 ? (
+                    <ArrowDownOutlined
+                      style={{ color: Colors.Error.errorMain }}
+                    />
+                  ) : (
+                    <MinusOutlined />
+                  );
+                }}
+              </Form.Item>
+            }
+            style={{ display: "inherit" }}
+          />
+        </Form.Item>
+
+        <Form.Item label={t("Reason")} name="reason">
+          <TextArea rows={3} maxLength={250} showCount />
+        </Form.Item>
+      </Form>
     </Modal>
   );
 }

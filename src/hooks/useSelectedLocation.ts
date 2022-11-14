@@ -1,7 +1,7 @@
 import useLocalStorage from "@rehooks/local-storage";
 import { recordError } from "../utils/utils";
 
-function useSelectedLocation() {
+export function useSelectedLocation() {
   const [selectedLocation, setSelectedLocation, deleteSelectedLocation] =
     useLocalStorage("selectedLocation", null);
 
@@ -19,5 +19,3 @@ function useSelectedLocation() {
 
   return { selectedLocation, selectLocation };
 }
-
-export default useSelectedLocation;
