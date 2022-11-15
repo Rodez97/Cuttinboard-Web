@@ -1,64 +1,39 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
+import { ClearOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
-  ArrowLeftOutlined,
-  ArrowRightOutlined,
-  ClearOutlined,
-  PlusCircleOutlined,
-  RetweetOutlined,
-} from "@ant-design/icons";
-import {
-  Auth,
-  Firestore,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  FirebaseSignature,
-  ILocationCheckList,
+  Checklist_Section,
   LocationCheckList,
 } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Col, Input, Layout, Row, Space, Typography } from "antd";
-import dayjs from "dayjs";
-import {
-  collection,
-  doc,
-  getDocs,
-  limitToLast,
-  orderBy,
-  PartialWithFieldValue,
-  query,
-  serverTimestamp,
-  setDoc,
-  Timestamp,
-  where,
-} from "firebase/firestore";
-import { nanoid } from "nanoid";
-import { useMemo, useState } from "react";
+import { Button, Divider, Layout, Space, Typography } from "antd";
+import { doc } from "firebase/firestore";
+import { useMemo, useRef } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
-import {
-  GrayPageHeader,
-  PageError,
-  PageLoading,
-  SimpleTodo,
-} from "../../components";
+import { GrayPageHeader, PageError, PageLoading } from "../../components";
+import TasksSection from "./TasksSection";
+import ManageSectionDialog, {
+  ManageSectionDialogRef,
+} from "./ManageSectionDialog";
+import { orderBy } from "lodash";
 
 function GlobalChecklist() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const manageSectionRef = useRef<ManageSectionDialogRef>(null);
   const { location, locationAccessKey } = useLocation();
-  const [newTaskName, setNewTaskName] = useState("");
   const [checklistData, loading, error] = useDocumentData<LocationCheckList>(
     doc(
       Firestore,
       "Organizations",
       location.organizationId,
       "locationChecklist",
-      `${selectedDate.format("DDMMYYYY")}_${location.id}`
+      location.id
     ).withConverter(LocationCheckList.Converter)
   );
 
@@ -67,212 +42,147 @@ function GlobalChecklist() {
     [locationAccessKey]
   );
 
-  const handleTaskChange = async (key: string, status: boolean) => {
+  const reset = async () => {
+    if (!checklistData || !canUse) {
+      return;
+    }
+    try {
+      await checklistData.resetAllTasks();
+    } catch (error) {
+      recordError(error);
+    }
+  };
+
+  const getSummaryText = useMemo(() => {
     if (!checklistData) {
-      return;
+      return "0/0 tasks completed";
     }
-    try {
-      await checklistData.changeTaskStatus(key, status);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const handleAddTask = async () => {
-    if (!newTaskName || !canUse) {
-      return;
-    }
-    const task = {
-      name: newTaskName.trim(),
-      status: false,
-      createdAt: serverTimestamp(),
-    };
-    setNewTaskName("");
-    try {
-      if (checklistData) {
-        await checklistData.addTask(nanoid(), task);
-      } else {
-        await setDoc(
-          doc(
-            Firestore,
-            "Organizations",
-            location.organizationId,
-            "locationChecklist",
-            `${selectedDate.format("DDMMYYYY")}_${location.id}`
-          ),
-          {
-            createdAt: serverTimestamp(),
-            createdBy: Auth.currentUser.uid,
-            checklistDate: Timestamp.fromDate(selectedDate.toDate()),
-            signedBy: Auth.currentUser.uid,
-            tasks: { [nanoid()]: task },
-            locationId: location.id,
-          }
-        );
-      }
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const handleRemoveTask = async (taskId: string) => {
-    if (!checklistData || !canUse) {
-      return;
-    }
-    try {
-      await checklistData.removeTask(taskId);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const cloneLastChecklist = async () => {
-    if (!canUse) {
-      return;
-    }
-    const docRef = doc(
-      Firestore,
-      "Organizations",
-      location.organizationId,
-      "locationChecklist",
-      `${selectedDate.format("DDMMYYYY")}_${location.id}`
-    );
-    const collRef = query(
-      collection(
-        Firestore,
-        "Organizations",
-        location.organizationId,
-        "locationChecklist"
-      ),
-      where("locationId", "==", location.id),
-      orderBy("checklistDate"),
-      limitToLast(1)
-    ).withConverter(LocationCheckList.Converter);
-    try {
-      const docsSnap = await getDocs(collRef);
-      if (docsSnap.docs.length === 0) {
-        return;
-      }
-      const lastChecklist = docsSnap.docs[0].data();
-      const update: PartialWithFieldValue<
-        ILocationCheckList & FirebaseSignature
-      > = {
-        tasks: lastChecklist.tasks,
-      };
-      if (!checklistData) {
-        update.checklistDate = Timestamp.fromDate(selectedDate.toDate());
-        update.createdAt = serverTimestamp();
-        update.createdBy = Auth.currentUser.uid;
-        update.signedBy = Auth.currentUser.uid;
-        update.locationId = location.id;
-      }
-      await setDoc(docRef, update, { merge: true });
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const clearAll = async () => {
-    if (!checklistData || !canUse) {
-      return;
-    }
-    try {
-      await checklistData.clearTasks();
-    } catch (error) {
-      recordError(error);
-    }
-  };
+    const total = checklistData.checklistSummary.total;
+    const completed = checklistData.checklistSummary.completed;
+    return `${completed}/${total} ${t("tasks completed")}`;
+  }, [checklistData]);
 
   if (error) {
     return <PageError error={error} />;
   }
 
+  const sectionsOrderedByTagAndCreationDate = useMemo(() => {
+    if (!checklistData) {
+      return [];
+    }
+
+    if (!checklistData.sections) {
+      return [];
+    }
+
+    // Order sections by creation date
+    const sections = orderBy(
+      Object.entries(checklistData.sections),
+      ([_, section]) => section.createdAt?.toMillis(),
+      "desc"
+    );
+
+    // Group sections by tag
+    const sectionsByTag = new Map<string, [string, Checklist_Section][]>();
+    sections.forEach(([id, section]) => {
+      const tag = section.tag || "General";
+      if (!sectionsByTag.has(tag)) {
+        sectionsByTag.set(tag, []);
+      }
+      sectionsByTag.get(tag).push([id, section]);
+    });
+    // Order sections by creation date
+    sectionsByTag.forEach((sections) => {
+      sections.sort(
+        ([_, section1], [__, section2]) =>
+          section1.createdAt?.toMillis() - section2.createdAt?.toMillis()
+      );
+    });
+
+    return Array.from(sectionsByTag.entries()).sort((a, b) => {
+      // Sort by the creation date of the first section in each tag
+      const aDate = a[1][0][1].createdAt?.toMillis();
+      const bDate = b[1][0][1].createdAt?.toMillis();
+      if (aDate && bDate) {
+        return aDate - bDate;
+      }
+      return 0;
+    });
+  }, [checklistData]);
+
   return (
-    <Layout.Content>
+    <Layout.Content
+      css={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <GrayPageHeader
         onBack={() =>
           navigate(`/location/${location.id}/apps`, { replace: true })
         }
         title={t("Daily Checklists")}
-        subTitle={`(${checklistData?.tasksSummary?.total ?? 0})`}
+        subTitle={getSummaryText}
+        extra={
+          canUse && (
+            <Space>
+              <Button
+                onClick={() => manageSectionRef.current?.openNew()}
+                icon={<PlusCircleOutlined />}
+                type="primary"
+              >
+                {t("Add Section")}
+              </Button>
+              <Button onClick={reset} icon={<ClearOutlined />} danger>
+                {t("Clear All")}
+              </Button>
+            </Space>
+          )
+        }
       />
 
-      {loading ? (
-        <PageLoading />
-      ) : (
-        <Row justify="center" css={{ paddingBottom: "50px" }}>
-          <Col
-            xs={24}
-            md={20}
-            lg={16}
-            css={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-              paddingTop: "10px",
-            }}
-          >
-            <Space css={{ display: "flex", justifyContent: "center" }}>
-              <Button
-                onClick={() => setSelectedDate((sd) => sd.subtract(1, "day"))}
-                icon={<ArrowLeftOutlined />}
-                type="link"
-                shape="circle"
-              />
-              <Typography.Text type="secondary">
-                {selectedDate.format("dddd, MM/DD/YY")}
-              </Typography.Text>
-              <Button
-                onClick={() => setSelectedDate((sd) => sd.add(1, "day"))}
-                icon={<ArrowRightOutlined />}
-                type="link"
-                shape="circle"
-              />
-            </Space>
-            {canUse && (
-              <Space
-                align="center"
-                size="large"
-                css={{ display: "flex", justifyContent: "center" }}
-              >
-                <Button
-                  onClick={cloneLastChecklist}
-                  icon={<RetweetOutlined />}
-                  disabled={checklistData != null}
-                  type="dashed"
-                >
-                  {t("Clone Last")}
-                </Button>
-                <Button onClick={clearAll} icon={<ClearOutlined />} danger>
-                  {t("Clear All")}
-                </Button>
-              </Space>
-            )}
-            <Space direction="vertical" css={{ display: "flex" }}>
-              {canUse && (
-                <Input
-                  placeholder={t("Add a task")}
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.code === "Enter") {
-                      e.preventDefault();
-                      handleAddTask();
-                    }
-                  }}
-                  addonAfter={<PlusCircleOutlined onClick={handleAddTask} />}
-                />
-              )}
-              <SimpleTodo
-                tasks={checklistData?.tasks ?? {}}
-                canRemove={canUse}
-                onRemove={handleRemoveTask}
-                onChange={handleTaskChange}
-              />
-            </Space>
-          </Col>
-        </Row>
-      )}
+      <Layout.Content
+        css={{ display: "flex", flexDirection: "column", height: "100%" }}
+      >
+        {error ? (
+          <PageError error={error} />
+        ) : loading ? (
+          <PageLoading />
+        ) : (
+          <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+            <div
+              css={{
+                minWidth: 300,
+                maxWidth: 900,
+                margin: "auto",
+                width: "100%",
+              }}
+            >
+              {sectionsOrderedByTagAndCreationDate.map(([tag, sections]) => (
+                <Space direction="vertical" css={{ display: "flex" }} key={tag}>
+                  <Divider orientation="left">
+                    <Typography.Title level={3}>{tag}</Typography.Title>
+                  </Divider>
+                  {sections.map(([sectionKey, section]) => (
+                    <TasksSection
+                      key={sectionKey}
+                      section={section}
+                      sectionId={sectionKey}
+                      canManage={canUse}
+                      onEdit={() =>
+                        manageSectionRef.current?.openEdit(sectionKey)
+                      }
+                      rootChecklist={checklistData}
+                    />
+                  ))}
+                </Space>
+              ))}
+            </div>
+          </div>
+        )}
+      </Layout.Content>
+
+      <ManageSectionDialog
+        rootChecklist={checklistData}
+        ref={manageSectionRef}
+      />
     </Layout.Content>
   );
 }

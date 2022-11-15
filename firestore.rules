@@ -97,9 +97,8 @@ service cloud.firestore {
 
       match /locationChecklist/{document=**} {
     	  allow read: if orgMember(organizationId);
-        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
-        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
-                      || (locMember(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["tasks"]));
+        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId) || isManager(organizationId, request.resource.data.locationId);
+        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
       }
 
       match /utensils/{document=**} {
@@ -172,8 +171,8 @@ service cloud.firestore {
 
       function createModule(){
         return (isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId))
-            && ((request.resource.data.privacyLevel != "PRIVATE" && request.resource.data.keys().hasAll(["name","accessTags","privacyLevel","locationId"])) ||
-                (request.resource.data.privacyLevel == "PRIVATE" && request.resource.data.keys().hasAll(["name","privacyLevel","locationId"])));
+            && ((request.resource.data.privacyLevel != 0 && request.resource.data.keys().hasAll(["name","accessTags","privacyLevel","locationId"])) ||
+                (request.resource.data.privacyLevel == 0 && request.resource.data.keys().hasAll(["name","privacyLevel","locationId"])));
       }
 
       function createConversation(){

@@ -22,9 +22,7 @@ import {
   Form,
   Input,
   InputNumber,
-  Layout,
   message,
-  PageHeader,
   Select,
 } from "antd";
 import {
@@ -49,6 +47,7 @@ type EmployeeData = {
  * Form for creating a new employee.
  */
 function CreateEmployee(props: DrawerProps) {
+  const [form] = Form.useForm<EmployeeData>();
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const { getAviablePositions, location } = useLocation();
@@ -119,13 +118,14 @@ function CreateEmployee(props: DrawerProps) {
         });
       }
       if (["ADDED", "ALREADY_MEMBER"].includes(status)) {
-        message.success(t("Changes saved"));
+        message.success(t("Employee added"));
         // Report to analytics
         logEvent(getAnalytics(), "employee_added", {
           employeeId,
           locationId: location.id,
         });
       }
+      form.resetFields();
     } catch (error) {
       recordError(error);
     }
@@ -134,6 +134,7 @@ function CreateEmployee(props: DrawerProps) {
   return (
     <Drawer {...props} title={t("Add Employee")} placement="right">
       <Form<EmployeeData>
+        form={form}
         css={{ minWidth: 280, maxWidth: 500, margin: "auto" }}
         layout="vertical"
         onFinish={onFinish}

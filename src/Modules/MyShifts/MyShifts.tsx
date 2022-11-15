@@ -97,7 +97,9 @@ function MyShifts() {
   }, [currentWeekId]);
 
   return (
-    <Layout>
+    <Layout.Content
+      css={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <GrayPageHeader
         onBack={() =>
           navigate(`/location/${location.id}/apps`, { replace: true })
@@ -105,10 +107,39 @@ function MyShifts() {
         title={t("My Shifts")}
       />
 
+      <div
+        css={{
+          minWidth: 270,
+          maxWidth: 700,
+          margin: "auto",
+          width: "100%",
+        }}
+      >
+        <Tabs
+          centered
+          onChange={setCurrentWeekId}
+          defaultActiveKey={currentWeekId}
+          items={[
+            {
+              label: t("This week"),
+              key: dayjs().format(WEEKFORMAT),
+              disabled: Boolean(loadingShifts || errorShifts),
+            },
+            {
+              label: t("Next week"),
+              key: dayjs().add(7, "days").format(WEEKFORMAT),
+              disabled: Boolean(loadingShifts || errorShifts),
+            },
+          ]}
+        />
+      </div>
+
       {errorShifts ? (
         <PageError error={errorShifts} />
       ) : (
-        <Layout.Content>
+        <Layout.Content
+          css={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
           <Spin spinning={loadingShifts || loadingShifts === undefined}>
             <div
               css={{ display: "flex", flexDirection: "column", padding: 20 }}
@@ -121,18 +152,6 @@ function MyShifts() {
                   width: "100%",
                 }}
               >
-                <Tabs
-                  centered
-                  onChange={setCurrentWeekId}
-                  defaultActiveKey={currentWeekId}
-                  items={[
-                    { label: t("This week"), key: dayjs().format(WEEKFORMAT) },
-                    {
-                      label: t("Next week"),
-                      key: dayjs().add(7, "days").format(WEEKFORMAT),
-                    },
-                  ]}
-                />
                 {shifts?.shiftsArray.length ? (
                   <Space
                     style={{ display: "flex", width: "100%" }}
@@ -201,7 +220,7 @@ function MyShifts() {
           </Spin>
         </Layout.Content>
       )}
-    </Layout>
+    </Layout.Content>
   );
 }
 

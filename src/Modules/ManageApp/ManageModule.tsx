@@ -18,6 +18,13 @@ import { useTranslation } from "react-i18next";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { useDisclose } from "../../hooks";
 import { GrayPageHeader } from "../../components";
+import { useState } from "react";
+import { GenericModule } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { isEmpty } from "lodash";
+
+interface ManageModuleProps {
+  baseModule?: GenericModule;
+}
 
 type FormType = {
   name: string;
@@ -26,8 +33,9 @@ type FormType = {
   privacyLevel: PrivacyLevel;
 };
 
-const ManageModule = () => {
+const ManageModule = ({ baseModule }: ManageModuleProps) => {
   const { t } = useTranslation();
+  const isEditing = !isEmpty(baseModule);
   const [form] = Form.useForm<FormType>();
   const privacyLevel = Form.useWatch("privacyLevel", form);
   const [isSubmitting, startSubmit, endSubmit] = useDisclose();
@@ -46,7 +54,7 @@ const ManageModule = () => {
     }
     startSubmit();
     try {
-      if (selectedApp) {
+      if (isEditing) {
         const { privacyLevel, position, ...others } = values;
         if (selectedApp.privacyLevel === PrivacyLevel.POSITIONS) {
           const hosts = selectedApp.accessTags?.filter((at) =>
@@ -62,6 +70,7 @@ const ManageModule = () => {
         logEvent(analytics, "update_module", {
           module_privacy_level: selectedApp.privacyLevel,
         });
+        navigate(-1);
       } else {
         let newId: string;
         const { position, ...others } = values;
@@ -87,8 +96,8 @@ const ManageModule = () => {
     }
   };
 
-  const getInitialValues = () => {
-    if (selectedApp) {
+  const getInitialValues = (): FormType => {
+    if (isEditing) {
       const { privacyLevel, accessTags, name, description } = selectedApp;
       if (privacyLevel === PrivacyLevel.POSITIONS) {
         const position = accessTags?.find((at) => !at.startsWith("hostId_"));
@@ -97,14 +106,18 @@ const ManageModule = () => {
         return { name, description, privacyLevel };
       }
     }
-    return {};
+    return {
+      name: "",
+      description: "",
+      privacyLevel: PrivacyLevel.PUBLIC,
+    };
   };
 
   return (
     <Spin spinning={isSubmitting}>
       <GrayPageHeader
         onBack={() => navigate(-1)}
-        title={selectedApp ? "Edit board" : "New board"}
+        title={isEditing ? "Edit board" : "New board"}
       />
       <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
         <div
@@ -149,7 +162,7 @@ const ManageModule = () => {
             </Form.Item>
 
             <Form.Item name="privacyLevel" label={t("Privacy Level")}>
-              <Radio.Group disabled={Boolean(selectedApp)}>
+              <Radio.Group disabled={isEditing}>
                 <Space direction="vertical">
                   <Radio value={PrivacyLevel.PUBLIC}>
                     {t(getPrivacyLevelTextByNumber(PrivacyLevel.PUBLIC))}

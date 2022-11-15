@@ -51,44 +51,44 @@ function ShiftCard({ shift }: ShiftCardProps) {
 
   return (
     <React.Fragment>
-      <List.Item
+      <Space
+        direction="vertical"
         css={{
+          display: "flex",
           backgroundColor: Colors.MainOnWhite,
           padding: 5,
           margin: 5,
         }}
-        actions={[
-          <Button
-            key="notes"
-            disabled={!shift?.notes}
-            onClick={showNotes}
-            icon={<Icon component={Note} />}
-            type="link"
-            shape="circle"
-          />,
-          <Button
-            key="tasks"
-            disabled={Object.keys(shift?.tasks ?? {}).length <= 0}
-            onClick={() => setTasksDialogOpen(true)}
-            icon={<OrderedListOutlined />}
-            type="link"
-            shape="circle"
-          />,
-        ]}
       >
-        <List.Item.Meta
-          title={`${shift.getStartDayjsDate.format(
-            "h:mm a"
-          )} - ${shift.getEndDayjsDate.format("h:mm a")}`.toUpperCase()}
-          description={getHours()}
-        />
-
-        {shift.position && (
-          <Space css={{ display: "flex", justifyContent: "space-evenly" }}>
-            {shift.position && <Tag color="processing">{shift.position}</Tag>}
-          </Space>
-        )}
-      </List.Item>
+        <List.Item
+          actions={[
+            <Button
+              key="notes"
+              disabled={!shift?.notes}
+              onClick={showNotes}
+              icon={<Icon component={Note} />}
+              type="link"
+              shape="circle"
+            />,
+            <Button
+              key="tasks"
+              disabled={Object.keys(shift?.tasks ?? {}).length <= 0}
+              onClick={() => setTasksDialogOpen(true)}
+              icon={<OrderedListOutlined />}
+              type="link"
+              shape="circle"
+            />,
+          ]}
+        >
+          <List.Item.Meta
+            title={`${shift.getStartDayjsDate.format(
+              "h:mm a"
+            )} - ${shift.getEndDayjsDate.format("h:mm a")}`.toUpperCase()}
+            description={getHours()}
+          />
+        </List.Item>
+        {shift.position && <Tag color="processing">{shift.position}</Tag>}
+      </Space>
       <Modal
         open={tasksDialogOpen}
         title={t("Shift Tasks")}

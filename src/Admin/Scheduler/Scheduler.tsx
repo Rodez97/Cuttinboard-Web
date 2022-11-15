@@ -17,7 +17,6 @@ import { useTranslation } from "react-i18next";
 import duration from "dayjs/plugin/duration";
 import { matchSorter } from "match-sorter";
 import ProjectedSalesDialog from "./ProjectedSalesDialog";
-import RosterView from "./RosterView";
 import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
 import {
@@ -46,7 +45,6 @@ import {
   message,
   Modal,
   Select,
-  Skeleton,
   Space,
   Tag,
   Typography,

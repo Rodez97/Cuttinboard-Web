@@ -27,7 +27,7 @@ export interface ManageTodoProps {
 type FormDataType = {
   name: string;
   description?: string;
-  dueDate: moment.Moment;
+  dueDate?: moment.Moment;
   tasks?: Record<string, Todo_Task>;
   assignedTo?: { id: string; name: string; email: string };
 };
@@ -83,16 +83,32 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
     }
   };
 
+  const getInitialValues = (): FormDataType => {
+    if (selectedTodo) {
+      const { dueDate, ...rest } = selectedTodo;
+      return {
+        ...rest,
+        dueDate: dueDate ? moment(dueDate.toDate()) : undefined,
+      };
+    }
+    return {
+      name: "",
+      description: "",
+      dueDate: undefined,
+      tasks: {},
+      assignedTo: undefined,
+    };
+  };
+
   return (
     <Form<FormDataType>
       form={form}
       onFinish={onFinish}
-      initialValues={{
-        ...selectedTodo,
-        dueDate: selectedTodo.dueDate && moment(selectedTodo.dueDate.toDate()),
-      }}
+      initialValues={getInitialValues()}
       disabled={submitting}
       autoComplete="off"
+      layout="vertical"
+      size="small"
     >
       <Routes>
         <Route path="/">
@@ -118,6 +134,7 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                   >
                     <Form.Item
                       name="name"
+                      label={t("Title")}
                       required
                       rules={[
                         { required: true, message: "" },
@@ -139,14 +156,11 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                         },
                       ]}
                     >
-                      <Input
-                        placeholder={t("Title")}
-                        maxLength={80}
-                        showCount
-                      />
+                      <Input maxLength={80} showCount />
                     </Form.Item>
                     <Form.Item
                       name="description"
+                      label={t("Description")}
                       rules={[
                         {
                           validator: async (_, value) => {
@@ -170,14 +184,9 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                         },
                       ]}
                     >
-                      <Input.TextArea
-                        placeholder={t("Description")}
-                        maxLength={255}
-                        showCount
-                        rows={3}
-                      />
+                      <Input.TextArea maxLength={255} showCount rows={3} />
                     </Form.Item>
-                    <Form.Item name="assignedTo">
+                    <Form.Item name="assignedTo" label={t("Assigned to")}>
                       {assignedTo ? (
                         <List.Item
                           extra={
@@ -214,10 +223,10 @@ const ManageTodo = ({ todos, title }: ManageTodoProps) => {
                         </Button>
                       )}
                     </Form.Item>
-                    <Form.Item name="dueDate">
-                      <DatePicker showTime placeholder={t("Due Date")} />
+                    <Form.Item name="dueDate" label={t("Due Date")}>
+                      <DatePicker showTime />
                     </Form.Item>
-                    <Form.Item name="tasks">
+                    <Form.Item name="tasks" label={t("Tasks")}>
                       <QuickTodo
                         tasks={tasks ?? {}}
                         onChange={(tasks) => form.setFieldValue("tasks", tasks)}

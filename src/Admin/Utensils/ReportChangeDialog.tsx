@@ -6,9 +6,8 @@ import {
 } from "@ant-design/icons";
 import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Form, InputNumber, Modal, Space } from "antd";
+import { Button, Form, InputNumber, Modal } from "antd";
 import TextArea from "antd/lib/input/TextArea";
-import { getAnalytics, logEvent } from "firebase/analytics";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
@@ -38,12 +37,10 @@ function ReportChangeDialog({
     if (changeQty === 0) {
       return;
     }
+
     setSubmitting(true);
     try {
       await utensil.addChange(changeQty, reason);
-      // Report to analytics
-      const analytics = getAnalytics();
-      logEvent(analytics, "report_change");
     } catch (error) {
       recordError(error);
     }
@@ -95,7 +92,6 @@ function ReportChangeDialog({
               <Form.Item shouldUpdate noStyle>
                 {({ getFieldValue }) => {
                   const changeQty: number = getFieldValue("changeQty");
-                  console.log(changeQty);
                   return changeQty > 0 ? (
                     <ArrowUpOutlined
                       style={{ color: Colors.Success.successMain }}

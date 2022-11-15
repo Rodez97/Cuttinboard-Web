@@ -4,8 +4,6 @@ import { ref } from "firebase/storage";
 import { useMemo, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useNavigate } from "react-router-dom";
-import FilesItem from "./FilesItem";
-import { orderBy } from "lodash";
 import { useTranslation } from "react-i18next";
 import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
@@ -13,12 +11,17 @@ import {
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import ToolBar from "../ToolBar";
-import FileItemRow from "./FileItemRow";
-import { Button, Col, Layout, List, Row, Segmented, Space } from "antd";
 import {
-  AppstoreOutlined,
-  BarsOutlined,
+  Button,
+  Image,
+  Input,
+  Layout,
+  Space,
+  Table,
+  Tooltip,
+  Typography,
+} from "antd";
+import Icon, {
   CloudUploadOutlined,
   InfoCircleOutlined,
   TeamOutlined,
@@ -32,21 +35,18 @@ import {
   PageError,
   PageLoading,
 } from "../../components";
+import { ColumnsType } from "antd/lib/table";
+import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
+import fileSize from "filesize";
+import FileMenu from "./FileMenu";
+import { recordError } from "../../utils/utils";
 
 function FilesMain() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [viewType, setViewType] = useState<"module" | "list">("module");
-  const [{ order, index, searchQuery }, setOrderData] = useState<{
-    index: number;
-    order: "desc" | "asc";
-    searchQuery?: string;
-  }>({
-    index: 0,
-    order: "asc",
-    searchQuery: "",
-  });
+  const [searchQuery, setSearchQuery] = useState("");
   const [pickFileOpen, pickFiles, closePickFile] = useDisclose();
+  const [viewImage, setViewImage] = useState("");
   const { selectedApp, canManage } = useCuttinboardModule();
   const { location } = useLocation();
   const [drawerFiles, loading, drawerFilesError] =
@@ -61,32 +61,96 @@ function FilesMain() {
   );
 
   const getOrderedFiles = useMemo(() => {
-    let ordered: Cuttinboard_File[] = [];
+    return searchQuery
+      ? matchSorter(drawerFiles, searchQuery, {
+          keys: ["name"],
+        })
+      : drawerFiles;
+  }, [drawerFiles, searchQuery]);
 
-    switch (index) {
-      case 0:
-        ordered = orderBy(drawerFiles, "createdAt", order);
-        break;
-      case 1:
-        ordered = orderBy(drawerFiles, "name", order);
-        break;
-      case 2:
-        ordered = orderBy(drawerFiles, "size", order);
-        break;
+  const columns: ColumnsType<Cuttinboard_File> = [
+    {
+      title: t("Name"),
+      dataIndex: "name",
+      key: "name",
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (_, { name, fileType }) => {
+        const fileIcon = getFileIconByType(name, fileType);
+        const fileColor = getFileColorsByType(name, fileType);
 
-      default:
-        ordered = drawerFiles;
-        break;
+        return (
+          <Tooltip
+            placement="topLeft"
+            title={name}
+            css={{ gap: 5, display: "flex", alignItems: "center" }}
+          >
+            <Icon
+              component={fileIcon}
+              css={{ color: fileColor, fontSize: "20px" }}
+            />
+            <Typography.Paragraph
+              ellipsis={{ rows: 1 }}
+              css={{
+                marginBottom: "0px !important",
+              }}
+            >
+              {name}
+            </Typography.Paragraph>
+          </Tooltip>
+        );
+      },
+      width: "61%",
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      defaultSortOrder: "ascend",
+      sortDirections: ["ascend", "descend", "ascend"],
+    },
+    {
+      title: t("Size"),
+      dataIndex: "size",
+      key: "size",
+      render: (_, { size }) => (
+        <Typography.Text>{fileSize(size)}</Typography.Text>
+      ),
+      width: "12%",
+      align: "right",
+      sorter: (a, b) => a.size - b.size,
+    },
+    {
+      title: "Created",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (_, { createdAt }) => (
+        <Typography.Text>
+          {createdAt?.toDate().toLocaleString()}
+        </Typography.Text>
+      ),
+      width: "20%",
+      sorter: (a, b) => a.createdAt?.toMillis() - b.createdAt?.toMillis(),
+      align: "right",
+    },
+    {
+      title: "",
+      dataIndex: "actions",
+      key: "actions",
+      render: (_, file) => <FileMenu file={file} />,
+      width: "7%",
+      align: "center",
+    },
+  ];
+
+  const fileClick = async (file: Cuttinboard_File) => {
+    try {
+      const fileUrl = await file.getUrl();
+      if (file.fileType.startsWith("image/")) {
+        setViewImage(fileUrl);
+      } else {
+        window.open(fileUrl, "_blanc");
+      }
+    } catch (error) {
+      recordError(error);
     }
-
-    return matchSorter(ordered, searchQuery, {
-      keys: ["name"],
-      sorter: (items) => items,
-    });
-  }, [drawerFiles, index, order, searchQuery]);
-
-  const handleChange = (nextView: "module" | "list") => {
-    setViewType(nextView);
   };
 
   if (loading) {
@@ -107,15 +171,6 @@ function FilesMain() {
         title={selectedApp.name}
         extra={[
           <Button
-            key="uploadFile"
-            disabled={!canManage}
-            onClick={pickFiles}
-            icon={<CloudUploadOutlined />}
-            type="dashed"
-          >
-            {t("Upload Files")}
-          </Button>,
-          <Button
             key="members"
             type="primary"
             onClick={() => navigate(`members`)}
@@ -125,53 +180,72 @@ function FilesMain() {
           </Button>,
         ]}
       />
-      <ToolBar
-        options={["Creation", "Name", "Size"]}
-        index={index}
-        order={order}
-        onChageOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
-        onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
-        searchQuery={searchQuery}
-        onChangeSearchQuery={(sq) =>
-          setOrderData((prev) => ({ ...prev, searchQuery: sq }))
-        }
-      />
-      <div css={{ display: "flex", padding: "10px", justifyContent: "center" }}>
-        <Segmented
-          value={viewType}
-          onChange={handleChange}
-          options={[
-            {
-              value: "list",
-              icon: <BarsOutlined />,
-            },
-            {
-              value: "module",
-              icon: <AppstoreOutlined />,
-            },
-          ]}
+
+      <Space
+        size="large"
+        css={{
+          display: "flex",
+          padding: "10px 20px",
+          alignItems: "center",
+        }}
+      >
+        <Button
+          disabled={!canManage}
+          onClick={pickFiles}
+          icon={<CloudUploadOutlined />}
+          type="primary"
+        >
+          {t("Upload Files")}
+        </Button>
+        <Input.Search
+          placeholder={t("Search")}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          css={{ width: 200 }}
         />
-      </div>
+      </Space>
 
       {getOrderedFiles?.length ? (
-        viewType === "module" ? (
-          <Space wrap css={{ display: "flex", padding: "10px" }}>
-            {getOrderedFiles?.map((file, i) => (
-              <FilesItem key={i} id={file.id} file={file} />
-            ))}
-          </Space>
-        ) : (
-          <Row justify="center" css={{ paddingBottom: "50px" }}>
-            <Col xs={24} md={20} lg={16} xl={12}>
-              <List
-                bordered
-                css={{ width: "100%" }}
-                dataSource={getOrderedFiles}
-                renderItem={(file) => <FileItemRow key={file.id} file={file} />}
-              />
-            </Col>
-          </Row>
-        )
+        <div
+          css={{
+            display: "flex",
+            flexDirection: "column",
+            padding: 20,
+            paddingTop: 0,
+            overflow: "auto",
+          }}
+        >
+          <Table
+            dataSource={getOrderedFiles}
+            columns={columns}
+            size="small"
+            css={{
+              minWidth: 500,
+              margin: "auto",
+            }}
+            pagination={false}
+            sticky
+            onRow={(file) => ({
+              onClick: () => fileClick(file),
+            })}
+          />
+          {viewImage && (
+            <Image
+              width={200}
+              css={{ display: "none" }}
+              src={viewImage}
+              preview={{
+                visible: true,
+                src: viewImage,
+                onVisibleChange: (value) => {
+                  if (!value) {
+                    setViewImage(null);
+                  }
+                },
+              }}
+            />
+          )}
+        </div>
       ) : (
         <EmptyMainModule
           description={

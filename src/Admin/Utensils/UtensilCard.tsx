@@ -29,7 +29,6 @@ const CardContainer = styled.div`
 
 function UtensilCard({ utensil, onClick }: IUtensilCard) {
   const { t } = useTranslation();
-  const { isGeneralManager, isOwner, isAdmin } = useLocation();
   const [reportChangeDialogOpen, setReportChangeDialogOpen] = useState(false);
   const [changesDialogOpen, setChangesDialogOpen] = useState(false);
 

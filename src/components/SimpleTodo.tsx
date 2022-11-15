@@ -1,4 +1,4 @@
-import { DeleteOutlined } from "@ant-design/icons";
+import { MinusOutlined } from "@ant-design/icons";
 import { Todo_Task } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, Checkbox, List, Typography } from "antd";
 import React from "react";
@@ -9,9 +9,16 @@ interface SimpleTodoProps {
   onChange: (taskId: string, newStatus: boolean) => void;
   canRemove?: boolean;
   onRemove?: (taskId: string) => void;
+  onTaskNameChange?: (taskId: string, newName: string) => void;
 }
 
-function SimpleTodo({ tasks, onChange, canRemove, onRemove }: SimpleTodoProps) {
+function SimpleTodo({
+  tasks,
+  onChange,
+  canRemove,
+  onRemove,
+  onTaskNameChange,
+}: SimpleTodoProps) {
   return (
     <List
       dataSource={getOrderedTasks(tasks)}
@@ -26,7 +33,7 @@ function SimpleTodo({ tasks, onChange, canRemove, onRemove }: SimpleTodoProps) {
                   onClick={() => onRemove(id)}
                   danger
                   type="link"
-                  icon={<DeleteOutlined />}
+                  icon={<MinusOutlined />}
                 />,
               ]
             }
@@ -39,7 +46,15 @@ function SimpleTodo({ tasks, onChange, canRemove, onRemove }: SimpleTodoProps) {
                 />
               }
               title={
-                <Typography.Text delete={task.status}>
+                <Typography.Text
+                  delete={task.status}
+                  editable={
+                    canRemove &&
+                    onTaskNameChange && {
+                      onChange: (newName) => onTaskNameChange(id, newName),
+                    }
+                  }
+                >
                   {task.name}
                 </Typography.Text>
               }

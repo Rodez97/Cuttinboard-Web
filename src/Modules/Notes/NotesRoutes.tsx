@@ -42,7 +42,10 @@ function NotesRoutes() {
         <Route path="members/*" element={<ModuleManageMembers />} />
         <Route path="details">
           <Route index element={<ModuleInfo />} />
-          <Route path="edit" element={<ManageModule />} />
+          <Route
+            path="edit"
+            element={<ManageModule baseModule={selectedApp} />}
+          />
         </Route>
       </Route>
     </Routes>

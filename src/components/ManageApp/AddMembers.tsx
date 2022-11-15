@@ -6,7 +6,6 @@ import { Button, Checkbox, List } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { TitleBoxGreen } from "../ColorTextDividers";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 
@@ -24,9 +23,7 @@ function AddMembers({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
-  const [selectedEmployees, setSelectedEmployees] = useState<Employee[] | null>(
-    initialSelected
-  );
+  const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
 
   const handleToggle = (value: Employee) => () => {
     const currentIndex = selectedEmployees.indexOf(value);
@@ -63,9 +60,12 @@ function AddMembers({
           width: "100%",
         }}
       >
-        <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
         <List
-          dataSource={getEmployees.filter((emp) => !hosts?.includes(emp.id))}
+          dataSource={getEmployees.filter(
+            (emp) =>
+              !hosts?.includes(emp.id) &&
+              !initialSelected?.some((e) => e.id === emp.id)
+          )}
           renderItem={(emp) => {
             return (
               <List.Item

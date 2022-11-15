@@ -11,7 +11,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Todo } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
-import { Button, Layout } from "antd";
+import { Button, Layout, Space } from "antd";
 import { GrayPageHeader } from "../../components/PageHeaders";
 import {
   InfoCircleOutlined,
@@ -86,7 +86,9 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   }, [todoCards, index, order, searchQuery]);
 
   return (
-    <Layout>
+    <Layout.Content
+      css={{ display: "flex", flexDirection: "column", height: "100%" }}
+    >
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={() => navigate("details")}
@@ -128,14 +130,18 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
           display: "flex",
           flexDirection: "column",
           padding: 20,
+          overflow: "auto",
         }}
       >
-        <div
+        <Space
           css={{
             minWidth: 300,
             maxWidth: 800,
             margin: "auto",
             width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "stretch",
           }}
         >
           {getOrderedTasks.length ? (
@@ -161,9 +167,9 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
               }
             />
           )}
-        </div>
+        </Space>
       </div>
-    </Layout>
+    </Layout.Content>
   );
 }
 
