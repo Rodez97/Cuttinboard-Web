@@ -53,6 +53,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
   }, [locationAccessKey, employee]);
 
   const openManageDialog = () => navigate(employee.id);
+
   return (
     <Space
       direction="vertical"

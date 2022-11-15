@@ -57,7 +57,6 @@ function AssignUser({ onSelectedEmployee }: AssignUserProps) {
             width: "100%",
           }}
         >
-          <TitleBoxGreen>{t("Location")}</TitleBoxGreen>
           <List
             dataSource={employees}
             renderItem={(emp) => {

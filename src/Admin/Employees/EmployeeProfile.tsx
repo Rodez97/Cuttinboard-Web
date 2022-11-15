@@ -8,10 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import EmployeeContactPanel from "./EmployeeContactPanel";
 import EmployeeDocuments from "./EmployeeDocuments";
 import EmployeeRolePanel from "./EmployeeRolePanel";
-import {
-  useEmployeesList,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { getAvatarByUID } from "../../utils/utils";
 
 function EmployeeProfile() {
@@ -19,7 +16,6 @@ function EmployeeProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { location } = useLocation();
 
   const employee = useMemo(
     () => getEmployees.find((e) => e.id === id),

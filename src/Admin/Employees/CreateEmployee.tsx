@@ -2,7 +2,6 @@
 import { jsx } from "@emotion/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { getRoleTextByNumber } from "./employee-utils";
 import { recordError } from "../../utils/utils";
 import {
@@ -48,7 +47,6 @@ type EmployeeData = {
  */
 function CreateEmployee(props: DrawerProps) {
   const [form] = Form.useForm<EmployeeData>();
-  const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const { getAviablePositions, location } = useLocation();
   const { t } = useTranslation();
@@ -101,7 +99,6 @@ function CreateEmployee(props: DrawerProps) {
         message.error(
           t("This user is already an owner or supervisor in the organization")
         );
-        navigate(-1);
         return;
       }
 

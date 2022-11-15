@@ -115,9 +115,7 @@ function GlobalChecklist() {
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
       <GrayPageHeader
-        onBack={() =>
-          navigate(`/location/${location.id}/apps`, { replace: true })
-        }
+        onBack={() => navigate(-1)}
         title={t("Daily Checklists")}
         subTitle={getSummaryText}
         extra={

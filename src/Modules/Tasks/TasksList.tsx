@@ -58,9 +58,7 @@ function TasksList() {
     >
       <DarkPageHeader
         title={t("Tasks")}
-        onBack={() =>
-          navigate(`/location/${location.id}/apps`, { replace: true })
-        }
+        onBack={() => navigate(-1)}
         css={{ paddingBottom: 0, paddingTop: 0 }}
       />
       {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (

@@ -100,12 +100,7 @@ function MyShifts() {
     <Layout.Content
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
-      <GrayPageHeader
-        onBack={() =>
-          navigate(`/location/${location.id}/apps`, { replace: true })
-        }
-        title={t("My Shifts")}
-      />
+      <GrayPageHeader onBack={() => navigate(-1)} title={t("My Shifts")} />
 
       <div
         css={{

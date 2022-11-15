@@ -24,7 +24,7 @@ function NotesList() {
   const navigate = useNavigate();
   const newElement = useNewElement();
   const { selectedApp, elements } = useCuttinboardModule();
-  const { locationAccessKey, location } = useLocation();
+  const { locationAccessKey } = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 
   const menuItems = useMemo(() => {
@@ -48,9 +48,7 @@ function NotesList() {
     >
       <DarkPageHeader
         title={t("Notes")}
-        onBack={() =>
-          navigate(`/location/${location.id}/apps`, { replace: true })
-        }
+        onBack={() => navigate(-1)}
         css={{ paddingBottom: 0, paddingTop: 0 }}
       />
       {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (

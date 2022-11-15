@@ -140,7 +140,6 @@ function TasksSection({
       ghost={false}
       backIcon={false}
       title={section.name}
-      subTitle={section?.description}
       tags={[
         <Tag
           key="tasksSummary"
