@@ -7,6 +7,7 @@ import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library
 import { Avatar, Button, DatePicker, Form, Input, List, Modal } from "antd";
 import {
   addDoc,
+  deleteField,
   PartialWithFieldValue,
   serverTimestamp,
   Timestamp,
@@ -77,6 +78,8 @@ const ManageTaskBlock = forwardRef<ManageTaskBlockRef, unknown>((_, ref) => {
 
     if (dueDate) {
       valuesToAdd.dueDate = Timestamp.fromDate(dueDate.toDate());
+    } else if (baseTaskBlock?.dueDate) {
+      valuesToAdd.dueDate = deleteField();
     }
 
     try {
@@ -230,7 +233,7 @@ const ManageTaskBlock = forwardRef<ManageTaskBlockRef, unknown>((_, ref) => {
           )}
         </Form.Item>
         <Form.Item name="dueDate" label={t("Due Date")}>
-          <DatePicker showTime />
+          <DatePicker showTime allowClear />
         </Form.Item>
       </Form>
     </Modal>
