@@ -23,7 +23,6 @@ import ScheduleSettings from "./ScheduleSettings";
 function Settings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { location } = useLocation();
   const { pathname } = useRouterLocation();
   return (
     <Layout hasSider>
@@ -39,7 +38,7 @@ function Settings() {
           <DarkPageHeader
             title={t("Settings")}
             avatar={{ src: <SettingFilled /> }}
-            onBack={() => navigate(`/location/${location.id}`)}
+            onBack={() => navigate(-1)}
             css={{ paddingBottom: 0, paddingTop: 0 }}
           />
           <Menu
@@ -49,13 +48,13 @@ function Settings() {
               {
                 key: "location",
                 label: t("Location"),
-                onClick: () => navigate("location"),
+                onClick: () => navigate("location", { replace: true }),
                 icon: <ShopOutlined />,
               },
               {
                 key: "schedule",
                 label: t("Schedule"),
-                onClick: () => navigate("schedule"),
+                onClick: () => navigate("schedule", { replace: true }),
                 icon: <ScheduleOutlined />,
               },
             ]}

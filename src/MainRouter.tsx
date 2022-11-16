@@ -2,20 +2,17 @@
 import { jsx } from "@emotion/react";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { LocationContainer } from "./LocationContainer";
-import {
-  EmployeesProvider,
-  LocationProvider,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import DashboardProvider from "./Dashboard/DashboardProvider";
 import { Layout } from "antd";
 import runOneSignal from "runOneSignal";
 import OneSignal from "react-onesignal";
 import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useSelectedLocation } from "./hooks";
-import { LoadingScreen, PageError, PageLoading } from "./components";
+import { PageLoading } from "./components";
+
 const Dashboard = lazy(() => import("./Dashboard/Dashboard"));
+const LocationRoutes = lazy(() => import("./LocationRoutes"));
 
 function MainRouter() {
   const { organizationKey } = useCuttinboard();
@@ -42,7 +39,11 @@ function MainRouter() {
           {isLocationSelected ? (
             <Route
               index
-              element={<Navigate to={`location/${selectedLocation}`} />}
+              element={
+                <Navigate
+                  to={`l/${organizationKey.orgId}/${selectedLocation}`}
+                />
+              }
             />
           ) : (
             <Route index element={<Navigate to="dashboard" />} />
@@ -59,24 +60,11 @@ function MainRouter() {
             }
           />
           <Route
-            path="location/:locationId/*"
+            path="l/:organizationId/:locationId/*"
             element={
-              <LocationProvider
-                organizationKey={organizationKey}
-                locationId={selectedLocation}
-              >
-                {({ loading, error }) =>
-                  loading ? (
-                    <LoadingScreen />
-                  ) : error ? (
-                    <PageError error={error} />
-                  ) : (
-                    <EmployeesProvider>
-                      <LocationContainer />
-                    </EmployeesProvider>
-                  )
-                }
-              </LocationProvider>
+              <Suspense fallback={<PageLoading />}>
+                <LocationRoutes />
+              </Suspense>
             }
           />
           <Route path="*" element={<Navigate to="dashboard" />} />

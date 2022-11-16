@@ -5,11 +5,11 @@ import {
   useCuttinboard,
   useNotificationsBadges,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Badge, Button, Card, List, message, Modal, Spin } from "antd";
+import { Badge, Button, Card, List, message, Modal } from "antd";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import styled from "@emotion/styled";
@@ -18,7 +18,6 @@ import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
 import { getAnalytics, logEvent } from "firebase/analytics";
-import { useSelectedLocation } from "../../hooks";
 
 const { Meta } = Card;
 
@@ -55,12 +54,10 @@ interface LocationCardProps {
 
 function LocationCard({ location, actions }: LocationCardProps) {
   const navigate = useNavigate();
-  const { selectLocation: selectLocId } = useSelectedLocation();
   const { getBadgeByLocation } = useNotificationsBadges();
   const { t } = useTranslation();
-  const { user, selectLocation, organizationKey } = useCuttinboard();
-  const [loadingLocation, setLoadingLocation] = useState(false);
-  const [createBillingSession, isRunning, error] = useHttpsCallable<
+  const { user, organizationKey } = useCuttinboard();
+  const [createBillingSession, , error] = useHttpsCallable<
     { return_url: string },
     string
   >(Functions, "stripe-createBillingSession");
@@ -119,21 +116,13 @@ function LocationCard({ location, actions }: LocationCardProps) {
         t("There was an error trying to access this location")
       );
     }
-    setLoadingLocation(true);
     try {
-      selectLocId(location.id);
-      await selectLocation(location);
-      navigate(`/location/${location.id}`);
-      // Report location selected to analytics
-      logEvent(getAnalytics(), "select_location", {
-        location_id: location.id,
-        location_name: location.name,
-        organization_id: location.organizationId,
+      navigate(`/l/${location.organizationId}/${location.id}`, {
+        replace: true,
       });
     } catch (error) {
       recordError(error);
     }
-    setLoadingLocation(false);
   };
 
   const showInfo = () => {
@@ -173,34 +162,32 @@ function LocationCard({ location, actions }: LocationCardProps) {
       count={getBadgeByLocation(location.id, location.organizationId)}
       color="primary"
     >
-      <Spin spinning={loadingLocation || isRunning}>
-        <MainCard
-          hoverable
-          onClick={handleSelectLocation}
-          actions={actions}
-          haveActions={Boolean(actions?.length)}
-          deleting={Boolean(location.subscriptionStatus === "canceled")}
-          extra={
-            <Button
-              type="text"
-              shape="circle"
-              icon={<InfoCircleOutlined />}
-              onClick={(e) => {
-                e.stopPropagation();
-                showInfo();
-              }}
-            />
-          }
-          title={location?.name}
-        >
-          <Meta
-            css={{ color: "inherit" }}
-            description={`${
-              location.members ? location.members.length : 0
-            } Member(s)`}
+      <MainCard
+        hoverable
+        onClick={handleSelectLocation}
+        actions={actions}
+        haveActions={Boolean(actions?.length)}
+        deleting={Boolean(location.subscriptionStatus === "canceled")}
+        extra={
+          <Button
+            type="text"
+            shape="circle"
+            icon={<InfoCircleOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              showInfo();
+            }}
           />
-        </MainCard>
-      </Spin>
+        }
+        title={location?.name}
+      >
+        <Meta
+          css={{ color: "inherit" }}
+          description={`${
+            location.members ? location.members.length : 0
+          } Member(s)`}
+        />
+      </MainCard>
     </Badge>
   );
 }

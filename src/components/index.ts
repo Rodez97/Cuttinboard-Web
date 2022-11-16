@@ -2,7 +2,7 @@
 export * from "./BusinessPaper";
 export { default as EditableAvatar } from "./EditableAvatar";
 export { default as EmptyMainModule } from "./EmptyMainModule";
-export { default as LoadingScreen } from "./LoadingScreen";
+export { default as LoadingScreen } from "./LoadingLocation";
 export { default as LocationEditor } from "./LocationEditor";
 export { default as PageError } from "./PageError";
 export * from "./PageHeaders";

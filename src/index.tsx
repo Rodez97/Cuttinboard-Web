@@ -7,7 +7,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { createRoot } from "react-dom/client";
-import MainAppRoot from "./MainAppRoot";
+import MainAppRoot from "./Root";
 import { enableIndexedDbPersistence } from "firebase/firestore";
 import { Firestore } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "./utils/utils";

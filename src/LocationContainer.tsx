@@ -40,6 +40,7 @@ export function LocationContainer() {
     locationAccessKey.locId !== locationId ||
     !location
   ) {
+    // If the locationKey is not set or the locationId does not match the one in the url, redirect to the dashboard
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -63,7 +64,7 @@ export function LocationContainer() {
                 pathname.split("/")[3] === "conversations" ? "primary" : "text"
               }
               shape="circle"
-              onClick={() => navigate("conversations")}
+              onClick={() => navigate("conversations", { replace: true })}
             />
           </Badge>,
 
@@ -77,7 +78,7 @@ export function LocationContainer() {
               icon={<Icon component={MessageTextLock} />}
               type={pathname.split("/")[3] === "chats" ? "primary" : "text"}
               shape="circle"
-              onClick={() => navigate("chats")}
+              onClick={() => navigate("chats", { replace: true })}
             />
           </Badge>,
           <Button
@@ -86,7 +87,7 @@ export function LocationContainer() {
             key="locSettings"
             type={pathname.split("/")[3] === "locSettings" ? "primary" : "text"}
             shape="circle"
-            onClick={() => navigate("locSettings")}
+            onClick={() => navigate("locSettings", { replace: true })}
             className="settings-btn"
             css={{ marginRight: 15 }}
           />,
