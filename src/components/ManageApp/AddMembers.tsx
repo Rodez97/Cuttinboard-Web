@@ -2,26 +2,28 @@
 import { jsx } from "@emotion/react";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Checkbox, List } from "antd";
+import { Button, Checkbox, List, Modal, ModalProps } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { UsergroupAddOutlined } from "@ant-design/icons";
 
-interface AddMembersProps {
+type AddMembersProps = {
   onSelectedEmployees: (employees: Employee[]) => void;
   initialSelected?: Employee[];
-  hosts?: string[];
-}
+  admins?: string[];
+  onClose: () => void;
+} & ModalProps;
 
 function AddMembers({
   onSelectedEmployees,
   initialSelected,
-  hosts,
+  admins,
+  onClose,
+  ...props
 }: AddMembersProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
 
@@ -41,71 +43,65 @@ function AddMembers({
   const handleAccept = () => {
     if (selectedEmployees.length > 0) {
       onSelectedEmployees(selectedEmployees);
-      navigate(-1);
+      onClose();
     }
   };
 
   const handleClose = () => {
     setSelectedEmployees(initialSelected);
-    navigate(-1);
+    onClose();
   };
 
   return (
-    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-      <div
-        css={{
-          minWidth: 300,
-          maxWidth: 600,
-          margin: "auto",
-          width: "100%",
-        }}
-      >
-        <List
-          dataSource={getEmployees.filter(
-            (emp) =>
-              !hosts?.includes(emp.id) &&
-              !initialSelected?.some((e) => e.id === emp.id)
-          )}
-          renderItem={(emp) => {
-            return (
-              <List.Item
-                key={emp.id}
-                css={{
-                  backgroundColor: Colors.MainOnWhite,
-                  padding: 10,
-                  margin: 5,
-                }}
-                extra={
-                  <Checkbox
-                    onChange={handleToggle(emp)}
-                    checked={selectedEmployees?.includes(emp)}
-                  />
-                }
-              >
-                <List.Item.Meta
-                  avatar={<QuickUserDialogAvatar employee={emp} />}
-                  title={emp.fullName}
-                  description={emp.email}
-                />
-              </List.Item>
-            );
-          }}
-        />
-
-        <Button
-          onClick={handleAccept}
-          block
-          type="primary"
-          css={{ margin: "20px 0px" }}
-        >
-          {t("Accept")}
-        </Button>
-
-        <Button onClick={handleClose} danger block type="dashed">
+    <Modal
+      {...props}
+      title={t("Add Members")}
+      footer={[
+        <Button type="dashed" onClick={handleClose} key="cancel">
           {t("Cancel")}
-        </Button>
-      </div>
-    </div>
+        </Button>,
+        <Button
+          icon={<UsergroupAddOutlined />}
+          type="primary"
+          onClick={handleAccept}
+          key="add"
+        >
+          {t("Add Member(s)")}
+        </Button>,
+      ]}
+    >
+      <List
+        dataSource={getEmployees.filter(
+          (emp) =>
+            !admins?.includes(emp.id) &&
+            !initialSelected?.some((e) => e.id === emp.id)
+        )}
+        renderItem={(emp) => {
+          return (
+            <List.Item
+              key={emp.id}
+              css={{
+                backgroundColor: Colors.MainOnWhite,
+                padding: 10,
+                margin: 5,
+              }}
+              extra={
+                <Checkbox
+                  onChange={handleToggle(emp)}
+                  checked={selectedEmployees?.includes(emp)}
+                />
+              }
+            >
+              <List.Item.Meta
+                avatar={<QuickUserDialogAvatar employee={emp} />}
+                title={emp.fullName}
+                description={emp.email}
+              />
+            </List.Item>
+          );
+        }}
+      />
+    </Modal>
   );
 }
 

@@ -100,7 +100,7 @@ export function LocationContainer() {
             path={`chats/*`}
             element={
               <Suspense fallback={<PageLoading />}>
-                <DM locationId={locationId} />
+                <DM />
               </Suspense>
             }
           />

@@ -6,19 +6,15 @@ import PageError from "../../components/PageError";
 import PageLoading from "../../components/PageLoading";
 import DMList from "./DMList";
 import DMRoutes from "./DMRoutes";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import dmImage from "../../assets/images/encrypted-data.png";
 import { useTranslation } from "react-i18next";
-import NewDM from "./NewDM";
-import { useState } from "react";
 import { recordError } from "../../utils/utils";
 import { EmptyMainModule } from "../../components";
+import { NotFound } from "../../components/NotFound";
 
-const DM = ({ locationId }: { locationId?: string }) => {
+const DM = () => {
   const { t } = useTranslation();
-  const [filterByLocation, setFilterByLocation] = useState(
-    Boolean(locationId != null)
-  );
 
   return (
     <DMsProvider onError={recordError}>
@@ -30,11 +26,7 @@ const DM = ({ locationId }: { locationId?: string }) => {
         ) : (
           <Layout hasSider>
             <Layout.Sider width={250} breakpoint="lg" collapsedWidth="0">
-              <DMList
-                underLocation={Boolean(locationId != null)}
-                filterChecked={filterByLocation}
-                onFilterCheckedChange={setFilterByLocation}
-              />
+              <DMList />
             </Layout.Sider>
             <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
               <Routes>
@@ -53,9 +45,8 @@ const DM = ({ locationId }: { locationId?: string }) => {
                       />
                     }
                   />
-                  <Route path=":boardId/*" element={<DMRoutes />} />
-                  <Route path="new" element={<NewDM />} />
-                  <Route path="*" element={<Navigate to="/chats" />} />
+                  <Route path=":boardId" element={<DMRoutes />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
             </Layout.Content>

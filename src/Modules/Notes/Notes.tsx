@@ -8,13 +8,13 @@ import {
 import { Layout } from "antd";
 import { collection } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
-import { Navigate, Route, Routes } from "react-router-dom";
-import ManageModule from "../ManageApp/ManageModule";
+import { Route, Routes } from "react-router-dom";
 import NotesList from "./NotesList";
 import NotesRoutes from "./NotesRoutes";
 import notesImage from "../../assets/images/notes.png";
 import { recordError } from "../../utils/utils";
 import { EmptyMainModule, PageError, PageLoading } from "../../components";
+import { NotFound } from "../../components/NotFound";
 
 function Notes() {
   const { t } = useTranslation();
@@ -56,9 +56,8 @@ function Notes() {
                       />
                     }
                   />
-                  <Route path=":boardId/*" element={<NotesRoutes />} />
-                  <Route path="new" element={<ManageModule />} />
-                  <Route path="*" element={<Navigate to="/apps/notes" />} />
+                  <Route path=":boardId" element={<NotesRoutes />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
             </Layout.Content>

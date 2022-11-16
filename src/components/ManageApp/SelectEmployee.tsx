@@ -1,69 +1,51 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  Colors,
-  Employee,
-  RoleAccessLevels,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { Button, List } from "antd";
-import { useTranslation } from "react-i18next";
+import { Colors, Employee } from "@cuttinboard-solutions/cuttinboard-library";
+import { Button, List, Modal, ModalProps } from "antd";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { ArrowRightOutlined } from "@ant-design/icons";
 
-interface AddMembersProps {
+type AddMembersProps = {
   onSelectedEmployee: (employee: Employee) => void;
-  hosts?: string[];
-}
+  employees?: Employee[];
+} & ModalProps;
 
-function SelectEmployee({ onSelectedEmployee, hosts }: AddMembersProps) {
-  const { t } = useTranslation();
-  const { getEmployees } = useEmployeesList();
-
+function SelectEmployee({
+  onSelectedEmployee,
+  employees,
+  ...props
+}: AddMembersProps) {
   return (
-    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-      <div
-        css={{
-          minWidth: 300,
-          maxWidth: 600,
-          margin: "auto",
-          width: "100%",
-        }}
-      >
-        <List
-          dataSource={getEmployees.filter(
-            (emp) =>
-              emp.locationRole <= RoleAccessLevels.MANAGER &&
-              !hosts?.includes(emp.id)
-          )}
-          renderItem={(emp) => {
-            return (
-              <List.Item
-                key={emp.id}
-                css={{
-                  backgroundColor: Colors.MainOnWhite,
-                  padding: 10,
-                  margin: 5,
-                }}
-                extra={
-                  <Button
-                    type="link"
-                    icon={<ArrowRightOutlined />}
-                    onClick={() => onSelectedEmployee(emp)}
-                  />
-                }
-              >
-                <List.Item.Meta
-                  avatar={<QuickUserDialogAvatar employee={emp} />}
-                  title={`${emp.name} ${emp.lastName}`}
-                  description={emp.email}
+    <Modal {...props}>
+      <List
+        dataSource={employees}
+        renderItem={(emp) => {
+          return (
+            <List.Item
+              key={emp.id}
+              css={{
+                backgroundColor: Colors.MainOnWhite,
+                padding: 10,
+                margin: 5,
+              }}
+              extra={
+                <Button
+                  type="link"
+                  icon={<ArrowRightOutlined />}
+                  onClick={() => onSelectedEmployee(emp)}
                 />
-              </List.Item>
-            );
-          }}
-        />
-      </div>
-    </div>
+              }
+            >
+              <List.Item.Meta
+                avatar={<QuickUserDialogAvatar employee={emp} />}
+                title={`${emp.name} ${emp.lastName}`}
+                description={emp.email}
+              />
+            </List.Item>
+          );
+        }}
+      />
+    </Modal>
   );
 }
 

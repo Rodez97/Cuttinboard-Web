@@ -1,5 +1,9 @@
 import { UserOutlined } from "@ant-design/icons";
 import {
+  CuttinboardUser,
+  Employee,
+} from "@cuttinboard-solutions/cuttinboard-library/models";
+import {
   DirectMessagesProvider,
   useDMs,
   useNotificationsBadges,
@@ -8,11 +12,14 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ChatMain from "../../ChatComponents/ChatMain";
 import { GrayPageHeader } from "../../components/PageHeaders";
+import { useDisclose } from "../../hooks";
+import DMDetails from "./DMDetails";
 
-function DMMain() {
+function DMMain({ employee }: { employee: Employee | CuttinboardUser }) {
   const navigate = useNavigate();
   const { removeDMBadge } = useNotificationsBadges();
   const { selectedChat } = useDMs();
+  const [infoOpen, openInfo, closeInfo] = useDisclose();
 
   useEffect(() => {
     return () => {
@@ -30,7 +37,7 @@ function DMMain() {
         avatar={{
           icon: <UserOutlined />,
           src: selectedChat.recipient.avatar,
-          onClick: () => navigate("details"),
+          onClick: openInfo,
           style: { cursor: "pointer" },
         }}
         title={
@@ -40,6 +47,8 @@ function DMMain() {
         }
       />
       <ChatMain type="chats" chatId={selectedChat.id} canUse />
+
+      <DMDetails open={infoOpen} onCancel={closeInfo} employee={employee} />
     </DirectMessagesProvider>
   );
 }

@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import { orderBy } from "lodash";
 import { useMemo, useRef, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { useNavigate } from "react-router-dom";
 import ManageNoteDialog, { ManageNoteDialogRef } from "./ManageNoteDialog";
 import NoteCard from "./NoteCard";
 import { useTranslation } from "react-i18next";
@@ -20,10 +19,15 @@ import {
   PageError,
   PageLoading,
 } from "../../components";
+import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
+import { useDisclose } from "../../hooks";
+import ManageModuleDialog, {
+  useManageModule,
+} from "../ManageApp/ManageModuleDialog";
+import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 
 function NotesMain() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
@@ -38,6 +42,10 @@ function NotesMain() {
   const [notes, loading, error] = useCollectionData<Note>(
     selectedApp && selectedApp.contentRef.withConverter(Note.Converter)
   );
+  const [infoOpen, openInfo, closeInfo] = useDisclose();
+  const [manageMembersOpen, openManageMembers, closeManageMembers] =
+    useDisclose();
+  const { baseRef, editModule } = useManageModule();
 
   const handleCreateNote = () => {
     manageNoteDialogRef.current?.openNew();
@@ -78,7 +86,7 @@ function NotesMain() {
     >
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
-        onBack={() => navigate("details")}
+        onBack={openInfo}
         title={selectedApp.name}
         subTitle={`(${Number(notes?.length)})`}
         extra={[
@@ -94,7 +102,7 @@ function NotesMain() {
           <Button
             key="members"
             type="primary"
-            onClick={() => navigate(`members`)}
+            onClick={openManageMembers}
             icon={<TeamOutlined />}
           >
             {t("Members")}
@@ -139,6 +147,19 @@ function NotesMain() {
       )}
 
       <ManageNoteDialog ref={manageNoteDialogRef} />
+      <ManageModuleDialog ref={baseRef} moduleName="Notes Stack" />
+      <ModuleInfoDialog
+        open={infoOpen}
+        onCancel={closeInfo}
+        onEdit={() => {
+          closeInfo();
+          editModule(selectedApp);
+        }}
+      />
+      <ModuleManageMembers
+        open={manageMembersOpen}
+        onCancel={closeManageMembers}
+      />
     </Layout.Content>
   );
 }

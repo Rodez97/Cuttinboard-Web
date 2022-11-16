@@ -43,7 +43,7 @@ function ModuleInfo() {
     }
   };
 
-  const hosts = useMemo(() => {
+  const admins = useMemo(() => {
     if (!Boolean(selectedApp.hosts?.length)) {
       return [];
     }
@@ -87,13 +87,13 @@ function ModuleInfo() {
               )}
             />
           </List.Item>
-          {Boolean(hosts.length) && (
+          {Boolean(admins.length) && (
             <List.Item>
               <List.Item.Meta
                 avatar={<CrownOutlined />}
-                title={t("Hosts")}
-                description={hosts.map((host) => (
-                  <p>{host.fullName}</p>
+                title={t("Admins")}
+                description={admins.map((admin) => (
+                  <p>{admin.fullName}</p>
                 ))}
               />
             </List.Item>

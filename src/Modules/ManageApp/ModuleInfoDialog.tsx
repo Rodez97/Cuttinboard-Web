@@ -1,15 +1,14 @@
 /** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
-  useConversations,
+  useCuttinboardModule,
   useEmployeesList,
   useLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { jsx } from "@emotion/react";
-import { Button, Divider, Modal, ModalProps, Switch } from "antd";
+import { Button, Divider, List, Modal, ModalProps } from "antd";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { List } from "antd";
 import {
   CrownOutlined,
   DeleteOutlined,
@@ -18,58 +17,51 @@ import {
   GlobalOutlined,
   InfoCircleOutlined,
   LockOutlined,
-  NotificationOutlined,
   TagOutlined,
   TagsOutlined,
-  TeamOutlined,
 } from "@ant-design/icons";
-import { useCallback } from "react";
-import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
 import {
   PrivacyLevel,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
 
-function ConvDetails({
+function ModuleInfoDialog({
   onEdit,
   ...props
 }: ModalProps & { onEdit: () => void }) {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { selectedConversation, canManage } = useConversations();
+  const { selectedApp, canManage } = useCuttinboardModule();
   const { locationAccessKey } = useLocation();
+  const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
 
-  const deleteConv = useCallback(async () => {
+  const admins = useMemo(() => {
+    if (!Boolean(selectedApp.hosts?.length)) {
+      return [];
+    }
+    return getEmployees.filter((e) => selectedApp.hosts?.indexOf(e.id) > -1);
+  }, [getEmployees, selectedApp]);
+
+  const handleDelete = async () => {
     if (!canManage) {
       return;
     }
     // Confirm delete
     Modal.confirm({
-      title: t("Delete Conversation"),
-      content: t("Are you sure you want to delete this conversation?"),
+      title: t("Delete Board"),
+      content: t("Are you sure you want to delete this board?"),
       okText: t("Delete"),
       okType: "danger",
       cancelText: t("Cancel"),
       onOk: async () => {
         try {
-          await selectedConversation.delete();
-          navigate(-1);
+          await selectedApp.delete();
         } catch (error) {
           recordError(error);
         }
       },
     });
-  }, [selectedConversation]);
-
-  const admins = useMemo(() => {
-    if (!Boolean(selectedConversation.hosts?.length)) {
-      return [];
-    }
-    return getEmployees.filter(
-      (e) => selectedConversation.hosts.indexOf(e.id) > -1
-    );
-  }, [getEmployees, selectedConversation]);
+  };
 
   return (
     <Modal
@@ -83,13 +75,13 @@ function ConvDetails({
             onClick={onEdit}
             key="edit"
           >
-            {t("Edit Conversation")}
+            {t("Edit Board")}
           </Button>,
           <Button
             icon={<DeleteOutlined />}
             type="dashed"
             danger
-            onClick={deleteConv}
+            onClick={handleDelete}
             key="delete"
           >
             {t("Delete")}
@@ -101,24 +93,22 @@ function ConvDetails({
         <List.Item.Meta
           avatar={<FormOutlined />}
           title={t("Name")}
-          description={selectedConversation.name}
+          description={selectedApp.name}
         />
       </List.Item>
       <List.Item>
         <List.Item.Meta
           avatar={
-            selectedConversation.privacyLevel === PrivacyLevel.PRIVATE ? (
+            selectedApp.privacyLevel === PrivacyLevel.PRIVATE ? (
               <LockOutlined />
-            ) : selectedConversation.privacyLevel === PrivacyLevel.POSITIONS ? (
+            ) : selectedApp.privacyLevel === PrivacyLevel.POSITIONS ? (
               <TagsOutlined />
             ) : (
               <GlobalOutlined />
             )
           }
           title={t("Privacy Level")}
-          description={t(
-            getPrivacyLevelTextByNumber(selectedConversation.privacyLevel)
-          )}
+          description={t(getPrivacyLevelTextByNumber(selectedApp.privacyLevel))}
         />
       </List.Item>
       {Boolean(admins.length) && (
@@ -137,51 +127,22 @@ function ConvDetails({
           avatar={<InfoCircleOutlined />}
           title={t("Description")}
           description={
-            Boolean(selectedConversation.description)
-              ? selectedConversation.description
-              : "---"
+            Boolean(selectedApp.description) ? selectedApp.description : "---"
           }
         />
       </List.Item>
-      {selectedConversation.privacyLevel === PrivacyLevel.PRIVATE && (
-        <List.Item>
-          <List.Item.Meta
-            avatar={<TeamOutlined />}
-            title={t("Members")}
-            description={selectedConversation.members?.length ?? 0}
-          />
-        </List.Item>
-      )}
-
-      {selectedConversation.privacyLevel === PrivacyLevel.POSITIONS &&
-        Boolean(selectedConversation.position) && (
+      {selectedApp.privacyLevel === PrivacyLevel.POSITIONS &&
+        Boolean(selectedApp.position) && (
           <List.Item>
             <List.Item.Meta
               avatar={<TagOutlined />}
               title={t("Position")}
-              description={selectedConversation.position}
+              description={selectedApp.position}
             />
           </List.Item>
         )}
-      <Divider />
-      <List.Item
-        hidden={!selectedConversation.iAmMember}
-        extra={
-          <Switch
-            checked={selectedConversation.isMuted}
-            onChange={() => {
-              selectedConversation.toggleMuteChat();
-            }}
-          />
-        }
-      >
-        <List.Item.Meta
-          avatar={<NotificationOutlined />}
-          title={t("Mute push notifications")}
-        />
-      </List.Item>
     </Modal>
   );
 }
 
-export default ConvDetails;
+export default ModuleInfoDialog;

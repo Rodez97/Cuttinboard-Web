@@ -19,22 +19,22 @@ import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/mode
 import { getAvatarByUID, recordError } from "../../utils/utils";
 import { intersection } from "lodash";
 import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
 import { useDashboard } from "../../Dashboard/DashboardProvider";
 
 function NewDMByEmail({
   onCreatingChange,
+  onClose,
 }: {
   onCreatingChange: (status: boolean) => void;
+  onClose: () => void;
 }) {
   const { locationId } = useParams();
   const { t } = useTranslation();
-  const { pathname } = useLocation();
   const [targetUser, setTargetUser] = useState<CuttinboardUser>(null);
   const { userDocument } = !locationId && useDashboard();
   const { startNewDMByEmail } = useDMs();
-  const navigate = useNavigate();
 
   const searchUser = async (email: string) => {
     onCreatingChange(true);
@@ -92,14 +92,16 @@ function NewDMByEmail({
     if (!targetUser) {
       return;
     }
-    onCreatingChange(true);
+
     try {
-      const newId = await startNewDMByEmail(targetUser);
-      navigate(pathname.replace("new", newId));
+      onCreatingChange(true);
+      await startNewDMByEmail(targetUser);
+      onClose();
     } catch (error) {
       recordError(error);
+    } finally {
+      onCreatingChange(false);
     }
-    onCreatingChange(false);
   };
 
   return (
@@ -149,10 +151,7 @@ function NewDMByEmail({
           >
             <List.Item.Meta
               avatar={
-                <Avatar
-                  icon={<UserOutlined />}
-                  src={getAvatarByUID(targetUser.id)}
-                />
+                <Avatar icon={<UserOutlined />} src={targetUser.avatar} />
               }
               title={`${targetUser.name} ${targetUser.lastName}`}
               description={targetUser.email}

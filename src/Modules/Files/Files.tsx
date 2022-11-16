@@ -7,18 +7,19 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { collection } from "@firebase/firestore";
 import { Layout } from "antd";
-import { Navigate, Route, Routes } from "react-router-dom";
-import ManageModule from "../ManageApp/ManageModule";
+import { Route, Routes } from "react-router-dom";
 import FilesDrawersList from "./FilesDrawersList";
 import FilesRoutes from "./FilesRoutes";
 import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
 import { recordError } from "../../utils/utils";
 import { EmptyMainModule, PageError, PageLoading } from "../../components";
+import { NotFound } from "../../components/NotFound";
 
 function Files() {
   const { t } = useTranslation();
   const { location } = useLocation();
+
   return (
     <CuttinboardModuleProvider
       baseRef={collection(
@@ -55,9 +56,8 @@ function Files() {
                       />
                     }
                   />
-                  <Route path=":boardId/*" element={<FilesRoutes />} />
-                  <Route path="new" element={<ManageModule />} />
-                  <Route path="*" element={<Navigate to="/apps/storage" />} />
+                  <Route path=":boardId" element={<FilesRoutes />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
             </Layout.Content>

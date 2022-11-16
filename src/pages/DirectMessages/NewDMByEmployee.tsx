@@ -8,30 +8,30 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Avatar, Button, List, Typography } from "antd";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
-import { getAvatarByUID, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
 import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
 
 function NewDMByEmployee({
   onCreatingChange,
+  onClose,
 }: {
   onCreatingChange: (status: boolean) => void;
+  onClose: () => void;
 }) {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { startNewLocationDM } = useDMs();
   const { getEmployees } = useEmployeesList();
 
   const startNewChat = async (selectedUser: Employee) => {
-    onCreatingChange(true);
     try {
-      const newId = await startNewLocationDM(selectedUser);
-      navigate(pathname.replace("new", newId));
+      onCreatingChange(true);
+      await startNewLocationDM(selectedUser);
+      onClose();
     } catch (error) {
       recordError(error);
+    } finally {
+      onCreatingChange(false);
     }
-    onCreatingChange(false);
   };
   return (
     <div>
@@ -56,9 +56,7 @@ function NewDMByEmployee({
             css={{ backgroundColor: "#F7F7F7", padding: 10, marginBottom: 8 }}
           >
             <List.Item.Meta
-              avatar={
-                <Avatar icon={<UserOutlined />} src={getAvatarByUID(emp.id)} />
-              }
+              avatar={<Avatar icon={<UserOutlined />} src={emp.avatar} />}
               title={`${emp.name} ${emp.lastName}`}
               description={emp.email}
             />

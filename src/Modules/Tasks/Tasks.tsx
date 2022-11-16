@@ -17,10 +17,12 @@ import tasksImage from "../../assets/images/to-do-list.png";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { EmptyMainModule } from "../../components";
+import { NotFound } from "../../components/NotFound";
 
 function Tasks() {
   const { t } = useTranslation();
   const { location } = useLocation();
+
   return (
     <CuttinboardModuleProvider
       baseRef={collection(
@@ -57,9 +59,8 @@ function Tasks() {
                       />
                     }
                   />
-                  <Route path=":boardId/*" element={<TasksRoutes />} />
-                  <Route path="new" element={<ManageModule />} />
-                  <Route path="*" element={<Navigate to="/apps/to-do" />} />
+                  <Route path=":boardId" element={<TasksRoutes />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
             </Layout.Content>

@@ -5,26 +5,18 @@ import {
   useCuttinboardModule,
   useEmployeesList,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Colors,
-  PrivacyLevel,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, List } from "antd";
+import { PrivacyLevel } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { ModalProps } from "antd";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ArrowRightOutlined } from "@ant-design/icons";
-import {
-  GrayPageHeader,
-  QuickUserDialogAvatar,
-  TitleBoxGreen,
-} from "../../components";
+import SelectEmployee from "../../components/ManageApp/SelectEmployee";
 
-interface AssignUserProps {
+type AssignUserProps = {
   onSelectedEmployee: (employee: Employee) => void;
-}
+} & ModalProps;
 
-function AssignUser({ onSelectedEmployee }: AssignUserProps) {
+function AssignUser({ onSelectedEmployee, ...props }: AssignUserProps) {
   const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
   const { t } = useTranslation();
@@ -42,52 +34,16 @@ function AssignUser({ onSelectedEmployee }: AssignUserProps) {
 
   const handleSelectEmployee = (emp: Employee) => {
     onSelectedEmployee(emp);
-    navigate(-1);
   };
 
   return (
-    <div>
-      <GrayPageHeader onBack={() => navigate(-1)} title={t("Assign tasks")} />
-      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-        <div
-          css={{
-            minWidth: 300,
-            maxWidth: 600,
-            margin: "auto",
-            width: "100%",
-          }}
-        >
-          <List
-            dataSource={employees}
-            renderItem={(emp) => {
-              return (
-                <List.Item
-                  key={emp.id}
-                  css={{
-                    backgroundColor: Colors.MainOnWhite,
-                    padding: 10,
-                    margin: 5,
-                  }}
-                  extra={
-                    <Button
-                      type="link"
-                      icon={<ArrowRightOutlined />}
-                      onClick={() => handleSelectEmployee(emp)}
-                    />
-                  }
-                >
-                  <List.Item.Meta
-                    avatar={<QuickUserDialogAvatar employee={emp} />}
-                    title={`${emp.name} ${emp.lastName}`}
-                    description={emp.email}
-                  />
-                </List.Item>
-              );
-            }}
-          />
-        </div>
-      </div>
-    </div>
+    <SelectEmployee
+      onSelectedEmployee={handleSelectEmployee}
+      employees={employees}
+      footer={null}
+      title={t("Assign tasks")}
+      {...props}
+    />
   );
 }
 

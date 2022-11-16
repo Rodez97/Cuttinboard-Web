@@ -1,10 +1,11 @@
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { ModalProps } from "antd";
 import React from "react";
 import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";
 
-function ConvManageMembers() {
+function ConvManageMembers(props: ModalProps) {
   const { canManage, selectedConversation } = useConversations();
 
   const handleRemoveMember = async (employeeId: string) => {
@@ -40,12 +41,12 @@ function ConvManageMembers() {
     }
   };
 
-  const handleRemoveHost = async (host: Employee) => {
+  const handleRemoveHost = async (admin: Employee) => {
     if (!selectedConversation) {
       return;
     }
     try {
-      await selectedConversation.removeHost(host);
+      await selectedConversation.removeHost(admin);
     } catch (error) {
       recordError(error);
     }
@@ -61,7 +62,8 @@ function ConvManageMembers() {
       removeHost={handleRemoveHost}
       privacyLevel={selectedConversation.privacyLevel}
       positions={[selectedConversation.position]}
-      hosts={selectedConversation?.hosts}
+      admins={selectedConversation?.hosts}
+      {...props}
     />
   );
 }

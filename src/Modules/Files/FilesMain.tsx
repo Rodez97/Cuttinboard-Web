@@ -40,6 +40,11 @@ import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import fileSize from "filesize";
 import FileMenu from "./FileMenu";
 import { recordError } from "../../utils/utils";
+import ManageModuleDialog, {
+  useManageModule,
+} from "../ManageApp/ManageModuleDialog";
+import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
+import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 
 function FilesMain() {
   const navigate = useNavigate();
@@ -54,6 +59,10 @@ function FilesMain() {
       selectedApp &&
         selectedApp.contentRef.withConverter(Cuttinboard_File.Converter)
     );
+  const [infoOpen, openInfo, closeInfo] = useDisclose();
+  const [manageMembersOpen, openManageMembers, closeManageMembers] =
+    useDisclose();
+  const { baseRef, editModule } = useManageModule();
   const storagePathRef = useMemo(
     () =>
       ref(Storage, `${location.storageRef.fullPath}/storage/${selectedApp.id}`),
@@ -167,13 +176,13 @@ function FilesMain() {
     >
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
-        onBack={() => navigate("details")}
+        onBack={openInfo}
         title={selectedApp.name}
         extra={[
           <Button
             key="members"
             type="primary"
-            onClick={() => navigate(`members`)}
+            onClick={openManageMembers}
             icon={<TeamOutlined />}
           >
             {t("Members")}
@@ -268,6 +277,19 @@ function FilesMain() {
         baseStorageRef={storagePathRef}
         open={pickFileOpen}
         onClose={closePickFile}
+      />
+      <ManageModuleDialog ref={baseRef} moduleName="Notes Stack" />
+      <ModuleInfoDialog
+        open={infoOpen}
+        onCancel={closeInfo}
+        onEdit={() => {
+          closeInfo();
+          editModule(selectedApp);
+        }}
+      />
+      <ModuleManageMembers
+        open={manageMembersOpen}
+        onCancel={closeManageMembers}
       />
     </Layout.Content>
   );

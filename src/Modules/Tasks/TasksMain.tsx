@@ -1,8 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { orderBy } from "lodash";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TaskBlock from "./TaskBlock";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,10 +18,19 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
-import { EmptyMainModule } from "../../components";
+import { EmptyMainModule, PageError, PageLoading } from "../../components";
+import { useDisclose } from "../../hooks";
+import ManageModuleDialog, {
+  useManageModule,
+} from "../ManageApp/ManageModuleDialog";
+import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
+import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
+import ManageTaskBlock, { ManageTaskBlockRef } from "./ManageTaskBlock";
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import { query, where } from "firebase/firestore";
+import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 
-function TasksMain({ todoCards }: { todoCards: Todo[] }) {
-  const navigate = useNavigate();
+function TasksMain() {
   const { t } = useTranslation();
   const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
@@ -35,9 +43,27 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
   });
   const { selectedApp, canManage } = useCuttinboardModule();
   const { removeBadge } = useNotificationsBadges();
+  const [infoOpen, openInfo, closeInfo] = useDisclose();
+  const [manageMembersOpen, openManageMembers, closeManageMembers] =
+    useDisclose();
+  const { baseRef, editModule } = useManageModule();
+  const manageTaskBlockRef = useRef<ManageTaskBlockRef>(null);
+  const [todoCards, loading, error] = useCollectionData<Todo>(
+    canManage
+      ? selectedApp?.contentRef.withConverter(Todo.Converter)
+      : selectedApp &&
+          query(
+            selectedApp.contentRef,
+            where(`assignedTo.id`, "==", Auth.currentUser.uid)
+          ).withConverter(Todo.Converter)
+  );
 
   const handleCreateTaskBlock = () => {
-    navigate("new-todo");
+    manageTaskBlockRef.current?.openNew();
+  };
+
+  const handleEditTaskBlock = (todo: Todo) => {
+    manageTaskBlockRef.current?.openEdit(todo);
   };
 
   useEffect(() => {
@@ -85,13 +111,21 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
     });
   }, [todoCards, index, order, searchQuery]);
 
+  if (loading) {
+    return <PageLoading />;
+  }
+
+  if (error) {
+    return <PageError error={error} />;
+  }
+
   return (
     <Layout.Content
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
-        onBack={() => navigate("details")}
+        onBack={openInfo}
         title={selectedApp.name}
         extra={[
           <Button
@@ -106,7 +140,7 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
           <Button
             key="members"
             type="primary"
-            onClick={() => navigate(`members`)}
+            onClick={openManageMembers}
             icon={<TeamOutlined />}
           >
             {t("Members")}
@@ -149,7 +183,7 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
               <TaskBlock
                 key={todo.id}
                 taskBlock={todo}
-                onEdit={() => navigate(`edit-todo/${todo.id}`)}
+                onEdit={() => handleEditTaskBlock(todo)}
               />
             ))
           ) : (
@@ -169,6 +203,20 @@ function TasksMain({ todoCards }: { todoCards: Todo[] }) {
           )}
         </Space>
       </div>
+      <ManageTaskBlock ref={manageTaskBlockRef} />
+      <ManageModuleDialog ref={baseRef} moduleName="Notes Stack" />
+      <ModuleInfoDialog
+        open={infoOpen}
+        onCancel={closeInfo}
+        onEdit={() => {
+          closeInfo();
+          editModule(selectedApp);
+        }}
+      />
+      <ModuleManageMembers
+        open={manageMembersOpen}
+        onCancel={closeManageMembers}
+      />
     </Layout.Content>
   );
 }

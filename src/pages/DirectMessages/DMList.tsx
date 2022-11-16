@@ -16,32 +16,28 @@ import { DarkPageHeader } from "../../components/PageHeaders";
 import { useTranslation } from "react-i18next";
 import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import { getAvatarByUID } from "../../utils/utils";
 import { Chat } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useNewElement } from "../../hooks/useNewElement";
+import { useDisclose } from "../../hooks";
+import NewDM from "./NewDM";
 
-function DMList({
-  underLocation,
-  filterChecked,
-  onFilterCheckedChange,
-}: {
-  underLocation?: boolean;
-  filterChecked?: boolean;
-  onFilterCheckedChange?: (newValue: boolean) => void;
-}) {
-  const navigate = useNavigate();
+function DMList() {
   const { locationId } = useParams();
-  const newElement = useNewElement();
+  const [underLocation] = useState(!!locationId);
+  const [filterByLocation, setFilterByLocation] = useState(
+    Boolean(locationId != null)
+  );
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { chats, chatId } = useDMs();
   const { getDMBadge } = useNotificationsBadges();
   const [searchQuery, setSearchQuery] = useState("");
   const { notifications } = useCuttinboard();
   const { getEmployees } = underLocation && useEmployeesList();
+  const [newDmOpen, openNewDm, closeNewDm] = useDisclose();
 
   const getChats = useMemo(() => {
     let filteredLocations: Chat[] = [];
-    if (underLocation && filterChecked) {
+    if (underLocation && filterByLocation) {
       filteredLocations = chats.filter((cht) =>
         getEmployees.some((e) => cht.recipient.id === e.id)
       );
@@ -76,7 +72,7 @@ function DMList({
     notifications,
     underLocation,
     locationId,
-    filterChecked,
+    filterByLocation,
   ]);
 
   return (
@@ -84,43 +80,48 @@ function DMList({
       direction="vertical"
       css={{
         display: "flex",
-        padding: "3px 5px",
         borderTop: `5px solid ${Colors.MainBlue}`,
       }}
     >
-      <DarkPageHeader
-        title={t("Chats")}
-        avatar={{ src: <Icon component={MessageTextLock} /> }}
-        onBack={() =>
-          navigate(
-            locationId != null ? `/location/${locationId}` : "/dashboard"
-          )
-        }
-        css={{ paddingBottom: 0, paddingTop: 0 }}
-      />
-      <Button icon={<PlusOutlined />} block type="dashed" onClick={newElement}>
-        {t("Add")}
-      </Button>
-      <Input.Search
-        placeholder={t("Search")}
-        value={searchQuery}
-        onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
-      />
-      {underLocation && (
-        <Checkbox
-          css={{ justifySelf: "center", color: "#fff" }}
-          checked={filterChecked}
-          onChange={(e) => onFilterCheckedChange(e.target.checked)}
-        >
-          {t("Show only location members")}
-        </Checkbox>
-      )}
+      <Space
+        direction="vertical"
+        css={{
+          padding: "3px 5px",
+          display: "flex",
+        }}
+      >
+        <DarkPageHeader
+          title={t("Chats")}
+          avatar={{ src: <Icon component={MessageTextLock} /> }}
+          onBack={() => navigate(-1)}
+          css={{ paddingBottom: 0, paddingTop: 0 }}
+        />
+        <Button icon={<PlusOutlined />} block type="dashed" onClick={openNewDm}>
+          {t("Add")}
+        </Button>
+        <Input.Search
+          placeholder={t("Search")}
+          value={searchQuery}
+          onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
+        />
+        {underLocation && (
+          <Checkbox
+            css={{ justifySelf: "center", color: "#fff" }}
+            checked={filterByLocation}
+            onChange={(e) => setFilterByLocation(e.target.checked)}
+          >
+            {t("Show only location members")}
+          </Checkbox>
+        )}
+      </Space>
       <Menu
         theme="dark"
         items={getChats}
-        onSelect={({ key }) => navigate(key)}
+        onSelect={({ key }) => navigate(key, { replace: true })}
         selectedKeys={[chatId]}
       />
+
+      <NewDM open={newDmOpen} onCancel={closeNewDm} onClose={closeNewDm} />
     </Space>
   );
 }

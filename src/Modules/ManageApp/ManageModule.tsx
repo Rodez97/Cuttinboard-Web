@@ -18,7 +18,6 @@ import { useTranslation } from "react-i18next";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { useDisclose } from "../../hooks";
 import { GrayPageHeader } from "../../components";
-import { useState } from "react";
 import { GenericModule } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { isEmpty } from "lodash";
 
@@ -57,10 +56,10 @@ const ManageModule = ({ baseModule }: ManageModuleProps) => {
       if (isEditing) {
         const { privacyLevel, position, ...others } = values;
         if (selectedApp.privacyLevel === PrivacyLevel.POSITIONS) {
-          const hosts = selectedApp.accessTags?.filter((at) =>
+          const admins = selectedApp.accessTags?.filter((at) =>
             at.startsWith("hostId_")
           );
-          const accessTags = [...hosts, position];
+          const accessTags = [...admins, position];
           await selectedApp.update({ ...others, accessTags });
         } else {
           await selectedApp.update(others);

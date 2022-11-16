@@ -16,14 +16,14 @@ interface IMemberItem {
   employee: Employee;
   onRemove: (employeeId: string) => void;
   readonly?: boolean;
-  hosts?: string[];
+  admins?: string[];
   privacyLevel: PrivacyLevel;
 }
 
 function MemberItem({
   employee,
   onRemove,
-  hosts,
+  admins,
   readonly,
   privacyLevel,
 }: IMemberItem) {
@@ -37,17 +37,17 @@ function MemberItem({
     if (isGeneralManager || isOwner || isAdmin) {
       return true;
     }
-    if (hosts?.includes(employee.id) && employee.id === user.uid) {
+    if (admins?.includes(employee.id) && employee.id === user.uid) {
       return false;
     }
 
-    return privacyLevel === PrivacyLevel.PRIVATE && hosts?.includes(user.uid);
+    return privacyLevel === PrivacyLevel.PRIVATE && admins?.includes(user.uid);
   }, [
     readonly,
     isGeneralManager,
     isOwner,
     employee.id,
-    hosts,
+    admins,
     privacyLevel,
     user.uid,
     isAdmin,

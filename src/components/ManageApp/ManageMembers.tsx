@@ -7,9 +7,8 @@ import {
   RoleAccessLevels,
   useEmployeesList,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Route, Routes, useNavigate } from "react-router-dom";
 import AddMembers from "./AddMembers";
 import MemberItem from "./MemberItem";
 import SelectEmployee from "./SelectEmployee";
@@ -17,19 +16,22 @@ import { indexOf } from "lodash";
 import {
   Button,
   Divider,
-  Layout,
   List,
   Modal,
+  ModalProps,
   Space,
   Tag,
-  Tooltip,
   Typography,
 } from "antd";
-import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
+import {
+  ExclamationCircleOutlined,
+  UserAddOutlined,
+  UsergroupAddOutlined,
+} from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { GrayPageHeader } from "../PageHeaders";
+import { useDisclose } from "../../hooks";
 
-interface ManageMembersProps {
+type ManageMembersProps = {
   readonly?: boolean;
   members: string[];
   removeMember: (employeeId: string) => void;
@@ -38,8 +40,8 @@ interface ManageMembersProps {
   removeHost: (hostUser: Employee) => void;
   privacyLevel: PrivacyLevel;
   positions?: string[];
-  hosts?: string[];
-}
+  admins?: string[];
+} & ModalProps;
 
 function ManageMembers({
   readonly,
@@ -49,13 +51,15 @@ function ManageMembers({
   removeHost,
   privacyLevel,
   positions,
-  hosts,
+  admins,
   members,
+  ...props
 }: ManageMembersProps) {
   const { t } = useTranslation();
   const { locationAccessKey } = useLocation();
-  const navigate = useNavigate();
   const { getEmployees } = useEmployeesList();
+  const [addMembersOpen, openAddMembers, closeAddMembers] = useDisclose();
+  const [selectHostOpen, openSelectHost, closeSelectHost] = useDisclose();
 
   const handleAddMembers = (addedEmployees: Employee[]) => {
     addMembers(addedEmployees);
@@ -90,31 +94,39 @@ function ManageMembers({
     if (privacyLevel === PrivacyLevel.POSITIONS) {
       membersList = getEmployees.filter((emp) => emp.hasAnyPosition(positions));
     }
-    return membersList.filter((m) => !hosts?.includes(m.id));
-  }, [getEmployees, privacyLevel, members, positions, hosts]);
+    return membersList.filter((m) => !admins?.includes(m.id));
+  }, [getEmployees, privacyLevel, members, positions, admins]);
 
   const hostsList = useMemo(() => {
-    if (!Boolean(hosts?.length)) {
+    if (!Boolean(admins?.length)) {
       return [];
     }
-    return getEmployees.filter((e) => hosts?.indexOf(e.id) > -1);
-  }, [getEmployees, hosts]);
+    return getEmployees.filter((e) => admins?.indexOf(e.id) > -1);
+  }, [getEmployees, admins]);
+
+  const getPossibleHosts = useMemo(() => {
+    return getEmployees.filter(
+      (emp) =>
+        emp.locationRole <= RoleAccessLevels.MANAGER &&
+        !admins?.includes(emp.id)
+    );
+  }, [getEmployees, admins]);
 
   const handleSetHost = (newHost: Employee) => {
+    closeSelectHost();
     setAppHost(newHost);
-    navigate(-1);
   };
 
-  const handleRemoveHost = async (host: Employee) => {
+  const handleRemoveHost = async (admin: Employee) => {
     Modal.confirm({
-      title: t("Are you sure you want to remove this host?"),
+      title: t("Are you sure you want to remove this admin?"),
       icon: <ExclamationCircleOutlined />,
       okText: t("Yes"),
       okType: "danger",
       cancelText: t("No"),
       async onOk() {
         try {
-          removeHost(host);
+          removeHost(admin);
         } catch (error) {
           recordError(error);
         }
@@ -124,162 +136,105 @@ function ManageMembers({
   };
 
   return (
-    <Routes>
-      <Route path="/">
-        <Route
-          index
-          element={
-            <Layout>
-              <GrayPageHeader
-                onBack={() => navigate(-1)}
-                title={t("Members")}
-                extra={[
-                  <Tooltip key="1" title={t("Add Members")}>
-                    <Button
-                      icon={<UserAddOutlined />}
-                      onClick={() => navigate(`add`)}
-                      type="primary"
-                      hidden={privacyLevel !== PrivacyLevel.PRIVATE || readonly}
-                    >
-                      {t("Add Members")}
-                    </Button>
-                  </Tooltip>,
-                ]}
+    <React.Fragment>
+      <Modal {...props} title={t("Add Members")} footer={null}>
+        {/* 🛡 Admin */}
+        {(Boolean(hostsList.length) ||
+          locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER) && (
+          <Divider orientation="left">{t("Admin")}</Divider>
+        )}
+
+        {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
+          <Button type="dashed" block onClick={openSelectHost}>
+            {t("Add Admin")}
+          </Button>
+        )}
+
+        {Boolean(hostsList.length) && (
+          <List
+            dataSource={hostsList}
+            renderItem={(hostUser) => (
+              <MemberItem
+                key={hostUser.id}
+                employee={hostUser}
+                onRemove={() => handleRemoveHost(hostUser)}
+                admins={admins}
+                privacyLevel={privacyLevel}
               />
-              <Layout.Content>
-                <div
-                  css={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: 20,
-                  }}
-                >
-                  <div
-                    css={{
-                      minWidth: 300,
-                      maxWidth: 600,
-                      margin: "auto",
-                      width: "100%",
-                    }}
-                  >
-                    {/* 🛡 Host */}
-                    {(Boolean(hostsList.length) ||
-                      locationAccessKey.role <=
-                        RoleAccessLevels.GENERAL_MANAGER) && (
-                      <Divider orientation="left">{t("Host")}</Divider>
-                    )}
+            )}
+          />
+        )}
 
-                    {Boolean(hostsList.length) && (
-                      <List
-                        dataSource={hostsList}
-                        renderItem={(hostUser) => (
-                          <MemberItem
-                            key={hostUser.id}
-                            employee={hostUser}
-                            onRemove={() => handleRemoveHost(hostUser)}
-                            hosts={hosts}
-                            privacyLevel={privacyLevel}
-                          />
-                        )}
-                      />
-                    )}
-                    {locationAccessKey.role <=
-                      RoleAccessLevels.GENERAL_MANAGER && (
-                      <Button
-                        type="dashed"
-                        block
-                        onClick={() => navigate("host")}
-                      >
-                        {t("Add Host")}
-                      </Button>
-                    )}
+        {/* Members */}
+        <Divider orientation="left">{t("Members")}</Divider>
 
-                    {/* Members */}
-                    <Divider orientation="left">{t("Members")}</Divider>
+        <Button
+          icon={<UserAddOutlined />}
+          onClick={openAddMembers}
+          type="dashed"
+          block
+          hidden={privacyLevel !== PrivacyLevel.PRIVATE || readonly}
+        >
+          {t("Add Members")}
+        </Button>
 
-                    {privacyLevel === PrivacyLevel.PUBLIC && (
-                      <Typography.Text
-                        strong
-                        css={{
-                          fontSize: 20,
-                          textAlign: "center",
-                          display: "block",
-                        }}
-                      >
-                        {t("This is a Public element. Everyone is a member")}
-                      </Typography.Text>
-                    )}
+        {privacyLevel === PrivacyLevel.PUBLIC && (
+          <Typography.Text
+            strong
+            css={{
+              fontSize: 20,
+              textAlign: "center",
+              display: "block",
+            }}
+          >
+            {t("This is a Public element. Everyone is a member")}
+          </Typography.Text>
+        )}
 
-                    {privacyLevel === PrivacyLevel.POSITIONS &&
-                      positions?.length && (
-                        <Space wrap>
-                          {positions
-                            .filter((p) => !p.startsWith("hostId_"))
-                            .map((pos, index) => (
-                              <Tag key={index}>{t(pos)}</Tag>
-                            ))}
-                        </Space>
-                      )}
+        {privacyLevel === PrivacyLevel.POSITIONS && positions?.length && (
+          <Space wrap>
+            {positions
+              .filter((p) => !p.startsWith("hostId_"))
+              .map((pos, index) => (
+                <Tag key={index}>{t(pos)}</Tag>
+              ))}
+          </Space>
+        )}
 
-                    <List
-                      dataSource={getMembers}
-                      renderItem={(emp) => (
-                        <MemberItem
-                          key={emp.id}
-                          employee={emp}
-                          onRemove={handleMemberRemove}
-                          privacyLevel={privacyLevel}
-                          readonly={
-                            privacyLevel === PrivacyLevel.POSITIONS ||
-                            privacyLevel === PrivacyLevel.PUBLIC ||
-                            readonly
-                          }
-                        />
-                      )}
-                    />
-                  </div>
-                </div>
-              </Layout.Content>
-            </Layout>
-          }
+        <List
+          dataSource={getMembers}
+          renderItem={(emp) => (
+            <MemberItem
+              key={emp.id}
+              employee={emp}
+              onRemove={handleMemberRemove}
+              privacyLevel={privacyLevel}
+              readonly={
+                privacyLevel === PrivacyLevel.POSITIONS ||
+                privacyLevel === PrivacyLevel.PUBLIC ||
+                readonly
+              }
+            />
+          )}
         />
-        <Route
-          path="add"
-          element={
-            <Layout>
-              <GrayPageHeader
-                onBack={() => navigate(-1)}
-                title={t("Add Members")}
-              />
-              <Layout.Content>
-                <AddMembers
-                  onSelectedEmployees={handleAddMembers}
-                  hosts={hosts}
-                  initialSelected={getMembers}
-                />
-              </Layout.Content>
-            </Layout>
-          }
-        />
-        <Route
-          path="host"
-          element={
-            <Layout>
-              <GrayPageHeader
-                onBack={() => navigate(-1)}
-                title={t("Select Host")}
-              />
-              <Layout.Content>
-                <SelectEmployee
-                  onSelectedEmployee={handleSetHost}
-                  hosts={hosts}
-                />
-              </Layout.Content>
-            </Layout>
-          }
-        />
-      </Route>
-    </Routes>
+      </Modal>
+      <AddMembers
+        onSelectedEmployees={handleAddMembers}
+        admins={admins}
+        initialSelected={getMembers}
+        onClose={closeAddMembers}
+        onCancel={closeAddMembers}
+        open={addMembersOpen}
+      />
+      <SelectEmployee
+        onSelectedEmployee={handleSetHost}
+        employees={getPossibleHosts}
+        onCancel={closeSelectHost}
+        open={selectHostOpen}
+        footer={null}
+        title={t("Select admin")}
+      />
+    </React.Fragment>
   );
 }
 
