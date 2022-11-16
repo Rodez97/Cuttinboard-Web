@@ -16,7 +16,7 @@ import {
   where,
 } from "firebase/firestore";
 import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { getAvatarByUID, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
 import { intersection } from "lodash";
 import { useDMs } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { useParams } from "react-router-dom";

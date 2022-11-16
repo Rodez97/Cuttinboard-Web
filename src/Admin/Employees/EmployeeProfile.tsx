@@ -9,7 +9,6 @@ import EmployeeContactPanel from "./EmployeeContactPanel";
 import EmployeeDocuments from "./EmployeeDocuments";
 import EmployeeRolePanel from "./EmployeeRolePanel";
 import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { getAvatarByUID } from "../../utils/utils";
 
 function EmployeeProfile() {
   const { getEmployees } = useEmployeesList();
@@ -32,7 +31,7 @@ function EmployeeProfile() {
         onBack={() => navigate(-1)}
         title={employee.fullName}
         avatar={{
-          src: getAvatarByUID(employee.id),
+          src: employee.avatar,
           icon: <UserOutlined />,
           alt: employee.fullName,
         }}

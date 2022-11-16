@@ -31,7 +31,7 @@ export const recordError = (error: Error, fatal?: boolean) => {
   });
 };
 
-export const getAvatarByUID = (uid: string) =>
+const getAvatarByUID = (uid: string) =>
   `https://firebasestorage.googleapis.com/v0/b/cuttinboard-2021.appspot.com/o/users%2F${uid}%2Favatar?alt=media`;
 
 export const getPrivacyLevelTextByNumber = (role: number) => {
