@@ -1,19 +1,18 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useCuttinboard,
-  useNotificationsBadges,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Badge, Button, Card, List, message, Modal } from "antd";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { ReactNode } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import styled from "@emotion/styled";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Colors,
+  FUNCTIONS,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
@@ -52,15 +51,14 @@ interface LocationCardProps {
   actions?: ReactNode[];
 }
 
-function LocationCard({ location, actions }: LocationCardProps) {
+export default ({ location, actions }: LocationCardProps) => {
   const navigate = useNavigate();
-  const { getBadgeByLocation } = useNotificationsBadges();
   const { t } = useTranslation();
-  const { user, organizationKey } = useCuttinboard();
-  const [createBillingSession, , error] = useHttpsCallable<
+  const { user, notifications } = useCuttinboard();
+  const [createBillingSession] = useHttpsCallable<
     { return_url: string },
     string
-  >(Functions, "stripe-createBillingSession");
+  >(FUNCTIONS, "stripe-createBillingSession");
 
   const showActionRequired = () => {
     Modal.confirm({
@@ -70,24 +68,26 @@ function LocationCard({ location, actions }: LocationCardProps) {
       ),
       async onOk() {
         try {
-          const { data } = await createBillingSession({
+          const response = await createBillingSession({
             return_url: window.location.href,
           });
+          if (!response?.data) {
+            throw new Error("No data returned");
+          }
           // Report to analytics
           const analytics = getAnalytics();
           logEvent(analytics, "billing_session_created", {
             location_id: location.id,
-            organization_id: organizationKey.orgId,
+            organization_id: location.organizationId,
             from: "location_card",
             for: "activate_location",
           });
           // Redirect to Stripe Billing Portal
-          window.location.assign(data);
-        } catch {
+          window.location.assign(response.data);
+        } catch (error) {
           recordError(error);
         }
       },
-      onCancel() {},
       type: "error",
       okText: t("Manage Billing"),
       okType: "primary",
@@ -159,7 +159,10 @@ function LocationCard({ location, actions }: LocationCardProps) {
 
   return (
     <Badge
-      count={getBadgeByLocation(location.id, location.organizationId)}
+      count={notifications?.getAllBadgesByLocation(
+        location.id,
+        location.organizationId
+      )}
       color="primary"
     >
       <MainCard
@@ -190,6 +193,4 @@ function LocationCard({ location, actions }: LocationCardProps) {
       </MainCard>
     </Badge>
   );
-}
-
-export default LocationCard;
+};

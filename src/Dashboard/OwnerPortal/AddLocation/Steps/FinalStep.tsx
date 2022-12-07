@@ -7,11 +7,11 @@ import { useAddLocation } from "../AddLocation";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc } from "firebase/firestore";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "../../../DashboardProvider";
 import { List, Space, Typography } from "antd";
 import { ShopOutlined, UserOutlined } from "@ant-design/icons";
 import { PageError, PageLoading } from "../../../../components";
+import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 const SummaryNewLocationContainer = styled.div`
   display: flex;
@@ -50,7 +50,7 @@ function FinalStep() {
   const { subscriptionDocument } = useDashboard();
   const { location, generalManager } = useAddLocation();
   const [subDoc, loadingSubDoc, subDocError] = useDocumentData(
-    doc(Firestore, "Organizations", user.uid)
+    doc(FIRESTORE, "Organizations", user.uid)
   );
 
   const getPrice = useCallback(() => {
@@ -69,7 +69,7 @@ function FinalStep() {
         currency: "USD",
       }),
     });
-  }, [subscriptionDocument, subDoc]);
+  }, [subscriptionDocument?.items, subDoc?.locations, t]);
 
   if (loadingSubDoc) {
     return <PageLoading />;
@@ -77,6 +77,10 @@ function FinalStep() {
 
   if (subDocError) {
     return <PageError error={subDocError} />;
+  }
+
+  if (!location) {
+    return <PageError error={new Error("No location data")} />;
   }
 
   return (

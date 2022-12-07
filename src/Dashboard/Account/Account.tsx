@@ -47,9 +47,6 @@ function Account() {
           {t("Delete Account")}
         </Button>
       </Layout.Content>
-      <Layout.Footer style={{ textAlign: "center" }}>
-        Cuttinboard ©{new Date().getFullYear()} Elevvate Technologies
-      </Layout.Footer>
 
       <DeleteAccountDialog
         open={openDeleteDialog}

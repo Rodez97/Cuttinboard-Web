@@ -9,12 +9,12 @@ import "@fontsource/roboto/700.css";
 import { createRoot } from "react-dom/client";
 import MainAppRoot from "./Root";
 import { enableIndexedDbPersistence } from "firebase/firestore";
-import { Firestore } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "./utils/utils";
+import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 export const MainApp = lazy(() => import("./App"));
 
-enableIndexedDbPersistence(Firestore).catch((err) => {
+enableIndexedDbPersistence(FIRESTORE).catch((err) => {
   if (err.code == "failed-precondition") {
     // Multiple tabs open, persistence can only be enabled
     // in one tab at a a time.

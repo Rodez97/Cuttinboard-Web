@@ -1,4 +1,4 @@
-import { useDeleteCuttinboardAccount } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useDeleteAccount } from "@cuttinboard-solutions/cuttinboard-library/account";
 import { Alert, Form, Input, Modal } from "antd";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,7 @@ type Props = {
 function DeleteAccountDialog({ open, onClose }: Props) {
   const [form] = Form.useForm();
   const { t } = useTranslation();
-  const { deleteAccount, error, deleting } = useDeleteCuttinboardAccount();
+  const { deleteAccount, error, deleting } = useDeleteAccount();
 
   const onFinish = async ({ password }: { password: string }) => {
     try {

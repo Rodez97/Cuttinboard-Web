@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -9,17 +8,17 @@ import { getAnalytics, logEvent } from "firebase/analytics";
 import { recordError } from "../utils/utils";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { Alert, Button, Form, Input, Typography } from "antd";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 //= ===========================|| FIREBASE - LOGIN ||============================//
 
 const FirebaseLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [loginError, setLoginError] = useState<string>(null);
+  const [loginError, setLoginError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signInWithEmailAndPassword, user, loading, error] =
-    useSignInWithEmailAndPassword(Auth);
+    useSignInWithEmailAndPassword(AUTH);
 
   const onFinish = async ({
     email,
@@ -120,11 +119,11 @@ const FirebaseLogin = () => {
       {(loginError || error) && (
         <Alert
           message="Error"
-          description={t(loginError ?? error.message)}
+          description={t(loginError ?? error?.message)}
           type="error"
           showIcon
           closable
-          onClose={() => setLoginError(null)}
+          onClose={() => setLoginError("")}
         />
       )}
     </div>

@@ -1,9 +1,7 @@
 /** @jsx jsx */
-import {
-  Auth,
-  Firestore,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { jsx } from "@emotion/react";
 import { Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
@@ -12,13 +10,14 @@ import { useTranslation } from "react-i18next";
 import { PageError, PageLoading } from "../../components";
 import LocationCard from "./LocationCard";
 
-function MemberLocations() {
+export default () => {
   const { t } = useTranslation();
+  const { user } = useCuttinboard();
   const [myLocations, loading, error] = useCollectionData(
     query(
-      collection(Firestore, "Locations"),
-      where("members", "array-contains", Auth.currentUser.uid)
-    ).withConverter(Location.Converter)
+      collection(FIRESTORE, "Locations"),
+      where("members", "array-contains", user.uid)
+    ).withConverter(Location.firestoreConverter)
   );
 
   if (loading) {
@@ -30,7 +29,7 @@ function MemberLocations() {
   }
   return (
     <div css={{ gap: "16px" }}>
-      {myLocations?.length > 0 ? (
+      {myLocations && myLocations.length > 0 ? (
         <Space wrap size="large">
           {myLocations.map((loc) => (
             <LocationCard key={loc.id} location={loc} />
@@ -51,6 +50,4 @@ function MemberLocations() {
       )}
     </div>
   );
-}
-
-export default MemberLocations;
+};

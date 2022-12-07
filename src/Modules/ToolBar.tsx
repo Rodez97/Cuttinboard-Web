@@ -7,7 +7,7 @@ import { SplitButton } from "../components";
 interface ToolBarProps {
   index: number;
   order: "desc" | "asc";
-  onChageOrder: (order: "asc" | "desc") => void;
+  onChangeOrder: (order: "asc" | "desc") => void;
   onChange: (index: number) => void;
   options: string[];
   searchQuery?: string;
@@ -17,7 +17,7 @@ interface ToolBarProps {
 function ToolBar({
   index,
   order,
-  onChageOrder,
+  onChangeOrder,
   onChange,
   options,
   searchQuery,
@@ -39,14 +39,16 @@ function ToolBar({
         onChange={onChange}
         selectedIndex={index}
         order={order}
-        onChageOrder={onChageOrder}
+        onChangeOrder={onChangeOrder}
       />
-      <Input.Search
-        placeholder={t("Search")}
-        value={searchQuery}
-        onChange={(e) => onChangeSearchQuery(e.currentTarget.value)}
-        css={{ width: 200 }}
-      />
+      {onChangeSearchQuery && (
+        <Input.Search
+          placeholder={t("Search")}
+          value={searchQuery}
+          onChange={(e) => onChangeSearchQuery(e.currentTarget.value)}
+          css={{ width: 200 }}
+        />
+      )}
     </Space>
   );
 }

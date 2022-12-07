@@ -5,8 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useSendPasswordResetEmail } from "react-firebase-hooks/auth";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { Alert, Button, Form, Input, message, Typography } from "antd";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../utils/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
 
@@ -14,7 +13,7 @@ const initialCounterTime = new Date();
 
 function FirebaseRecover() {
   const [sendPasswordResetEmail, sending, error] =
-    useSendPasswordResetEmail(Auth);
+    useSendPasswordResetEmail(AUTH);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [sentTime, setSentTime, clearSentTime] = useSessionstorageState(

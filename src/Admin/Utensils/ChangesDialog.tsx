@@ -5,13 +5,11 @@ import {
   ArrowUpOutlined,
   MinusOutlined,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Timestamp } from "@firebase/firestore";
 import { Avatar, Button, Empty, List, Modal, Space, Typography } from "antd";
 import dayjs from "dayjs";
-import React from "react";
 import { useTranslation } from "react-i18next";
+import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/utensils";
 
 interface ChangesDialogProps {
   open: boolean;
@@ -27,12 +25,12 @@ function ChangesDialog({ open, onClose, utensil }: ChangesDialogProps) {
       title={t("Changes")}
       onCancel={onClose}
       footer={[
-        <Button type="primary" onClick={onClose}>
+        <Button type="primary" onClick={onClose} key="close">
           OK
         </Button>,
       ]}
     >
-      {utensil?.changes?.length > 0 ? (
+      {utensil.changes && utensil.changes.length > 0 ? (
         <List
           dataSource={utensil.orderedChanges}
           renderItem={(ut, index) => (

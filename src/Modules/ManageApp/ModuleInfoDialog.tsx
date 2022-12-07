@@ -1,14 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  useCuttinboardModule,
-  useEmployeesList,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Button, Divider, List, Modal, ModalProps } from "antd";
+import { Button, List, Modal, ModalProps } from "antd";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
   CrownOutlined,
   DeleteOutlined,
@@ -22,28 +16,33 @@ import {
 } from "@ant-design/icons";
 import {
   PrivacyLevel,
+  privacyLevelToString,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
+import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
 
 function ModuleInfoDialog({
   onEdit,
   ...props
 }: ModalProps & { onEdit: () => void }) {
-  const { selectedApp, canManage } = useCuttinboardModule();
-  const { locationAccessKey } = useLocation();
+  const { selectedBoard, canManageBoard } = useBoard();
+  const { locationAccessKey } = useCuttinboardLocation();
   const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
 
   const admins = useMemo(() => {
-    if (!Boolean(selectedApp.hosts?.length)) {
+    if (!selectedBoard || !selectedBoard.hosts || !selectedBoard.hosts.length) {
       return [];
     }
-    return getEmployees.filter((e) => selectedApp.hosts?.indexOf(e.id) > -1);
-  }, [getEmployees, selectedApp]);
+    const admins = selectedBoard.hosts;
+    return getEmployees.filter((e) => admins.includes(e.id));
+  }, [getEmployees, selectedBoard]);
 
   const handleDelete = async () => {
-    if (!canManage) {
+    if (!canManageBoard || !selectedBoard) {
       return;
     }
     // Confirm delete
@@ -55,13 +54,17 @@ function ModuleInfoDialog({
       cancelText: t("Cancel"),
       onOk: async () => {
         try {
-          await selectedApp.delete();
+          await selectedBoard.delete();
         } catch (error) {
           recordError(error);
         }
       },
     });
   };
+
+  if (!selectedBoard) {
+    return null;
+  }
 
   return (
     <Modal
@@ -93,22 +96,22 @@ function ModuleInfoDialog({
         <List.Item.Meta
           avatar={<FormOutlined />}
           title={t("Name")}
-          description={selectedApp.name}
+          description={selectedBoard.name}
         />
       </List.Item>
       <List.Item>
         <List.Item.Meta
           avatar={
-            selectedApp.privacyLevel === PrivacyLevel.PRIVATE ? (
+            selectedBoard.privacyLevel === PrivacyLevel.PRIVATE ? (
               <LockOutlined />
-            ) : selectedApp.privacyLevel === PrivacyLevel.POSITIONS ? (
+            ) : selectedBoard.privacyLevel === PrivacyLevel.POSITIONS ? (
               <TagsOutlined />
             ) : (
               <GlobalOutlined />
             )
           }
           title={t("Privacy Level")}
-          description={t(getPrivacyLevelTextByNumber(selectedApp.privacyLevel))}
+          description={t(privacyLevelToString(selectedBoard.privacyLevel))}
         />
       </List.Item>
       {Boolean(admins.length) && (
@@ -117,7 +120,7 @@ function ModuleInfoDialog({
             avatar={<CrownOutlined />}
             title={t("Admins")}
             description={admins.map((admin) => (
-              <p>{admin.fullName}</p>
+              <p key={admin.id}>{admin.fullName}</p>
             ))}
           />
         </List.Item>
@@ -127,17 +130,17 @@ function ModuleInfoDialog({
           avatar={<InfoCircleOutlined />}
           title={t("Description")}
           description={
-            Boolean(selectedApp.description) ? selectedApp.description : "---"
+            selectedBoard.description ? selectedBoard.description : "---"
           }
         />
       </List.Item>
-      {selectedApp.privacyLevel === PrivacyLevel.POSITIONS &&
-        Boolean(selectedApp.position) && (
+      {selectedBoard.privacyLevel === PrivacyLevel.POSITIONS &&
+        Boolean(selectedBoard.position) && (
           <List.Item>
             <List.Item.Meta
               avatar={<TagOutlined />}
               title={t("Position")}
-              description={selectedApp.position}
+              description={selectedBoard.position}
             />
           </List.Item>
         )}

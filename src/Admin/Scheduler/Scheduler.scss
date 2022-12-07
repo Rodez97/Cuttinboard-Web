@@ -25,3 +25,11 @@
 table tfoot {
   inset-block-end: 0; /* "bottom" */
 }
+
+.ant-table-summary {
+  background-color: #f0f2f5 !important;
+}
+
+.ant-table-summary .ant-table-cell {
+  background-color: #f0f2f5 !important;
+}

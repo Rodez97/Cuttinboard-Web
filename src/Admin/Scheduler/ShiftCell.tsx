@@ -1,22 +1,15 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  Employee,
-  EmployeeShifts,
-  Shift,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
 import dayjs from "dayjs";
-import React from "react";
 import ShiftElement from "./ShiftElement";
 import duration from "dayjs/plugin/duration";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import { PlusOutlined } from "@ant-design/icons";
 import { Space } from "antd";
 import isoWeek from "dayjs/plugin/isoWeek";
-import {
-  Colors,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useScheduler } from "./Scheduler";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { Shift } from "@cuttinboard-solutions/cuttinboard-library/schedule";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
@@ -25,19 +18,12 @@ interface ShiftCellProps {
   employee: Employee;
   shifts?: Shift[];
   date: Date;
-  onNewShift: (employee: Employee, date: Date) => void;
-  empShifts: EmployeeShifts;
 }
 
-function ShiftCell({
-  employee,
-  shifts,
-  date,
-  onNewShift,
-  empShifts,
-}: ShiftCellProps) {
+function ShiftCell({ employee, shifts, date }: ShiftCellProps) {
+  const { newShift } = useScheduler();
   const handleCellClick = () => {
-    onNewShift(employee, date);
+    newShift?.(employee, date);
   };
 
   return (
@@ -46,24 +32,25 @@ function ShiftCell({
         display: "flex",
         height: "100%",
         width: "100%",
-        justifyContent: "center",
-        backgroundColor:
-          employee.locationRole === RoleAccessLevels.OWNER
-            ? Colors.Yellow.Light
-            : employee.locationRole === RoleAccessLevels.GENERAL_MANAGER
-            ? Colors.Green.Light
-            : Colors.Blue.Light,
+        flexDirection: "column",
       }}
     >
-      {shifts?.length > 0 ? (
-        <ShiftElement employee={employee} column={date} empShifts={empShifts} />
+      {shifts && shifts.length > 0 ? (
+        shifts.map((shift) => (
+          <ShiftElement
+            key={shift.id}
+            employee={employee}
+            column={date}
+            shift={shift}
+          />
+        ))
       ) : (
         <Space
           css={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            flex: 1,
+            height: "100%",
             cursor: "pointer",
           }}
           onClick={handleCellClick}

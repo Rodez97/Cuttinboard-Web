@@ -7,16 +7,18 @@ import {
   QuestionCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Dropdown, Menu, MenuProps } from "antd";
+import { Avatar, Dropdown, MenuProps } from "antd";
 import { signOut } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { showTranslations } from "translation-check";
+import i18next from "i18next";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { AUTH } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function UserMenu({ color }: { color?: string }) {
   const { t } = useTranslation();
-  const [user] = useAuthState(Auth);
+  const { user } = useCuttinboard();
   const navigate = useNavigate();
 
   const onClick: MenuProps["onClick"] = async ({ key }) => {
@@ -31,7 +33,14 @@ function UserMenu({ color }: { color?: string }) {
         window.open("https://www.cuttinboard.com/help-center", "_blank");
         break;
       case "signOut":
-        await signOut(Auth);
+        await signOut(AUTH);
+        break;
+      case "trans":
+        showTranslations(i18next, {
+          sourceLng: "en",
+          targetLngs: ["es"],
+          preserveEmptyStrings: false,
+        });
         break;
 
       default:
@@ -45,7 +54,7 @@ function UserMenu({ color }: { color?: string }) {
         items: [
           {
             key: "email",
-            label: Auth.currentUser.email,
+            label: user.email,
             disabled: true,
           },
           {
@@ -64,6 +73,11 @@ function UserMenu({ color }: { color?: string }) {
             icon: <QuestionCircleOutlined />,
           },
           {
+            key: "trans",
+            label: t("Translations"),
+            icon: <QuestionCircleOutlined />,
+          },
+          {
             key: "signOut",
             label: t("Sign Out"),
             icon: <LogoutOutlined />,
@@ -73,10 +87,17 @@ function UserMenu({ color }: { color?: string }) {
       }}
       trigger={["click"]}
     >
-      <div css={{ cursor: "pointer" }}>
+      <div
+        css={{
+          cursor: "pointer",
+          display: "flex",
+          gap: 5,
+          alignItems: "center",
+        }}
+      >
         <Avatar
           src={user.photoURL ?? undefined}
-          alt={user.displayName}
+          alt={user.displayName ?? ""}
           icon={<UserOutlined />}
         />
         <DownOutlined style={{ fontSize: 14, color: color ?? "#fff" }} />

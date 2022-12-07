@@ -1,14 +1,15 @@
 /** @jsx jsx */
 import { ArrowRightOutlined, PlusOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { jsx } from "@emotion/react";
-import { Button, Empty, Layout, List, PageHeader, Tag } from "antd";
+import { Button, Empty, Layout, List, Tag } from "antd";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { QuickUserDialogAvatar } from "../../components";
+import { PageHeader } from "@ant-design/pro-layout";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 
-function Supervisors({ supervisors }: { supervisors: Employee[] }) {
+export default ({ supervisors }: { supervisors: Employee[] }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -45,7 +46,7 @@ function Supervisors({ supervisors }: { supervisors: Employee[] }) {
               width: "100%",
             }}
           >
-            {Boolean(supervisors?.length) ? (
+            {supervisors?.length ? (
               <List
                 dataSource={supervisors}
                 css={{ padding: "20px 10px" }}
@@ -59,6 +60,7 @@ function Supervisors({ supervisors }: { supervisors: Employee[] }) {
                     key={sup.id}
                     actions={[
                       <ArrowRightOutlined
+                        key="details"
                         onClick={() => navigate(`details/${sup.id}`)}
                       />,
                     ]}
@@ -100,6 +102,4 @@ function Supervisors({ supervisors }: { supervisors: Employee[] }) {
       </Layout.Content>
     </Layout>
   );
-}
-
-export default Supervisors;
+};

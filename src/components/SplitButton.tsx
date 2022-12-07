@@ -11,18 +11,18 @@ interface SplitButtonProps {
   order: "asc" | "desc";
   onChange: (index: number) => void;
   selectedIndex: number;
-  onChageOrder: (order: "asc" | "desc") => void;
+  onChangeOrder: (order: "asc" | "desc") => void;
 }
 
 export default function SplitButton({
   options,
   onChange,
   selectedIndex,
-  onChageOrder,
+  onChangeOrder,
   order = "asc",
 }: SplitButtonProps) {
   const handleClick = () => {
-    onChageOrder(order === "asc" ? "desc" : "asc");
+    onChangeOrder(order === "asc" ? "desc" : "asc");
   };
 
   return (

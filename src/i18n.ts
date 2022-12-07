@@ -22,17 +22,25 @@ i18n
   .use(initReactI18next)
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
-  .init({
-    preload: ["en", "es"],
-    fallbackLng,
-    debug: false,
-    interpolation: {
-      escapeValue: false, // not needed for react as it escapes by default
+  .init(
+    {
+      preload: ["en", "es"],
+      fallbackLng,
+      debug: false,
+      interpolation: {
+        escapeValue: false, // not needed for react as it escapes by default
+      },
+      //react: { useSuspense: false },
+      supportedLngs: availableLanguages,
     },
-    //react: { useSuspense: false },
-    supportedLngs: availableLanguages,
-  });
-
-dayjs.locale(i18n.language);
+    (err, t) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("i18n initialized");
+      }
+      dayjs.locale(i18n.language);
+    }
+  );
 
 export default i18n;

@@ -1,25 +1,30 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Link } from "react-router-dom";
+import { Button, Dropdown, MenuProps, Modal, Skeleton, Tag } from "antd";
 import {
-  useCuttinboard,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Colors,
-  CompareRoles,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, List, Modal, Space, Tag } from "antd";
-import {
-  DeleteOutlined,
   ExclamationCircleOutlined,
+  FileTextOutlined,
   InfoCircleOutlined,
-  StarFilled,
+  MinusOutlined,
+  MoreOutlined,
+  TagOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { QuickUserDialogAvatar } from "../../components";
+import { GrayPageHeader, UserInfoElement } from "../../components";
+import EmployeeContactDialog from "./EmployeeContactDialog";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  useCuttinboard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  CompareRoles,
+  useDisclose,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 interface EmployeeCardProps {
   employee: Employee;
@@ -28,8 +33,8 @@ interface EmployeeCardProps {
 function EmployeeCard({ employee }: EmployeeCardProps) {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
-  const { locationAccessKey } = useLocation();
-  const navigate = useNavigate();
+  const { locationAccessKey } = useCuttinboardLocation();
+  const [infoOpen, openInfo, closeInfo] = useDisclose();
 
   const handleRemoveEmployee = async () => {
     Modal.confirm({
@@ -44,76 +49,114 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
           recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 
   const compareRoles = useMemo(() => {
-    return CompareRoles(locationAccessKey.role, employee.locationRole);
+    return CompareRoles(locationAccessKey.role, Number(employee.locationRole));
   }, [locationAccessKey, employee]);
 
-  const openManageDialog = () => navigate(employee.id);
+  const items: MenuProps["items"] = [
+    {
+      label: t("Contact Information"),
+      key: "ci",
+      icon: <InfoCircleOutlined />,
+      onClick: openInfo,
+    },
+  ];
+
+  const manageItems: MenuProps["items"] = [
+    {
+      type: "divider",
+    },
+    {
+      label: <Link to={`s/${employee.id}`}>{t("Role and Positions")}</Link>,
+      key: "es",
+      icon: <TagOutlined />,
+    },
+    {
+      label: <Link to={`d/${employee.id}`}>{t("Documents")}</Link>,
+      key: "ed",
+      icon: <FileTextOutlined />,
+    },
+    {
+      label: t("Remove"),
+      key: "re",
+      danger: true,
+      onClick: handleRemoveEmployee,
+      icon: <MinusOutlined />,
+    },
+  ];
+
+  const handleAvatarClick = () => {
+    Modal.info({
+      title: t("User Info"),
+      content: <UserInfoElement employee={employee} />,
+    });
+  };
+
+  const getPositions = () => {
+    return employee.positions.filter(
+      (position) => position !== employee.mainPosition
+    );
+  };
 
   return (
-    <Space
-      direction="vertical"
-      style={{
-        display: "flex",
-        backgroundColor: Colors.MainOnWhite,
-        margin: "10px 5px",
-        padding: "10px",
-      }}
-    >
-      <List.Item
-        actions={
-          employee.id !== user?.uid && compareRoles
-            ? [
-                <Button
-                  key="manage"
-                  type="text"
-                  shape="circle"
-                  onClick={openManageDialog}
-                  icon={<InfoCircleOutlined />}
-                />,
-                <Button
-                  key="remove"
-                  type="text"
-                  shape="circle"
-                  onClick={handleRemoveEmployee}
-                  icon={<DeleteOutlined />}
-                  danger
-                />,
-              ]
-            : []
-        }
-      >
-        <List.Item.Meta
-          title={`${employee.name} ${employee.lastName} ${
-            employee?.role === RoleAccessLevels.OWNER ? "👑" : ""
-          }`}
-          description={employee.email}
-          avatar={<QuickUserDialogAvatar employee={employee} />}
-        />
-      </List.Item>
-
-      {employee.role === "employee" && employee.positions && (
-        <Space wrap>
-          {employee.positions.map((pos) => (
-            <Tag
-              key={pos}
-              color="processing"
-              icon={
-                employee.mainPosition === pos ? (
-                  <StarFilled style={{ color: Colors.Yellow.Main }} />
-                ) : null
-              }
+    <React.Fragment>
+      <Skeleton loading={!employee} active>
+        <GrayPageHeader
+          css={{
+            marginBottom: 4,
+          }}
+          avatar={{
+            src: employee.avatar,
+            onClick: handleAvatarClick,
+            style: { cursor: "pointer" },
+            icon: <UserOutlined />,
+          }}
+          subTitle={employee.fullName}
+          extra={
+            <Dropdown
+              menu={{
+                items: [
+                  ...items,
+                  ...(employee.id !== user?.uid && compareRoles
+                    ? manageItems
+                    : []),
+                ],
+              }}
+              trigger={["click"]}
             >
-              {pos}
-            </Tag>
-          ))}
-        </Space>
-      )}
-    </Space>
+              <Button type="text" shape="circle" icon={<MoreOutlined />} />
+            </Dropdown>
+          }
+          tags={
+            employee.mainPosition
+              ? [
+                  <Tag key="mainPosition" color="gold">
+                    {employee.mainPosition}
+                  </Tag>,
+                ]
+              : []
+          }
+          footer={
+            getPositions().length
+              ? getPositions().map((pos) => (
+                  <Tag key={pos} color="processing">
+                    {pos}
+                  </Tag>
+                ))
+              : undefined
+          }
+        />
+      </Skeleton>
+      <EmployeeContactDialog
+        employee={employee}
+        open={infoOpen}
+        onCancel={closeInfo}
+        footer={null}
+      />
+    </React.Fragment>
   );
 }
 

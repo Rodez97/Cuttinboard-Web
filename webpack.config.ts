@@ -1,4 +1,3 @@
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import AntdDayjsWebpackPlugin from "antd-dayjs-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
@@ -7,7 +6,6 @@ import LodashModuleReplacementPlugin from "lodash-webpack-plugin";
 import path from "path";
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 import { DefinePlugin } from "webpack";
-import dotenv from "dotenv";
 
 const webpackConfig = () => {
   return {
@@ -69,10 +67,6 @@ const webpackConfig = () => {
               loader: "less-loader",
               options: {
                 lessOptions: {
-                  modifyVars: {
-                    "layout-header-background": Colors.MainDark,
-                    "layout-body-background": "#fff",
-                  },
                   javascriptEnabled: true,
                 },
               },
@@ -153,8 +147,8 @@ const webpackConfig = () => {
       new CopyWebpackPlugin({
         patterns: [{ from: "src/assets/images", to: "images/" }, "public"],
       }),
-      new LodashModuleReplacementPlugin(),
       new AntdDayjsWebpackPlugin(),
+      new LodashModuleReplacementPlugin({ paths: true }),
     ],
   };
 };

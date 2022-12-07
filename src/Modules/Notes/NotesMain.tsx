@@ -1,13 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { orderBy } from "lodash";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import ManageNoteDialog, { ManageNoteDialogRef } from "./ManageNoteDialog";
-import NoteCard from "./NoteCard";
+import NoteCard from "./Note";
 import { useTranslation } from "react-i18next";
-import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
 import ToolBar from "../ToolBar";
 import { Button, Layout, Space } from "antd";
 import Icon, { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
@@ -20,13 +18,39 @@ import {
   PageLoading,
 } from "../../components";
 import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
-import { useDisclose } from "../../hooks";
 import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
+import { useParams } from "react-router-dom";
+import { NotFound } from "../../components/NotFound";
+import {
+  Note,
+  useBoard,
+} from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
-function NotesMain() {
+export default () => {
+  const { boardId } = useParams();
+  const { selectedBoard, selectBoard } = useBoard();
+
+  useLayoutEffect(() => {
+    if (boardId) {
+      selectBoard(boardId);
+    }
+    return () => {
+      selectBoard("");
+    };
+  }, [boardId, selectBoard]);
+
+  if (!selectedBoard) {
+    return <NotFound />;
+  }
+
+  return <Main />;
+};
+
+function Main() {
   const { t } = useTranslation();
   const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
@@ -37,10 +61,11 @@ function NotesMain() {
     order: "asc",
     searchQuery: "",
   });
-  const { selectedApp, canManage } = useCuttinboardModule();
+  const { selectedBoard, canManageBoard } = useBoard();
   const manageNoteDialogRef = useRef<ManageNoteDialogRef>(null);
   const [notes, loading, error] = useCollectionData<Note>(
-    selectedApp && selectedApp.contentRef.withConverter(Note.Converter)
+    selectedBoard &&
+      selectedBoard.contentRef.withConverter(Note.firestoreConverter)
   );
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const [manageMembersOpen, openManageMembers, closeManageMembers] =
@@ -52,24 +77,24 @@ function NotesMain() {
   };
 
   const getOrderedNotes = useMemo(() => {
-    let ordered: Note[] = [];
+    if (!notes) {
+      return [];
+    }
+
+    const filtered: Note[] = searchQuery
+      ? matchSorter(notes, searchQuery, {
+          keys: ["title", "content"],
+        })
+      : notes;
 
     switch (index) {
       case 0:
-        ordered = orderBy(notes, "createdAt", order);
-        break;
+        return orderBy(filtered, (e) => e.author.at.toDate(), order);
       case 1:
-        ordered = orderBy(notes, "title", order);
-        break;
-
+        return orderBy(filtered, "title", order);
       default:
-        ordered = notes;
-        break;
+        return filtered;
     }
-    return matchSorter(ordered, searchQuery, {
-      keys: ["title", "content"],
-      sorter: (items) => items,
-    });
   }, [notes, index, order, searchQuery]);
 
   if (loading) {
@@ -80,6 +105,10 @@ function NotesMain() {
     return <PageError error={error} />;
   }
 
+  if (!selectedBoard) {
+    return <EmptyMainModule />;
+  }
+
   return (
     <Layout.Content
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -87,12 +116,12 @@ function NotesMain() {
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={openInfo}
-        title={selectedApp.name}
-        subTitle={`(${Number(notes?.length)})`}
+        title={selectedBoard.name}
+        subTitle={`(${notes ? notes.length : 0})`}
         extra={[
           <Button
             key="newNote"
-            disabled={!canManage}
+            disabled={!canManageBoard}
             onClick={handleCreateNote}
             icon={<Icon component={NotePlus} />}
             type="dashed"
@@ -113,20 +142,20 @@ function NotesMain() {
         options={["Creation", "Name"]}
         index={index}
         order={order}
-        onChageOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
+        onChangeOrder={(order) => setOrderData((prev) => ({ ...prev, order }))}
         onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
         searchQuery={searchQuery}
         onChangeSearchQuery={(sq) =>
           setOrderData((prev) => ({ ...prev, searchQuery: sq }))
         }
       />
-      {getOrderedNotes.length ? (
+      {getOrderedNotes.length > 0 ? (
         <Space wrap css={{ padding: 20, overflow: "auto" }}>
           {getOrderedNotes?.map((note) => (
             <NoteCard
               key={note.id}
               note={note}
-              manageNoteDialogRef={manageNoteDialogRef}
+              onEdit={() => manageNoteDialogRef.current?.openEdit(note)}
             />
           ))}
         </Space>
@@ -138,6 +167,7 @@ function NotesMain() {
               <a
                 href="https://www.cuttinboard.com/help/understanding-the-notes-app"
                 target="_blank"
+                rel="noreferrer"
               >
                 learn more.
               </a>
@@ -153,7 +183,7 @@ function NotesMain() {
         onCancel={closeInfo}
         onEdit={() => {
           closeInfo();
-          editModule(selectedApp);
+          editModule(selectedBoard);
         }}
       />
       <ModuleManageMembers
@@ -163,5 +193,3 @@ function NotesMain() {
     </Layout.Content>
   );
 }
-
-export default NotesMain;

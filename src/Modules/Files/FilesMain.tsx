@@ -1,16 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ref } from "firebase/storage";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useCuttinboardModule,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import {
   Button,
   Image,
@@ -18,6 +12,7 @@ import {
   Layout,
   Space,
   Table,
+  TableColumnsType,
   Tooltip,
   Typography,
 } from "antd";
@@ -28,14 +23,12 @@ import Icon, {
 } from "@ant-design/icons";
 import PickFile from "./PickFile";
 import { matchSorter } from "match-sorter";
-import { useDisclose } from "../../hooks";
 import {
   EmptyMainModule,
   GrayPageHeader,
   PageError,
   PageLoading,
 } from "../../components";
-import { ColumnsType } from "antd/lib/table";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import fileSize from "filesize";
 import FileMenu from "./FileMenu";
@@ -45,19 +38,50 @@ import ManageModuleDialog, {
 } from "../ManageApp/ManageModuleDialog";
 import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
+import { NotFound } from "../../components/NotFound";
+import {
+  Cuttinboard_File,
+  useBoard,
+} from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  STORAGE,
+  useDisclose,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
-function FilesMain() {
-  const navigate = useNavigate();
+export default function FilesMain() {
+  const { boardId } = useParams();
+  const { selectedBoard, selectBoard } = useBoard();
+
+  useLayoutEffect(() => {
+    if (boardId) {
+      selectBoard(boardId);
+    }
+    return () => {
+      selectBoard("");
+    };
+  }, [boardId, selectBoard]);
+
+  if (!selectedBoard) {
+    return <NotFound />;
+  }
+
+  return <Main />;
+}
+
+function Main() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [pickFileOpen, pickFiles, closePickFile] = useDisclose();
-  const [viewImage, setViewImage] = useState("");
-  const { selectedApp, canManage } = useCuttinboardModule();
-  const { location } = useLocation();
+  const [viewImage, setViewImage] = useState<string | null>("");
+  const { selectedBoard, canManageBoard } = useBoard();
+  const { location } = useCuttinboardLocation();
   const [drawerFiles, loading, drawerFilesError] =
     useCollectionData<Cuttinboard_File>(
-      selectedApp &&
-        selectedApp.contentRef.withConverter(Cuttinboard_File.Converter)
+      selectedBoard &&
+        selectedBoard.contentRef.withConverter(
+          Cuttinboard_File.firestoreConverter
+        )
     );
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const [manageMembersOpen, openManageMembers, closeManageMembers] =
@@ -65,11 +89,18 @@ function FilesMain() {
   const { baseRef, editModule } = useManageModule();
   const storagePathRef = useMemo(
     () =>
-      ref(Storage, `${location.storageRef.fullPath}/storage/${selectedApp.id}`),
-    [location.storageRef.fullPath, selectedApp.id]
+      selectedBoard &&
+      ref(
+        STORAGE,
+        `${location.storageRef.fullPath}/storage/${selectedBoard.id}`
+      ),
+    [location.storageRef.fullPath, selectedBoard]
   );
 
   const getOrderedFiles = useMemo(() => {
+    if (!drawerFiles) {
+      return [];
+    }
     return searchQuery
       ? matchSorter(drawerFiles, searchQuery, {
           keys: ["name"],
@@ -77,7 +108,7 @@ function FilesMain() {
       : drawerFiles;
   }, [drawerFiles, searchQuery]);
 
-  const columns: ColumnsType<Cuttinboard_File> = [
+  const columns: TableColumnsType<Cuttinboard_File> = [
     {
       title: t("Name"),
       dataIndex: "name",
@@ -136,7 +167,7 @@ function FilesMain() {
         </Typography.Text>
       ),
       width: "20%",
-      sorter: (a, b) => a.createdAt?.toMillis() - b.createdAt?.toMillis(),
+      sorter: (a, b) => a.createdAt.toMillis() - b.createdAt.toMillis(),
       align: "right",
     },
     {
@@ -170,6 +201,10 @@ function FilesMain() {
     return <PageError error={drawerFilesError} />;
   }
 
+  if (!selectedBoard || !storagePathRef) {
+    return <EmptyMainModule />;
+  }
+
   return (
     <Layout.Content
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -177,7 +212,7 @@ function FilesMain() {
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={openInfo}
-        title={selectedApp.name}
+        title={selectedBoard.name}
         extra={[
           <Button
             key="members"
@@ -199,7 +234,7 @@ function FilesMain() {
         }}
       >
         <Button
-          disabled={!canManage}
+          disabled={!canManageBoard}
           onClick={pickFiles}
           icon={<CloudUploadOutlined />}
           type="primary"
@@ -263,6 +298,7 @@ function FilesMain() {
               <a
                 href="https://www.cuttinboard.com/help/understanding-the-notes-app"
                 target="_blank"
+                rel="noreferrer"
               >
                 learn more.
               </a>
@@ -284,7 +320,7 @@ function FilesMain() {
         onCancel={closeInfo}
         onEdit={() => {
           closeInfo();
-          editModule(selectedApp);
+          editModule(selectedBoard);
         }}
       />
       <ModuleManageMembers
@@ -294,5 +330,3 @@ function FilesMain() {
     </Layout.Content>
   );
 }
-
-export default FilesMain;

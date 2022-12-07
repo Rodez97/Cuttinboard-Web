@@ -3,7 +3,7 @@ import { recordError } from "../utils/utils";
 
 export function useSelectedLocation() {
   const [selectedLocation, setSelectedLocation, deleteSelectedLocation] =
-    useLocalStorage("selectedLocation", null);
+    useLocalStorage<string | null>("selectedLocation", null);
 
   const selectLocation = (locationId: string | null) => {
     try {

@@ -1,12 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  PrivacyLevel,
-  Employee,
-  useLocation,
-  RoleAccessLevels,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import AddMembers from "./AddMembers";
@@ -23,13 +16,18 @@ import {
   Tag,
   Typography,
 } from "antd";
-import {
-  ExclamationCircleOutlined,
-  UserAddOutlined,
-  UsergroupAddOutlined,
-} from "@ant-design/icons";
+import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { useDisclose } from "../../hooks";
+import {
+  Employee,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  PrivacyLevel,
+  RoleAccessLevels,
+  useDisclose,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 type ManageMembersProps = {
   readonly?: boolean;
@@ -56,7 +54,7 @@ function ManageMembers({
   ...props
 }: ManageMembersProps) {
   const { t } = useTranslation();
-  const { locationAccessKey } = useLocation();
+  const { locationAccessKey } = useCuttinboardLocation();
   const { getEmployees } = useEmployeesList();
   const [addMembersOpen, openAddMembers, closeAddMembers] = useDisclose();
   const [selectHostOpen, openSelectHost, closeSelectHost] = useDisclose();
@@ -79,7 +77,6 @@ function ManageMembers({
           recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 
@@ -91,14 +88,14 @@ function ManageMembers({
     if (privacyLevel === PrivacyLevel.PUBLIC) {
       membersList = getEmployees;
     }
-    if (privacyLevel === PrivacyLevel.POSITIONS) {
+    if (privacyLevel === PrivacyLevel.POSITIONS && positions) {
       membersList = getEmployees.filter((emp) => emp.hasAnyPosition(positions));
     }
     return membersList.filter((m) => !admins?.includes(m.id));
   }, [getEmployees, privacyLevel, members, positions, admins]);
 
   const hostsList = useMemo(() => {
-    if (!Boolean(admins?.length)) {
+    if (!admins || !admins.length) {
       return [];
     }
     return getEmployees.filter((e) => admins?.indexOf(e.id) > -1);
@@ -107,8 +104,9 @@ function ManageMembers({
   const getPossibleHosts = useMemo(() => {
     return getEmployees.filter(
       (emp) =>
+        emp.locationRole &&
         emp.locationRole <= RoleAccessLevels.MANAGER &&
-        !admins?.includes(emp.id)
+        !(admins && admins.includes(emp.id))
     );
   }, [getEmployees, admins]);
 
@@ -131,7 +129,6 @@ function ManageMembers({
           recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 

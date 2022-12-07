@@ -1,4 +1,6 @@
-@import "~antd/dist/antd.less";
+body {
+  margin: 0;
+}
 
 #root {
   display: flex;
@@ -11,10 +13,57 @@
   font-size: inherit !important;
   text-decoration: underline;
 }
+
 .ant-layout-content {
   overflow-y: auto;
 }
+
+.ant-layout {
+  background-color: white;
+}
+
 .str-chat {
   width: 100% !important;
   height: 100% !important;
+}
+
+.module-sider {
+  background-color: #fbfbfa !important;
+}
+
+.module-sider-container {
+  display: flex;
+  background-color: #fbfbfa;
+  padding-top: 10px;
+}
+
+.module-sider-content {
+  padding: 3px 5px;
+  display: flex;
+}
+
+.module-sider-menu {
+  background-color: #fbfbfa;
+}
+
+.module-sider-menu .ant-menu-item {
+  color: #74726e !important;
+}
+
+.module-sider-menu .ant-menu-item-selected {
+  background-color: #f1f1f0 !important;
+  color: #37352f !important;
+}
+
+.ant-list-item-meta-title {
+  margin-top: 0;
+}
+
+.tasks-tabs-scrollable {
+  padding: 0px 24px;
+}
+
+.default-alert {
+  background-color: #fbfbfa;
+  border: 1px solid #d9d9d9;
 }

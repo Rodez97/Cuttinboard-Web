@@ -1,21 +1,21 @@
-import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { PageLoading } from "../components";
 import AppsView from "./AppsView";
 
-const Tasks = lazy(() => import("./Tasks/Tasks"));
-const Notes = lazy(() => import("./Notes/Notes"));
-const Shifts = lazy(() => import("./MyShifts/MyShifts"));
-const Storage = lazy(() => import("./Files/Files"));
-const GlobalChecklist = lazy(() => import("./GlobalChecklist/GlobalChecklist"));
+const Tasks = lazy(() => import("./Tasks"));
+const Notes = lazy(() => import("./Notes"));
+const Shifts = lazy(() => import("./MyShifts"));
+const Storage = lazy(() => import("./Files"));
+const GlobalChecklist = lazy(() => import("./GlobalChecklist"));
 
-const Employees = lazy(() => import("../Admin/Employees/EmployeesRouter"));
-const Schedule = lazy(() => import("../Admin/Scheduler/Schedule"));
-const Utensils = lazy(() => import("../Admin/Utensils/Utensils"));
+const Employees = lazy(() => import("../Admin/Employees"));
+const Schedule = lazy(() => import("../Admin/Scheduler"));
+const Utensils = lazy(() => import("../Admin/Utensils"));
 
 function AppsRouter() {
-  const { locationAccessKey } = useLocation();
+  const { locationAccessKey } = useCuttinboardLocation();
   return (
     <Routes>
       <Route path="/">

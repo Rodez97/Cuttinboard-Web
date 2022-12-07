@@ -17,30 +17,31 @@ import { useNavigate } from "react-router-dom";
 import LocationsPicker from "./LocationsPicker";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import {
-  Auth,
-  Functions,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
+  FUNCTIONS,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 const { Step } = Steps;
 
-type supervisor = {
+type Supervisor = {
   name: string;
   lastName: string;
   email: string;
 };
 
-function NewSupervisor() {
+export default () => {
+  const { user } = useCuttinboard();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [executeCallable, loading, error] = useHttpsCallable(
-    Functions,
+    FUNCTIONS,
     "http-employees-create"
   );
-  const [supervisorData, setsupervisorData] = useState<supervisor>(null);
+  const [supervisorData, setSupervisorData] = useState<Supervisor | null>(null);
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
   const getStatusText = (stp: number) => {
@@ -63,8 +64,8 @@ function NewSupervisor() {
     return "finish";
   };
 
-  const onSupervisorFormFinish = (values: supervisor) => {
-    setsupervisorData(values);
+  const onSupervisorFormFinish = (values: Supervisor) => {
+    setSupervisorData(values);
     setStep(2);
   };
 
@@ -184,7 +185,7 @@ function NewSupervisor() {
                 },
                 {
                   validator: async (_, value) => {
-                    // Check if value dont hace tailing or leading spaces
+                    // Check if value don't have tailing or leading spaces
                     if (value !== value.trim()) {
                       return Promise.reject(
                         new Error(t("Cannot have leading or trailing spaces"))
@@ -208,7 +209,7 @@ function NewSupervisor() {
                 { type: "email", message: t("Must be a valid email") },
                 {
                   validator(_, value) {
-                    if (value && value === Auth.currentUser.email) {
+                    if (value && value === user.email) {
                       return Promise.reject(
                         new Error(t("You can't be a supervisor"))
                       );
@@ -287,6 +288,4 @@ function NewSupervisor() {
       )}
     </Layout>
   );
-}
-
-export default NewSupervisor;
+};

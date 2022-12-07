@@ -1,15 +1,9 @@
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
-import { Space } from "antd";
+import { Space, Tag } from "antd";
 
-export const OwnerGoldContainer = styled(Space)`
-  margin: 10px;
-  padding: 10px;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+export const OwnerGoldContainer = styled(Tag)`
+  color: #ffffff;
   background: radial-gradient(
       ellipse farthest-corner at right bottom,
       #fedb37 0%,

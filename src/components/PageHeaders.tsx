@@ -1,6 +1,6 @@
+import { PageHeader } from "@ant-design/pro-layout";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
-import { PageHeader } from "antd";
 
 export const DarkPageHeader = styled(PageHeader)`
   background-color: ${Colors.MainDark};
@@ -15,9 +15,12 @@ export const DarkPageHeader = styled(PageHeader)`
   }
   & .ant-btn {
     color: #fff;
+    :hover {
+      color: rgba(255, 255, 255, 0.65);
+    }
   }
 `;
 
 export const GrayPageHeader = styled(PageHeader)`
-  background-color: ${Colors.MainOnWhite};
+  background-color: #fbfbfa;
 `;

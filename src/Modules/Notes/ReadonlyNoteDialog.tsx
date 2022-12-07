@@ -1,11 +1,18 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { DeleteFilled, EditFilled, UserOutlined } from "@ant-design/icons";
-import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  DeleteFilled,
+  EditFilled,
+  EditOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Button, Modal, Tag, Typography } from "antd";
 import Linkify from "linkify-react";
 import { useTranslation } from "react-i18next";
+import {
+  Note,
+  useBoard,
+} from "@cuttinboard-solutions/cuttinboard-library/boards";
 
 interface ReadonlyNoteDialogProps {
   note: Note;
@@ -15,14 +22,14 @@ interface ReadonlyNoteDialogProps {
   open: boolean;
 }
 
-function ReadonlyNoteDialog({
+export default ({
   note,
   onClose,
   onEdit,
   onDelete,
   open,
-}: ReadonlyNoteDialogProps) {
-  const { canManage } = useCuttinboardModule();
+}: ReadonlyNoteDialogProps) => {
+  const { canManageBoard } = useBoard();
   const { t } = useTranslation();
 
   const handleEdit = () => {
@@ -39,7 +46,7 @@ function ReadonlyNoteDialog({
         <Button
           key="delete"
           onClick={onDelete}
-          disabled={!canManage}
+          disabled={!canManageBoard}
           danger
           icon={<DeleteFilled />}
         >
@@ -48,7 +55,7 @@ function ReadonlyNoteDialog({
         <Button
           key="edit"
           onClick={handleEdit}
-          disabled={!canManage}
+          disabled={!canManageBoard}
           icon={<EditFilled />}
           type="dashed"
         >
@@ -76,9 +83,15 @@ function ReadonlyNoteDialog({
           {note.content}
         </Linkify>
       </Typography.Paragraph>
-      {note.authorName && <Tag icon={<UserOutlined />}>{note.authorName}</Tag>}
+      <Tag icon={<UserOutlined />}>
+        {t("Created by:")} {note.author.name}
+      </Tag>
+      {note.updated && (
+        <Tag icon={<EditOutlined />}>
+          {t("Last updated:")} {note.updated.at.toDate().toLocaleString()}{" "}
+          {t("by")} {note.updated.name}
+        </Tag>
+      )}
     </Modal>
   );
-}
-
-export default ReadonlyNoteDialog;
+};

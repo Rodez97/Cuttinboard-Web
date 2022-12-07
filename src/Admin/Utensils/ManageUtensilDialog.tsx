@@ -1,26 +1,15 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
-import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  FirebaseSignature,
-  IUtensil,
-  Utensil,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useCuttinboard,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
-import {
-  addDoc,
-  collection,
-  PartialWithFieldValue,
-  serverTimestamp,
-} from "firebase/firestore";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
+import {
+  IUtensil,
+  Utensil,
+} from "@cuttinboard-solutions/cuttinboard-library/utensils";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 export interface IManageUtensilDialogRef {
   openNew: () => void;
@@ -29,14 +18,13 @@ export interface IManageUtensilDialogRef {
 
 const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
   (_props, ref) => {
-    const [form] = Form.useForm<IUtensil>();
+    const [form] = Form.useForm<Omit<IUtensil, "percent" | "locationId">>();
     const [saving, setSaving] = useState(false);
-    const { user } = useCuttinboard();
-    const { location } = useLocation();
+    const { location } = useCuttinboardLocation();
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
-    const [utensil, setUtensil] = useState<Utensil>(null);
+    const [utensil, setUtensil] = useState<Utensil | null>(null);
 
     useImperativeHandle(ref, () => ({
       openNew,
@@ -61,27 +49,15 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
       setUtensil(null);
     };
 
-    const onFinish = async (values: Partial<IUtensil>) => {
+    const onFinish = async (
+      values: Omit<IUtensil, "percent" | "locationId">
+    ) => {
       setSaving(true);
       try {
         if (utensil) {
           await utensil.update(values);
         } else {
-          const newAppObject: PartialWithFieldValue<
-            IUtensil & FirebaseSignature
-          > = {
-            ...values,
-            createdAt: serverTimestamp(),
-            createdBy: user.uid,
-            locationId: location.id,
-          };
-          const dbRef = collection(
-            Firestore,
-            "Organizations",
-            location.organizationId,
-            "utensils"
-          );
-          await addDoc(dbRef, newAppObject);
+          await Utensil.NewUtensil({ ...values, locationId: location.id });
         }
       } catch (error) {
         recordError(error);

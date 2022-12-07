@@ -1,68 +1,72 @@
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { ModalProps } from "antd";
 import React from "react";
 import ManageMembers from "../../components/ManageApp/ManageMembers";
 import { recordError } from "../../utils/utils";
 
 function ModuleManageMembers(props: ModalProps) {
-  const { selectedApp, canManage } = useCuttinboardModule();
+  const { selectedBoard, canManageBoard } = useBoard();
 
   const handleRemoveMember = async (employeeId: string) => {
-    if (!selectedApp) {
+    if (!selectedBoard) {
       return;
     }
     try {
-      await selectedApp.removeMember(employeeId);
+      await selectedBoard.removeMember(employeeId);
     } catch (error) {
       recordError(error);
     }
   };
 
   const handleAddMembers = async (addedEmployees: Employee[]) => {
-    if (!selectedApp) {
+    if (!selectedBoard) {
       return;
     }
     try {
-      await selectedApp.addMembers(addedEmployees);
+      await selectedBoard.addMembers(addedEmployees);
     } catch (error) {
       recordError(error);
     }
   };
 
   const handleSetAppHost = async (newHostUser: Employee) => {
-    if (!selectedApp) {
+    if (!selectedBoard) {
       return;
     }
     try {
-      await selectedApp.addHost(newHostUser);
+      await selectedBoard.addHost(newHostUser);
     } catch (error) {
       recordError(error);
     }
   };
 
   const handleRemoveHost = async (admin: Employee) => {
-    if (!selectedApp) {
+    if (!selectedBoard) {
       return;
     }
     try {
-      await selectedApp.removeHost(admin.id);
+      await selectedBoard.removeHost(admin.id);
     } catch (error) {
       recordError(error);
     }
   };
 
+  if (!selectedBoard) {
+    return null;
+  }
+
   return (
     <ManageMembers
-      readonly={!canManage}
-      members={selectedApp.accessTags}
+      readonly={!canManageBoard}
+      members={selectedBoard.accessTags ?? []}
       removeMember={handleRemoveMember}
       addMembers={handleAddMembers}
       setAppHost={handleSetAppHost}
       removeHost={handleRemoveHost}
-      privacyLevel={selectedApp.privacyLevel}
-      positions={selectedApp.accessTags}
-      admins={selectedApp?.hosts}
+      privacyLevel={selectedBoard.privacyLevel}
+      positions={selectedBoard.accessTags}
+      admins={selectedBoard.hosts}
       {...props}
     />
   );

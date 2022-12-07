@@ -4,10 +4,9 @@ import {
   MinusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/utensils";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Form, InputNumber, Modal } from "antd";
-import TextArea from "antd/lib/input/TextArea";
+import { Button, Form, Input, InputNumber, Modal } from "antd";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
@@ -111,7 +110,7 @@ function ReportChangeDialog({
         </Form.Item>
 
         <Form.Item label={t("Reason")} name="reason">
-          <TextArea rows={3} maxLength={250} showCount />
+          <Input.TextArea rows={3} maxLength={250} showCount />
         </Form.Item>
       </Form>
     </Modal>

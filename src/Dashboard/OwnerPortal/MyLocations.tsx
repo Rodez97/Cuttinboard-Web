@@ -1,16 +1,9 @@
 /** @jsx jsx */
-import { CrownOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { PageHeader } from "@ant-design/pro-layout";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
-import {
-  Alert,
-  Button,
-  Input,
-  Layout,
-  PageHeader,
-  Space,
-  Typography,
-} from "antd";
+import { Alert, Button, Input, Layout, Result, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
@@ -23,10 +16,9 @@ import { customOrderSorter } from "./customOrderSorter";
 import DeleteLocationDialog, {
   DeleteLocationDialogRef,
 } from "./DeleteLocationDialog";
-import GoldTag from "./GoldTag";
-import { useOwner } from "./OwnerPortal";
+import { useOwner } from ".";
 
-function MyLocations() {
+export default () => {
   const { t } = useTranslation();
   const deleteLocDialogRef = useRef<DeleteLocationDialogRef>(null);
   const { locations } = useOwner();
@@ -42,7 +34,7 @@ function MyLocations() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const deleteLocation = (loc: Location) => {
-    deleteLocDialogRef.current.openDialog(loc);
+    deleteLocDialogRef.current?.openDialog(loc);
   };
 
   const getOrderedLocations = useMemo(() => {
@@ -67,16 +59,15 @@ function MyLocations() {
     }
   }, [locations, order, index, searchQuery]);
 
+  if (!organization) {
+    return <Result status="error" title="Organization not found" />;
+  }
+
   return (
     <Layout>
       <PageHeader
         backIcon={false}
         title={t("My Locations")}
-        tags={[
-          <GoldTag key={"owner"} icon={<CrownOutlined />}>
-            {t("Owner")}
-          </GoldTag>,
-        ]}
         extra={[
           <Button
             key="2"
@@ -145,7 +136,7 @@ function MyLocations() {
             options={[t("Name"), t("City"), t("ID")]}
             selectedIndex={index}
             order={order}
-            onChageOrder={(order) => {
+            onChangeOrder={(order) => {
               setOrderData((prev) => ({ ...prev, order }));
             }}
             onChange={(index) => setOrderData((prev) => ({ ...prev, index }))}
@@ -166,27 +157,29 @@ function MyLocations() {
                 key={loc.id}
                 location={loc}
                 actions={
-                  !Boolean(organization.subscriptionStatus === "canceled") && [
-                    <Button
-                      key="edit"
-                      icon={<EditOutlined />}
-                      type="link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`locationDetails/${loc.id}`);
-                      }}
-                    />,
-                    <Button
-                      key="delete"
-                      icon={<DeleteOutlined />}
-                      danger
-                      type="link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteLocation(loc);
-                      }}
-                    />,
-                  ]
+                  !(organization.subscriptionStatus === "canceled")
+                    ? [
+                        <Button
+                          key="edit"
+                          icon={<EditOutlined />}
+                          type="link"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`locationDetails/${loc.id}`);
+                          }}
+                        />,
+                        <Button
+                          key="delete"
+                          icon={<DeleteOutlined />}
+                          danger
+                          type="link"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteLocation(loc);
+                          }}
+                        />,
+                      ]
+                    : []
                 }
               />
             ))}
@@ -208,6 +201,4 @@ function MyLocations() {
       <DeleteLocationDialog ref={deleteLocDialogRef} />
     </Layout>
   );
-}
-
-export default MyLocations;
+};

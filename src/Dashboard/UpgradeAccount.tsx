@@ -9,46 +9,57 @@ import styled from "@emotion/styled";
 import { recordError } from "../utils/utils";
 import LiteAvatar from "../assets/images/cuttinboardLite.png";
 import {
-  Auth,
-  Firestore,
-  Functions,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Alert, Button, Checkbox, Layout, List, Space, Typography } from "antd";
+  Alert,
+  Button,
+  Checkbox,
+  Layout,
+  List,
+  Result,
+  Typography,
+} from "antd";
 import {
   CreditCardOutlined,
   FolderOpenOutlined,
   GiftOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { STRIPE_PRICE_ID, STRIPE_PRODUCT_ID } from "../VARS";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { PageError, PageLoading } from "../components";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  FIRESTORE,
+  FUNCTIONS,
+  STRIPE_PRICE_ID,
+  STRIPE_PRODUCT_ID,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 const PlanCard = styled.div`
   background: #f7f7f7;
   width: 250px;
   height: 250px;
   padding: 5px;
-  gap: 10px;
+  gap: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   color: #3d3d3d;
+  margin: auto;
 `;
 
-function UpgradeAccount() {
+export default () => {
+  const { user } = useCuttinboard();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [agreeWithTerms, setAgreeWithTerms] = useState(false);
   const [upgradeAccount, running, error] = useHttpsCallable<string, void>(
-    Functions,
+    FUNCTIONS,
     "stripe-upgradeOwner"
   );
   const [price, loadingPrice, priceError] = useDocumentData(
-    doc(Firestore, "Products", STRIPE_PRODUCT_ID, "prices", STRIPE_PRICE_ID)
+    doc(FIRESTORE, "Products", STRIPE_PRODUCT_ID, "prices", STRIPE_PRICE_ID)
   );
 
   const handleUpgrade = async () => {
@@ -72,7 +83,7 @@ function UpgradeAccount() {
       logEvent(getAnalytics(), "upgrade_account", {
         method: "stripe",
         price: STRIPE_PRICE_ID,
-        uid: Auth.currentUser.uid,
+        uid: user.uid,
       });
       // REdirect to dashboard
       navigate("/dashboard/owner-portal");
@@ -87,6 +98,10 @@ function UpgradeAccount() {
 
   if (priceError) {
     return <PageError error={priceError} />;
+  }
+
+  if (!price) {
+    return <Result status="404" title="404" subTitle="Not found" />;
   }
 
   const features = [
@@ -119,58 +134,74 @@ function UpgradeAccount() {
         alignItems: "center",
       }}
     >
-      <Typography.Title level={1}>{t("Upgrading to Owner")}</Typography.Title>
-      <PlanCard>
-        <img src={LiteAvatar} width={100} />
-
-        <Typography.Title level={2}>
-          {`$${
-            price.interval === "month"
-              ? (price.unit_amount / 100).toFixed(2)
-              : (price.unit_amount / 100 / 12).toFixed(4).slice(0, 5)
-          }`}
-        </Typography.Title>
-
-        <Typography.Text type="secondary" css={{ fontSize: 20 }}>
-          {t("Per Location")}
-        </Typography.Text>
-        <Typography.Text type="secondary" css={{ fontSize: 20 }}>
-          {t("Per Month")}
-        </Typography.Text>
-      </PlanCard>
-
-      <List
-        css={{ minWidth: 300 }}
-        dataSource={features}
-        renderItem={({ label, icon }) => (
-          <List.Item>
-            <List.Item.Meta avatar={icon} title={label} />
-          </List.Item>
-        )}
-      />
-      <Checkbox
-        checked={agreeWithTerms}
-        onChange={handleCBChange}
-        disabled={running}
+      <div
+        css={{ minWidth: 270, maxWidth: 400, margin: "auto", width: "100%" }}
       >
-        {t("I agree with these terms")}
-      </Checkbox>
-      <Space>
-        <Button onClick={handleBack} disabled={running}>
-          {t("Cancel")}
-        </Button>
-        <Button
-          onClick={handleUpgrade}
-          disabled={!agreeWithTerms}
-          loading={running}
-          type="primary"
+        <Typography.Title level={1} css={{ textAlign: "center" }}>
+          {t("Upgrading to Owner")}
+        </Typography.Title>
+        <PlanCard>
+          <img src={LiteAvatar} width={100} />
+
+          <Typography.Text strong css={{ fontSize: 25 }}>
+            {`$${
+              price.interval === "month"
+                ? (price.unit_amount / 100).toFixed(2)
+                : (price.unit_amount / 100 / 12).toFixed(4).slice(0, 5)
+            }`}
+          </Typography.Text>
+
+          <Typography.Text type="secondary" css={{ fontSize: 20 }}>
+            {t("Per Location")}
+          </Typography.Text>
+          <Typography.Text type="secondary" css={{ fontSize: 18 }}>
+            {t("Per Month")}
+          </Typography.Text>
+        </PlanCard>
+
+        <List
+          css={{
+            minWidth: 270,
+            maxWidth: 400,
+            margin: "auto",
+            width: "100%",
+            marginTop: 16,
+          }}
+          bordered={false}
+          split={false}
+          size="small"
+          dataSource={features}
+          renderItem={({ label, icon }, i) => (
+            <List.Item key={i}>
+              <List.Item.Meta avatar={icon} title={label} />
+            </List.Item>
+          )}
+        />
+        <Checkbox
+          checked={agreeWithTerms}
+          onChange={handleCBChange}
+          disabled={running}
+          css={{ marginTop: 16, display: "flex", justifyContent: "center" }}
         >
-          {t("Upgrade")}
-        </Button>
-        {error && <Alert message={t(error.message)} type="error" showIcon />}
-      </Space>
+          {t("I agree with these terms")}
+        </Checkbox>
+        <Button.Group
+          css={{ marginTop: 16, display: "flex", justifyContent: "center" }}
+        >
+          <Button onClick={handleBack} disabled={running}>
+            {t("Cancel")}
+          </Button>
+          <Button
+            onClick={handleUpgrade}
+            disabled={!agreeWithTerms}
+            loading={running}
+            type="primary"
+          >
+            {t("Upgrade")}
+          </Button>
+          {error && <Alert message={t(error.message)} type="error" showIcon />}
+        </Button.Group>
+      </div>
     </Layout>
   );
-}
-
-export default UpgradeAccount;
+};

@@ -6,14 +6,14 @@ import { getAnalytics, logEvent } from "firebase/analytics";
 import { recordError } from "../utils/utils";
 import { Alert, Button, Checkbox, Form, Input, Typography } from "antd";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useRegisterUser } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useRegister } from "@cuttinboard-solutions/cuttinboard-library/account";
 
 //= ==========================|| FIREBASE - REGISTER ||===========================//
 
 const FirebaseRegister = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { registerUser, submitting, error } = useRegisterUser();
+  const { registerUser, submitting, error } = useRegister();
 
   const onFinish = async ({
     name,

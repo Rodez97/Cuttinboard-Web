@@ -1,6 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
 
     function isAuthenticated(){
       return request.auth != null;
@@ -49,6 +50,10 @@ service cloud.firestore {
       }
     }
 
+    // match /Templates/{doc=**} {
+    //   allow read, write: if true;
+    // }
+
     match /Products/{id} {
       allow read: if true;
 
@@ -79,6 +84,16 @@ service cloud.firestore {
     match /Organizations/{organizationId} {
       allow read: if isAuthenticated();
 
+      match /recurringTasks/{locId} {
+        allow read: if isOwner(organizationId) || locMember(organizationId, locId);
+        allow write: if isOwner(organizationId) || locMember(organizationId, locId);
+      }
+
+      match /tasks/{locId} {
+        allow read: if isOwner(organizationId) || locMember(organizationId, locId);
+        allow write: if isOwner(organizationId) || locMember(organizationId, locId);
+      }
+
       match /settings/{settingId} {
         allow read: if isAuthenticated() && orgMember(organizationId);
         allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, settingId.replace("schedule_",""));
@@ -87,9 +102,10 @@ service cloud.firestore {
       // Employees
       match /employees/{document=**} {
     	  allow read: if orgMember(organizationId);
-        allow delete: if orgMember(organizationId)
+        allow delete: if isOwner(organizationId) 
+                      || (orgMember(organizationId)
                       && resource.data.locations.keys().size() == 1
-                      && resource.data.role == "employee";
+                      && resource.data.role == "employee");
         allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["locations"]) && compareRoles(organizationId))
                       || (orgMember(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["preferredName","emergencyContact","contactComments"]))
                       || (isOwner(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisingLocations"]));
@@ -103,7 +119,8 @@ service cloud.firestore {
 
       match /utensils/{document=**} {
         allow read: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
-        allow create, delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId);
+        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId);
+        allow delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId);
         allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)
                       || (isManager(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["changes","currentQuantity"]));
       }

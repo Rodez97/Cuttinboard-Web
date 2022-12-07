@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Form, Input } from "antd";
+import { Button, Divider, Form, Input } from "antd";
 import { useTranslation } from "react-i18next";
 import { CloseOutlined, SaveFilled } from "@ant-design/icons";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
@@ -29,47 +29,53 @@ function LocationEditor({
       size="small"
       autoComplete="off"
     >
-      <Form.Item required name="name" rules={[{ required: true, message: "" }]}>
-        <Input maxLength={50} showCount placeholder={t("Name")} />
+      <Form.Item
+        required
+        name="name"
+        rules={[{ required: true, message: "" }]}
+        label={t("Name")}
+      >
+        <Input maxLength={50} showCount />
       </Form.Item>
       <Form.Item
         name="email"
         rules={[{ type: "email", message: t("Must be a valid email") }]}
+        label={t("Email")}
       >
-        <Input type="email" maxLength={100} placeholder={t("Email")} />
+        <Input type="email" maxLength={100} />
       </Form.Item>
-      <Form.Item name="phoneNumber">
-        <Input
-          type="phoneNumber"
-          maxLength={30}
-          placeholder={t("Phone Number")}
-        />
+      <Form.Item name="phoneNumber" label={t("Phone Number")}>
+        <Input type="phoneNumber" maxLength={30} />
       </Form.Item>
-      <Form.Item name="intId">
-        <Input maxLength={90} placeholder={t("Internal ID")} />
+      <Form.Item name="intId" label={t("Internal ID")}>
+        <Input maxLength={90} />
       </Form.Item>
-      <Form.Item name="description">
-        <Input maxLength={255} showCount placeholder={t("Description")} />
+      <Form.Item name="description" label={t("Description")}>
+        <Input maxLength={255} showCount />
       </Form.Item>
-      <Form.Item label={t("Address")} name="address">
+      <Divider orientation="left">{t("Address")}</Divider>
+      <Form.Item name="address">
         <Input.Group>
-          <Form.Item name={["address", "streetNumber"]}>
-            <Input placeholder={t("Address Line 1")} />
+          <Form.Item
+            name={["address", "streetNumber"]}
+            label={t("Address Line 1")}
+          >
+            <Input />
           </Form.Item>
-          <Form.Item name={["address", "street"]}>
-            <Input placeholder={t("Address Line 2")} />
+          <Form.Item name={["address", "street"]} label={t("Address Line 2")}>
+            <Input />
           </Form.Item>
-          <Form.Item name={["address", "city"]}>
-            <Input placeholder={t("City")} />
+          <Form.Item name={["address", "city"]} label={t("City")}>
+            <Input />
           </Form.Item>
-          <Form.Item name={["address", "state"]}>
-            <Input placeholder={t("State")} />
+          <Form.Item name={["address", "state"]} label={t("State")}>
+            <Input />
           </Form.Item>
-          <Form.Item name={["address", "country"]}>
-            <Input placeholder={t("Country")} />
+          <Form.Item name={["address", "country"]} label={t("Country")}>
+            <Input />
           </Form.Item>
-          <Form.Item name={["address", "zip"]}>
-            <Input placeholder={t("Zip")} />
+          <Form.Item name={["address", "zip"]} label={t("Zip")}>
+            <Input />
           </Form.Item>
         </Input.Group>
       </Form.Item>

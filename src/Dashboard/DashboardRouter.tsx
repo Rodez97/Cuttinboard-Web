@@ -6,11 +6,12 @@ import { PageLoading } from "../components";
 import { useDashboard } from "./DashboardProvider";
 import UpgradeAccount from "./UpgradeAccount";
 
-const Locations = lazy(() => import("./Locations/Locations"));
+const Locations = lazy(() => import("./Locations"));
 const Account = lazy(() => import("./Account/Account"));
 const MyDocuments = lazy(() => import("./MyDocuments"));
 const Subscription = lazy(() => import("./Subscription"));
-const OwnerPortal = lazy(() => import("./OwnerPortal/OwnerPortal"));
+const OwnerPortal = lazy(() => import("./OwnerPortal"));
+const DirectMessages = lazy(() => import("../Chats/DirectMessages"));
 
 function DashboardRouter() {
   const { userDocument } = useDashboard();
@@ -34,7 +35,7 @@ function DashboardRouter() {
             </Suspense>
           }
         />
-
+        <Route path="directMessages/*" element={<DirectMessages />} />
         <Route
           path="account"
           element={

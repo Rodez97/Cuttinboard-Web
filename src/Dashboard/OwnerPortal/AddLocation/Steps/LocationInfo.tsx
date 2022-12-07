@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAddLocation } from "../AddLocation";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Button, Checkbox, Form, Input, message, Space } from "antd";
+import { Button, Checkbox, Divider, Form, Input, message, Space } from "antd";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 type locFormType = Partial<Location> & {
   gm: {
@@ -17,6 +17,7 @@ type locFormType = Partial<Location> & {
 };
 
 function LocationInfo() {
+  const { user } = useCuttinboard();
   const [locationForm] = Form.useForm<locFormType>();
   const { t } = useTranslation();
   const { location, setLocation, setGeneralManager } = useAddLocation();
@@ -61,90 +62,68 @@ function LocationInfo() {
             alignItems: "flex-start",
           }}
         >
-          <Form.Item
-            name="baseLoc"
-            label={t("Information")}
-            css={{ minWidth: 280 }}
-          >
-            <Input.Group>
+          <Form.Item css={{ minWidth: 280 }}>
+            <Divider orientation="left">{t("Information")}</Divider>
+            <Input.Group size="small">
               <Form.Item
                 required
                 name="name"
                 rules={[{ required: true, message: "" }]}
+                label={t("Location Name")}
               >
-                <Input
-                  required
-                  maxLength={50}
-                  showCount
-                  placeholder={t("Location Name") + " (required)"}
-                />
+                <Input maxLength={50} showCount />
               </Form.Item>
               <Form.Item
                 name="email"
                 rules={[{ type: "email", message: t("Must be a valid email") }]}
+                label={t("Email")}
               >
-                <Input
-                  type="email"
-                  maxLength={100}
-                  placeholder={t("Email") + " (optional)"}
-                />
+                <Input type="email" maxLength={100} />
               </Form.Item>
-              <Form.Item name="phoneNumber">
-                <Input
-                  type="phoneNumber"
-                  maxLength={30}
-                  placeholder={t("Phone Number") + " (optional)"}
-                />
+              <Form.Item name="phoneNumber" label={t("Phone Number")}>
+                <Input type="phoneNumber" maxLength={30} />
               </Form.Item>
-              <Form.Item name="intId">
-                <Input
-                  maxLength={90}
-                  placeholder={t("Internal ID") + " (optional)"}
-                />
+              <Form.Item name="intId" label={t("Internal ID")}>
+                <Input maxLength={90} />
               </Form.Item>
-              <Form.Item name="description">
-                <Input.TextArea
-                  maxLength={255}
-                  showCount
-                  rows={3}
-                  placeholder={t("Description") + " (optional)"}
-                />
+              <Form.Item name="description" label={t("Description")}>
+                <Input.TextArea maxLength={255} showCount rows={3} />
               </Form.Item>
             </Input.Group>
           </Form.Item>
 
-          <Form.Item
-            label={t("Address")}
-            name="address"
-            css={{ minWidth: 280 }}
-          >
+          <Form.Item css={{ minWidth: 280 }}>
+            <Divider orientation="left">{t("Address")}</Divider>
             <Input.Group>
-              <Form.Item name={["address", "streetNumber"]}>
-                <Input placeholder={t("Address Line 1") + " (optional)"} />
+              <Form.Item
+                name={["address", "streetNumber"]}
+                label={t("Address Line 1")}
+              >
+                <Input />
               </Form.Item>
-              <Form.Item name={["address", "street"]}>
-                <Input placeholder={t("Address Line 2") + " (optional)"} />
+              <Form.Item
+                name={["address", "street"]}
+                label={t("Address Line 2")}
+              >
+                <Input />
               </Form.Item>
-              <Form.Item name={["address", "city"]}>
-                <Input placeholder={t("City") + " (optional)"} />
+              <Form.Item name={["address", "city"]} label={t("City")}>
+                <Input />
               </Form.Item>
-              <Form.Item name={["address", "state"]}>
-                <Input placeholder={t("State") + " (optional)"} />
+              <Form.Item name={["address", "state"]} label={t("State")}>
+                <Input />
               </Form.Item>
-              <Form.Item name={["address", "country"]}>
-                <Input placeholder={t("Country") + " (optional)"} />
+              <Form.Item name={["address", "country"]} label={t("Country")}>
+                <Input />
               </Form.Item>
-              <Form.Item name={["address", "zip"]}>
-                <Input placeholder={t("Zip") + " (optional)"} />
+              <Form.Item name={["address", "zip"]} label={t("Zip")}>
+                <Input />
               </Form.Item>
             </Input.Group>
           </Form.Item>
 
-          <Form.Item
-            name="gm"
-            css={{ minWidth: 280 }}
-            label={t("General Manager")}
-          >
+          <Form.Item css={{ minWidth: 280 }}>
+            <Divider orientation="left">{t("General Manager")}</Divider>
             <Form.Item>
               <Checkbox
                 checked={addGM}
@@ -172,8 +151,9 @@ function LocationInfo() {
                     },
                   },
                 ]}
+                label={t("Name")}
               >
-                <Input placeholder={t("Name")} />
+                <Input />
               </Form.Item>
               <Form.Item
                 name={["gm", "lastName"]}
@@ -187,8 +167,9 @@ function LocationInfo() {
                     },
                   },
                 ]}
+                label={t("Last Name")}
               >
-                <Input placeholder={t("Last Name")} />
+                <Input />
               </Form.Item>
               <Form.Item
                 name={["gm", "email"]}
@@ -198,7 +179,7 @@ function LocationInfo() {
                       if (!value && addGM) {
                         return Promise.reject();
                       }
-                      if (value && addGM && value === Auth.currentUser.email) {
+                      if (value && addGM && value === user.email) {
                         return Promise.reject(
                           new Error(t("You can't be the GM"))
                         );
@@ -208,8 +189,9 @@ function LocationInfo() {
                   },
                   { type: "email", message: t("Must be a valid email") },
                 ]}
+                label={t("Email")}
               >
-                <Input placeholder={t("Email")} />
+                <Input />
               </Form.Item>
             </Input.Group>
           </Form.Item>

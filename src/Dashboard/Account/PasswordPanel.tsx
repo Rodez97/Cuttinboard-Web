@@ -1,18 +1,20 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Button, Card, Form, Input, message, Space } from "antd";
+import { Alert, Button, Card, Form, Input, message, Space } from "antd";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useState } from "react";
 import { useUpdatePassword } from "react-firebase-hooks/auth";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { AUTH } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function PasswordPanel() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const [updatePassword, updating, error] = useUpdatePassword(Auth);
+  const { user } = useCuttinboard();
+  const [updatePassword, updating, error] = useUpdatePassword(AUTH);
   const [editing, setEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,14 +24,17 @@ function PasswordPanel() {
   };
 
   const onFinish = async (values) => {
+    if (!user.email) {
+      message.error(
+        t("You must have an email address to change your password")
+      );
+      return;
+    }
     const { password, newPassword } = values;
     setIsSubmitting(true);
     try {
-      const credential = EmailAuthProvider.credential(
-        Auth.currentUser.email,
-        password
-      );
-      await reauthenticateWithCredential(Auth.currentUser, credential);
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential);
       await updatePassword(newPassword);
       form.resetFields();
       setEditing(false);
@@ -144,6 +149,8 @@ function PasswordPanel() {
             </Button>
           )}
         </Space>
+
+        {error && <Alert message={error.message} type="error" showIcon />}
       </Card>
     </Space>
   );

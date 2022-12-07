@@ -1,17 +1,14 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  Employee,
-  EmployeeShifts,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
 import { useCallback } from "react";
-import { Card, Space, Tag, Tooltip, Typography } from "antd";
-import { getDurationText } from "./getDurationText";
-import {
-  Colors,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { Space, Tag, Tooltip, Typography } from "antd";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { QuickUserDialogAvatar } from "../../components";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  EmployeeShifts,
+  minutesToTextDuration,
+} from "@cuttinboard-solutions/cuttinboard-library/schedule";
 
 interface EmpColumnCellProps {
   employee: Employee;
@@ -36,21 +33,21 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
       );
     }
 
-    const totalTime = getDurationText(empShifts.wageData.totalHours * 60);
+    const totalTime = minutesToTextDuration(empShifts.summary.totalHours * 60);
 
     if (employee.locationRole === RoleAccessLevels.OWNER) {
       return <Tag color="processing">{totalTime}</Tag>;
     }
 
-    const totalWage = empShifts.wageData.totalWage;
+    const totalWage = empShifts.summary.totalWage;
 
-    const haveOvertime = empShifts.wageData.overtimeHours > 0;
+    const haveOvertime = empShifts.summary.overtimeHours > 0;
 
     if (haveOvertime) {
-      const overtimeTime = getDurationText(
-        empShifts.wageData.overtimeHours * 60
+      const overtimeTime = minutesToTextDuration(
+        empShifts.summary.overtimeHours * 60
       );
-      const overtimeWage = empShifts.wageData.overtimeWage;
+      const overtimeWage = empShifts.summary.overtimeWage;
 
       return (
         <Tooltip
@@ -91,25 +88,23 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
   }, [empShifts, employee]);
 
   return (
-    <Card
-      bordered={false}
+    <div
       css={{
         zIndex: 2,
-        backgroundColor:
-          employee.locationRole === RoleAccessLevels.OWNER
-            ? Colors.Yellow.Light
-            : employee.locationRole === RoleAccessLevels.GENERAL_MANAGER
-            ? Colors.Green.Light
-            : Colors.Blue.Light,
-        height: "100%",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        height: 50,
+        paddingLeft: 5,
+        backgroundColor: "white",
       }}
     >
-      <Card.Meta
-        avatar={<QuickUserDialogAvatar employee={employee} size={25} />}
-        title={`${employee.fullName}`}
-        description={getSecondaryElement()}
-      />
-    </Card>
+      <QuickUserDialogAvatar employee={employee} size={25} />
+      <div css={{ marginLeft: 5, display: "flex", flexDirection: "column" }}>
+        <Typography.Text strong>{employee.fullName}</Typography.Text>
+        {getSecondaryElement()}
+      </div>
+    </div>
   );
 }
 

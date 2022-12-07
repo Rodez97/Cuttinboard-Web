@@ -1,50 +1,49 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {
-  ref as storageRef,
-  StorageReference,
-  uploadBytes,
-} from "@firebase/storage";
+import { ref as storageRef, uploadBytes } from "@firebase/storage";
 import React, { useState } from "react";
 import fileSize from "filesize";
 import { useTranslation } from "react-i18next";
 import { message, Modal, Upload, UploadFile, UploadProps } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import {
-  useCuttinboardModule,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { nanoid } from "nanoid";
-import {
-  Auth,
-  Firestore,
-  Storage,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { recordError } from "../../utils/utils";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-
-interface DropzoneDialogProps {
-  maxFiles?: number;
-  maxSize?: number;
-  baseStorageRef: StorageReference;
-  open: boolean;
-  onClose: () => void;
-}
+import { StorageReference } from "firebase/storage";
+import {
+  useCuttinboard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { nanoid } from "nanoid";
+import {
+  FIRESTORE,
+  STORAGE,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 const { Dragger } = Upload;
 
-const PickFile: React.FC<DropzoneDialogProps> = ({
+type PickFileProps = {
+  maxFiles: number;
+  maxSize: number;
+  baseStorageRef: StorageReference;
+  onClose: () => void;
+  open: boolean;
+};
+
+export default ({
   maxFiles,
   maxSize,
   baseStorageRef,
   onClose,
   open,
-}) => {
+}: PickFileProps) => {
   const { t } = useTranslation();
-  const { location } = useLocation();
-  const { selectedApp } = useCuttinboardModule();
+  const { user } = useCuttinboard();
+  const { location } = useCuttinboardLocation();
+  const { selectedBoard } = useBoard();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const close = () => {
     setFileList([]);
@@ -52,7 +51,7 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
   };
 
   const handleAccept = () => {
-    if (Boolean(fileList.length)) {
+    if (fileList.length) {
       handleUpload();
     } else {
       close();
@@ -73,11 +72,12 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
     },
     beforeUpload: (file) => {
       if (file.size > maxSize) {
-        message.warning(
-          t("File size limit {{0}}", {
+        messageApi.open({
+          type: "warning",
+          content: t("File size limit {{0}}", {
             0: fileSize(maxSize),
-          })
-        );
+          }),
+        });
       } else {
         setFileList([...fileList, file]);
         setFilesToUpload([...filesToUpload, file]);
@@ -88,21 +88,26 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
   };
 
   const handleUpload = async () => {
+    if (!selectedBoard) {
+      return;
+    }
+
     const total =
-      fileList.reduce((acc, current) => acc + current.size, 0) +
+      fileList.reduce((acc, current) => acc + (current.size ?? 0), 0) +
       location.usage.storageUsed;
 
     if (total > location.usage.storageLimit) {
-      return message.warn(
-        t("You don't have enough storage to upload this file")
-      );
+      return messageApi.open({
+        type: "warning",
+        content: t("You don't have enough storage to upload this file"),
+      });
     }
     setUploading(true);
     for await (const file of filesToUpload) {
       const fileId = nanoid();
       const fileName = `${fileId}.${file.name.split(".").pop()}`;
       const fileRef = storageRef(
-        Storage,
+        STORAGE,
         `${baseStorageRef.fullPath}/${fileName}`
       );
       try {
@@ -114,22 +119,28 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
           id: fileId,
           name: file.name,
           createdAt: serverTimestamp(),
-          createdBy: Auth.currentUser?.uid,
+          createdBy: user.uid,
           fileType: file.type,
           size: file.size,
           storagePath: fileRef.fullPath,
         };
         await setDoc(
-          doc(Firestore, selectedApp.contentRef.path, fileId),
+          doc(FIRESTORE, selectedBoard.contentRef.path, fileId),
           newFileRecord,
           {
             merge: true,
           }
         );
-        message.success("upload successfully.");
+        messageApi.open({
+          type: "success",
+          content: t("Upload successfully"),
+        });
       } catch (error) {
         recordError(error);
-        message.error("upload failed.");
+        messageApi.open({
+          type: "error",
+          content: t("Upload failed"),
+        });
         continue;
       }
     }
@@ -148,10 +159,11 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
       okText={fileList.length ? t("Upload") : t("Accept")}
       onCancel={close}
       confirmLoading={uploading}
-      okButtonProps={{ disabled: !Boolean(fileList.length) }}
+      okButtonProps={{ disabled: !fileList.length }}
       cancelButtonProps={{ disabled: uploading }}
       onOk={handleAccept}
     >
+      {contextHolder}
       <Dragger {...props} disabled={uploading}>
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
@@ -168,5 +180,3 @@ const PickFile: React.FC<DropzoneDialogProps> = ({
     </Modal>
   );
 };
-
-export default PickFile;

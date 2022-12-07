@@ -4,7 +4,7 @@ import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Card, Checkbox, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 
-export const LocationsPickerOption = ({
+export default ({
   location,
   selected,
   onSelectChange,
@@ -22,7 +22,7 @@ export const LocationsPickerOption = ({
         <Checkbox
           key="check"
           checked={selected}
-          onChange={(e) => onSelectChange(location)}
+          onChange={() => onSelectChange(location)}
         />,
       ]}
     >

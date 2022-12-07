@@ -3,17 +3,7 @@ import { jsx } from "@emotion/react";
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import {
-  useEmployeesList,
-  useLocation,
-  useSchedule,
-  weekToDate,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Employee,
-  Shift,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Divider, Layout, Table, TableColumnsType } from "antd";
+import { Divider, Layout, Table, TableColumnsType, Tag } from "antd";
 import { Button, Space, Typography } from "antd";
 import {
   FilePdfOutlined,
@@ -21,12 +11,22 @@ import {
   RightCircleOutlined,
 } from "@ant-design/icons";
 import "./RosterView.scss";
-import { groupBy } from "lodash";
-import { getDurationText } from "./getDurationText";
+import { capitalize, groupBy } from "lodash";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { useNavigate } from "react-router-dom";
 import { generateRosterPdf } from "./generatePdf";
 import { GrayPageHeader } from "../../components";
+import {
+  Employee,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  minutesToTextDuration,
+  Shift,
+  useSchedule,
+  weekToDate,
+} from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 export type RosterData = {
   employee: Employee;
@@ -35,31 +35,20 @@ export type RosterData = {
 
 function RosterView() {
   const navigate = useNavigate();
-  const {
-    employeeShiftsCollection,
-    weekDays,
-    selectedTag,
-    searchQuery,
-    weekId,
-  } = useSchedule();
+  const { employeeShiftsCollection, weekDays, weekId } = useSchedule();
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
-  const { location } = useLocation();
+  const { location } = useCuttinboardLocation();
 
   const employees = useMemo(() => {
     // Get all employees except the supervisor
     const emp = getEmployees.filter(
       (e) => e.locationRole !== RoleAccessLevels.ADMIN
     );
-    // Return the array sorted by locationRole and if is the same location role, sort by name
-    return emp.sort((a, b) => {
-      if (a.locationRole !== b.locationRole) {
-        return a.locationRole - b.locationRole;
-      }
-      return a.fullName.localeCompare(b.fullName);
-    });
-  }, [searchQuery, selectedTag, getEmployees]);
+    // Return the array sorted by locationRole
+    return emp.sort((a, b) => Number(a.locationRole) - Number(b.locationRole));
+  }, [getEmployees]);
 
   const columns = useMemo(
     (): TableColumnsType<RosterData> => [
@@ -68,12 +57,30 @@ function RosterView() {
         dataIndex: "employee",
         key: "employee",
         render: (_, { employee }) => employee.fullName,
+        sorter: {
+          compare: (a, b, order) => {
+            if (order === "ascend") {
+              return a.employee.fullName.localeCompare(b.employee.fullName);
+            }
+            if (order === "descend") {
+              return b.employee.fullName.localeCompare(a.employee.fullName);
+            }
+            return (
+              Number(a.employee.locationRole) - Number(b.employee.locationRole)
+            );
+          },
+        },
       },
       {
         title: t("Position"),
         dataIndex: "position",
         key: "position",
-        render: (_, { shift }) => shift.position,
+        render: (_, { shift }) =>
+          shift.position ? (
+            <Tag color="processing">{shift.position}</Tag>
+          ) : (
+            <Tag color="error">{t("No position")}</Tag>
+          ),
       },
       {
         title: t("Start"),
@@ -92,7 +99,7 @@ function RosterView() {
         dataIndex: "time",
         key: "time",
         render: (_, { shift }) => {
-          return getDurationText(shift.shiftDuration.totalMinutes);
+          return minutesToTextDuration(shift.shiftDuration.totalMinutes);
         },
       },
       {
@@ -100,7 +107,7 @@ function RosterView() {
         dataIndex: "overtime",
         key: "overtime",
         render: (_, { shift }) => {
-          return getDurationText(shift.wageData.overtimeHours * 60);
+          return minutesToTextDuration(shift.wageData.overtimeHours * 60);
         },
       },
       {
@@ -128,7 +135,7 @@ function RosterView() {
         },
       },
     ],
-    [weekDays, employeeShiftsCollection]
+    [t]
   );
 
   const dataSource = useMemo(() => {
@@ -136,16 +143,26 @@ function RosterView() {
     employeeShiftsCollection
       .flatMap((sd) => ({
         employeeId: sd.employeeId,
-        shiftsColl: sd.shiftsArray?.filter((sfts) =>
-          sfts.getStartDayjsDate.isSame(weekDays[selectedDateIndex], "day")
+        shiftsColl: sd.shiftsArray?.filter((shifts) =>
+          shifts.getStartDayjsDate.isSame(weekDays[selectedDateIndex], "day")
         ),
       }))
       ?.forEach((shiftsDoc) => {
         shiftsDoc.shiftsColl.forEach((shift) => {
-          shiftsCollection.push({
-            shift,
-            employee: employees.find((e) => e.id === shiftsDoc.employeeId),
-          });
+          if (
+            !shift.deleting // If the shift is not being deleted
+          ) {
+            // If the shift is not deleted and is published, add it to the collection
+            const employee = employees.find(
+              (e) => e.id === shiftsDoc.employeeId
+            );
+            if (employee) {
+              shiftsCollection.push({
+                shift,
+                employee,
+              });
+            }
+          }
         });
       });
 
@@ -206,7 +223,9 @@ function RosterView() {
               type="text"
             />
             <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-              {dayjs(weekDays[selectedDateIndex]).format("dddd, MM/DD/YY")}
+              {capitalize(
+                dayjs(weekDays[selectedDateIndex]).format("dddd, MMMM DD, YYYY")
+              )}
             </Typography.Text>
             <Button
               onClick={() =>
@@ -229,15 +248,6 @@ function RosterView() {
             dataSource={dataSource["am"]}
             pagination={false}
             rowKey={(e) => e.shift.id}
-            rowClassName={(e) => {
-              if (e.shift.status === "draft" || e.shift.hasPendingUpdates) {
-                return "edited";
-              }
-              if (e.shift.deleting) {
-                return "deleting";
-              }
-              return "";
-            }}
           />
 
           <Divider>{t("PM Shifts")}</Divider>
@@ -250,15 +260,6 @@ function RosterView() {
             dataSource={dataSource["pm"]}
             pagination={false}
             rowKey={(e) => e.shift.id}
-            rowClassName={(e) => {
-              if (e.shift.status === "draft" || e.shift.hasPendingUpdates) {
-                return "edited";
-              }
-              if (e.shift.deleting) {
-                return "deleting";
-              }
-              return "";
-            }}
           />
         </div>
       </Layout.Content>

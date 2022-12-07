@@ -1,30 +1,35 @@
+import { EmployeesProvider } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
-  EmployeesProvider,
   LocationProvider,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Result } from "antd";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import React, { useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { LoadingScreen, PageError } from "./components";
-import { useDisclose, useSelectedLocation } from "./hooks";
-import { LocationContainer } from "./LocationContainer";
+import { useSelectedLocation } from "./hooks";
+import LocationContainer from "./LocationContainer";
 
 function LocationRoutes() {
   const { t } = useTranslation();
   const { organizationId, locationId } = useParams();
-  const { organizationKey, selectLocation } = useCuttinboard();
+  const { organizationKey, selectOrganizationLocation } = useCuttinboard();
   const { selectedLocation, selectLocation: selectLocId } =
     useSelectedLocation();
   const [loading, , endLoading] = useDisclose(true);
-  const [error, setError] = useState<Error>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
-    if (organizationId !== organizationKey?.orgId) {
+    if (
+      organizationId &&
+      locationId &&
+      organizationId !== organizationKey?.orgId
+    ) {
       // The user has selected a different organization, so we need to select the new organization
-      selectLocation(organizationId)
+      selectOrganizationLocation(organizationId)
         .then(() => {
           selectLocId(locationId);
           logEvent(getAnalytics(), "select_location", {
@@ -37,7 +42,7 @@ function LocationRoutes() {
         .finally(() => {
           endLoading();
         });
-    } else if (locationId !== selectedLocation) {
+    } else if (locationId && locationId !== selectedLocation) {
       // The user has selected a different location, so we need to select the new location
       selectLocId(locationId);
       endLoading();
@@ -45,7 +50,15 @@ function LocationRoutes() {
       // The user has selected the same location and we don't need to do anything
       endLoading();
     }
-  }, [locationId, selectedLocation, organizationKey, organizationId]);
+  }, [
+    locationId,
+    selectedLocation,
+    organizationKey,
+    organizationId,
+    selectOrganizationLocation,
+    selectLocId,
+    endLoading,
+  ]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -55,23 +68,20 @@ function LocationRoutes() {
     return <PageError error={error} />;
   }
 
-  if (!organizationKey) {
-    return <Result status="error" title={t("error.organizationId")} />;
+  if (!organizationKey || !locationId || !organizationId) {
+    return <Result status="error" title={t("Not Found")} />;
   }
 
   return (
-    <LocationProvider organizationKey={organizationKey} locationId={locationId}>
-      {({ loading, error }) =>
-        loading ? (
-          <LoadingScreen />
-        ) : error ? (
-          <PageError error={error} />
-        ) : (
-          <EmployeesProvider>
-            <LocationContainer />
-          </EmployeesProvider>
-        )
-      }
+    <LocationProvider
+      organizationKey={organizationKey}
+      locationId={locationId}
+      LoadingComponent={() => <LoadingScreen />}
+      ErrorComponent={(e) => <PageError error={e} />}
+    >
+      <EmployeesProvider ErrorRender={(e) => <PageError error={e} />}>
+        <LocationContainer />
+      </EmployeesProvider>
     </LocationProvider>
   );
 }

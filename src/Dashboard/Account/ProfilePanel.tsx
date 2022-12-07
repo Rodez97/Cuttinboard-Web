@@ -1,26 +1,23 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import {
-  useCuttinboard,
-  useUpdateCuttinboardAccount,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Button, Card, DatePicker, Form, Input, message, Space } from "antd";
-import dayjs from "dayjs";
+import { Button, Card, Form, Input, message, Space } from "antd";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
 import { EditableAvatar } from "../../components";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library/account";
+import { STORAGE } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function ProfilePanel() {
   const [form] = Form.useForm();
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const { user } = useCuttinboard();
-  const { updateUserProfile, updating } = useUpdateCuttinboardAccount();
+  const { updateUserProfile, updating } = useUpdateAccount();
   const { userDocument } = useDashboard();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,12 +27,12 @@ function ProfilePanel() {
   };
 
   const onFinish = async (values) => {
-    const { avatar, birthDate, ...others } = values;
+    const { avatar, ...others } = values;
     setIsSubmitting(true);
     try {
-      let photoURL: string = user.photoURL;
+      let photoURL: string = user.photoURL ?? "";
       if (avatar?.file) {
-        const profilePictureRef = ref(Storage, `users/${user.uid}/avatar`);
+        const profilePictureRef = ref(STORAGE, `users/${user.uid}/avatar`);
         const uploadTask = await uploadBytes(profilePictureRef, avatar.file);
         photoURL = await getDownloadURL(uploadTask.ref);
       }
@@ -43,7 +40,6 @@ function ProfilePanel() {
         {
           ...others,
           avatar: photoURL,
-          birthDate: birthDate ? birthDate.toDate() : undefined,
         },
         null
       );
@@ -69,7 +65,6 @@ function ProfilePanel() {
             name: userDocument.name,
             lastName: userDocument.lastName,
             email: userDocument.email,
-            birthDate: dayjs(userDocument.birthDate?.toDate()),
             avatar: user.photoURL,
           }}
           disabled={!editing || isSubmitting || updating}
@@ -83,7 +78,7 @@ function ProfilePanel() {
             }}
           >
             <EditableAvatar
-              initialValue={user.photoURL}
+              initialValue={user.photoURL ?? ""}
               size={100}
               align="center"
               value={form.getFieldValue("avatar")}
@@ -106,7 +101,7 @@ function ProfilePanel() {
               },
               {
                 validator: async (_, value) => {
-                  // Check if value dont hace tailing or leading spaces
+                  // Check if value don't have tailing or leading spaces
                   if (value !== value.trim()) {
                     return Promise.reject(
                       new Error(
@@ -135,7 +130,7 @@ function ProfilePanel() {
               },
               {
                 validator: async (_, value) => {
-                  // Check if value dont hace tailing or leading spaces
+                  // Check if value don't have tailing or leading spaces
                   if (value !== value.trim()) {
                     return Promise.reject(
                       new Error(
@@ -151,13 +146,6 @@ function ProfilePanel() {
           </Form.Item>
           <Form.Item label={t("Email")} name="email">
             <Input disabled />
-          </Form.Item>
-          <Form.Item
-            label={t("Date of Birth")}
-            rules={[{ type: "date" }]}
-            name="birthDate"
-          >
-            <DatePicker />
           </Form.Item>
         </Form>
         <Space

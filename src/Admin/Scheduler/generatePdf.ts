@@ -3,12 +3,14 @@ import { RosterData } from "./RosterView";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import dayjs from "dayjs";
-import { weekToDate } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { groupBy } from "lodash";
+import { capitalize, groupBy } from "lodash";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { LogoDataUrl } from "./LogoDataUrl";
 import { ShiftsTable } from "./Scheduler";
-import { getDurationText } from "./getDurationText";
+import {
+  minutesToTextDuration,
+  weekToDate,
+} from "@cuttinboard-solutions/cuttinboard-library/schedule";
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 // Const generate a pdf with tables for am and pm roster shifts for a given date and location
@@ -31,11 +33,11 @@ export const generateRosterPdf = (
 
   // Group am roster by shift position
   const amRosterGrouped = groupBy(amRoster, ({ shift }) =>
-    Boolean(shift.position) ? shift.position : "NO POSITION"
+    shift.position ? shift.position : "NO POSITION"
   );
   // Group pm roster by shift position
   const pmRosterGrouped = groupBy(pmRoster, ({ shift }) =>
-    Boolean(shift.position) ? shift.position : "NO POSITION"
+    shift.position ? shift.position : "NO POSITION"
   );
 
   const docDefinition: TDocumentDefinitions = {
@@ -199,45 +201,65 @@ export const generateSchedulePdf = (
   const weekNo = Number.parseInt(weekId.split("-")[1]);
   const firstDayWeek = dayjs(weekToDate(year, weekNo, 1));
   const lastDayWeek = firstDayWeek.add(6, "days");
-  const weekText = `${firstDayWeek.format("MMM DD")} -> ${lastDayWeek.format(
-    "MMM DD"
-  )}`;
+  const weekText = `${capitalize(
+    firstDayWeek.format("MMM[.] DD")
+  )}  ->  ${capitalize(lastDayWeek.format("MMM[.] DD"))}`;
 
   // Filter empDocs to get only the docs with shifts
   const empDocsFiltered = empDocs.filter(
-    (doc) => doc.empShifts.shiftsArray.length > 0
+    (doc) => doc.empShifts && doc.empShifts.shiftsArray.length > 0
   );
+
+  if (empDocsFiltered.length === 0) {
+    alert("No shifts to generate schedule");
+    return;
+  }
 
   const docDefinition: TDocumentDefinitions = {
     pageOrientation: "landscape",
     watermark: {
       text: "CUTTINBOARD",
       color: "gray",
-      opacity: 0.3,
+      opacity: 0.1,
       bold: true,
       italics: false,
     },
+    header: {
+      stack: [
+        {
+          image: LogoDataUrl,
+          width: 100,
+          margin: [0, 0, 0, 3],
+        },
+        {
+          text: "www.cuttinboard.com",
+          link: "https://www.cuttinboard.com",
+          fontSize: 10,
+        },
+        {
+          text: locationName,
+          style: "locationName",
+        },
+      ],
+      alignment: "center",
+      margin: [0, 5, 0, 10],
+    },
     content: [
       {
-        stack: [
+        columns: [
           {
-            image: LogoDataUrl,
-            width: 20,
-            opacity: 0.7,
-            margin: [0, 0, 0, 10],
+            width: "*",
+            text: locationName,
+            style: "week",
+            alignment: "left",
           },
           {
-            text: locationName,
-            style: "locationName",
+            width: "*",
+            text: `Week ${weekNo}, ${weekText}`,
+            style: "week",
+            alignment: "right",
           },
         ],
-        alignment: "center",
-        margin: [0, 0, 0, 10],
-      },
-      {
-        text: `Week ${weekNo}, ${weekText}`,
-        style: "week",
-        alignment: "right",
       },
       {
         // Create a table with the shift position as separator of the shifts with a light orange background
@@ -248,7 +270,7 @@ export const generateSchedulePdf = (
             [
               { text: "Employee", style: "tableHeader" },
               ...weekDays.map((day) => ({
-                text: dayjs(day).format("ddd"),
+                text: capitalize(dayjs(day).format("ddd")),
                 style: "tableHeader",
                 alignment: "center",
               })),
@@ -263,14 +285,16 @@ export const generateSchedulePdf = (
                     noWrap: true,
                   },
                   {
-                    text: getDurationText(empShifts.wageData.totalHours * 60),
+                    text: minutesToTextDuration(
+                      empShifts!.summary.totalHours * 60
+                    ),
                     fontSize: 8,
                   },
                 ],
                 fillColor: Colors.Blue.Light,
               },
               ...weekDays.map((day) => {
-                const shifts = empShifts.shiftsArray.filter(
+                const shifts = empShifts!.shiftsArray.filter(
                   (shift) => shift.shiftIsoWeekday === dayjs(day).isoWeekday()
                 );
                 if (shifts.length > 0) {
@@ -283,7 +307,7 @@ export const generateSchedulePdf = (
                       .replace("pm", "p");
                     const fullTime = `${startTime} - ${endTime}`;
                     let newShiftCell: any;
-                    if (Boolean(shift.position)) {
+                    if (shift.position) {
                       newShiftCell = {
                         style: "shiftInnerTable",
                         table: {

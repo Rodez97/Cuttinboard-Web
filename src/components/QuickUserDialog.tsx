@@ -90,7 +90,7 @@ export function QuickUserDialogAvatar({
   return (
     <Avatar
       size={size}
-      src={employee.avatar}
+      src={employee?.avatar}
       onClick={handleOpen}
       css={{ cursor: "pointer" }}
       icon={<UserOutlined />}

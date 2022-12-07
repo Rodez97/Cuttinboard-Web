@@ -1,26 +1,27 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
-import { GenericModule } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useCuttinboardModule,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Positions,
-  PrivacyLevel,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Form, Input, Modal, Radio, Select, Space } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDisclose } from "../../hooks";
-import { getPrivacyLevelTextByNumber, recordError } from "../../utils/utils";
+import { recordError } from "../../utils/utils";
 import { isEmpty } from "lodash";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import {
+  Board,
+  useBoard,
+} from "@cuttinboard-solutions/cuttinboard-library/boards";
+import {
+  POSITIONS,
+  PrivacyLevel,
+  privacyLevelToString,
+  useDisclose,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 export interface ManageModuleDialogRef {
   openNew: () => void;
-  openEdit: (module: GenericModule) => void;
+  openEdit: (module: Board) => void;
 }
 
 type ManageModuleProps = {
@@ -40,11 +41,11 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
     const [form] = Form.useForm<FormType>();
     const privacyLevel = Form.useWatch("privacyLevel", form);
     const [isSubmitting, startSubmit, endSubmit] = useDisclose();
-    const { newElement, selectedApp, canManage } = useCuttinboardModule();
+    const { addNewBoard, selectedBoard, canManageBoard } = useBoard();
     const [isOpen, open, close] = useDisclose(false);
     const [title, setTitle] = useState("");
-    const { location } = useLocation();
-    const [baseModule, setbaseModule] = useState<GenericModule>(null);
+    const { location } = useCuttinboardLocation();
+    const [baseModule, setBaseModule] = useState<Board | null>(null);
     const isEditing = !isEmpty(baseModule);
 
     useImperativeHandle(ref, () => ({
@@ -57,51 +58,50 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
       open();
     };
 
-    const openEdit = (module: GenericModule) => {
+    const openEdit = (module: Board) => {
       setTitle(t("Edit ") + moduleName);
-      setbaseModule(module);
+      setBaseModule(module);
       open();
     };
 
     const handleClose = () => {
       close();
-      setbaseModule(null);
+      setBaseModule(null);
       form.resetFields();
     };
 
     const onFinish = async (values: FormType) => {
-      if (!canManage) {
+      if (!canManageBoard) {
         return;
       }
       startSubmit();
       try {
-        if (isEditing) {
+        if (isEditing && selectedBoard) {
           const { privacyLevel, position, ...others } = values;
-          if (selectedApp.privacyLevel === PrivacyLevel.POSITIONS) {
-            const admins = selectedApp.accessTags?.filter((at) =>
+          if (selectedBoard.privacyLevel === PrivacyLevel.POSITIONS) {
+            const admins = selectedBoard.accessTags?.filter((at) =>
               at.startsWith("hostId_")
             );
-            const accessTags = [...admins, position];
-            await selectedApp.update({ ...others, accessTags });
+            const accessTags = [...(admins ?? []), position];
+            await selectedBoard.update({ ...others, accessTags });
           } else {
-            await selectedApp.update(others);
+            await selectedBoard.update(others);
           }
           // Report to analytics
           const analytics = getAnalytics();
           logEvent(analytics, "update_module", {
-            module_privacy_level: selectedApp.privacyLevel,
+            module_privacy_level: selectedBoard.privacyLevel,
             moduleName,
           });
         } else {
-          let newId: string;
           const { position, ...others } = values;
           if (others.privacyLevel === PrivacyLevel.POSITIONS) {
-            newId = await newElement({
+            await addNewBoard({
               ...others,
-              accessTags: [position],
+              accessTags: position ? [position] : [],
             });
           } else {
-            newId = await newElement(others);
+            await addNewBoard(others);
           }
           // Report to analytics
           const analytics = getAnalytics();
@@ -165,7 +165,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
               },
               {
                 validator: async (_, value) => {
-                  // Check if value dont hace tailing or leading spaces
+                  // Check if value don't have tailing or leading spaces
                   if (value !== value.trim()) {
                     return Promise.reject(
                       new Error(t("Cannot have leading or trailing spaces"))
@@ -186,13 +186,13 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
             <Radio.Group disabled={isEditing}>
               <Space direction="vertical">
                 <Radio value={PrivacyLevel.PUBLIC}>
-                  {t(getPrivacyLevelTextByNumber(PrivacyLevel.PUBLIC))}
+                  {t(privacyLevelToString(PrivacyLevel.PUBLIC))}
                 </Radio>
                 <Radio value={PrivacyLevel.POSITIONS}>
-                  {t(getPrivacyLevelTextByNumber(PrivacyLevel.POSITIONS))}
+                  {t(privacyLevelToString(PrivacyLevel.POSITIONS))}
                 </Radio>
                 <Radio value={PrivacyLevel.PRIVATE}>
-                  {t(getPrivacyLevelTextByNumber(PrivacyLevel.PRIVATE))}
+                  {t(privacyLevelToString(PrivacyLevel.PRIVATE))}
                 </Radio>
               </Space>
             </Radio.Group>
@@ -222,7 +222,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
                 )}
 
                 <Select.OptGroup label={t("Default")}>
-                  {Positions.map((pos) => (
+                  {POSITIONS.map((pos) => (
                     <Select.Option key={pos} value={pos}>
                       {pos}
                     </Select.Option>
@@ -244,7 +244,7 @@ export const useManageModule = () => {
     baseRef.current?.openNew();
   };
 
-  const editModule = (module: GenericModule) => {
+  const editModule = (module: Board) => {
     baseRef.current?.openEdit(module);
   };
 

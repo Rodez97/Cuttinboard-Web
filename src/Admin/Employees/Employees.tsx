@@ -1,21 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EmployeeCard from "./EmployeeCard";
-import { useNavigate } from "react-router-dom";
 import { matchSorter } from "match-sorter";
-import { getRoleTextByNumber } from "./employee-utils";
-import {
-  useCuttinboard,
-  useEmployeesList,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Positions,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import {
   Button,
   Divider,
@@ -24,6 +12,7 @@ import {
   List,
   Modal,
   Select,
+  Skeleton,
   Space,
   Tooltip,
 } from "antd";
@@ -32,24 +21,34 @@ import {
   TagOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
-import Icon from "@ant-design/icons";
-import AccountGroupOutline from "@mdi/svg/svg/account-group-outline.svg";
 import { recordError } from "../../utils/utils";
 import ManagePositions from "./ManagePositions";
-import { orderBy } from "lodash";
+import { groupBy, orderBy } from "lodash";
 import CreateEmployee from "./CreateEmployee";
-import { useDisclose } from "../../hooks";
 import { GrayPageHeader } from "../../components";
+import {
+  Employee,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  useCuttinboard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  POSITIONS,
+  RoleAccessLevels,
+  roleToString,
+  useDisclose,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function Employees() {
-  const { getEmployees } = useEmployeesList();
+  const { getEmployees, loading } = useEmployeesList();
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const [selectedTag, setSelectedTag] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>("");
   const { user } = useCuttinboard();
   const [managePositionsOpen, setManagePositionsOpen] = useState(false);
-  const { isOwner, isAdmin, location } = useLocation();
-  const navigate = useNavigate();
+  const { isOwner, isAdmin, location } = useCuttinboardLocation();
   const [isCreateEmployeeOpen, openCreateEmployee, closeCreateEmployee] =
     useDisclose(false);
 
@@ -68,31 +67,45 @@ function Employees() {
           recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 
-  const getEmployeeByRole = useCallback(
-    (role: RoleAccessLevels) => {
-      const byRole: Employee[] = matchSorter(getEmployees, role.toString(), {
-        keys: [(e) => e.locationRole.toString()],
-      });
-      const byName = searchText
-        ? matchSorter(byRole, searchText, {
-            keys: [(e) => e.fullName],
-          })
-        : byRole;
+  const getEmployeeByRole = useCallback(() => {
+    const employees = getEmployees;
 
-      const beforeSort = selectedTag
-        ? matchSorter(byName, selectedTag, {
-            keys: [(e) => e.positions],
-          })
-        : byName;
-      // Return the array sorted by locationRole and if is the same location role, sort by name
-      return orderBy(beforeSort, ["locationRole", "fullName"]);
-    },
-    [searchText, selectedTag, getEmployees]
-  );
+    const groupedByRole = groupBy(employees, (e) => e.locationRole);
+
+    const finalAfterQuery = Object.entries(groupedByRole).reduce<
+      Record<RoleAccessLevels, Employee[]>
+    >(
+      (acc, [role, employees]) => {
+        // Filter by name by searchText
+        const filtered = searchText
+          ? matchSorter(employees, searchText, {
+              keys: [(e) => e.fullName],
+            })
+          : employees;
+        const byPos = selectedTag
+          ? matchSorter(filtered, selectedTag, {
+              keys: [(e) => e.positions],
+            })
+          : filtered;
+        const parsedRole: RoleAccessLevels = parseInt(role);
+        acc[parsedRole] = orderBy(byPos, ["locationRole", "fullName"]);
+
+        return acc;
+      },
+      {
+        [RoleAccessLevels.OWNER]: [],
+        [RoleAccessLevels.ADMIN]: [],
+        [RoleAccessLevels.GENERAL_MANAGER]: [],
+        [RoleAccessLevels.MANAGER]: [],
+        [RoleAccessLevels.STAFF]: [],
+      }
+    );
+
+    return Object.entries(finalAfterQuery);
+  }, [searchText, selectedTag, getEmployees]);
 
   const joinSupervisor = async () => {
     try {
@@ -113,15 +126,12 @@ function Employees() {
           recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 
   return (
     <Layout>
       <GrayPageHeader
-        onBack={() => navigate(-1)}
-        avatar={{ icon: <Icon component={AccountGroupOutline} /> }}
         title={t("Employees")}
         subTitle={`${location.usage.employeesCount} / ${location.usage.employeesLimit}`}
         extra={[
@@ -185,7 +195,7 @@ function Employees() {
           )}
 
           <Select.OptGroup label={t("Default")}>
-            {Positions.map((pos) => (
+            {POSITIONS.map((pos) => (
               <Select.Option value={pos} key={pos}>
                 {pos}
               </Select.Option>
@@ -198,87 +208,59 @@ function Employees() {
           <div
             css={{
               minWidth: 300,
-              maxWidth: 700,
+              maxWidth: 800,
               margin: "auto",
               width: "100%",
             }}
           >
-            <List>
-              {isOwner && !getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" onClick={addPrimaryOwner} block>
-                  {t("Join this location")}
-                </Button>
-              )}
-              {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" onClick={joinSupervisor} block>
-                  {t("Join this location")}
-                </Button>
-              )}
+            {loading ? (
+              <Skeleton active />
+            ) : (
+              <List>
+                {isOwner && !getEmployees?.some((e) => e.id === user.uid) && (
+                  <Button type="dashed" onClick={addPrimaryOwner} block>
+                    {t("Join this location")}
+                  </Button>
+                )}
+                {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
+                  <Button type="dashed" onClick={joinSupervisor} block>
+                    {t("Join this location")}
+                  </Button>
+                )}
 
-              {isOwner && getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" danger onClick={removePrimaryOwner} block>
-                  {t("Leave this location")}
-                </Button>
-              )}
-              {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
-                <Button type="dashed" danger onClick={leaveSupervisor} block>
-                  {t("Leave this location")}
-                </Button>
-              )}
+                {isOwner && getEmployees?.some((e) => e.id === user.uid) && (
+                  <Button
+                    type="dashed"
+                    danger
+                    onClick={removePrimaryOwner}
+                    block
+                  >
+                    {t("Leave this location")}
+                  </Button>
+                )}
+                {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
+                  <Button type="dashed" danger onClick={leaveSupervisor} block>
+                    {t("Leave this location")}
+                  </Button>
+                )}
 
-              {getEmployeeByRole(RoleAccessLevels.OWNER)?.length > 0 && (
-                <Divider orientation="left">
-                  {t(getRoleTextByNumber(RoleAccessLevels.OWNER))}
-                </Divider>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.OWNER)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
-
-              {getEmployeeByRole(RoleAccessLevels.ADMIN)?.length > 0 && (
-                <Divider orientation="left">
-                  {t(getRoleTextByNumber(RoleAccessLevels.ADMIN))}
-                </Divider>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.ADMIN)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
-
-              {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.length >
-                0 && (
-                <Divider orientation="left">
-                  {t(getRoleTextByNumber(RoleAccessLevels.GENERAL_MANAGER))}
-                </Divider>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.GENERAL_MANAGER)?.map(
-                (emp, i) => (
-                  <EmployeeCard key={i} employee={emp} />
-                )
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.MANAGER)?.length > 0 && (
-                <Divider orientation="left">
-                  {t(getRoleTextByNumber(RoleAccessLevels.MANAGER))}
-                </Divider>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.MANAGER)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
-
-              {getEmployeeByRole(RoleAccessLevels.STAFF)?.length > 0 && (
-                <Divider orientation="left">
-                  {t(getRoleTextByNumber(RoleAccessLevels.STAFF))}
-                </Divider>
-              )}
-
-              {getEmployeeByRole(RoleAccessLevels.STAFF)?.map((emp, i) => (
-                <EmployeeCard key={i} employee={emp} />
-              ))}
-            </List>
+                {getEmployeeByRole().map(([role, employees]) => {
+                  if (employees.length > 0) {
+                    return (
+                      <React.Fragment key={role}>
+                        <Divider orientation="left">
+                          {t(roleToString(parseInt(role)))}
+                        </Divider>
+                        {employees.map((employee) => (
+                          <EmployeeCard key={employee.id} employee={employee} />
+                        ))}
+                      </React.Fragment>
+                    );
+                  }
+                  return null;
+                })}
+              </List>
+            )}
           </div>
         </div>
       </Layout.Content>

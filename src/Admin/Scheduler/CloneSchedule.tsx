@@ -1,9 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  useEmployeesList,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Alert, Avatar, Checkbox, List, Modal } from "antd";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
@@ -16,6 +12,8 @@ import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 import { WEEKFORMAT } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/schedule";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -23,7 +21,7 @@ dayjs.extend(customParseFormat);
 function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
   const { t } = useTranslation();
   const { getEmployees } = useEmployeesList();
-  const { cloneWeek, weekId, scheduleSummary } = useSchedule();
+  const { cloneWeek, weekId, weekSummary } = useSchedule();
   const [isCloning, setIsCloning] = useState(false);
   const [selectedWeek, setSelectedWeek] = useState(dayjs().format(WEEKFORMAT));
   const [selectedEmployees, setSelectedEmployees] = useState(
@@ -61,11 +59,16 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     if (selectedWeek === weekId) {
       return false;
     }
-    if (scheduleSummary?.totalShifts > 0) {
+    if (weekSummary.total.totalShifts > 0) {
       return false;
     }
     return true;
-  }, [weekId, selectedWeek, scheduleSummary]);
+  }, [
+    selectedEmployees.length,
+    selectedWeek,
+    weekId,
+    weekSummary.total.totalShifts,
+  ]);
 
   return (
     <Modal
@@ -89,7 +92,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
           message={t("Cannot clone the same week")}
         />
       )}
-      {scheduleSummary?.totalShifts > 0 && (
+      {weekSummary.total.totalShifts > 0 && (
         <Alert
           css={{ marginTop: 10 }}
           showIcon
@@ -98,6 +101,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
         />
       )}
       <List
+        css={{ maxHeight: "50vh", overflowY: "auto", marginTop: 10 }}
         dataSource={getEmployees}
         renderItem={(emp) => (
           <List.Item

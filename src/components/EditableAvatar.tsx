@@ -25,7 +25,7 @@ interface EditableAvatarProps {
   value?: { url: string; file?: File };
   size?: number;
   align?: "left" | "center" | "right";
-  onImageEdited?: (newValue: { url: string; file?: File }) => void;
+  onImageEdited: (newValue: { url: string; file?: File }) => void;
   imageBorderRadius?: number;
   compressSize?: number;
   disabled?: boolean;
@@ -49,7 +49,7 @@ function EditableAvatar({
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [imageScale, setImageScale] = useState<number>(1);
   const avatarEditorRef = useRef<AvatarEditor>(null);
-  const [selectedImageFile, setSelectedImageFile] = useState<File>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   const handleClose = () => {
     setEditOpen(false);
@@ -63,20 +63,22 @@ function EditableAvatar({
     const pureImage = avatarEditorRef.current?.getImage();
     const imageEditedDataURL = pureImage.toDataURL();
     pureImage.toBlob((blob) => {
-      new Compressor(blob, {
-        quality: 0.5,
-        width: compressSize,
-        height: compressSize,
+      if (blob) {
+        new Compressor(blob, {
+          quality: 0.5,
+          width: compressSize,
+          height: compressSize,
 
-        success: (result) => {
-          const extension = mime.extension(result.type);
-          finalImage = new File([result], `${nanoid()}.${extension}`);
-          if (finalImage?.size <= 8_000_000) {
-            onImageEdited({ url: imageEditedDataURL, file: finalImage });
-          }
-        },
-        error: (error) => console.error(error),
-      });
+          success: (result) => {
+            const extension = mime.extension(result.type);
+            finalImage = new File([result], `${nanoid()}.${extension}`);
+            if (finalImage.size <= 8_000_000) {
+              onImageEdited({ url: imageEditedDataURL, file: finalImage });
+            }
+          },
+          error: (error) => console.error(error),
+        });
+      }
     });
     handleClose();
   };
@@ -110,7 +112,7 @@ function EditableAvatar({
         css={{
           alignSelf: align ?? "flex-start",
           justifySelf: align ?? "flex-start",
-          cursor: !disabled && "pointer",
+          cursor: disabled ? "initial" : "pointer",
         }}
         size={size ?? 100}
         icon={<EditOutlined />}
@@ -142,7 +144,7 @@ function EditableAvatar({
           <StyledAvatarEditor
             width={150}
             height={150}
-            image={selectedImageFile}
+            image={selectedImageFile ?? value?.url ?? initialValue ?? ""}
             borderRadius={imageBorderRadius}
             scale={imageScale}
             ref={avatarEditorRef}

@@ -1,13 +1,15 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Checkbox, List, Modal, ModalProps } from "antd";
-import { useState } from "react";
+import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { UsergroupAddOutlined } from "@ant-design/icons";
+import {
+  Employee,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library/employee";
 
 type AddMembersProps = {
   onSelectedEmployees: (employees: Employee[]) => void;
@@ -24,6 +26,7 @@ function AddMembers({
   ...props
 }: AddMembersProps) {
   const { t } = useTranslation();
+  const [searchText, setSearchText] = useState("");
   const { getEmployees } = useEmployeesList();
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
 
@@ -48,9 +51,22 @@ function AddMembers({
   };
 
   const handleClose = () => {
-    setSelectedEmployees(initialSelected);
+    setSelectedEmployees(initialSelected ?? []);
     onClose();
   };
+
+  const employees = useMemo(() => {
+    const filtered = getEmployees.filter((emp) => {
+      if (
+        admins?.includes(emp.id) ||
+        initialSelected?.some((e) => e.id === emp.id)
+      ) {
+        return false;
+      }
+      return emp.name.toLowerCase().includes(searchText.toLowerCase());
+    });
+    return filtered;
+  }, [getEmployees, searchText, admins, initialSelected]);
 
   return (
     <Modal
@@ -70,12 +86,16 @@ function AddMembers({
         </Button>,
       ]}
     >
+      <Input.Search
+        placeholder={t("Search")}
+        allowClear
+        onChange={({ currentTarget }) => setSearchText(currentTarget.value)}
+        value={searchText}
+        css={{ width: 200, marginBottom: 10 }}
+      />
       <List
-        dataSource={getEmployees.filter(
-          (emp) =>
-            !admins?.includes(emp.id) &&
-            !initialSelected?.some((e) => e.id === emp.id)
-        )}
+        css={{ maxHeight: "50vh", overflowY: "auto" }}
+        dataSource={employees}
         renderItem={(emp) => {
           return (
             <List.Item

@@ -20,7 +20,7 @@
     "noImplicitThis": true,
     "outDir": "build",
     "strict": false,
-    "types": ["puppeteer", "jest-environment-puppeteer", "expect-puppeteer"]
+    "strictNullChecks": true
   },
   "include": [
     "src",

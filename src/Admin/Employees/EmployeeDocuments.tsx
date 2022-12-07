@@ -1,11 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Storage } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useCuttinboard,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   deleteObject,
   getDownloadURL,
@@ -14,16 +8,16 @@ import {
   StorageReference,
   uploadBytes,
 } from "firebase/storage";
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Avatar,
   Card,
   Divider,
+  Layout,
   List,
   message,
   Modal,
-  Space,
   Upload,
   UploadProps,
 } from "antd";
@@ -33,25 +27,45 @@ import {
   ExclamationCircleOutlined,
   FileFilled,
   InboxOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Colors,
+  STORAGE,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { useNavigate, useParams } from "react-router-dom";
+import { GrayPageHeader } from "../../components";
+import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  useCuttinboard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 
 const { Dragger } = Upload;
 
-function EmployeeDocuments({ employee }: { employee: Employee }) {
+export default () => {
+  const { id } = useParams();
   const { t } = useTranslation();
-  const { location } = useLocation();
+  const navigate = useNavigate();
+  const { getEmployeeById } = useEmployeesList();
+  const { location } = useCuttinboardLocation();
   const { user } = useCuttinboard();
   const [files, setFiles] = useState<StorageReference[]>([]);
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
-  const [uploading, setUploading] = useState(false);
+
+  const employee = useMemo(
+    () => (id ? getEmployeeById(id) : null),
+    [getEmployeeById, id]
+  );
 
   useEffect(() => {
-    loadFilesFromStorage();
-  }, []);
+    if (employee) {
+      loadFilesFromStorage();
+    }
+  }, [employee]);
 
   const handleChange = async (file: File) => {
     const filenameParts = file.name.split(".");
@@ -68,8 +82,11 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
   };
 
   const handleSaveFile = async (file: File) => {
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
     const storageRef = ref(
-      Storage,
+      STORAGE,
       `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}/${file.name}`
     );
     try {
@@ -110,7 +127,6 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
           return recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 
@@ -120,14 +136,17 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
   };
 
   const loadFilesFromStorage = async () => {
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
     setLoadingFiles(true);
     const storageRef = ref(
-      Storage,
+      STORAGE,
       `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}`
     );
     const result = await listAll(storageRef);
     setFiles(result.items);
-    const userStorageRef = ref(Storage, `users/${employee.id}/documents`);
+    const userStorageRef = ref(STORAGE, `users/${employee.id}/documents`);
     const userResult = await listAll(userStorageRef);
     setUserFiles(userResult.items);
     setLoadingFiles(false);
@@ -135,91 +154,114 @@ function EmployeeDocuments({ employee }: { employee: Employee }) {
 
   const props: UploadProps = {
     beforeUpload: async (file) => {
-      setUploading(true);
       message.loading(t("Uploading File"));
       await handleChange(file);
-      setUploading(false);
       message.destroy();
       return false;
     },
     fileList: [],
   };
+
+  if (!employee) {
+    return null;
+  }
+
   return (
-    <div
-      css={{
-        display: "flex",
-        minWidth: 300,
-        maxWidth: 500,
-        margin: "auto",
-        flexDirection: "column",
-        gap: 16,
-      }}
-    >
-      <Card title={t("Employee Documents")}>
-        <Dragger {...props}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">{t("Upload Document")}</p>
-          <p className="ant-upload-hint">
-            {t("Click or drag file to this area to upload")}
-          </p>
-        </Dragger>
+    <Layout>
+      <GrayPageHeader
+        onBack={() => navigate(-1)}
+        title={employee.fullName}
+        subTitle={t("Employee Documents")}
+        avatar={{
+          src: employee.avatar,
+          icon: <UserOutlined />,
+          alt: employee.fullName,
+        }}
+      />
+      <Layout.Content
+        css={{
+          display: "flex",
+          flexDirection: "column",
+          padding: 20,
+          paddingBottom: 30,
+        }}
+      >
+        <div
+          css={{
+            display: "flex",
+            minWidth: 300,
+            maxWidth: 500,
+            margin: "auto",
+            width: "100%",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          <Card title={t("Employee Documents")}>
+            <Dragger {...props}>
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">{t("Upload Document")}</p>
+              <p className="ant-upload-hint">
+                {t("Click or drag file to this area to upload")}
+              </p>
+            </Dragger>
 
-        <Divider>{t("Documents")}</Divider>
-        <List
-          loading={loadingFiles}
-          dataSource={files}
-          bordered
-          renderItem={(file, index) => (
-            <List.Item
-              key={index}
-              actions={[
-                <DeleteFilled
-                  key="delete"
-                  onClick={handleDeleteFile(file)}
-                  style={{ color: Colors.Error.errorMain }}
-                />,
-                <DownloadOutlined
-                  key="download"
-                  onClick={handleFileClick(file)}
-                />,
-              ]}
-            >
-              <List.Item.Meta
-                avatar={<Avatar icon={<FileFilled />} />}
-                description={file.name}
-              />
-            </List.Item>
-          )}
-        />
-      </Card>
+            <Divider>{t("Documents")}</Divider>
+            <List
+              loading={loadingFiles}
+              dataSource={files}
+              bordered
+              renderItem={(file, index) => (
+                <List.Item
+                  key={index}
+                  actions={[
+                    <DeleteFilled
+                      key="delete"
+                      onClick={handleDeleteFile(file)}
+                      style={{ color: Colors.Error.errorMain }}
+                    />,
+                    <DownloadOutlined
+                      key="download"
+                      onClick={handleFileClick(file)}
+                    />,
+                  ]}
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar icon={<FileFilled />} />}
+                    description={file.name}
+                  />
+                </List.Item>
+              )}
+            />
+          </Card>
 
-      <Card title={t("Uploaded by employee")}>
-        <List
-          loading={loadingFiles}
-          dataSource={userFiles}
-          bordered
-          renderItem={(file, index) => (
-            <List.Item
-              key={index}
-              actions={[
-                <DownloadOutlined
-                  key="download"
-                  onClick={handleFileClick(file)}
-                />,
-              ]}
-            >
-              <List.Item.Meta
-                avatar={<Avatar icon={<FileFilled />} />}
-                description={file.name}
-              />
-            </List.Item>
-          )}
-        />
-      </Card>
-    </div>
+          <Card title={t("Uploaded by employee")}>
+            <List
+              loading={loadingFiles}
+              dataSource={userFiles}
+              bordered
+              renderItem={(file, index) => (
+                <List.Item
+                  key={index}
+                  actions={[
+                    <DownloadOutlined
+                      key="download"
+                      onClick={handleFileClick(file)}
+                    />,
+                  ]}
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar icon={<FileFilled />} />}
+                    description={file.name}
+                  />
+                </List.Item>
+              )}
+            />
+          </Card>
+        </div>
+      </Layout.Content>
+    </Layout>
   );
-}
-
-export default EmployeeDocuments;
+};

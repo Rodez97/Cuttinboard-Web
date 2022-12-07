@@ -3,12 +3,12 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash";
 import { recordError } from "../utils/utils";
-import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { useDashboard } from "./DashboardProvider";
-import { Alert, Button, Descriptions, Space, Typography } from "antd";
+import { Alert, Button, Descriptions, Result, Space, Typography } from "antd";
 import { CreditCardTwoTone } from "@ant-design/icons";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { FUNCTIONS } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 function Subscription() {
   const { subscriptionDocument, organization, userDocument } = useDashboard();
@@ -16,11 +16,15 @@ function Subscription() {
   const [createBillingSession, running, error] = useHttpsCallable<
     string,
     string
-  >(Functions, "stripe-createBillingSession");
+  >(FUNCTIONS, "stripe-createBillingSession");
 
   const createManageSubSession = async () => {
+    if (!organization) return;
     try {
-      const { data } = await createBillingSession(window.location.href);
+      const result = await createBillingSession(window.location.href);
+      if (!result?.data) {
+        throw new Error("No data returned");
+      }
       // Report to analytics
       logEvent(getAnalytics(), "manage_subscription", {
         method: "stripe",
@@ -28,7 +32,7 @@ function Subscription() {
         uid: userDocument.id,
       });
       // Redirect to Stripe
-      location.assign(data);
+      location.assign(result.data);
     } catch (error) {
       recordError(error);
     }
@@ -45,6 +49,10 @@ function Subscription() {
       }),
     [subscriptionDocument, organization]
   );
+
+  if (!organization) {
+    return <Result status="404" title="404" subTitle="Not found" />;
+  }
 
   return (
     <Space
@@ -88,34 +96,9 @@ function Subscription() {
           )}
       </Descriptions>
 
-      {subscriptionDocument?.cancel_at_period_end && (
-        <Alert
-          message={t(
-            "This plan will be cancelled on {{0}}, all your locations will be deleted 15 days after the cancellation.",
-            {
-              0: dayjs(subscriptionDocument?.cancel_at?.toDate()).format(
-                "MM/DD/YYYY"
-              ),
-            }
-          )}
-          type="warning"
-          showIcon
-        />
-      )}
+      {}
 
-      {organization.subscriptionStatus !== "canceled" &&
-        (!userDocument?.paymentMethods ||
-          userDocument?.paymentMethods.length < 1) && (
-          <Alert
-            message={t(
-              "No payment method saved. Declare a payment method to keep accessing the Owner plan."
-            )}
-            type="warning"
-            showIcon
-          />
-        )}
-
-      {organization.subscriptionStatus === "canceled" && (
+      {organization.subscriptionStatus === "canceled" ? (
         <Alert
           message={t(
             "Your plan was cancelled on {{0}}, all your locations will be deleted after 15 days.",
@@ -128,7 +111,34 @@ function Subscription() {
           type="error"
           showIcon
         />
+      ) : (
+        subscriptionDocument?.cancel_at_period_end && (
+          <Alert
+            message={t(
+              "This plan will be cancelled on {{0}}, all your locations will be deleted 15 days after the cancellation.",
+              {
+                0: dayjs(subscriptionDocument?.cancel_at?.toDate()).format(
+                  "MM/DD/YYYY"
+                ),
+              }
+            )}
+            type="warning"
+            showIcon
+          />
+        )
       )}
+
+      {organization.subscriptionStatus !== "canceled" &&
+        (!userDocument.paymentMethods ||
+          userDocument.paymentMethods.length < 1) && (
+          <Alert
+            message={t(
+              "No payment method saved. Declare a payment method to keep accessing the Owner plan."
+            )}
+            type="warning"
+            showIcon
+          />
+        )}
 
       <Button
         color="primary"

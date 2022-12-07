@@ -8,21 +8,18 @@ import { LoadingScreen, PageError } from "./components";
 
 function App() {
   return (
-    <CuttinboardProvider onError={recordError}>
-      {({ user, error, loading }) =>
-        loading ? (
-          <LoadingScreen />
-        ) : error ? (
-          <PageError error={error} />
-        ) : user ? (
-          <>
-            <TrackPageAnalytics />
-            <MainRouter />
-          </>
-        ) : (
-          <AuthWrapper />
-        )
-      }
+    <CuttinboardProvider
+      LoadingRenderer={LoadingScreen}
+      ErrorRenderer={(err) => {
+        recordError(err);
+        return <PageError error={err} />;
+      }}
+      NoUserRenderer={<AuthWrapper />}
+    >
+      <>
+        <TrackPageAnalytics />
+        <MainRouter />
+      </>
     </CuttinboardProvider>
   );
 }

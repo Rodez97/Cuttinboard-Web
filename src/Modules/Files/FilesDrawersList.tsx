@@ -1,14 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ContainerOutlined, PlusOutlined } from "@ant-design/icons";
-import {
-  useCuttinboardModule,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Colors,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Input, Menu, MenuProps, Space } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
@@ -16,21 +9,24 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import FilesCounter from "./FilesCounter";
-import { DarkPageHeader } from "../../components";
 import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
+import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
-function FilesDrawersList() {
+export default () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { selectedApp, elements } = useCuttinboardModule();
-  const { locationAccessKey } = useLocation();
+  const { selectedBoard, boards } = useBoard();
+  const { locationAccessKey } = useCuttinboardLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const { baseRef, newModule } = useManageModule();
 
   const menuItems = useMemo((): MenuProps["items"] => {
-    const sorted = matchSorter(elements, searchQuery, { keys: ["name"] });
+    const sorted = boards
+      ? matchSorter(boards, searchQuery, { keys: ["name"] })
+      : [];
 
     return orderBy(sorted, "createdAt", "desc")?.map((el) => ({
       label: el.name,
@@ -39,31 +35,19 @@ function FilesDrawersList() {
       key: el.id,
       onClick: () => navigate(el.id, { replace: true }),
     }));
-  }, [elements, searchQuery]);
+  }, [boards, navigate, searchQuery]);
 
   return (
     <Space
       direction="vertical"
+      className="module-sider-container"
       css={{
-        display: "flex",
-        borderTop: `5px solid ${Colors.MainBlue}`,
         height: "100%",
         justifyContent: "space-between",
       }}
     >
       <Space direction="vertical" css={{ display: "flex" }}>
-        <Space
-          direction="vertical"
-          css={{
-            padding: "3px 5px",
-            display: "flex",
-          }}
-        >
-          <DarkPageHeader
-            title={t("Files")}
-            onBack={() => navigate(-1)}
-            css={{ paddingBottom: 0, paddingTop: 0 }}
-          />
+        <Space direction="vertical" className="module-sider-content">
           {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
             <Button
               icon={<PlusOutlined />}
@@ -80,7 +64,11 @@ function FilesDrawersList() {
             onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
           />
         </Space>
-        <Menu theme="dark" items={menuItems} selectedKeys={[selectedApp?.id]} />
+        <Menu
+          items={menuItems}
+          selectedKeys={selectedBoard ? [selectedBoard.id] : []}
+          className="module-sider-menu"
+        />
 
         <ManageModuleDialog ref={baseRef} moduleName="Drawer" />
       </Space>
@@ -88,6 +76,4 @@ function FilesDrawersList() {
       <FilesCounter />
     </Space>
   );
-}
-
-export default FilesDrawersList;
+};

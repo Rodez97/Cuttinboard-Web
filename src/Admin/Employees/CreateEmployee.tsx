@@ -2,17 +2,7 @@
 import { jsx } from "@emotion/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { getRoleTextByNumber } from "./employee-utils";
 import { recordError } from "../../utils/utils";
-import {
-  useAddEmployee,
-  useEmployeesList,
-  useLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Positions,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import {
   Alert,
   Button,
@@ -29,10 +19,20 @@ import {
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { Firestore } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { compact } from "lodash";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import {
+  FIRESTORE,
+  POSITIONS,
+  RoleAccessLevels,
+  roleToString,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  useEmployeeCreator,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 type EmployeeData = {
   name: string;
@@ -48,9 +48,9 @@ type EmployeeData = {
 function CreateEmployee(props: DrawerProps) {
   const [form] = Form.useForm<EmployeeData>();
   const { getEmployees } = useEmployeesList();
-  const { getAviablePositions, location } = useLocation();
+  const { availablePositions, location } = useCuttinboardLocation();
   const { t } = useTranslation();
-  const [addEmployee, submitting, error] = useAddEmployee();
+  const { createEmployee, loading, error } = useEmployeeCreator();
 
   const onFinish = async ({ positions, ...values }: EmployeeData) => {
     if (getEmployees.some((e) => e.email === values.email)) {
@@ -65,7 +65,7 @@ function CreateEmployee(props: DrawerProps) {
       const checkForSupervisor = await getDocs(
         query(
           collection(
-            Firestore,
+            FIRESTORE,
             "Organizations",
             location.organizationId,
             "employees"
@@ -83,17 +83,29 @@ function CreateEmployee(props: DrawerProps) {
 
       const employeeToAdd = {
         ...values,
-        positions: positions.map((pos) => pos.position),
-        wagePerPosition: positions.reduce(
-          (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
-          {}
-        ),
+        positions: positions ? positions.map((pos) => pos.position) : [],
+        wagePerPosition: positions
+          ? positions.reduce(
+              (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
+              {}
+            )
+          : {},
         mainPosition: "",
       };
 
-      const {
-        data: { status, employeeId },
-      } = await addEmployee({ ...employeeToAdd, locationId: location.id });
+      const result = await createEmployee({
+        ...employeeToAdd,
+        locationId: location.id,
+      });
+
+      if (!result || !result.data) {
+        message.error(
+          t("There was an error creating the employee. Please try again")
+        );
+        return;
+      }
+
+      const { status, employeeId } = result.data;
 
       if (status === "CANT_ADD_ORG_EMP") {
         message.error(
@@ -142,7 +154,7 @@ function CreateEmployee(props: DrawerProps) {
           role: RoleAccessLevels.STAFF,
           positions: [],
         }}
-        disabled={submitting}
+        disabled={loading}
         autoComplete="off"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
@@ -166,7 +178,7 @@ function CreateEmployee(props: DrawerProps) {
             },
             {
               validator: async (_, value) => {
-                // Check if value dont hace tailing or leading spaces
+                // Check if value don't have tailing or leading spaces
                 if (value !== value.trim()) {
                   return Promise.reject(
                     new Error(t("Name cannot have leading or trailing spaces"))
@@ -194,7 +206,7 @@ function CreateEmployee(props: DrawerProps) {
             },
             {
               validator: async (_, value) => {
-                // Check if value dont hace tailing or leading spaces
+                // Check if value don't have tailing or leading spaces
                 if (value !== value.trim()) {
                   return Promise.reject(
                     new Error(t("Name cannot have leading or trailing spaces"))
@@ -219,7 +231,7 @@ function CreateEmployee(props: DrawerProps) {
             },
             {
               validator: async (_, value) => {
-                // Check if value dont hace tailing or leading spaces
+                // Check if value don't have tailing or leading spaces
                 if (value !== value.trim()) {
                   return Promise.reject(
                     new Error(t("Cannot have leading or trailing spaces"))
@@ -238,10 +250,10 @@ function CreateEmployee(props: DrawerProps) {
         >
           <Select
             defaultValue={RoleAccessLevels.STAFF}
-            options={getAviablePositions
+            options={availablePositions
               .filter((p) => p !== RoleAccessLevels.ADMIN)
               .map((role) => ({
-                label: t(getRoleTextByNumber(role)),
+                label: t(roleToString(role)),
                 value: role,
               }))}
           />
@@ -311,14 +323,18 @@ function CreateEmployee(props: DrawerProps) {
                         {location.settings?.positions?.length && (
                           <Select.OptGroup label={t("Custom")}>
                             {location.settings.positions.map((pos) => (
-                              <Select.Option value={pos}>{pos}</Select.Option>
+                              <Select.Option value={pos} key={pos}>
+                                {pos}
+                              </Select.Option>
                             ))}
                           </Select.OptGroup>
                         )}
 
                         <Select.OptGroup label={t("Default")}>
-                          {Positions.map((pos) => (
-                            <Select.Option value={pos}>{pos}</Select.Option>
+                          {POSITIONS.map((pos) => (
+                            <Select.Option value={pos} key={pos}>
+                              {pos}
+                            </Select.Option>
                           ))}
                         </Select.OptGroup>
                       </Select>
@@ -342,7 +358,7 @@ function CreateEmployee(props: DrawerProps) {
                     shape="circle"
                     onClick={() => remove(name)}
                     icon={<MinusCircleOutlined />}
-                    disabled={submitting}
+                    disabled={loading}
                   />
                 </div>
               ))}
@@ -366,7 +382,7 @@ function CreateEmployee(props: DrawerProps) {
             htmlType="submit"
             icon={<SaveFilled />}
             block
-            loading={submitting}
+            loading={loading}
           >
             {t("Save")}
           </Button>

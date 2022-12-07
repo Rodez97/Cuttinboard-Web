@@ -1,5 +1,3 @@
-import { Todo_Task } from "@cuttinboard-solutions/cuttinboard-library";
-import { Timestamp } from "@firebase/firestore";
 import React, {
   forwardRef,
   useImperativeHandle,
@@ -11,45 +9,54 @@ import { useTranslation } from "react-i18next";
 import SimpleTodo from "./SimpleTodo";
 import { Input, InputRef } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
+import {
+  Checklist,
+  Task,
+} from "@cuttinboard-solutions/cuttinboard-library/checklist";
+import { recordError } from "../utils/utils";
 
 interface QuickTodoProps {
-  tasks: Record<string, Todo_Task>;
-  onChange: (tasks: Record<string, Todo_Task>) => void;
+  checklist: Checklist;
 }
 
 export interface QuickTodoRef {
-  addTask: () => void;
-  removeTask: (key: string) => void;
+  addTask: (name: string) => Promise<void>;
+  removeTask: (task: Task) => Promise<void>;
 }
 
 const QuickTodo = forwardRef<QuickTodoRef, QuickTodoProps>(
-  ({ tasks, onChange }, ref) => {
+  ({ checklist }, ref) => {
     const [newTaskName, setNewTaskName] = useState("");
     const { t } = useTranslation();
     const inputRef = useRef<InputRef>(null);
 
-    const addTask = () => {
-      if (newTaskName) {
-        onChange({
-          ...tasks,
-          [nanoid()]: {
-            name: newTaskName,
-            status: false,
-            createdAt: Timestamp.now(),
-          },
-        });
-        setNewTaskName("");
+    const addTask = async (newName = newTaskName) => {
+      if (newName) {
+        try {
+          checklist.addTask(nanoid(), newName);
+        } catch (error) {
+          recordError(error);
+        } finally {
+          setNewTaskName("");
+        }
       }
-      inputRef.current.focus();
+      inputRef.current?.focus();
     };
 
-    const handleTaskChange = (key: string, status: boolean) => () => {
-      onChange({ ...tasks, [key]: { ...tasks[key], status } });
+    const handleTaskChange = (task: Task, newStatus: boolean) => async () => {
+      try {
+        await task.changeTaskStatus(newStatus);
+      } catch (error) {
+        recordError(error);
+      }
     };
 
-    const removeTask = (key: string) => {
-      const { [key]: remove, ...others } = tasks;
-      onChange(others);
+    const removeTask = async (task: Task) => {
+      try {
+        checklist.removeTask(task.id);
+      } catch (error) {
+        recordError(error);
+      }
     };
 
     useImperativeHandle(ref, () => ({
@@ -70,10 +77,10 @@ const QuickTodo = forwardRef<QuickTodoRef, QuickTodoProps>(
               addTask();
             }
           }}
-          addonAfter={<PlusCircleOutlined onClick={addTask} />}
+          addonAfter={<PlusCircleOutlined onClick={() => addTask()} />}
         />
         <SimpleTodo
-          tasks={tasks}
+          tasks={checklist.tasksArray}
           canRemove
           onRemove={removeTask}
           onChange={handleTaskChange}

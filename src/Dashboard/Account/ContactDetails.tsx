@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { useUpdateCuttinboardAccount } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Alert,
   Button,
@@ -17,6 +16,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
+import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library/account";
 
 type EmployeeContactData = {
   phoneNumber: string;
@@ -29,7 +29,7 @@ function ContactDetails() {
   const [form] = Form.useForm<EmployeeContactData>();
   const [editing, setEditing] = useState(false);
   const { t } = useTranslation();
-  const { updateUserProfile, updating, error } = useUpdateCuttinboardAccount();
+  const { updateUserProfile, updating, error } = useUpdateAccount();
   const { userDocument } = useDashboard();
 
   const cancelEditing = () => {

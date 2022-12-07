@@ -1,9 +1,7 @@
 /** @jsx jsx */
-import {
-  Auth,
-  Firestore,
-} from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { Location } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { jsx } from "@emotion/react";
 import { Divider, Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
@@ -15,13 +13,14 @@ import { useTranslation } from "react-i18next";
 import { PageError, PageLoading } from "../../components";
 import LocationCard from "./LocationCard";
 
-function SupervisorLocations() {
+export default () => {
   const { t } = useTranslation();
+  const { user } = useCuttinboard();
   const [myLocations, loading, error] = useCollectionData(
     query(
-      collection(Firestore, "Locations"),
-      where("supervisors", "array-contains", Auth.currentUser.uid)
-    ).withConverter(Location.Converter)
+      collection(FIRESTORE, "Locations"),
+      where("supervisors", "array-contains", user.uid)
+    ).withConverter(Location.firestoreConverter)
   );
 
   const groupedByOrganizations = useMemo(
@@ -66,6 +65,4 @@ function SupervisorLocations() {
       )}
     </div>
   );
-}
-
-export default SupervisorLocations;
+};

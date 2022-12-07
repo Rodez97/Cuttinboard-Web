@@ -6,20 +6,20 @@ import { useTranslation } from "react-i18next";
 import FinalStep from "./Steps/FinalStep";
 import LocationInfo from "./Steps/LocationInfo";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Functions } from "@cuttinboard-solutions/cuttinboard-library/firebase";
 import { Button, Layout, message, Result, Space, Steps, Tooltip } from "antd";
 import { recordError } from "../../../utils/utils";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { getAnalytics, logEvent } from "firebase/analytics";
+import { FUNCTIONS } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 interface AddLocationContextProps {
-  location: Partial<Location>;
+  location: Partial<Location> | null;
   setLocation: React.Dispatch<React.SetStateAction<Partial<Location>>>;
-  generalManager?: {
+  generalManager: {
     email: string;
     name: string;
     lastName: string;
-  };
+  } | null;
   setGeneralManager: React.Dispatch<
     React.SetStateAction<{
       email: string;
@@ -48,14 +48,14 @@ function AddLocation() {
   const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
-  const [location, setLocation] = useState<Partial<Location>>(null);
+  const [location, setLocation] = useState<Partial<Location> | null>(null);
   const [generalManager, setGeneralManager] = useState<{
     email: string;
     name: string;
     lastName: string;
-  }>(null);
+  } | null>(null);
   const [addLocation, creating, error] = useHttpsCallable(
-    Functions,
+    FUNCTIONS,
     "http-locations-create"
   );
 
@@ -84,6 +84,9 @@ function AddLocation() {
   };
 
   const createLocation = async () => {
+    if (!location) {
+      return;
+    }
     try {
       const hide = message.loading(t("Adding a new location..."), 0);
       await addLocation({

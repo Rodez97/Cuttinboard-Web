@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { MinusCircleOutlined } from "@ant-design/icons";
-import { useLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Positions } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { POSITIONS } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { jsx } from "@emotion/react";
 import {
   Button,
@@ -20,7 +20,7 @@ import { recordError } from "../../utils/utils";
 
 function ManagePositions(props: DrawerProps) {
   const { t } = useTranslation();
-  const { location } = useLocation();
+  const { location } = useCuttinboardLocation();
   const [addingPosition, setAddingPosition] = useState(false);
   const [fieldValue, setFieldValue] = useState("");
 
@@ -91,7 +91,7 @@ function ManagePositions(props: DrawerProps) {
       <List
         css={{ overflowY: "auto" }}
         size="small"
-        dataSource={matchSorter(Positions, "")}
+        dataSource={matchSorter(POSITIONS, "")}
         renderItem={(pos) => (
           <List.Item key={pos}>
             <Typography.Text>{pos}</Typography.Text>

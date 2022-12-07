@@ -1,9 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Colors, Employee } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, List, Modal, ModalProps } from "antd";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { ArrowRightOutlined } from "@ant-design/icons";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 type AddMembersProps = {
   onSelectedEmployee: (employee: Employee) => void;
@@ -18,6 +19,7 @@ function SelectEmployee({
   return (
     <Modal {...props}>
       <List
+        css={{ maxHeight: "80vh", overflowY: "auto" }}
         dataSource={employees}
         renderItem={(emp) => {
           return (

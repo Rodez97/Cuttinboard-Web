@@ -1,4 +1,4 @@
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
+import { AUTH } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import FirebaseLogin from "./FirebaseLogin";
@@ -6,7 +6,7 @@ import FirebaseRecover from "./FirebaseRecover";
 import FirebaseRegister from "./FirebaseRegister";
 
 export default () => {
-  if (Auth.currentUser) {
+  if (AUTH.currentUser) {
     return <Navigate to="/dashboard" />;
   }
   return (

@@ -1,12 +1,12 @@
 import { SaveFilled } from "@ant-design/icons";
-import { Auth } from "@cuttinboard-solutions/cuttinboard-library/firebase";
-import { Note } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  Note,
+  useBoard,
+} from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Form, Input, Modal } from "antd";
-import { addDoc, serverTimestamp } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDisclose } from "../../hooks";
 import { recordError } from "../../utils/utils";
 
 export interface ManageNoteDialogRef {
@@ -14,14 +14,14 @@ export interface ManageNoteDialogRef {
   openEdit: (note: Note) => void;
 }
 
-const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
+export default forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<{ title?: string; content: string }>();
-  const { selectedApp } = useCuttinboardModule();
+  const { selectedBoard } = useBoard();
   const [isOpen, open, close] = useDisclose(false);
   const [title, setTitle] = useState("");
   const [isSubmitting, startSubmit, endSubmit] = useDisclose();
-  const [baseNote, setBaseNote] = useState<Note>(null);
+  const [baseNote, setBaseNote] = useState<Note | null>(null);
 
   useImperativeHandle(ref, () => ({
     openNew,
@@ -49,15 +49,9 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
     startSubmit();
     try {
       if (baseNote) {
-        await baseNote.edit(values.title?.trim(), values.content.trim());
-      } else {
-        await addDoc(selectedApp?.contentRef, {
-          title: values.title?.trim(),
-          content: values.content.trim(),
-          createdAt: serverTimestamp(),
-          createdBy: Auth.currentUser.uid,
-          authorName: Auth.currentUser.displayName,
-        });
+        await baseNote.update(values);
+      } else if (selectedBoard) {
+        await Note.NewNote(selectedBoard.contentRef, values);
       }
       endSubmit();
       handleClose();
@@ -101,6 +95,11 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
               whitespace: true,
               message: t("Cannot be empty"),
             },
+            // Check that the title does not have leading or trailing spaces
+            {
+              pattern: /^\S.*\S$/,
+              message: t("Cannot start or end with spaces"),
+            },
           ]}
         >
           <Input placeholder={t("Title")} maxLength={80} showCount />
@@ -118,6 +117,11 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
               max: 4000,
               message: t("Cannot be longer than 4000 characters"),
             },
+            // Check that the title does not have leading or trailing spaces
+            {
+              pattern: /^\S.*\S$/,
+              message: t("Cannot start or end with spaces"),
+            },
           ]}
         >
           <Input.TextArea
@@ -131,5 +135,3 @@ const ManageNoteDialog = forwardRef<ManageNoteDialogRef, unknown>((_, ref) => {
     </Modal>
   );
 });
-
-export default ManageNoteDialog;

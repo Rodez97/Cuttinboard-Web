@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { Button } from "antd";
 
-export const GoldButton = styled(Button)`
+export default styled(Button)`
   color: #ffffff;
   background: radial-gradient(
       ellipse farthest-corner at right bottom,

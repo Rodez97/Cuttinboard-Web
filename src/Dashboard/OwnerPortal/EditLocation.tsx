@@ -1,16 +1,17 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Layout, message, PageHeader } from "antd";
+import { Layout, message, Result } from "antd";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
-import { useOwner } from "./OwnerPortal";
+import { useOwner } from ".";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { LocationEditor } from "../../components";
+import { PageHeader } from "@ant-design/pro-layout";
 
-function EditLocation() {
+export default () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { locations } = useOwner();
@@ -29,6 +30,10 @@ function EditLocation() {
     intId,
     address,
   }: Partial<Location>) => {
+    if (!getLocation) {
+      throw new Error("Location not found");
+    }
+
     setEditing(true);
     try {
       await getLocation.updateLocation({
@@ -52,24 +57,42 @@ function EditLocation() {
       setEditing(false);
     }
   };
+
+  if (!getLocation) {
+    return (
+      <Result
+        status="404"
+        title="404"
+        subTitle="Sorry, the location was not found."
+      />
+    );
+  }
+
   return (
     <Layout>
       <PageHeader
         onBack={() => navigate(-1)}
         title={t("Edit Location Details")}
       />
-      <Layout.Content css={{ display: "flex", justifyContent: "center" }}>
-        <div>
-          <LocationEditor
-            baseLocation={getLocation}
-            onChange={handleChange}
-            onCancel={() => navigate(-1)}
-            loading={editing}
-          />
+      <Layout.Content>
+        <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+          <div
+            css={{
+              minWidth: 270,
+              maxWidth: 400,
+              margin: "auto",
+              width: "100%",
+            }}
+          >
+            <LocationEditor
+              baseLocation={getLocation}
+              onChange={handleChange}
+              onCancel={() => navigate(-1)}
+              loading={editing}
+            />
+          </div>
         </div>
       </Layout.Content>
     </Layout>
   );
-}
-
-export default EditLocation;
+};

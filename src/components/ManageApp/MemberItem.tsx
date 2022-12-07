@@ -1,16 +1,18 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { DeleteFilled } from "@ant-design/icons";
-import {
-  useCuttinboard,
-  Employee,
-  PrivacyLevel,
-  useLocation,
-  Colors,
-} from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, List } from "antd";
 import { useMemo } from "react";
 import { QuickUserDialogAvatar } from "../QuickUserDialog";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  Colors,
+  PrivacyLevel,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  useCuttinboard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library/services";
 
 interface IMemberItem {
   employee: Employee;
@@ -28,7 +30,7 @@ function MemberItem({
   privacyLevel,
 }: IMemberItem) {
   const { user } = useCuttinboard();
-  const { isGeneralManager, isOwner, isAdmin } = useLocation();
+  const { isGeneralManager, isOwner, isAdmin } = useCuttinboardLocation();
 
   const haveSecondaryAction = useMemo(() => {
     if (readonly) {
@@ -61,15 +63,18 @@ function MemberItem({
         margin: 5,
       }}
       actions={
-        haveSecondaryAction && [
-          <Button
-            onClick={() => onRemove(employee.id)}
-            danger
-            icon={<DeleteFilled />}
-            type="link"
-            shape="circle"
-          />,
-        ]
+        haveSecondaryAction
+          ? [
+              <Button
+                key="remove"
+                onClick={() => onRemove(employee.id)}
+                danger
+                icon={<DeleteFilled />}
+                type="link"
+                shape="circle"
+              />,
+            ]
+          : undefined
       }
     >
       <List.Item.Meta

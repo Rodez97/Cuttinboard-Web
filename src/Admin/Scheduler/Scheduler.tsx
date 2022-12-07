@@ -19,53 +19,41 @@ import { matchSorter } from "match-sorter";
 import ProjectedSalesDialog from "./ProjectedSalesDialog";
 import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
-import {
-  Employee,
-  EmployeeShifts,
-  Shift,
-} from "@cuttinboard-solutions/cuttinboard-library/models";
-import {
-  useEmployeesList,
-  useLocation,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  Positions,
-  RoleAccessLevels,
-  WEEKFORMAT,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import Table, { ColumnsType } from "antd/lib/table";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
-import {
-  Button,
-  Descriptions,
-  Input,
-  Layout,
-  message,
-  Modal,
-  Select,
-  Space,
-  Tag,
-  Typography,
-} from "antd";
+import { Button, Empty, Input, Layout, Space, Table, Tag, Tooltip } from "antd";
 import TableFooter from "./TableFooter";
 import {
-  ExclamationCircleOutlined,
   FilePdfOutlined,
   FundProjectionScreenOutlined,
   ScheduleOutlined,
   TeamOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { recordError } from "../../utils/utils";
 import "./Scheduler.scss";
 import CloneSchedule from "./CloneSchedule";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import useSize from "@react-hook/size";
 import { generateSchedulePdf } from "./generatePdf";
 import { GrayPageHeader, PageError, PageLoading } from "../../components";
+import { useResizeDetector } from "react-resize-detector";
+import { capitalize, compact, uniq } from "lodash";
+import PublishDialog from "./PublishDialog";
+import {
+  Employee,
+  useEmployeesList,
+} from "@cuttinboard-solutions/cuttinboard-library/employee";
+import {
+  EmployeeShifts,
+  Shift,
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  POSITIONS,
+  RoleAccessLevels,
+  useDisclose,
+  WEEKFORMAT,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -83,38 +71,37 @@ export const ScheduleContext = createContext<Partial<IScheduleContextProps>>(
 export interface ShiftsTable {
   key: string;
   employee: Employee;
-  empShifts: EmployeeShifts;
+  empShifts: EmployeeShifts | undefined;
 }
 
 function Scheduler() {
+  const { ref, height } = useResizeDetector();
   const {
     weekId,
     setWeekId,
     employeeShiftsCollection,
-    publish,
     searchQuery,
     setSearchQuery,
-    selectedTag,
-    setSelectedTag,
     weekDays,
-    updatesCount,
-    scheduleSummary,
-    loading,
-    error,
+    updates,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
   const manageShiftDialogRef = useRef<IManageShiftDialogRef>(null);
   const { t } = useTranslation();
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
-  const { getEmployees } = useEmployeesList();
-  const { location } = useLocation();
-  const target = useRef<HTMLDivElement>(null);
-  const [_, height] = useSize(target);
+  const {
+    getEmployees,
+    loading: employeesLoading,
+    error: employeesError,
+  } = useEmployeesList();
+  const { location } = useCuttinboardLocation();
+  const [publishDialogOpen, openPublish, closePublish] = useDisclose();
 
-  const handleBack = () => {
-    navigate(-1);
-  };
+  console.log({
+    globalLocationData: globalThis.locationData,
+    shiftsEmpRef: EmployeeShifts.Reference(weekId),
+  });
 
   const employees = useMemo(() => {
     // Get all employees except the supervisor
@@ -127,179 +114,68 @@ function Scheduler() {
           keys: [(e) => e.fullName],
         })
       : emp;
-    const beforeSort = selectedTag
-      ? matchSorter(byName, selectedTag, {
-          keys: [(e) => e.positions],
-        })
-      : byName;
     // Return the array sorted by locationRole and if is the same location role, sort by name
-    return beforeSort.sort((a, b) => {
+    return byName.sort((a, b) => {
       if (a.locationRole !== b.locationRole) {
-        return a.locationRole - b.locationRole;
+        return Number(a.locationRole) - Number(b.locationRole);
       }
       return a.fullName.localeCompare(b.fullName);
     });
-  }, [searchQuery, selectedTag, getEmployees]);
+  }, [searchQuery, getEmployees]);
 
-  const togglePublishSchedule = async () => {
-    let notifiTo: "all" | "all_scheduled" | "changed" | "none";
-    Modal.confirm({
-      title: t("Publish schedule changes"),
-      icon: <ExclamationCircleOutlined />,
-      content: (
-        <Space direction="vertical" css={{ display: "flex" }}>
-          <Descriptions bordered column={1} size="small">
-            <Descriptions.Item label={t("New or Draft:")}>
-              {updatesCount.newOrDraft}
-            </Descriptions.Item>
-
-            <Descriptions.Item label={t("Shift Updates:")}>
-              {updatesCount.pendingUpdates}
-            </Descriptions.Item>
-
-            <Descriptions.Item label={t("Deleted Shifts:")}>
-              {updatesCount.deleted}
-            </Descriptions.Item>
-
-            <Descriptions.Item label={t("Total Changes:")}>
-              {updatesCount.total}
-            </Descriptions.Item>
-          </Descriptions>
-
-          <Typography.Title level={5}>{t("Notify to:")}</Typography.Title>
-
-          <Select
-            onChange={(e: "all" | "all_scheduled" | "changed" | "none") => {
-              notifiTo = e;
-            }}
-            value={notifiTo}
-            defaultValue="changed"
-            css={{ width: "100%" }}
-          >
-            <Select.Option value="all">{t("All")}</Select.Option>
-            <Select.Option value="all_scheduled">
-              {t("all_scheduled")}
-            </Select.Option>
-            <Select.Option value="changed">{t("changed")}</Select.Option>
-            <Select.Option value="none">{t("None")}</Select.Option>
-          </Select>
-        </Space>
-      ),
-      async onOk() {
-        try {
-          await publish(notifiTo ?? "changed");
-          message.success(t("Changes Published"));
-          // Report to analytics
-          const analytics = getAnalytics();
-          logEvent(analytics, "publish_schedule", {
-            notifiTo,
-            ...scheduleSummary,
-          });
-        } catch (error) {
-          recordError(error);
-        }
-      },
-      onCancel() {},
-    });
-  };
-
-  const newShift = useCallback(
-    (employee: Employee, column: Date) => {
-      manageShiftDialogRef.current?.openNew(employee, column);
-    },
-    [manageShiftDialogRef.current]
-  );
+  const newShift = useCallback((employee: Employee, column: Date) => {
+    manageShiftDialogRef.current?.openNew(employee, column);
+  }, []);
 
   const editShift = useCallback(
     (employee: Employee, shift: Shift) =>
       manageShiftDialogRef.current?.openEdit(employee, shift),
-    [manageShiftDialogRef.current]
-  );
-
-  const columns = useMemo(
-    (): ColumnsType<ShiftsTable> => [
-      {
-        title: t("Employee"),
-        dataIndex: "employee",
-        key: "employee",
-        render: (_, { employee, empShifts }) => (
-          <EmpColumnCell employee={employee} empShifts={empShifts} />
-        ),
-        fixed: "left",
-        width: 250,
-        className: "employee-column",
-        filters: [
-          {
-            text: t("Scheduled Only"),
-            value: "all_scheduled",
-          },
-          {
-            text: t("Changed"),
-            value: "changed",
-          },
-          {
-            text: t("Staff Only"),
-            value: "staff_only",
-          },
-        ],
-        onFilter: (value: string, record) => {
-          switch (value) {
-            case "all_scheduled":
-              return record.empShifts?.shiftsArray.length > 0;
-            case "changed":
-              return record.empShifts?.haveChanges;
-            case "staff_only":
-              return record.employee.locationRole === RoleAccessLevels.STAFF;
-            default:
-              return true;
-          }
-        },
-      },
-      ...weekDays.map((wd) => ({
-        title: dayjs(wd).format("ddd DD"),
-        dataIndex: dayjs(wd).isoWeekday(),
-        key: dayjs(wd).isoWeekday(),
-        render: (_, { employee, empShifts }: ShiftsTable) => (
-          <ShiftCell
-            employee={employee}
-            shifts={empShifts?.shiftsArray.filter(
-              (s) => s.shiftIsoWeekday === dayjs(wd).isoWeekday()
-            )}
-            date={wd}
-            onNewShift={newShift}
-            empShifts={empShifts}
-          />
-        ),
-      })),
-    ],
-    [weekDays, employees, employeeShiftsCollection]
+    []
   );
 
   const generatePdf = useCallback(async () => {
-    generateSchedulePdf(
-      employees?.map((emp) => ({
-        key: emp.id,
-        employee: emp,
-        empShifts: employeeShiftsCollection?.find(
-          (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
-        ),
-      })),
-      location.name,
-      weekId,
-      weekDays
+    const empDocs = compact(
+      employees.map((employee) => {
+        const empShifts = employeeShiftsCollection?.find(
+          (shf) => shf.id === `${weekId}_${employee.id}_${location.id}`
+        );
+        if (!empShifts) {
+          return null;
+        }
+        return {
+          key: employee.id,
+          employee,
+          empShifts,
+        };
+      })
     );
-  }, [weekDays, employees, employeeShiftsCollection]);
+    generateSchedulePdf(empDocs, location.name, weekId, weekDays);
+  }, [
+    employees,
+    location.name,
+    location.id,
+    weekId,
+    weekDays,
+    employeeShiftsCollection,
+  ]);
+
+  if (employeesLoading) {
+    return <PageLoading />;
+  }
+
+  if (employeesError) {
+    return <PageError error={employeesError} />;
+  }
 
   return (
-    <Layout css={{ overflowX: "auto" }}>
-      <ScheduleContext.Provider
-        value={{
-          editShift,
-          newShift,
-        }}
-      >
+    <ScheduleContext.Provider
+      value={{
+        editShift,
+        newShift,
+      }}
+    >
+      <Layout css={{ overflowX: "auto" }}>
         <GrayPageHeader
-          onBack={handleBack}
           title={t("Schedule")}
           extra={[
             <Button
@@ -333,25 +209,38 @@ function Scheduler() {
             >
               {t("See Roster")}
             </Button>,
-            <Button
-              key="1"
-              icon={<UploadOutlined />}
-              onClick={togglePublishSchedule}
-              type="primary"
-              disabled={
-                updatesCount.total === 0 ||
-                dayjs(weekDays[0]).isoWeek() > dayjs().add(1, "week").isoWeek()
+            <Tooltip
+              title={
+                dayjs(weekDays[0]).isoWeek() >
+                  dayjs().add(1, "week").isoWeek() &&
+                t(
+                  "You can't publish schedules that are more than 2 weeks in advance"
+                )
               }
+              key="1"
             >
-              {`${t("Publish")} (${updatesCount.total})`}
-            </Button>,
+              <Button
+                icon={<UploadOutlined />}
+                onClick={openPublish}
+                type="primary"
+                disabled={
+                  updates.total === 0 ||
+                  dayjs(weekDays[0]).isoWeek() >
+                    dayjs().add(1, "week").isoWeek()
+                }
+              >
+                {`${t("Publish")} (${updates.total})`}
+              </Button>
+            </Tooltip>,
           ]}
           tags={
-            Boolean(dayjs().format(WEEKFORMAT) === weekId) && [
-              <Tag key="thisWeek" color="processing">
-                {t("This Week")}
-              </Tag>,
-            ]
+            dayjs().format(WEEKFORMAT) === weekId
+              ? [
+                  <Tag key="thisWeek" color="processing">
+                    {t("This Week")}
+                  </Tag>,
+                ]
+              : []
           }
         />
 
@@ -362,99 +251,152 @@ function Scheduler() {
         >
           <WeekNavigator onChange={setWeekId} currentWeekId={weekId} />
 
-          <Space align="center" wrap>
-            <Input.Search
-              placeholder={t("Search")}
-              allowClear
-              onChange={(e) => setSearchQuery(e.currentTarget.value)}
-              value={searchQuery}
-              css={{ width: 200 }}
-            />
-            <Select
-              showSearch
-              style={{ width: 200 }}
-              onSelect={setSelectedTag}
-              onClear={() => setSelectedTag(null)}
-              placeholder={t("Filter by position")}
-              allowClear
-            >
-              {location.settings?.positions?.length && (
-                <Select.OptGroup label={t("Custom")}>
-                  {location.settings.positions.map((pos) => (
-                    <Select.Option value={pos} key={pos}>
-                      {pos}
-                    </Select.Option>
-                  ))}
-                </Select.OptGroup>
-              )}
-
-              <Select.OptGroup label={t("Default")}>
-                {Positions.map((pos) => (
-                  <Select.Option value={pos} key={pos}>
-                    {pos}
-                  </Select.Option>
-                ))}
-              </Select.OptGroup>
-            </Select>
-          </Space>
+          <Input.Search
+            placeholder={t("Search")}
+            allowClear
+            onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            value={searchQuery}
+            css={{ width: 200 }}
+          />
         </Space>
         <ScheduleSummaryElement />
-        <Layout.Content ref={target} css={{ overflowY: "hidden" }}>
-          {error ? (
-            <PageError error={error} />
-          ) : loading ? (
-            <PageLoading />
-          ) : (
-            [
-              <Table
-                key="table"
-                scroll={{ x: 1300, y: height - 55 - 85 }}
-                bordered
-                components={{
-                  body: {
-                    cell: ({ children, ...props }) => (
-                      <td {...props} className="shift-cell">
-                        {children}
-                      </td>
-                    ),
-                  },
-                }}
-                columns={columns}
-                dataSource={employees?.map((emp) => ({
-                  key: emp.id,
-                  employee: emp,
-                  empShifts: employeeShiftsCollection?.find(
-                    (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
+        <Layout.Content css={{ minHeight: 100 }} ref={ref}>
+          {employees?.length > 0 ? (
+            <Table
+              scroll={height ? { x: 1300, y: height - 39 * 3 } : { x: 1300 }}
+              css={{ height: "100%" }}
+              bordered
+              size="small"
+              components={{
+                body: {
+                  cell: ({ children, ...props }) => (
+                    <td {...props} className="shift-cell">
+                      {children}
+                    </td>
                   ),
-                }))}
-                summary={(pageData) => (
-                  <Table.Summary fixed>
-                    <TableFooter data={pageData} />
-                  </Table.Summary>
-                )}
-                pagination={false}
-                rowKey={(e) => e.employee.id}
-                rowClassName="scheduler-row"
-              />,
-              <ManageShiftDialog
-                ref={manageShiftDialogRef}
-                key="manageShiftD"
-              />,
-              <ProjectedSalesDialog
-                visible={projectedSalesOpen}
-                onClose={() => setProjectedSalesOpen(false)}
-                key="projectedSalesD"
-              />,
-              <CloneSchedule
-                open={cloneDialogOpen}
-                onCancel={() => setCloneDialogOpen(false)}
-                key="cloneD"
-              />,
-            ]
+                },
+              }}
+              columns={[
+                {
+                  title: t("Employee"),
+                  dataIndex: "employee",
+                  key: "employee",
+                  render: (_, { employee, empShifts }) => (
+                    <EmpColumnCell employee={employee} empShifts={empShifts} />
+                  ),
+                  fixed: "left",
+                  width: 250,
+                  className: "employee-column",
+                  filters: [
+                    {
+                      text: t("Scheduled Only"),
+                      value: "all_scheduled",
+                    },
+                    {
+                      text: t("Changed"),
+                      value: "changed",
+                    },
+                    {
+                      text: t("Staff Only"),
+                      value: "staff_only",
+                    },
+                    {
+                      text: t("Positions"),
+                      value: "positions",
+                      children: uniq([
+                        ...POSITIONS,
+                        ...(location.settings?.positions ?? []),
+                      ])
+                        .sort((a, b) => a.localeCompare(b))
+                        .map((pos) => ({
+                          text: pos,
+                          value: pos,
+                        })),
+                    },
+                  ],
+                  onFilter: (value: string, record) => {
+                    if (value === "all_scheduled") {
+                      return Boolean(
+                        record.empShifts &&
+                          record.empShifts.shiftsArray.length > 0
+                      );
+                    }
+
+                    if (value === "changed") {
+                      return Boolean(
+                        record.empShifts && record.empShifts.haveChanges
+                      );
+                    }
+
+                    if (value === "staff_only") {
+                      return Boolean(
+                        record.employee.locationRole === RoleAccessLevels.STAFF
+                      );
+                    }
+
+                    if (value) {
+                      return record.employee.hasAnyPosition([value]);
+                    }
+
+                    return true;
+                  },
+                },
+                ...weekDays.map((wd) => ({
+                  title: capitalize(dayjs(wd).format("ddd DD")),
+                  dataIndex: dayjs(wd).isoWeekday(),
+                  key: dayjs(wd).isoWeekday(),
+                  render: (_, { employee, empShifts }: ShiftsTable) => (
+                    <ShiftCell
+                      employee={employee}
+                      shifts={empShifts?.shiftsArray.filter(
+                        (s) => s.shiftIsoWeekday === dayjs(wd).isoWeekday()
+                      )}
+                      date={wd}
+                    />
+                  ),
+                })),
+              ]}
+              dataSource={employees?.map((emp) => ({
+                key: emp.id,
+                employee: emp,
+                empShifts: employeeShiftsCollection?.find(
+                  (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
+                ),
+              }))}
+              summary={(pageData) => (
+                <Table.Summary fixed>
+                  <TableFooter data={pageData} />
+                </Table.Summary>
+              )}
+              pagination={false}
+              rowKey={(e) => e.employee.id}
+              rowClassName="scheduler-row"
+            />
+          ) : (
+            <Empty
+              description={t("No employees found")}
+              css={{
+                marginTop: 50,
+              }}
+            />
           )}
         </Layout.Content>
-      </ScheduleContext.Provider>
-    </Layout>
+        <ManageShiftDialog ref={manageShiftDialogRef} />
+        <ProjectedSalesDialog
+          visible={projectedSalesOpen}
+          onClose={() => setProjectedSalesOpen(false)}
+        />
+        <CloneSchedule
+          open={cloneDialogOpen}
+          onCancel={() => setCloneDialogOpen(false)}
+        />
+        <PublishDialog
+          open={publishDialogOpen}
+          onCancel={closePublish}
+          onAccept={closePublish}
+        />
+      </Layout>
+    </ScheduleContext.Provider>
   );
 }
 

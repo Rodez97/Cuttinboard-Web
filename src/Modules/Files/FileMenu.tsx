@@ -6,27 +6,28 @@ import {
   FormOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import { Cuttinboard_File } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboardModule } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  Cuttinboard_File,
+  useBoard,
+} from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Dropdown, Input, Modal, Typography } from "antd";
 import axios from "axios";
 import fileDownload from "js-file-download";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useDisclose, useFileItem } from "../../hooks";
 import { recordError } from "../../utils/utils";
 
 interface FilesMenuProps {
   file: Cuttinboard_File;
 }
 
-function FileMenu({ file }: FilesMenuProps) {
+export default ({ file }: FilesMenuProps) => {
   const { t } = useTranslation();
-  const { canManage } = useCuttinboardModule();
+  const { canManageBoard } = useBoard();
   const [newFileName, setNewFileName] = useState("");
   const [renameOpen, openRename, closeRename] = useDisclose();
   const [renaming, startRenaming, endRenaming] = useDisclose();
-  const { copyToClipboard, openFile } = useFileItem(file);
 
   const handleDelete = async () => {
     Modal.confirm({
@@ -42,7 +43,6 @@ function FileMenu({ file }: FilesMenuProps) {
           recordError(error);
         }
       },
-      onCancel() {},
     });
   };
 
@@ -77,7 +77,9 @@ function FileMenu({ file }: FilesMenuProps) {
               label: t("Copy link"),
               key: "onCopyToClipboardClick",
               icon: <CopyOutlined />,
-              onClick: copyToClipboard,
+              onClick: async () => {
+                navigator.clipboard.writeText(await file.getUrl());
+              },
             },
             {
               label: t("Download"),
@@ -89,14 +91,14 @@ function FileMenu({ file }: FilesMenuProps) {
               label: t("Rename"),
               key: "renameFile",
               icon: <FormOutlined />,
-              disabled: !canManage,
+              disabled: !canManageBoard,
               onClick: openRename,
             },
             {
               label: t("Delete"),
               key: "deleteFile",
               icon: <DeleteOutlined />,
-              disabled: !canManage,
+              disabled: !canManageBoard,
               danger: true,
               onClick: handleDelete,
             },
@@ -132,6 +134,4 @@ function FileMenu({ file }: FilesMenuProps) {
       </Modal>
     </React.Fragment>
   );
-}
-
-export default FileMenu;
+};

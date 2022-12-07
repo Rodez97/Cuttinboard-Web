@@ -1,15 +1,14 @@
 import { MinusOutlined } from "@ant-design/icons";
-import { Todo_Task } from "@cuttinboard-solutions/cuttinboard-library";
+import { Task } from "@cuttinboard-solutions/cuttinboard-library/checklist";
 import { Button, Checkbox, List, Typography } from "antd";
 import React from "react";
-import { getOrderedTasks } from "../utils/utils";
 
 interface SimpleTodoProps {
-  tasks: Record<string, Todo_Task>;
-  onChange: (taskId: string, newStatus: boolean) => void;
+  tasks: Task[];
+  onChange: (task: Task, newStatus: boolean) => void;
   canRemove?: boolean;
-  onRemove?: (taskId: string) => void;
-  onTaskNameChange?: (taskId: string, newName: string) => void;
+  onRemove?: (task: Task) => void;
+  onTaskNameChange?: (task: Task, newName: string) => void;
 }
 
 function SimpleTodo({
@@ -21,28 +20,30 @@ function SimpleTodo({
 }: SimpleTodoProps) {
   return (
     <List
-      dataSource={getOrderedTasks(tasks)}
-      renderItem={([id, task]) => {
+      dataSource={tasks}
+      renderItem={(task) => {
         return (
           <List.Item
-            key={id}
+            key={task.id}
             actions={
-              canRemove && [
-                <Button
-                  key="delete"
-                  onClick={() => onRemove(id)}
-                  danger
-                  type="link"
-                  icon={<MinusOutlined />}
-                />,
-              ]
+              canRemove && onRemove
+                ? [
+                    <Button
+                      key="delete"
+                      onClick={() => onRemove(task)}
+                      danger
+                      type="link"
+                      icon={<MinusOutlined />}
+                    />,
+                  ]
+                : []
             }
           >
             <List.Item.Meta
               avatar={
                 <Checkbox
                   checked={task.status}
-                  onChange={(e) => onChange(id, e.target.checked)}
+                  onChange={(e) => onChange(task, e.target.checked)}
                 />
               }
               title={
@@ -51,7 +52,7 @@ function SimpleTodo({
                   editable={
                     canRemove &&
                     onTaskNameChange && {
-                      onChange: (newName) => onTaskNameChange(id, newName),
+                      onChange: (newName) => onTaskNameChange(task, newName),
                     }
                   }
                 >

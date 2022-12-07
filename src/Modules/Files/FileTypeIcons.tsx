@@ -116,7 +116,7 @@ export function FileTypeIcons({
         <Icon
           component={mdiFile}
           size={size}
-          color={Colors.SecundaryBlack}
+          color={Colors.SecondaryBlack}
           {...props}
         />
       );
@@ -199,6 +199,6 @@ export const getFileColorsByType = (filename: string, mimeType?: string) => {
     case "pptx":
       return "#F5BA15";
     default:
-      return Colors.SecundaryBlack;
+      return Colors.SecondaryBlack;
   }
 };
