@@ -2,7 +2,7 @@ import { PageHeader } from "@ant-design/pro-layout";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
 
-export const DarkPageHeader = styled(PageHeader)`
+const DarkPageHeader = styled(PageHeader)`
   background-color: ${Colors.MainDark};
   & .ant-page-header-heading-title {
     color: #fff !important;
@@ -21,6 +21,4 @@ export const DarkPageHeader = styled(PageHeader)`
   }
 `;
 
-export const GrayPageHeader = styled(PageHeader)`
-  background-color: #fbfbfa;
-`;
+export default DarkPageHeader;

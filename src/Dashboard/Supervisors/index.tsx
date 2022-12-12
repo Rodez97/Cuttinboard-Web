@@ -8,7 +8,7 @@ import { collection, query, where } from "firebase/firestore";
 import React from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { Route, Routes } from "react-router-dom";
-import { PageError, PageLoading } from "../../components";
+import { PageError, LoadingPage } from "../../shared";
 import NewSupervisor from "./NewSupervisor";
 import SupervisorDetails from "./SupervisorDetails";
 import Supervisors from "./Supervisors";
@@ -23,7 +23,7 @@ export default () => {
   );
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (error) {
@@ -36,7 +36,10 @@ export default () => {
         path="/"
         element={<Supervisors supervisors={supervisors ?? []} />}
       />
-      <Route path="new-supervisor" element={<NewSupervisor />} />
+      <Route
+        path="new-supervisor"
+        element={<NewSupervisor supervisors={supervisors ?? []} />}
+      />
       <Route
         path="details/:supervisorId/*"
         element={<SupervisorDetails supervisors={supervisors ?? []} />}

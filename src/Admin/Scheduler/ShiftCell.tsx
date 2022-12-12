@@ -10,21 +10,30 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { useScheduler } from "./Scheduler";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { Shift } from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { useMemo } from "react";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(duration);
 
 interface ShiftCellProps {
   employee: Employee;
-  shifts?: Shift[];
+  allShifts?: Shift[];
   date: Date;
 }
 
-function ShiftCell({ employee, shifts, date }: ShiftCellProps) {
+function ShiftCell({ employee, allShifts, date }: ShiftCellProps) {
   const { newShift } = useScheduler();
   const handleCellClick = () => {
-    newShift?.(employee, date);
+    newShift(employee, date);
   };
+
+  const cellShifts = useMemo(
+    () =>
+      allShifts?.filter((s) => s.shiftIsoWeekday === dayjs(date).isoWeekday()),
+    [allShifts, date]
+  );
+
+  console.log("cellShifts", cellShifts);
 
   return (
     <div
@@ -35,8 +44,8 @@ function ShiftCell({ employee, shifts, date }: ShiftCellProps) {
         flexDirection: "column",
       }}
     >
-      {shifts && shifts.length > 0 ? (
-        shifts.map((shift) => (
+      {cellShifts && cellShifts.length > 0 ? (
+        cellShifts.map((shift) => (
           <ShiftElement
             key={shift.id}
             employee={employee}

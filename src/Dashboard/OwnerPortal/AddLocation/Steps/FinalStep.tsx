@@ -10,7 +10,7 @@ import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/servi
 import { useDashboard } from "../../../DashboardProvider";
 import { List, Space, Typography } from "antd";
 import { ShopOutlined, UserOutlined } from "@ant-design/icons";
-import { PageError, PageLoading } from "../../../../components";
+import { PageError, LoadingPage } from "../../../../shared";
 import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 const SummaryNewLocationContainer = styled.div`
@@ -72,7 +72,7 @@ function FinalStep() {
   }, [subscriptionDocument?.items, subDoc?.locations, t]);
 
   if (loadingSubDoc) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (subDocError) {

@@ -15,7 +15,7 @@ import { capitalize, groupBy } from "lodash";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { useNavigate } from "react-router-dom";
 import { generateRosterPdf } from "./generatePdf";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import {
   Employee,
   useEmployeesList,

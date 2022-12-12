@@ -9,7 +9,7 @@ import { arrayUnion, doc, writeBatch } from "firebase/firestore";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import { recordError } from "../../utils/utils";
 import LocationsPicker from "./LocationsPicker";
 

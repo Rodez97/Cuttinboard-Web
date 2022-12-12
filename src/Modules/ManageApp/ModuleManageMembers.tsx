@@ -2,7 +2,7 @@ import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { ModalProps } from "antd";
 import React from "react";
-import ManageMembers from "../../components/ManageApp/ManageMembers";
+import ManageBoardMembers from "../../shared/organisms/ManageBoardMembers";
 import { recordError } from "../../utils/utils";
 
 function ModuleManageMembers(props: ModalProps) {
@@ -57,7 +57,7 @@ function ModuleManageMembers(props: ModalProps) {
   }
 
   return (
-    <ManageMembers
+    <ManageBoardMembers
       readonly={!canManageBoard}
       members={selectedBoard.accessTags ?? []}
       removeMember={handleRemoveMember}

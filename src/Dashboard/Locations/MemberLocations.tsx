@@ -7,7 +7,7 @@ import { Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
-import { PageError, PageLoading } from "../../components";
+import { PageError, LoadingPage } from "../../shared";
 import LocationCard from "./LocationCard";
 
 export default () => {
@@ -21,7 +21,7 @@ export default () => {
   );
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (error) {

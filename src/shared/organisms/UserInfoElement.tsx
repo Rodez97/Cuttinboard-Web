@@ -9,19 +9,15 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Button, List, Modal } from "antd";
+import { Avatar, Button, List } from "antd";
 import { useTranslation } from "react-i18next";
 
-interface QuickUserDialogProps {
-  employee: Employee;
-}
-
-export function UserInfoElement({ employee }: QuickUserDialogProps) {
+function UserInfoElement({ employee }: { employee: Employee }) {
   const { t } = useTranslation();
 
   return (
-    <List>
-      <List.Item css={{ justifyContent: "center" }}>
+    <List css={{ width: "100%" }}>
+      <List.Item css={{ justifyContent: "center !important" }}>
         <Avatar
           src={employee.avatar}
           size={60}
@@ -73,27 +69,4 @@ export function UserInfoElement({ employee }: QuickUserDialogProps) {
   );
 }
 
-export function QuickUserDialogAvatar({
-  employee,
-  size,
-}: {
-  employee: Employee;
-  size?: number;
-}) {
-  const { t } = useTranslation();
-  const handleOpen = () => {
-    Modal.info({
-      title: t("User Info"),
-      content: <UserInfoElement employee={employee} />,
-    });
-  };
-  return (
-    <Avatar
-      size={size}
-      src={employee?.avatar}
-      onClick={handleOpen}
-      css={{ cursor: "pointer" }}
-      icon={<UserOutlined />}
-    />
-  );
-}
+export default UserInfoElement;

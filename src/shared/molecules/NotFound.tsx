@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-export function NotFound() {
+function NotFound() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   return (
@@ -19,3 +19,5 @@ export function NotFound() {
     />
   );
 }
+
+export default NotFound;

@@ -23,10 +23,10 @@ import {
 import moment from "moment";
 import { compact, isEqual } from "lodash";
 import { recordError } from "../../utils/utils";
-import { PageError } from "../../components";
-import { PageLoading } from "@ant-design/pro-layout";
+import { LoadingPage, PageError } from "../../shared";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import React from "react";
 
 type ScheduleFormData = {
   ot_week: {
@@ -139,7 +139,7 @@ function ScheduleSettings() {
 
   // If the data is loading, show a loading message
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   const initialValues = {
@@ -162,303 +162,307 @@ function ScheduleSettings() {
   };
 
   return (
-    <Layout.Content>
-      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-        <div
-          css={{
-            minWidth: 270,
-            maxWidth: 400,
-            margin: "auto",
-            width: "100%",
-          }}
-        >
-          <Typography.Title css={{ textAlign: "center" }}>
-            {t("Schedule settings")}
-          </Typography.Title>
-          <Form<ScheduleFormData>
-            form={form}
-            css={{ width: "100%", gap: 8 }}
-            initialValues={initialValues}
-            onFinish={onFinish}
+    <React.Fragment>
+      <Typography.Title css={{ textAlign: "center", marginTop: 10 }}>
+        {t("Schedule settings")}
+      </Typography.Title>
+      <Layout.Content>
+        <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+          <div
+            css={{
+              minWidth: 270,
+              maxWidth: 400,
+              margin: "auto",
+              width: "100%",
+            }}
           >
-            <Divider>{t("OVERTIME")}</Divider>
-
-            <Button
-              type="link"
-              href="https://www.cuttinboard.com/help/how-overtime-works"
-              target="_blank"
-              icon={<QuestionCircleOutlined />}
-              css={{ marginBottom: 8 }}
+            <Form<ScheduleFormData>
+              form={form}
+              css={{ width: "100%", gap: 8 }}
+              initialValues={initialValues}
+              onFinish={onFinish}
             >
-              {t("How overtime works?")}
-            </Button>
+              <Divider>{t("OVERTIME")}</Divider>
 
-            {/* Weekly Overtime */}
-            <Space
-              direction="vertical"
-              css={{
-                border: "1px solid #00000025",
-                padding: 5,
-                width: "100%",
-              }}
-            >
-              <Form.Item
-                name={["ot_week", "enabled"]}
-                valuePropName="checked"
-                normalize={(
-                  value: ScheduleFormData["ot_week"]["enabled"],
-                  _,
-                  all: ScheduleFormData
-                ) => {
-                  // If the weekly overtime is enabled and the daily overtime is enabled, disable the daily overtime
-                  if (value && all.ot_day.enabled) {
-                    form.setFieldValue(["ot_day", "enabled"], false);
-                  }
-                  return value;
+              <Button
+                type="link"
+                href="https://www.cuttinboard.com/help/how-overtime-works"
+                target="_blank"
+                icon={<QuestionCircleOutlined />}
+                css={{ marginBottom: 8 }}
+              >
+                {t("How overtime works?")}
+              </Button>
+
+              {/* Weekly Overtime */}
+              <Space
+                direction="vertical"
+                css={{
+                  border: "1px solid #00000025",
+                  padding: 5,
+                  width: "100%",
                 }}
               >
-                <Checkbox>{t("Weekly overtime")}</Checkbox>
-              </Form.Item>
-
-              <Form.Item
-                name={["ot_week", "hours"]}
-                label={t("Calculate overtime after")}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please enter overtime"),
-                  },
-                ]}
-              >
-                <InputNumber
-                  min={0}
-                  max={60}
-                  formatter={(value) => `${value} hours`}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name={["ot_week", "multiplier"]}
-                label={t("Overtime multiplier")}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please enter overtime multiplier"),
-                  },
-                ]}
-              >
-                <InputNumber
-                  min={0}
-                  max={60}
-                  formatter={(value) => `${value}x`}
-                />
-              </Form.Item>
-            </Space>
-
-            {/* Daily Overtime */}
-            <Space
-              direction="vertical"
-              css={{
-                border: "1px solid #00000025",
-                padding: 5,
-                width: "100%",
-                marginTop: 10,
-              }}
-            >
-              <Form.Item
-                name={["ot_day", "enabled"]}
-                valuePropName="checked"
-                normalize={(
-                  value: ScheduleFormData["ot_day"]["enabled"],
-                  _,
-                  all: ScheduleFormData
-                ) => {
-                  // If the daily overtime is enabled and the weekly overtime is enabled, disable the weekly overtime
-                  if (value && all.ot_week.enabled) {
-                    form.setFieldValue(["ot_week", "enabled"], false);
-                  }
-                  return value;
-                }}
-              >
-                <Checkbox>{t("Daily overtime")}</Checkbox>
-              </Form.Item>
-
-              <Form.Item
-                name={["ot_day", "hours"]}
-                label={t("Calculate overtime after")}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please enter overtime"),
-                  },
-                ]}
-              >
-                <InputNumber
-                  min={0}
-                  max={60}
-                  formatter={(value) => `${value} hours`}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name={["ot_day", "multiplier"]}
-                label={t("Overtime multiplier")}
-                rules={[
-                  {
-                    required: true,
-                    message: t("Please enter overtime multiplier"),
-                  },
-                ]}
-              >
-                <InputNumber
-                  min={0}
-                  max={60}
-                  formatter={(value) => `${value}x`}
-                />
-              </Form.Item>
-            </Space>
-
-            <Divider>{t("PRESET TIMES")}</Divider>
-
-            <Form.List
-              name="presetTimes"
-              rules={[
-                {
-                  validator: async (_, presetTimes) => {
-                    console.log(presetTimes, presetTimes.length);
-                    // Limit the number of preset times to 10
-                    if (presetTimes.length > 10) {
-                      return Promise.reject(
-                        new Error(t("You can only have up to 10 preset times"))
-                      );
+                <Form.Item
+                  name={["ot_week", "enabled"]}
+                  valuePropName="checked"
+                  normalize={(
+                    value: ScheduleFormData["ot_week"]["enabled"],
+                    _,
+                    all: ScheduleFormData
+                  ) => {
+                    // If the weekly overtime is enabled and the daily overtime is enabled, disable the daily overtime
+                    if (value && all.ot_day.enabled) {
+                      form.setFieldValue(["ot_day", "enabled"], false);
                     }
-                  },
-                },
-              ]}
-            >
-              {(fields, { add, remove }) => (
-                <div
-                  css={{
-                    alignSelf: "center",
-                    justifySelf: "center",
-                    margin: "auto",
-                    display: "flex",
-                    flexDirection: "column",
+                    return value;
                   }}
                 >
-                  {fields.map((field) => (
-                    <Space
-                      key={field.key}
-                      align="baseline"
-                      css={{
-                        border: "1px solid #00000025",
-                        padding: 5,
-                        marginTop: 10,
-                      }}
-                    >
-                      <Form.Item
-                        {...field}
-                        name={[field.name, "start"]}
-                        key="start"
-                        rules={[{ required: true, message: "Missing start" }]}
-                        trigger="onSelect"
-                      >
-                        <TimePicker
-                          format="hh:mm a"
-                          minuteStep={5}
-                          use12Hours
-                          allowClear={false}
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        {...field}
-                        name={[field.name, "end"]}
-                        key="end"
-                        rules={[{ required: true, message: "Missing end" }]}
-                        trigger="onSelect"
-                      >
-                        <TimePicker
-                          format="hh:mm a"
-                          minuteStep={5}
-                          use12Hours
-                          allowClear={false}
-                        />
-                      </Form.Item>
-                      <MinusCircleOutlined onClick={() => remove(field.name)} />
-                    </Space>
-                  ))}
-                  <Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
-                      disabled={fields.length >= 10}
-                    >
-                      {t("Add preset time")}
-                    </Button>
-                  </Form.Item>
-                </div>
-              )}
-            </Form.List>
+                  <Checkbox>{t("Weekly overtime")}</Checkbox>
+                </Form.Item>
 
-            <Form.Item shouldUpdate>
-              {() => {
-                // Get OT Week
-                const otWeek: ScheduleFormData["ot_week"] = form.getFieldValue([
-                  "ot_week",
-                ]);
-                // Get OT Day
-                const otDay: ScheduleFormData["ot_day"] = form.getFieldValue([
-                  "ot_day",
-                ]);
-                // Get Preset Times
-                const presetTimes: ScheduleFormData["presetTimes"] =
-                  form.getFieldValue(["presetTimes"]);
-                // Compare otWeek to initialValues
-                const otWeekChanged = !isEqual(
-                  otWeek,
-                  scheduleSettingsData?.ot_week
-                );
-                // Compare otDay to initialValues
-                const otDayChanged = !isEqual(
-                  otDay,
-                  scheduleSettingsData?.ot_day
-                );
-                // Compare presetTimes to initialValues
-                const presetTimesToString = compact(presetTimes)?.map(
-                  (time: { start: moment.Moment; end: moment.Moment }) => ({
-                    start: time?.start?.format("HH:mm"),
-                    end: time?.end?.format("HH:mm"),
-                  })
-                );
-                const presetTimesChanged = !isEqual(
-                  presetTimesToString.sort(),
-                  scheduleSettingsData?.presetTimes?.sort()
-                );
-                // If any of the values have changed, enable the submit button
-                const submitEnabled =
-                  otWeekChanged || otDayChanged || presetTimesChanged;
-                return (
-                  <Button
-                    htmlType="submit"
-                    block
-                    type="primary"
-                    icon={<SaveOutlined />}
-                    // Shake the button if there are changes
-                    css={[submitEnabled ? ShakeCss : {}, { marginTop: 20 }]}
-                    // Disable the button if there are no changes
-                    disabled={!submitEnabled}
+                <Form.Item
+                  name={["ot_week", "hours"]}
+                  label={t("Calculate overtime after")}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("Please enter overtime"),
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={60}
+                    formatter={(value) => `${value} hours`}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name={["ot_week", "multiplier"]}
+                  label={t("Overtime multiplier")}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("Please enter overtime multiplier"),
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={60}
+                    formatter={(value) => `${value}x`}
+                  />
+                </Form.Item>
+              </Space>
+
+              {/* Daily Overtime */}
+              <Space
+                direction="vertical"
+                css={{
+                  border: "1px solid #00000025",
+                  padding: 5,
+                  width: "100%",
+                  marginTop: 10,
+                }}
+              >
+                <Form.Item
+                  name={["ot_day", "enabled"]}
+                  valuePropName="checked"
+                  normalize={(
+                    value: ScheduleFormData["ot_day"]["enabled"],
+                    _,
+                    all: ScheduleFormData
+                  ) => {
+                    // If the daily overtime is enabled and the weekly overtime is enabled, disable the weekly overtime
+                    if (value && all.ot_week.enabled) {
+                      form.setFieldValue(["ot_week", "enabled"], false);
+                    }
+                    return value;
+                  }}
+                >
+                  <Checkbox>{t("Daily overtime")}</Checkbox>
+                </Form.Item>
+
+                <Form.Item
+                  name={["ot_day", "hours"]}
+                  label={t("Calculate overtime after")}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("Please enter overtime"),
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={60}
+                    formatter={(value) => `${value} hours`}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name={["ot_day", "multiplier"]}
+                  label={t("Overtime multiplier")}
+                  rules={[
+                    {
+                      required: true,
+                      message: t("Please enter overtime multiplier"),
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={0}
+                    max={60}
+                    formatter={(value) => `${value}x`}
+                  />
+                </Form.Item>
+              </Space>
+
+              <Divider>{t("PRESET TIMES")}</Divider>
+
+              <Form.List
+                name="presetTimes"
+                rules={[
+                  {
+                    validator: async (_, presetTimes) => {
+                      // Limit the number of preset times to 10
+                      if (presetTimes.length > 10) {
+                        return Promise.reject(
+                          new Error(
+                            t("You can only have up to 10 preset times")
+                          )
+                        );
+                      }
+                    },
+                  },
+                ]}
+              >
+                {(fields, { add, remove }) => (
+                  <div
+                    css={{
+                      alignSelf: "center",
+                      justifySelf: "center",
+                      margin: "auto",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
                   >
-                    {t("Save")}
-                  </Button>
-                );
-              }}
-            </Form.Item>
-          </Form>
+                    {fields.map((field) => (
+                      <Space
+                        key={field.key}
+                        align="baseline"
+                        css={{
+                          border: "1px solid #00000025",
+                          padding: 5,
+                          marginTop: 10,
+                        }}
+                      >
+                        <Form.Item
+                          {...field}
+                          name={[field.name, "start"]}
+                          key="start"
+                          rules={[{ required: true, message: "Missing start" }]}
+                          trigger="onSelect"
+                        >
+                          <TimePicker
+                            format="hh:mm a"
+                            minuteStep={5}
+                            use12Hours
+                            allowClear={false}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...field}
+                          name={[field.name, "end"]}
+                          key="end"
+                          rules={[{ required: true, message: "Missing end" }]}
+                          trigger="onSelect"
+                        >
+                          <TimePicker
+                            format="hh:mm a"
+                            minuteStep={5}
+                            use12Hours
+                            allowClear={false}
+                          />
+                        </Form.Item>
+                        <MinusCircleOutlined
+                          onClick={() => remove(field.name)}
+                        />
+                      </Space>
+                    ))}
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<PlusOutlined />}
+                        disabled={fields.length >= 10}
+                      >
+                        {t("Add preset time")}
+                      </Button>
+                    </Form.Item>
+                  </div>
+                )}
+              </Form.List>
+
+              <Form.Item shouldUpdate>
+                {() => {
+                  // Get OT Week
+                  const otWeek: ScheduleFormData["ot_week"] =
+                    form.getFieldValue(["ot_week"]);
+                  // Get OT Day
+                  const otDay: ScheduleFormData["ot_day"] = form.getFieldValue([
+                    "ot_day",
+                  ]);
+                  // Get Preset Times
+                  const presetTimes: ScheduleFormData["presetTimes"] =
+                    form.getFieldValue(["presetTimes"]);
+                  // Compare otWeek to initialValues
+                  const otWeekChanged = !isEqual(
+                    otWeek,
+                    scheduleSettingsData?.ot_week
+                  );
+                  // Compare otDay to initialValues
+                  const otDayChanged = !isEqual(
+                    otDay,
+                    scheduleSettingsData?.ot_day
+                  );
+                  // Compare presetTimes to initialValues
+                  const presetTimesToString = compact(presetTimes)?.map(
+                    (time: { start: moment.Moment; end: moment.Moment }) => ({
+                      start: time?.start?.format("HH:mm"),
+                      end: time?.end?.format("HH:mm"),
+                    })
+                  );
+                  const presetTimesChanged = !isEqual(
+                    presetTimesToString.sort(),
+                    scheduleSettingsData?.presetTimes?.sort()
+                  );
+                  // If any of the values have changed, enable the submit button
+                  const submitEnabled =
+                    otWeekChanged || otDayChanged || presetTimesChanged;
+                  return (
+                    <Button
+                      htmlType="submit"
+                      block
+                      type="primary"
+                      icon={<SaveOutlined />}
+                      // Shake the button if there are changes
+                      css={[submitEnabled ? ShakeCss : {}, { marginTop: 20 }]}
+                      // Disable the button if there are no changes
+                      disabled={!submitEnabled}
+                    >
+                      {t("Save")}
+                    </Button>
+                  );
+                }}
+              </Form.Item>
+            </Form>
+          </div>
         </div>
-      </div>
-    </Layout.Content>
+      </Layout.Content>
+    </React.Fragment>
   );
 }
 

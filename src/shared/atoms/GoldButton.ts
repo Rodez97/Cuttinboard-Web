@@ -1,8 +1,7 @@
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import styled from "@emotion/styled";
-import { Space, Tag } from "antd";
+import { Button } from "antd";
 
-export const OwnerGoldContainer = styled(Tag)`
+const GoldButton = styled(Button)`
   color: #ffffff;
   background: radial-gradient(
       ellipse farthest-corner at right bottom,
@@ -22,13 +21,4 @@ export const OwnerGoldContainer = styled(Tag)`
     );
 `;
 
-export const NormalContainer = styled(Space)`
-  margin: 10px;
-  padding: 10px;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: ${Colors.MainBlue};
-`;
+export default GoldButton;

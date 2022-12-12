@@ -166,7 +166,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
               {
                 validator: async (_, value) => {
                   // Check if value don't have tailing or leading spaces
-                  if (value !== value.trim()) {
+                  if (value && value !== value.trim()) {
                     return Promise.reject(
                       new Error(t("Cannot have leading or trailing spaces"))
                     );

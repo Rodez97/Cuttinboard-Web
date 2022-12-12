@@ -117,7 +117,6 @@ export default forwardRef<
     const recurrenceObject = RecurringTask.getRRuleObjectFromRule(
       recurringTask[1].recurrenceRule
     );
-    console.log({ recurrenceObject });
 
     form.setFieldsValue({
       name: recurringTask[1].name,
@@ -214,8 +213,12 @@ export default forwardRef<
   };
 
   const handleCancel = () => {
-    if (editing) {
-      endEditing();
+    if (periodicTask) {
+      if (editing) {
+        endEditing();
+      } else {
+        handleClose();
+      }
     } else {
       handleClose();
     }

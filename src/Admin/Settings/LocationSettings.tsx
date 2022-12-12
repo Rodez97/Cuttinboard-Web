@@ -7,9 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { message, Typography } from "antd";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import React from "react";
-import { LocationEditor } from "../../components";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { LocationInfoForm } from "../../shared";
 
 function LocationSettings() {
   const { t } = useTranslation();
@@ -49,21 +49,15 @@ function LocationSettings() {
 
   return (
     <React.Fragment>
-      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-        <div
-          css={{ minWidth: 270, maxWidth: 400, margin: "auto", width: "100%" }}
-        >
-          <Typography.Title css={{ textAlign: "center" }}>
-            {t("Location information")}
-          </Typography.Title>
-          <LocationEditor
-            baseLocation={location}
-            onChange={handleChange}
-            onCancel={() => navigate(-1)}
-            loading={isSubmitting}
-          />
-        </div>
-      </div>
+      <Typography.Title css={{ textAlign: "center", marginTop: 10 }}>
+        {t("Location information")}
+      </Typography.Title>
+      <LocationInfoForm
+        baseLocation={location}
+        onChange={handleChange}
+        onCancel={() => navigate(-1)}
+        loading={isSubmitting}
+      />
     </React.Fragment>
   );
 }

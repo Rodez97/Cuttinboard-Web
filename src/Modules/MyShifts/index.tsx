@@ -17,7 +17,7 @@ import {
   WEEKFORMAT,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { useLayoutEffect } from "react";
-import { GrayPageHeader, PageError } from "../../components";
+import { GrayPageHeader, PageError } from "../../shared";
 import {
   useCuttinboard,
   useCuttinboardLocation,

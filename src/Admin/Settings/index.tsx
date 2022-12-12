@@ -76,13 +76,13 @@ export default () => {
           />
         </Space>
       </Layout.Sider>
-      <Layout.Content>
+      <Layout>
         <Routes>
           <Route path="location" element={<LocationSettings />} />
           <Route path="schedule" element={<ScheduleSettings />} />
           <Route path="*" element={<Navigate to="location" />} />
         </Routes>
-      </Layout.Content>
+      </Layout>
     </Layout>
   );
 };

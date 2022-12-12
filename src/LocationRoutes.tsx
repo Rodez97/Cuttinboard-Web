@@ -9,7 +9,7 @@ import { getAnalytics, logEvent } from "firebase/analytics";
 import React, { useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { LoadingScreen, PageError } from "./components";
+import { PageError, RootLoading } from "./shared";
 import { useSelectedLocation } from "./hooks";
 import LocationContainer from "./LocationContainer";
 
@@ -61,7 +61,7 @@ function LocationRoutes() {
   ]);
 
   if (loading) {
-    return <LoadingScreen />;
+    return <RootLoading />;
   }
 
   if (error) {
@@ -76,7 +76,7 @@ function LocationRoutes() {
     <LocationProvider
       organizationKey={organizationKey}
       locationId={locationId}
-      LoadingComponent={() => <LoadingScreen />}
+      LoadingComponent={() => <RootLoading />}
       ErrorComponent={(e) => <PageError error={e} />}
     >
       <EmployeesProvider ErrorRender={(e) => <PageError error={e} />}>

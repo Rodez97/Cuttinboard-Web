@@ -23,16 +23,20 @@ function PasswordPanel() {
     form.resetFields();
   };
 
-  const onFinish = async (values) => {
+  const onFinish = async (values: {
+    password: string;
+    newPassword: string;
+  }) => {
     if (!user.email) {
       message.error(
         t("You must have an email address to change your password")
       );
       return;
     }
-    const { password, newPassword } = values;
-    setIsSubmitting(true);
+
     try {
+      const { password, newPassword } = values;
+      setIsSubmitting(true);
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(newPassword);
@@ -41,8 +45,9 @@ function PasswordPanel() {
       message.success(t("Changes saved"));
     } catch (error) {
       recordError(error);
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (

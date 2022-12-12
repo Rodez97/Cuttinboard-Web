@@ -2,9 +2,9 @@
 import { jsx } from "@emotion/react";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import AddMembers from "./AddMembers";
-import MemberItem from "./MemberItem";
-import SelectEmployee from "./SelectEmployee";
+import EmployeeMultiSelect from "./EmployeeMultiSelect";
+import BoardMemberItem from "../molecules/BoardMemberItem";
+import EmployeeSelect from "../molecules/EmployeeSelect";
 import { indexOf } from "lodash";
 import {
   Button,
@@ -29,7 +29,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
-type ManageMembersProps = {
+type ManageBoardMembersProps = {
   readonly?: boolean;
   members: string[];
   removeMember: (employeeId: string) => void;
@@ -41,7 +41,7 @@ type ManageMembersProps = {
   admins?: string[];
 } & ModalProps;
 
-function ManageMembers({
+function ManageBoardMembers({
   readonly,
   removeMember,
   addMembers,
@@ -52,7 +52,7 @@ function ManageMembers({
   admins,
   members,
   ...props
-}: ManageMembersProps) {
+}: ManageBoardMembersProps) {
   const { t } = useTranslation();
   const { locationAccessKey } = useCuttinboardLocation();
   const { getEmployees } = useEmployeesList();
@@ -63,7 +63,7 @@ function ManageMembers({
     addMembers(addedEmployees);
   };
 
-  const handleMemberRemove = async (employeeId: string) => {
+  const handleMemberRemove = async (employee: Employee) => {
     Modal.confirm({
       title: t("Are you sure you want to remove this user?"),
       icon: <ExclamationCircleOutlined />,
@@ -72,7 +72,7 @@ function ManageMembers({
       cancelText: t("No"),
       onOk() {
         try {
-          removeMember(employeeId);
+          removeMember(employee.id);
         } catch (error) {
           recordError(error);
         }
@@ -80,28 +80,38 @@ function ManageMembers({
     });
   };
 
-  const getMembers = useMemo(() => {
+  // Calculate a list of board members based on the privacy level and other conditions
+  const getBoardMembers = useMemo(() => {
     let membersList: Employee[] = [];
     if (privacyLevel === PrivacyLevel.PRIVATE) {
+      // If the privacy level is private, only include employees who are members
       membersList = getEmployees.filter((emp) => indexOf(members, emp.id) > -1);
     }
     if (privacyLevel === PrivacyLevel.PUBLIC) {
+      // If the privacy level is public, include all employees
       membersList = getEmployees;
     }
     if (privacyLevel === PrivacyLevel.POSITIONS && positions) {
+      // If the privacy level is based on positions and positions are specified, only include employees with the specified positions
       membersList = getEmployees.filter((emp) => emp.hasAnyPosition(positions));
     }
+    // Filter out any admins from the list of members
     return membersList.filter((m) => !admins?.includes(m.id));
   }, [getEmployees, privacyLevel, members, positions, admins]);
 
+  // Calculate a list of hosts (admins)
   const hostsList = useMemo(() => {
+    // If there are no admins, return an empty list
     if (!admins || !admins.length) {
       return [];
     }
-    return getEmployees.filter((e) => admins?.indexOf(e.id) > -1);
+    // Otherwise, return a list of employees who are admins
+    return getEmployees.filter((e) => admins.indexOf(e.id) > -1);
   }, [getEmployees, admins]);
 
+  // Calculate a list of possible hosts (admins)
   const getPossibleHosts = useMemo(() => {
+    // Return a list of employees who have manager-level access or higher and are not already admins
     return getEmployees.filter(
       (emp) =>
         emp.locationRole &&
@@ -151,10 +161,10 @@ function ManageMembers({
           <List
             dataSource={hostsList}
             renderItem={(hostUser) => (
-              <MemberItem
+              <BoardMemberItem
                 key={hostUser.id}
                 employee={hostUser}
-                onRemove={() => handleRemoveHost(hostUser)}
+                onRemove={handleRemoveHost}
                 admins={admins}
                 privacyLevel={privacyLevel}
               />
@@ -165,15 +175,17 @@ function ManageMembers({
         {/* Members */}
         <Divider orientation="left">{t("Members")}</Divider>
 
-        <Button
-          icon={<UserAddOutlined />}
-          onClick={openAddMembers}
-          type="dashed"
-          block
-          hidden={privacyLevel !== PrivacyLevel.PRIVATE || readonly}
-        >
-          {t("Add Members")}
-        </Button>
+        {privacyLevel === PrivacyLevel.PRIVATE && !readonly && (
+          <Button
+            icon={<UserAddOutlined />}
+            onClick={openAddMembers}
+            type="dashed"
+            block
+            hidden={privacyLevel !== PrivacyLevel.PRIVATE || readonly}
+          >
+            {t("Add Members")}
+          </Button>
+        )}
 
         {privacyLevel === PrivacyLevel.PUBLIC && (
           <Typography.Text
@@ -199,9 +211,9 @@ function ManageMembers({
         )}
 
         <List
-          dataSource={getMembers}
+          dataSource={getBoardMembers}
           renderItem={(emp) => (
-            <MemberItem
+            <BoardMemberItem
               key={emp.id}
               employee={emp}
               onRemove={handleMemberRemove}
@@ -215,15 +227,15 @@ function ManageMembers({
           )}
         />
       </Modal>
-      <AddMembers
+      <EmployeeMultiSelect
         onSelectedEmployees={handleAddMembers}
         admins={admins}
-        initialSelected={getMembers}
+        initialSelected={getBoardMembers}
         onClose={closeAddMembers}
         onCancel={closeAddMembers}
         open={addMembersOpen}
       />
-      <SelectEmployee
+      <EmployeeSelect
         onSelectedEmployee={handleSetHost}
         employees={getPossibleHosts}
         onCancel={closeSelectHost}
@@ -235,4 +247,4 @@ function ManageMembers({
   );
 }
 
-export default ManageMembers;
+export default ManageBoardMembers;

@@ -21,7 +21,17 @@ import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
-import { Button, Empty, Input, Layout, Space, Table, Tag, Tooltip } from "antd";
+import {
+  Button,
+  Empty,
+  Input,
+  Layout,
+  Space,
+  Table,
+  TableColumnsType,
+  Tag,
+  Tooltip,
+} from "antd";
 import TableFooter from "./TableFooter";
 import {
   FilePdfOutlined,
@@ -34,7 +44,7 @@ import "./Scheduler.scss";
 import CloneSchedule from "./CloneSchedule";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
 import { generateSchedulePdf } from "./generatePdf";
-import { GrayPageHeader, PageError, PageLoading } from "../../components";
+import { GrayPageHeader, PageError, LoadingPage } from "../../shared";
 import { useResizeDetector } from "react-resize-detector";
 import { capitalize, compact, uniq } from "lodash";
 import PublishDialog from "./PublishDialog";
@@ -64,8 +74,8 @@ export interface IScheduleContextProps {
   newShift: (employee: Employee, date: Date) => void;
 }
 
-export const ScheduleContext = createContext<Partial<IScheduleContextProps>>(
-  {}
+export const ScheduleContext = createContext<IScheduleContextProps>(
+  {} as IScheduleContextProps
 );
 
 export interface ShiftsTable {
@@ -97,11 +107,6 @@ function Scheduler() {
   } = useEmployeesList();
   const { location } = useCuttinboardLocation();
   const [publishDialogOpen, openPublish, closePublish] = useDisclose();
-
-  console.log({
-    globalLocationData: globalThis.locationData,
-    shiftsEmpRef: EmployeeShifts.Reference(weekId),
-  });
 
   const employees = useMemo(() => {
     // Get all employees except the supervisor
@@ -159,8 +164,103 @@ function Scheduler() {
     employeeShiftsCollection,
   ]);
 
+  const columns = useMemo<TableColumnsType<ShiftsTable>>(
+    () => [
+      {
+        title: t("Employee"),
+        dataIndex: "employee",
+        key: "employee",
+        render: (_, { employee, empShifts }) => (
+          <EmpColumnCell employee={employee} empShifts={empShifts} />
+        ),
+        fixed: "left",
+        width: 250,
+        className: "employee-column",
+        filters: [
+          {
+            text: t("Scheduled Only"),
+            value: "all_scheduled",
+          },
+          {
+            text: t("Changed"),
+            value: "changed",
+          },
+          {
+            text: t("Staff Only"),
+            value: "staff_only",
+          },
+          {
+            text: t("Positions"),
+            value: "positions",
+            children: uniq([
+              ...POSITIONS,
+              ...(location.settings?.positions ?? []),
+            ])
+              .sort((a, b) => a.localeCompare(b))
+              .map((pos) => ({
+                text: pos,
+                value: pos,
+              })),
+          },
+        ],
+        onFilter: (value: string, record) => {
+          if (value === "all_scheduled") {
+            return Boolean(
+              record.empShifts && record.empShifts.shiftsArray.length > 0
+            );
+          }
+
+          if (value === "changed") {
+            return Boolean(record.empShifts && record.empShifts.haveChanges);
+          }
+
+          if (value === "staff_only") {
+            return Boolean(
+              record.employee.locationRole === RoleAccessLevels.STAFF
+            );
+          }
+
+          if (value) {
+            return record.employee.hasAnyPosition([value]);
+          }
+
+          return true;
+        },
+      },
+      ...weekDays.map((wd) => ({
+        title: capitalize(dayjs(wd).format("ddd DD")),
+        dataIndex: dayjs(wd).isoWeekday(),
+        key: dayjs(wd).isoWeekday(),
+        render: (_, { employee, empShifts }: ShiftsTable) => (
+          <ShiftCell
+            employee={employee}
+            allShifts={empShifts?.shiftsArray}
+            date={wd}
+          />
+        ),
+      })),
+    ],
+    [location.settings?.positions, t, weekDays]
+  );
+
+  const shiftsSource = useMemo(() => {
+    if (!employees) {
+      return [];
+    }
+    return employees.map((employee) => {
+      const empShifts = employeeShiftsCollection?.find(
+        (shf) => shf.id === `${weekId}_${employee.id}_${location.id}`
+      );
+      return {
+        key: employee.id,
+        employee,
+        empShifts,
+      };
+    });
+  }, [employeeShiftsCollection, employees, location.id, weekId]);
+
   if (employeesLoading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (employeesError) {
@@ -261,7 +361,7 @@ function Scheduler() {
         </Space>
         <ScheduleSummaryElement />
         <Layout.Content css={{ minHeight: 100 }} ref={ref}>
-          {employees?.length > 0 ? (
+          {employees.length > 0 ? (
             <Table
               scroll={height ? { x: 1300, y: height - 39 * 3 } : { x: 1300 }}
               css={{ height: "100%" }}
@@ -276,93 +376,8 @@ function Scheduler() {
                   ),
                 },
               }}
-              columns={[
-                {
-                  title: t("Employee"),
-                  dataIndex: "employee",
-                  key: "employee",
-                  render: (_, { employee, empShifts }) => (
-                    <EmpColumnCell employee={employee} empShifts={empShifts} />
-                  ),
-                  fixed: "left",
-                  width: 250,
-                  className: "employee-column",
-                  filters: [
-                    {
-                      text: t("Scheduled Only"),
-                      value: "all_scheduled",
-                    },
-                    {
-                      text: t("Changed"),
-                      value: "changed",
-                    },
-                    {
-                      text: t("Staff Only"),
-                      value: "staff_only",
-                    },
-                    {
-                      text: t("Positions"),
-                      value: "positions",
-                      children: uniq([
-                        ...POSITIONS,
-                        ...(location.settings?.positions ?? []),
-                      ])
-                        .sort((a, b) => a.localeCompare(b))
-                        .map((pos) => ({
-                          text: pos,
-                          value: pos,
-                        })),
-                    },
-                  ],
-                  onFilter: (value: string, record) => {
-                    if (value === "all_scheduled") {
-                      return Boolean(
-                        record.empShifts &&
-                          record.empShifts.shiftsArray.length > 0
-                      );
-                    }
-
-                    if (value === "changed") {
-                      return Boolean(
-                        record.empShifts && record.empShifts.haveChanges
-                      );
-                    }
-
-                    if (value === "staff_only") {
-                      return Boolean(
-                        record.employee.locationRole === RoleAccessLevels.STAFF
-                      );
-                    }
-
-                    if (value) {
-                      return record.employee.hasAnyPosition([value]);
-                    }
-
-                    return true;
-                  },
-                },
-                ...weekDays.map((wd) => ({
-                  title: capitalize(dayjs(wd).format("ddd DD")),
-                  dataIndex: dayjs(wd).isoWeekday(),
-                  key: dayjs(wd).isoWeekday(),
-                  render: (_, { employee, empShifts }: ShiftsTable) => (
-                    <ShiftCell
-                      employee={employee}
-                      shifts={empShifts?.shiftsArray.filter(
-                        (s) => s.shiftIsoWeekday === dayjs(wd).isoWeekday()
-                      )}
-                      date={wd}
-                    />
-                  ),
-                })),
-              ]}
-              dataSource={employees?.map((emp) => ({
-                key: emp.id,
-                employee: emp,
-                empShifts: employeeShiftsCollection?.find(
-                  (shf) => shf.id === `${weekId}_${emp.id}_${location.id}`
-                ),
-              }))}
+              columns={columns}
+              dataSource={shiftsSource}
               summary={(pageData) => (
                 <Table.Summary fixed>
                   <TableFooter data={pageData} />

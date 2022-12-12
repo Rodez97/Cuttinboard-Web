@@ -1,50 +1,39 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ClearOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import {
-  FIRESTORE,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Empty, Layout, Space } from "antd";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { useMemo } from "react";
-import { useDocumentData } from "react-firebase-hooks/firestore";
+import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
-import { GrayPageHeader, PageError, PageLoading } from "../../components";
+import {
+  GrayPageHeader,
+  PageError,
+  LoadingPage,
+  DraggableList,
+} from "../../shared";
 import TaskBlock from "../Tasks/TaskBlock";
 import { nanoid } from "nanoid";
 import {
-  useCuttinboard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { ChecklistGroup } from "@cuttinboard-solutions/cuttinboard-library/checklist";
+  Checklist,
+  useDailyChecklist,
+} from "@cuttinboard-solutions/cuttinboard-library/checklist";
 
 export default () => {
-  const { user } = useCuttinboard();
   const { t } = useTranslation();
-  const { location, locationAccessKey } = useCuttinboardLocation();
-  const [checklistData, loading, error] = useDocumentData<ChecklistGroup>(
-    doc(
-      FIRESTORE,
-      "Organizations",
-      location.organizationId,
-      "locationChecklist",
-      location.id
-    ).withConverter(ChecklistGroup.firestoreConverter)
-  );
-
-  const canUse = useMemo(
-    () => locationAccessKey.role <= RoleAccessLevels.MANAGER,
-    [locationAccessKey]
-  );
+  const {
+    checklistData,
+    loading,
+    error,
+    canWrite,
+    resetTasks,
+    checklistsArray,
+    addChecklist,
+  } = useDailyChecklist();
+  const scrollBottomTarget = useRef<HTMLDivElement>(null);
 
   const reset = async () => {
-    if (!checklistData || !canUse) {
-      return;
-    }
     try {
-      await checklistData.resetAllTasks();
+      await resetTasks();
     } catch (error) {
       recordError(error);
     }
@@ -59,53 +48,40 @@ export default () => {
     return `${completed}/${total} ${t("tasks completed")}`;
   }, [checklistData, t]);
 
-  if (error) {
-    return <PageError error={error} />;
-  }
-
-  const sectionsOrderedByTagAndCreationDate = useMemo(() => {
-    if (!checklistData) {
-      return [];
-    }
-
-    if (checklistData.checklistsArray.length === 0) {
-      return [];
-    }
-
-    return checklistData.checklistsArray;
-  }, [checklistData]);
-
   const addBlock = async () => {
     try {
-      if (checklistData) {
-        await checklistData.addChecklist(nanoid());
-      } else {
-        // If we don't have a checklist, we're creating a new one
-        await setDoc(
-          doc(
-            FIRESTORE,
-            "Organizations",
-            location.organizationId,
-            "locationChecklist",
-            location.id
-          ),
-          {
-            checklists: {
-              [nanoid()]: {
-                name: `Task Block #1`,
-                createdAt: serverTimestamp(),
-                createdBy: user.uid,
-                order: 1,
-              },
-            },
-            locationId: location.id,
-          }
-        );
-      }
+      await addChecklist(nanoid());
+      scrollBottomTarget.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
     } catch (error) {
       recordError(error);
     }
   };
+
+  const reorderItem = async (
+    element: Checklist,
+    sourceIndex: number,
+    targetIndex: number
+  ) => {
+    if (!checklistData) {
+      return;
+    }
+    try {
+      await checklistData.reorderChecklists(element.id, targetIndex);
+    } catch (error) {
+      recordError(error);
+    }
+  };
+
+  if (error) {
+    return <PageError error={error} />;
+  }
+
+  if (loading) {
+    return <LoadingPage />;
+  }
 
   return (
     <Layout.Content
@@ -115,7 +91,7 @@ export default () => {
         title={t("Daily Checklists")}
         subTitle={getSummaryText}
         extra={
-          canUse && (
+          canWrite && (
             <Space>
               <Button
                 onClick={addBlock}
@@ -135,53 +111,52 @@ export default () => {
       <Layout.Content
         css={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
-        {error ? (
-          <PageError error={error} />
-        ) : loading ? (
-          <PageLoading />
-        ) : (
-          <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-            <div
-              css={{
-                minWidth: 300,
-                maxWidth: 900,
-                margin: "auto",
-                width: "100%",
-              }}
-            >
-              <Space direction="vertical" css={{ display: "flex" }}>
-                {sectionsOrderedByTagAndCreationDate.length > 0 &&
-                checklistData ? (
-                  sectionsOrderedByTagAndCreationDate.map((checklist) => (
+        <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+          <div
+            css={{
+              minWidth: 300,
+              maxWidth: 900,
+              margin: "auto",
+              width: "100%",
+            }}
+          >
+            <Space direction="vertical" css={{ display: "flex" }}>
+              {checklistsArray.length > 0 && checklistData ? (
+                <DraggableList<Checklist>
+                  dataSource={checklistsArray}
+                  renderItem={(checklist, i, isDragging) => (
                     <TaskBlock
-                      key={checklist.id}
+                      key={i}
                       section={checklist}
                       sectionId={checklist.id}
-                      canManage={canUse}
+                      canManage={canWrite}
                       rootChecklist={checklistData}
+                      isDragging={isDragging}
                     />
-                  ))
-                ) : (
-                  <Empty
-                    description={
-                      <span>
-                        {t("No tasks found")}.{" "}
-                        <a onClick={addBlock}>Create one</a> or{" "}
-                        <a
-                          href="https://www.cuttinboard.com/help/tasks-app"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          learn more.
-                        </a>
-                      </span>
-                    }
-                  />
-                )}
-              </Space>
-            </div>
+                  )}
+                  onReorder={reorderItem}
+                />
+              ) : (
+                <Empty
+                  description={
+                    <span>
+                      {t("No tasks found")}.{" "}
+                      <a onClick={addBlock}>Create one</a> or{" "}
+                      <a
+                        href="https://www.cuttinboard.com/help/tasks-app"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        learn more.
+                      </a>
+                    </span>
+                  }
+                />
+              )}
+            </Space>
           </div>
-        )}
+          <div ref={scrollBottomTarget} css={{ height: 50 }} />
+        </div>
       </Layout.Content>
     </Layout.Content>
   );

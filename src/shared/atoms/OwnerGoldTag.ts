@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
-import { Button } from "antd";
+import { Tag } from "antd";
 
-export default styled(Button)`
+const OwnerGoldTag = styled(Tag)`
   color: #ffffff;
   background: radial-gradient(
       ellipse farthest-corner at right bottom,
@@ -20,3 +20,5 @@ export default styled(Button)`
       #5d4a1f 100%
     );
 `;
+
+export default OwnerGoldTag;

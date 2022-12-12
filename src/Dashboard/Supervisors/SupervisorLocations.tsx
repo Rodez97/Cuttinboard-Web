@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { Location } from "@cuttinboard-solutions/cuttinboard-library";
 import { Alert, Button, Layout, Modal, Table } from "antd";
 import React from "react";
-import { GrayPageHeader, UserInfoElement } from "../../components";
+import { GrayPageHeader, UserInfoElement } from "../../shared";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {

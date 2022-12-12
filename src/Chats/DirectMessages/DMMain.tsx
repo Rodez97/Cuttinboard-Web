@@ -1,7 +1,6 @@
 import { UserOutlined } from "@ant-design/icons";
 import React, { useEffect } from "react";
 import ChatMain from "../components/ChatMain";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import DMDetails from "./DMDetails";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/account";
@@ -11,6 +10,7 @@ import {
   useDirectMessageChat,
 } from "@cuttinboard-solutions/cuttinboard-library/chats";
 import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { GrayPageHeader } from "../../shared";
 
 export default ({
   employee,

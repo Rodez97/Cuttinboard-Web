@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Modal, Tag } from "antd";
 import Icon from "@ant-design/icons";
 import { Note } from "../Notes/notesIcons";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import { Shift } from "@cuttinboard-solutions/cuttinboard-library/schedule";
 
 interface ShiftCardProps {

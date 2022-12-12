@@ -20,21 +20,25 @@ export default ({
         <List.Item>
           <List.Item.Meta
             title={t("Phone Number")}
-            description={employee.phoneNumber ?? "---"}
+            description={employee.phoneNumber ? employee.phoneNumber : "---"}
           />
         </List.Item>
 
         <List.Item>
           <List.Item.Meta
             title={t("Preferred Name")}
-            description={employee.preferredName ?? "---"}
+            description={
+              employee.preferredName ? employee.preferredName : "---"
+            }
           />
         </List.Item>
 
         <List.Item>
           <List.Item.Meta
             title={t("Comments")}
-            description={employee.contactComments ?? "---"}
+            description={
+              employee.contactComments ? employee.contactComments : "---"
+            }
           />
         </List.Item>
 
@@ -52,14 +56,22 @@ export default ({
           <List.Item>
             <List.Item.Meta
               title={t("Name")}
-              description={employee.emergencyContact?.name ?? "---"}
+              description={
+                employee.emergencyContact?.name
+                  ? employee.emergencyContact.name
+                  : "---"
+              }
             />
           </List.Item>
 
           <List.Item>
             <List.Item.Meta
               title={t("Phone Number")}
-              description={employee.emergencyContact?.phoneNumber ?? "---"}
+              description={
+                employee.emergencyContact?.phoneNumber
+                  ? employee.emergencyContact.phoneNumber
+                  : "---"
+              }
             />
           </List.Item>
         </div>

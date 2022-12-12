@@ -28,8 +28,8 @@ function ManagePositions(props: DrawerProps) {
     if (!position) {
       return;
     }
-    setAddingPosition(true);
     try {
+      setAddingPosition(true);
       await location.addPosition(position);
       setFieldValue("");
       // Report to analytics
@@ -39,8 +39,9 @@ function ManagePositions(props: DrawerProps) {
       });
     } catch (error) {
       recordError(error);
+    } finally {
+      setAddingPosition(false);
     }
-    setAddingPosition(false);
   };
 
   const removePosition = async (position: string) => {

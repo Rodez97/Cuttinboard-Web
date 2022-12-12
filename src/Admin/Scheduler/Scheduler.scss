@@ -27,9 +27,17 @@ table tfoot {
 }
 
 .ant-table-summary {
-  background-color: #f0f2f5 !important;
+  background-color: #fcfcfc !important;
 }
 
 .ant-table-summary .ant-table-cell {
-  background-color: #f0f2f5 !important;
+  background-color: #fcfcfc !important;
+}
+
+.ant-table-thead {
+  background-color: #fcfcfc !important;
+}
+
+.ant-table-thead .ant-table-cell {
+  background-color: #fcfcfc !important;
 }

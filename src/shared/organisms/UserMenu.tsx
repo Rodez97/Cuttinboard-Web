@@ -11,8 +11,6 @@ import { Avatar, Dropdown, MenuProps } from "antd";
 import { signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { showTranslations } from "translation-check";
-import i18next from "i18next";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { AUTH } from "@cuttinboard-solutions/cuttinboard-library/utils";
 
@@ -34,13 +32,6 @@ function UserMenu({ color }: { color?: string }) {
         break;
       case "signOut":
         await signOut(AUTH);
-        break;
-      case "trans":
-        showTranslations(i18next, {
-          sourceLng: "en",
-          targetLngs: ["es"],
-          preserveEmptyStrings: false,
-        });
         break;
 
       default:

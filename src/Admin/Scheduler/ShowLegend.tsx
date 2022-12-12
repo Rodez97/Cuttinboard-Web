@@ -1,9 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import Icon, { BorderOutlined } from "@ant-design/icons";
+import Icon from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Modal } from "antd";
 import mdiClockAlert from "@mdi/svg/svg/clock-alert.svg";
+import mdiSquare from "@mdi/svg/svg/square-rounded.svg";
 import i18next from "i18next";
 
 export default () => {
@@ -12,7 +13,8 @@ export default () => {
     content: (
       <div>
         <p>
-          <BorderOutlined
+          <Icon
+            component={mdiSquare}
             css={{
               color: Colors.MainBlue,
             }}
@@ -20,7 +22,8 @@ export default () => {
           {" " + i18next.t("Published").toString()}
         </p>
         <p>
-          <BorderOutlined
+          <Icon
+            component={mdiSquare}
             css={{
               color: "#505050",
             }}
@@ -28,7 +31,8 @@ export default () => {
           {" " + i18next.t("Pending publishing").toString()}
         </p>
         <p>
-          <BorderOutlined
+          <Icon
+            component={mdiSquare}
             css={{
               color: "#f33d61",
             }}

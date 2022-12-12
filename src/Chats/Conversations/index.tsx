@@ -1,16 +1,16 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import PageError from "../../components/PageError";
+import ErrorPage from "../../shared/molecules/PageError";
 import { Layout } from "antd";
-import PageLoading from "../../components/PageLoading";
+import LoadingPage from "../../shared/molecules/LoadingPage";
 import ConversationsRoutes from "./ConversationsRoutes";
 import ConversationsList from "./ConversationsList";
 import { useTranslation } from "react-i18next";
 import convImage from "../../assets/images/chat.png";
 import { recordError } from "../../utils/utils";
-import { EmptyMainModule } from "../../components";
 import { ConversationsProvider } from "@cuttinboard-solutions/cuttinboard-library/chats";
+import { EmptyBoard } from "../../shared";
 
 export default () => {
   const { t } = useTranslation();
@@ -19,9 +19,9 @@ export default () => {
     <ConversationsProvider onError={recordError}>
       {({ loading, error }) =>
         loading ? (
-          <PageLoading />
+          <LoadingPage />
         ) : error ? (
-          <PageError error={error} />
+          <ErrorPage error={error} />
         ) : (
           <Layout hasSider>
             <Layout.Sider
@@ -38,7 +38,7 @@ export default () => {
                   <Route
                     index
                     element={
-                      <EmptyMainModule
+                      <EmptyBoard
                         description={
                           <p>
                             {t("Welcome to Conversations.")}{" "}

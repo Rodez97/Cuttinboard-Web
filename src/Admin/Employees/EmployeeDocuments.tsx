@@ -18,6 +18,7 @@ import {
   List,
   message,
   Modal,
+  Result,
   Upload,
   UploadProps,
 } from "antd";
@@ -36,12 +37,9 @@ import {
 import { recordError } from "../../utils/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import {
-  useCuttinboard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 
 const { Dragger } = Upload;
 
@@ -51,10 +49,10 @@ export default () => {
   const navigate = useNavigate();
   const { getEmployeeById } = useEmployeesList();
   const { location } = useCuttinboardLocation();
-  const { user } = useCuttinboard();
   const [files, setFiles] = useState<StorageReference[]>([]);
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
-  const [loadingFiles, setLoadingFiles] = useState(false);
+  const [loadingFiles, setLoadingFiles] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const employee = useMemo(
     () => (id ? getEmployeeById(id) : null),
@@ -63,47 +61,63 @@ export default () => {
 
   useEffect(() => {
     if (employee) {
+      const loadFilesFromStorage = async () => {
+        const employeeStorageRef = ref(
+          STORAGE,
+          `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}`
+        );
+        const userStorageRef = ref(STORAGE, `users/${employee.id}/documents`);
+        try {
+          const employeeStorageFiles = await listAll(employeeStorageRef);
+          setFiles(employeeStorageFiles.items);
+
+          const userStorageFiles = await listAll(userStorageRef);
+          setUserFiles(userStorageFiles.items);
+        } catch (error) {
+          setError(error);
+          console.error(error);
+        } finally {
+          setLoadingFiles(false);
+        }
+      };
       loadFilesFromStorage();
     }
-  }, [employee]);
+  }, [employee, location.id, location.organizationId]);
 
   const handleChange = async (file: File) => {
-    const filenameParts = file.name.split(".");
-    const fileExtension = filenameParts.pop();
-    const filename = filenameParts.join(".");
-    const fileName = prompt(
-      "Enter file name (Optional, leave blank to use original name)",
-      filename
+    const nameArray = file.name.split(".");
+    const extension = nameArray.pop();
+    const newName = prompt(
+      t("Enter file name (Optional, leave blank to use original name)")
     );
-    const newFile = fileName
-      ? new File([file], `${fileName}.${fileExtension}`, { type: file.type })
+    const newFile = newName
+      ? new File([file], `${newName}.${extension}`, { type: file.type })
       : file;
-    await handleSaveFile(newFile);
+    await uploadFile(newFile);
   };
 
-  const handleSaveFile = async (file: File) => {
+  const uploadFile = async (file: File) => {
     if (!employee) {
       throw new Error("Employee not found");
     }
+    const { type, name, size } = file;
+    const { organizationId, id: locationId } = location;
+    const { id: employeeId } = employee;
     const storageRef = ref(
       STORAGE,
-      `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}/${file.name}`
+      `organizations/${organizationId}/employees/${employeeId}/location/${locationId}/${name}`
     );
+
     try {
       const uploadRef = await uploadBytes(storageRef, file, {
-        contentType: file.type,
-        customMetadata: {
-          locationId: location.id,
-          employeeId: employee.id,
-          uploadedBy: user.uid,
-        },
+        contentType: type,
       });
       setFiles([...files, uploadRef.ref]);
       // Report to analytics
       logEvent(getAnalytics(), "file_upload", {
-        file_size: file.size,
-        file_type: file.type,
-        file_location: location.id,
+        size,
+        type,
+        locationId,
         from: "employee_documents",
       });
     } catch (error) {
@@ -135,23 +149,6 @@ export default () => {
     window.open(url, "_blank");
   };
 
-  const loadFilesFromStorage = async () => {
-    if (!employee) {
-      throw new Error("Employee not found");
-    }
-    setLoadingFiles(true);
-    const storageRef = ref(
-      STORAGE,
-      `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}`
-    );
-    const result = await listAll(storageRef);
-    setFiles(result.items);
-    const userStorageRef = ref(STORAGE, `users/${employee.id}/documents`);
-    const userResult = await listAll(userStorageRef);
-    setUserFiles(userResult.items);
-    setLoadingFiles(false);
-  };
-
   const props: UploadProps = {
     beforeUpload: async (file) => {
       message.loading(t("Uploading File"));
@@ -163,7 +160,19 @@ export default () => {
   };
 
   if (!employee) {
-    return null;
+    return (
+      <Result status="404" title="404" subTitle={t("Employee not found")} />
+    );
+  }
+
+  if (error) {
+    return (
+      <Result
+        status="500"
+        title="500"
+        subTitle={t("Error loading employee documents")}
+      />
+    );
   }
 
   return (

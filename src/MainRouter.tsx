@@ -6,9 +6,9 @@ import DashboardProvider from "./Dashboard/DashboardProvider";
 import runOneSignal from "runOneSignal";
 import OneSignal from "react-onesignal";
 import { useSelectedLocation } from "./hooks";
-import { PageLoading } from "./components";
 import { isEmpty } from "lodash";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { LoadingPage } from "./shared";
 
 const Dashboard = lazy(() => import("./Dashboard/Dashboard"));
 const LocationRoutes = lazy(() => import("./LocationRoutes"));
@@ -48,7 +48,7 @@ function MainRouter() {
         <Route
           path="dashboard/*"
           element={
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<LoadingPage />}>
               <DashboardProvider>
                 <Dashboard />
               </DashboardProvider>
@@ -58,7 +58,7 @@ function MainRouter() {
         <Route
           path="l/:organizationId/:locationId/*"
           element={
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<LoadingPage />}>
               <LocationRoutes />
             </Suspense>
           }

@@ -25,7 +25,7 @@ import {
 import { compact } from "lodash";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import {
   POSITIONS,
   RoleAccessLevels,
@@ -45,15 +45,14 @@ export default () => {
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { getEmployees, getEmployeeById } = useEmployeesList();
+  const { getEmployeeById } = useEmployeesList();
   const [form] = Form.useForm<EmployeeRoleData>();
-  const positions = Form.useWatch("positions", form);
   const { availablePositions, location } = useCuttinboardLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const employee = useMemo(
     () => (id ? getEmployeeById(id) : null),
-    [getEmployees, id]
+    [getEmployeeById, id]
   );
 
   const cancel = () => {
@@ -294,22 +293,32 @@ export default () => {
                 </React.Fragment>
               )}
             </Form.List>
-            {positions && positions.length > 0 && (
-              <Form.Item label={t("Main Position")} name="mainPosition">
-                <Select
-                  options={compact(
-                    positions?.map((pos) =>
-                      pos?.position
-                        ? {
-                            label: pos.position,
-                            value: pos.position,
-                          }
-                        : null
-                    )
-                  )}
-                />
-              </Form.Item>
-            )}
+            <Form.Item
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.positions !== currentValues.positions
+              }
+            >
+              {({ getFieldValue }) => {
+                const positions: EmployeeRoleData["positions"] =
+                  getFieldValue("positions");
+
+                const compactPositions = positions ? compact(positions) : [];
+
+                if (compactPositions.length === 0) {
+                  return null;
+                }
+                return (
+                  <Form.Item label={t("Main Position")} name="mainPosition">
+                    <Select
+                      options={compactPositions.map(({ position }) => ({
+                        label: position,
+                        value: position,
+                      }))}
+                    />
+                  </Form.Item>
+                );
+              }}
+            </Form.Item>
             <Form.Item label={t("Comments")} name="employeeDataComments">
               <Input.TextArea rows={2} maxLength={255} showCount />
             </Form.Item>

@@ -6,7 +6,7 @@ import { Result } from "antd";
 import { doc, DocumentData, DocumentReference } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
-import { PageError, PageLoading } from "../components";
+import { PageError, LoadingPage } from "../shared";
 
 interface DashboardContextProps {
   userDocument: CuttinboardUser;
@@ -44,15 +44,19 @@ export default ({ children }: { children: ReactNode }) => {
     loadingSubscriptionDocument ||
     loadingOrganization
   ) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
-  if (userDocumentError || SubDocumentError || organizationError) {
-    return (
-      <PageError
-        error={userDocumentError ?? SubDocumentError ?? organizationError!}
-      />
-    );
+  if (userDocumentError) {
+    return <PageError error={userDocumentError} />;
+  }
+
+  if (SubDocumentError) {
+    return <PageError error={SubDocumentError} />;
+  }
+
+  if (organizationError) {
+    return <PageError error={organizationError} />;
   }
 
   if (!userDocument) {

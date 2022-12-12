@@ -10,7 +10,7 @@ import { matchSorter } from "match-sorter";
 import React, { useMemo, useRef, useState } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
-import { GrayPageHeader, PageLoading } from "../../components";
+import { GrayPageHeader, LoadingPage } from "../../shared";
 import ManageUtensilDialog, {
   IManageUtensilDialogRef,
 } from "./ManageUtensilDialog";
@@ -47,7 +47,7 @@ export default () => {
   };
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   return (

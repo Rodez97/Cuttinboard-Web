@@ -27,7 +27,7 @@ import {
   StorageReference,
   uploadBytes,
 } from "firebase/storage";
-import { useLayoutEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../utils/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
@@ -35,13 +35,13 @@ import {
   getFileColorsByType,
   getFileIconByType,
 } from "../Modules/Files/FileTypeIcons";
-import { STORAGE } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  MAX_DOCUMENTS,
+  MAX_FILE_SIZE,
+  STORAGE,
+} from "@cuttinboard-solutions/cuttinboard-library/utils";
 
 const { Dragger } = Upload;
-
-const MAX_DOCUMENTS = 20;
-
-const MAX_FILE_SIZE = 1024 * 1024 * 8; // 8MB
 
 function MyDocuments() {
   const { t } = useTranslation();
@@ -49,9 +49,31 @@ function MyDocuments() {
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
 
+  const loadFilesFromStorage = useCallback(async () => {
+    // Set loadingFiles to true to indicate that the files are being loaded
+    setLoadingFiles(true);
+
+    try {
+      // Get a reference to the user's storage location
+      const userStorageRef = ref(STORAGE, `users/${user.uid}/documents`);
+
+      // List all files in the user's storage location
+      const userResult = await listAll(userStorageRef);
+
+      // Set the userFiles state variable with the files from the user's storage location
+      setUserFiles(userResult.items);
+    } catch (error) {
+      // Handle error if something goes wrong
+      recordError(error);
+    } finally {
+      // Set loadingFiles to false to indicate that the files have been loaded
+      setLoadingFiles(false);
+    }
+  }, [user.uid, setLoadingFiles, setUserFiles]);
+
   useLayoutEffect(() => {
     loadFilesFromStorage();
-  }, []);
+  }, [loadFilesFromStorage]);
 
   const handleChange = async (file: File) => {
     const filenameParts = file.name.split(".");
@@ -106,14 +128,6 @@ function MyDocuments() {
   const handleFileClick = (file: StorageReference) => async () => {
     const url = await getDownloadURL(file);
     window.open(url, "_blank");
-  };
-
-  const loadFilesFromStorage = async () => {
-    setLoadingFiles(true);
-    const userStorageRef = ref(STORAGE, `users/${user.uid}/documents`);
-    const userResult = await listAll(userStorageRef);
-    setUserFiles(userResult.items);
-    setLoadingFiles(false);
   };
 
   const props: UploadProps = {

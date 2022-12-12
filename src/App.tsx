@@ -4,12 +4,12 @@ import TrackPageAnalytics from "./utils/TrackPageAnalytics";
 import { recordError } from "./utils/utils";
 import { CuttinboardProvider } from "@cuttinboard-solutions/cuttinboard-library/services";
 import AuthWrapper from "./Auth/AuthWrapper";
-import { LoadingScreen, PageError } from "./components";
+import { PageError, RootLoading } from "./shared";
 
 function App() {
   return (
     <CuttinboardProvider
-      LoadingRenderer={LoadingScreen}
+      LoadingRenderer={RootLoading}
       ErrorRenderer={(err) => {
         recordError(err);
         return <PageError error={err} />;

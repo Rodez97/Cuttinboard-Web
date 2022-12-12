@@ -6,8 +6,7 @@ import { Route, Routes } from "react-router-dom";
 import FilesDrawersList from "./FilesDrawersList";
 import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
-import { EmptyMainModule, PageError, PageLoading } from "../../components";
-import { NotFound } from "../../components/NotFound";
+import { PageError, LoadingPage, EmptyBoard, NotFound } from "../../shared";
 import FilesMain from "./FilesMain";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { BoardProvider } from "@cuttinboard-solutions/cuttinboard-library/boards";
@@ -28,7 +27,7 @@ export default () => {
     >
       {({ loading, error }) =>
         loading ? (
-          <PageLoading />
+          <LoadingPage />
         ) : error ? (
           <PageError error={error} />
         ) : (
@@ -47,7 +46,7 @@ export default () => {
                   <Route
                     index
                     element={
-                      <EmptyMainModule
+                      <EmptyBoard
                         description={
                           <p>
                             {t("Welcome to Files.")} <a>{t("Learn More")}</a>

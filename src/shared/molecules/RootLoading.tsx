@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import Lottie from "lottie-react";
-import StartAnimation from "../assets/StartAnimation.json";
+import StartAnimation from "../../assets/StartAnimation.json";
 
-export default () => (
+const RootLoading = () => (
   <div
     css={{
       display: "flex",
@@ -15,3 +15,5 @@ export default () => (
     <Lottie animationData={StartAnimation} loop style={{ width: 600 }} />
   </div>
 );
+
+export default RootLoading;

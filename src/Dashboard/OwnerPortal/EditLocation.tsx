@@ -8,8 +8,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { useOwner } from ".";
 import { getAnalytics, logEvent } from "firebase/analytics";
-import { LocationEditor } from "../../components";
 import { PageHeader } from "@ant-design/pro-layout";
+import { LocationInfoForm } from "../../shared";
 
 export default () => {
   const navigate = useNavigate();
@@ -74,25 +74,12 @@ export default () => {
         onBack={() => navigate(-1)}
         title={t("Edit Location Details")}
       />
-      <Layout.Content>
-        <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-          <div
-            css={{
-              minWidth: 270,
-              maxWidth: 400,
-              margin: "auto",
-              width: "100%",
-            }}
-          >
-            <LocationEditor
-              baseLocation={getLocation}
-              onChange={handleChange}
-              onCancel={() => navigate(-1)}
-              loading={editing}
-            />
-          </div>
-        </div>
-      </Layout.Content>
+      <LocationInfoForm
+        baseLocation={getLocation}
+        onChange={handleChange}
+        onCancel={() => navigate(-1)}
+        loading={editing}
+      />
     </Layout>
   );
 };

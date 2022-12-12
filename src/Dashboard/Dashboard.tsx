@@ -21,7 +21,7 @@ import Icon, {
   UserOutlined,
 } from "@ant-design/icons";
 import mdiMessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import { DarkPageHeader, OwnerGoldContainer, UserMenu } from "../components";
+import { DarkPageHeader, OwnerGoldTag, UserMenu } from "../shared";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
@@ -97,7 +97,7 @@ export default () => {
         }
         subTitle={
           Boolean(userDocument?.subscriptionId) && (
-            <OwnerGoldContainer>OWNER</OwnerGoldContainer>
+            <OwnerGoldTag>OWNER</OwnerGoldTag>
           )
         }
         tags={

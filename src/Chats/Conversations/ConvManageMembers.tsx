@@ -2,7 +2,7 @@ import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/cha
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { ModalProps } from "antd";
 import React from "react";
-import ManageMembers from "../../components/ManageApp/ManageMembers";
+import ManageBoardMembers from "../../shared/organisms/ManageBoardMembers";
 import { recordError } from "../../utils/utils";
 
 function ConvManageMembers(props: ModalProps) {
@@ -57,7 +57,7 @@ function ConvManageMembers(props: ModalProps) {
   }
 
   return (
-    <ManageMembers
+    <ManageBoardMembers
       readonly={!canManage}
       members={activeConversation.members ?? []}
       removeMember={handleRemoveMember}

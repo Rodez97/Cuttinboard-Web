@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { useCallback } from "react";
 import { Space, Tag, Tooltip, Typography } from "antd";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { QuickUserDialogAvatar } from "../../components";
+import { UserInfoAvatar } from "../../shared";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
   EmployeeShifts,
@@ -99,7 +99,7 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
         backgroundColor: "white",
       }}
     >
-      <QuickUserDialogAvatar employee={employee} size={25} />
+      <UserInfoAvatar employee={employee} size={25} />
       <div css={{ marginLeft: 5, display: "flex", flexDirection: "column" }}>
         <Typography.Text strong>{employee.fullName}</Typography.Text>
         {getSecondaryElement()}

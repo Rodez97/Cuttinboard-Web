@@ -1,8 +1,8 @@
 import React, { useLayoutEffect } from "react";
 import { useParams } from "react-router-dom";
 import ConversationsMain from "./ConversationsMain";
-import { NotFound } from "../../components/NotFound";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/chats";
+import { NotFound } from "../../shared";
 
 function ConversationsRoutes() {
   const { boardId } = useParams();

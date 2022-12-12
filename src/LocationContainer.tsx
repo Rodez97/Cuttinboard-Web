@@ -18,7 +18,7 @@ import {
   RoleAccessLevels,
   roleToString,
 } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { DarkPageHeader, PageLoading, UserMenu } from "./components";
+import { DarkPageHeader, LoadingPage, UserMenu } from "./shared";
 import mdiViewDashboard from "@mdi/svg/svg/view-dashboard.svg";
 import mdiMyShifts from "@mdi/svg/svg/account-clock-outline.svg";
 import mdiNotes from "@mdi/svg/svg/note-multiple-outline.svg";
@@ -219,7 +219,7 @@ export default () => {
                 path={`home`}
                 key="home"
                 element={
-                  <Suspense fallback={<PageLoading />}>
+                  <Suspense fallback={<LoadingPage />}>
                     <AppsView />
                   </Suspense>
                 }
@@ -228,7 +228,7 @@ export default () => {
                 key="emp"
                 path={`employees/*`}
                 element={
-                  <Suspense fallback={<PageLoading />}>
+                  <Suspense fallback={<LoadingPage />}>
                     <Employees />
                   </Suspense>
                 }
@@ -237,7 +237,7 @@ export default () => {
                 key="sch"
                 path={`schedule/*`}
                 element={
-                  <Suspense fallback={<PageLoading />}>
+                  <Suspense fallback={<LoadingPage />}>
                     <Schedule />
                   </Suspense>
                 }
@@ -246,7 +246,7 @@ export default () => {
                 key="uts"
                 path={`utensils/*`}
                 element={
-                  <Suspense fallback={<PageLoading />}>
+                  <Suspense fallback={<LoadingPage />}>
                     <Utensils />
                   </Suspense>
                 }
@@ -256,7 +256,7 @@ export default () => {
             <Route
               path={`my-shifts/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <Shifts />
                 </Suspense>
               }
@@ -264,7 +264,7 @@ export default () => {
             <Route
               path={`notes/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <Notes />
                 </Suspense>
               }
@@ -272,7 +272,7 @@ export default () => {
             <Route
               path={`tasks/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <Tasks />
                 </Suspense>
               }
@@ -280,7 +280,7 @@ export default () => {
             <Route
               path={`files/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <Storage />
                 </Suspense>
               }
@@ -288,7 +288,7 @@ export default () => {
             <Route
               path={`checklist/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <GlobalChecklist />
                 </Suspense>
               }
@@ -297,7 +297,7 @@ export default () => {
             <Route
               path={`conversations/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <Conversations />
                 </Suspense>
               }
@@ -305,7 +305,7 @@ export default () => {
             <Route
               path={`chats/*`}
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <DM />
                 </Suspense>
               }
@@ -314,7 +314,7 @@ export default () => {
               <Route
                 path={`locSettings/*`}
                 element={
-                  <Suspense fallback={<PageLoading />}>
+                  <Suspense fallback={<LoadingPage />}>
                     <Settings />
                   </Suspense>
                 }

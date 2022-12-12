@@ -1,8 +1,8 @@
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import VerifyEmail from "../Auth/VerifyEmail";
-import { PageLoading } from "../components";
+import VerifyEmail from "../shared/organisms/VerifyEmail";
+import { LoadingPage } from "../shared";
 import { useDashboard } from "./DashboardProvider";
 import UpgradeAccount from "./UpgradeAccount";
 
@@ -16,13 +16,14 @@ const DirectMessages = lazy(() => import("../Chats/DirectMessages"));
 function DashboardRouter() {
   const { userDocument } = useDashboard();
   const { user } = useCuttinboard();
+
   return (
     <Routes>
       <Route path="/">
         <Route
           path="locations/*"
           element={
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<LoadingPage />}>
               <Locations />
             </Suspense>
           }
@@ -30,7 +31,7 @@ function DashboardRouter() {
         <Route
           path="owner-portal/*"
           element={
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<LoadingPage />}>
               <OwnerPortal />
             </Suspense>
           }
@@ -39,7 +40,7 @@ function DashboardRouter() {
         <Route
           path="account"
           element={
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<LoadingPage />}>
               <Account />
             </Suspense>
           }
@@ -47,7 +48,7 @@ function DashboardRouter() {
         <Route
           path="my-documents"
           element={
-            <Suspense fallback={<PageLoading />}>
+            <Suspense fallback={<LoadingPage />}>
               <MyDocuments />
             </Suspense>
           }
@@ -56,7 +57,7 @@ function DashboardRouter() {
           <Route
             path="subscription"
             element={
-              <Suspense fallback={<PageLoading />}>
+              <Suspense fallback={<LoadingPage />}>
                 <Subscription />
               </Suspense>
             }

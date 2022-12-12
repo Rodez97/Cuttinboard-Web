@@ -16,7 +16,7 @@ import { intersection } from "lodash";
 import { useParams } from "react-router-dom";
 import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
 import { useDashboard } from "../../Dashboard/DashboardProvider";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/account";
 import { useDirectMessageChat } from "@cuttinboard-solutions/cuttinboard-library/chats";

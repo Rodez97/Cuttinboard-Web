@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { ReactElement, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -22,21 +22,24 @@ import {
 } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
 import RecurringTaskItem from "./RecurringTaskItem";
-import DropNewBlock from "./DropNewBlock";
 import {
+  Checklist,
   ChecklistGroup,
   RecurringTaskDoc,
 } from "@cuttinboard-solutions/cuttinboard-library/checklist";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { DraggableList } from "../../shared";
 
 export default ({
   tasksDocument,
   recurringTaskDoc,
   createTask,
+  bottomElement,
 }: {
   tasksDocument: ChecklistGroup | undefined;
   recurringTaskDoc: RecurringTaskDoc | undefined;
   createTask: () => void;
+  bottomElement: ReactElement;
 }) => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
@@ -68,7 +71,7 @@ export default ({
     return filteredSections;
   }, [tasksDocument, searchText]);
 
-  const recurringTasksToday = useCallback(() => {
+  const recurringTasksToday = useMemo(() => {
     if (!recurringTaskDoc) {
       return [];
     }
@@ -98,6 +101,34 @@ export default ({
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   }, []);
 
+  const onRecurringTaskChange = useCallback(
+    async (taskId: string) => {
+      if (recurringTaskDoc) {
+        try {
+          await recurringTaskDoc.toggleCompleted(taskId);
+        } catch (error) {
+          reportError(error);
+        }
+      }
+    },
+    [recurringTaskDoc]
+  );
+
+  const reorderItem = async (
+    element: Checklist,
+    sourceIndex: number,
+    targetIndex: number
+  ) => {
+    if (!tasksDocument) {
+      return;
+    }
+    try {
+      await tasksDocument.reorderChecklists(element.id, targetIndex);
+    } catch (error) {
+      recordError(error);
+    }
+  };
+
   return (
     <Layout>
       <Space css={{ marginBottom: 20, padding: "2px 20px" }}>
@@ -121,7 +152,7 @@ export default ({
         </Button>
       </Space>
       <Layout.Content>
-        {recurringTasksToday().length > 0 && tasksDocument && (
+        {recurringTasksToday.length > 0 && tasksDocument && (
           <React.Fragment>
             <Card
               css={{
@@ -151,12 +182,15 @@ export default ({
                   paddingTop: 10,
                 }}
               >
-                {recurringTasksToday().map(([id, task]) => (
-                  <RecurringTaskItem id={id} task={task} key={id} />
+                {recurringTasksToday.map(([id, task]) => (
+                  <RecurringTaskItem
+                    task={task}
+                    key={id}
+                    onChange={() => onRecurringTaskChange(id)}
+                  />
                 ))}
               </div>
             </Card>
-            <DropNewBlock tasks={tasksDocument} />
           </React.Fragment>
         )}
 
@@ -175,15 +209,20 @@ export default ({
             <Space direction="vertical" css={{ display: "flex" }}>
               {sectionsOrderedByTagAndCreationDate.length > 0 &&
               tasksDocument ? (
-                sectionsOrderedByTagAndCreationDate.map((checklist) => (
-                  <TaskBlock
-                    key={checklist.id}
-                    section={checklist}
-                    sectionId={checklist.id}
-                    canManage={canUse}
-                    rootChecklist={tasksDocument}
-                  />
-                ))
+                <DraggableList<Checklist>
+                  dataSource={sectionsOrderedByTagAndCreationDate}
+                  renderItem={(checklist, i, isDragging) => (
+                    <TaskBlock
+                      key={i}
+                      section={checklist}
+                      sectionId={checklist.id}
+                      canManage={canUse}
+                      rootChecklist={tasksDocument}
+                      isDragging={isDragging}
+                    />
+                  )}
+                  onReorder={reorderItem}
+                />
               ) : (
                 <Empty
                   description={
@@ -203,6 +242,7 @@ export default ({
               )}
             </Space>
           </div>
+          {bottomElement}
         </div>
       </Layout.Content>
     </Layout>

@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { recordError } from "../utils/utils";
+import { recordError } from "../../utils/utils";
 import axios from "axios";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { useSendEmailVerification } from "react-firebase-hooks/auth";

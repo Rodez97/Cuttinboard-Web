@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import { DeleteFilled } from "@ant-design/icons";
 import { Button, List } from "antd";
 import { useMemo } from "react";
-import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
   Colors,
@@ -13,46 +12,53 @@ import {
   useCuttinboard,
   useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
+import UserInfoAvatar from "../organisms/UserInfoAvatar";
 
-interface IMemberItem {
+type BoardMemberItemProps = {
   employee: Employee;
-  onRemove: (employeeId: string) => void;
+  onRemove: (employee: Employee) => void;
   readonly?: boolean;
   admins?: string[];
   privacyLevel: PrivacyLevel;
-}
+};
 
-function MemberItem({
+function BoardMemberItem({
   employee,
   onRemove,
   admins,
   readonly,
   privacyLevel,
-}: IMemberItem) {
+}: BoardMemberItemProps) {
   const { user } = useCuttinboard();
   const { isGeneralManager, isOwner, isAdmin } = useCuttinboardLocation();
 
-  const haveSecondaryAction = useMemo(() => {
+  const canRemoveBoardMember = useMemo(() => {
+    // If the board member is read-only, the user cannot remove them
     if (readonly) {
       return false;
     }
+
+    // If the user is a general manager, owner, or admin, they can remove the board member
     if (isGeneralManager || isOwner || isAdmin) {
       return true;
     }
+
+    // If the board member is an admin and is the current user, they cannot remove themselves
     if (admins?.includes(employee.id) && employee.id === user.uid) {
       return false;
     }
 
+    // If the privacy level is private and the current user is an admin, they can remove the board member
     return privacyLevel === PrivacyLevel.PRIVATE && admins?.includes(user.uid);
   }, [
-    readonly,
-    isGeneralManager,
-    isOwner,
-    employee.id,
-    admins,
-    privacyLevel,
-    user.uid,
-    isAdmin,
+    readonly, // The board member's read-only status
+    isGeneralManager, // Whether the user is a general manager
+    isOwner, // Whether the user is the owner
+    employee.id, // The board member's ID
+    admins, // The list of admins
+    privacyLevel, // The privacy level of the item
+    user.uid, // The current user's ID
+    isAdmin, // Whether the user is an admin
   ]);
 
   return (
@@ -63,11 +69,11 @@ function MemberItem({
         margin: 5,
       }}
       actions={
-        haveSecondaryAction
+        canRemoveBoardMember
           ? [
               <Button
                 key="remove"
-                onClick={() => onRemove(employee.id)}
+                onClick={() => onRemove(employee)}
                 danger
                 icon={<DeleteFilled />}
                 type="link"
@@ -78,12 +84,12 @@ function MemberItem({
       }
     >
       <List.Item.Meta
-        avatar={<QuickUserDialogAvatar employee={employee} />}
-        title={`${employee.fullName}`}
+        avatar={<UserInfoAvatar employee={employee} />}
+        title={employee.fullName}
         description={employee.email}
       />
     </List.Item>
   );
 }
 
-export default MemberItem;
+export default BoardMemberItem;

@@ -7,6 +7,7 @@ import {
   Form,
   Input,
   Layout,
+  message,
   Space,
   Steps,
   Typography,
@@ -23,6 +24,7 @@ import {
 import { recordError } from "../../utils/utils";
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 
 const { Step } = Steps;
 
@@ -32,7 +34,7 @@ type Supervisor = {
   email: string;
 };
 
-export default () => {
+export default ({ supervisors }: { supervisors: Employee[] }) => {
   const { user } = useCuttinboard();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -76,6 +78,7 @@ export default () => {
         role: RoleAccessLevels.ADMIN,
         supervisingLocations: selectedLocations.map((sl) => sl.id),
       });
+      message.success(t("Supervisor created successfully"));
       // Report to analytics
       logEvent(getAnalytics(), "create_supervisor", {
         method: "email",
@@ -123,7 +126,11 @@ export default () => {
                 {t(
                   "Supervisors will be deleted from the locations they belong to."
                 )}{" "}
-                <a href="#" target="_blank">
+                <a
+                  href="https://www.cuttinboard.com/help/supervisors"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {t("Learn more")}
                 </a>
               </Typography.Text>
@@ -153,8 +160,8 @@ export default () => {
                 },
                 {
                   validator: async (_, value) => {
-                    // Check if value dont hace tailing or leading spaces
-                    if (value !== value.trim()) {
+                    // Check if value don't have tailing or leading spaces
+                    if (value && value !== value.trim()) {
                       return Promise.reject(
                         new Error(
                           t("Name cannot have leading or trailing spaces")
@@ -186,7 +193,7 @@ export default () => {
                 {
                   validator: async (_, value) => {
                     // Check if value don't have tailing or leading spaces
-                    if (value !== value.trim()) {
+                    if (value && value !== value.trim()) {
                       return Promise.reject(
                         new Error(t("Cannot have leading or trailing spaces"))
                       );
@@ -212,6 +219,14 @@ export default () => {
                     if (value && value === user.email) {
                       return Promise.reject(
                         new Error(t("You can't be a supervisor"))
+                      );
+                    }
+                    if (
+                      value &&
+                      supervisors.some((s) => s.email.toLowerCase() === value)
+                    ) {
+                      return Promise.reject(
+                        new Error(t("Supervisor already exists"))
                       );
                     }
                     return Promise.resolve();

@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { Alert, Avatar, Checkbox, List, Modal } from "antd";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -28,17 +28,20 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     getEmployees.map((e) => e.id)
   );
 
-  const handleSelectedEmpChange = (empId: string) => {
-    if (selectedEmployees.includes(empId)) {
-      setSelectedEmployees((prev) => prev.filter((e) => e !== empId));
-    } else {
-      setSelectedEmployees((prev) => [...prev, empId]);
-    }
-  };
+  const handleSelectedEmpChange = useCallback(
+    (empId: string) => {
+      if (selectedEmployees.includes(empId)) {
+        setSelectedEmployees((prev) => prev.filter((e) => e !== empId));
+      } else {
+        setSelectedEmployees((prev) => [...prev, empId]);
+      }
+    },
+    [selectedEmployees]
+  );
 
   const clone = async () => {
-    setIsCloning(true);
     try {
+      setIsCloning(true);
       await cloneWeek(selectedWeek, selectedEmployees);
       props.onCancel();
       // Report to analytics
@@ -48,22 +51,31 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
       });
     } catch (error) {
       recordError(error);
+    } finally {
+      setIsCloning(false);
     }
-    setIsCloning(false);
   };
 
   const canClone = useMemo(() => {
+    // Return false if no employees are selected
     if (selectedEmployees.length === 0) {
       return false;
     }
+
+    // Return false if the selected week is the current week
     if (selectedWeek === weekId) {
       return false;
     }
+
+    // Return false if the current week has shifts scheduled
     if (weekSummary.total.totalShifts > 0) {
       return false;
     }
+
+    // Otherwise, return true
     return true;
   }, [
+    // The value of canClone depends on these values
     selectedEmployees.length,
     selectedWeek,
     weekId,

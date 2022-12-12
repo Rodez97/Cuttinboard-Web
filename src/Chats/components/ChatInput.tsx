@@ -22,7 +22,7 @@ import {
 import Picker from "emoji-picker-react";
 import { recordError } from "../../utils/utils";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import {
   Attachment,
   Message,

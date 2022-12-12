@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { Spin } from "antd";
 
-function PageLoading() {
+function LoadingPage() {
   return (
     <div
       css={{
@@ -19,4 +19,4 @@ function PageLoading() {
   );
 }
 
-export default PageLoading;
+export default LoadingPage;

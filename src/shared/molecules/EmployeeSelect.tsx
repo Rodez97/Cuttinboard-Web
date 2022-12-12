@@ -1,21 +1,21 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Button, List, Modal, ModalProps } from "antd";
-import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import UserInfoAvatar from "../organisms/UserInfoAvatar";
 
-type AddMembersProps = {
+type EmployeeSelectProps = {
   onSelectedEmployee: (employee: Employee) => void;
   employees?: Employee[];
 } & ModalProps;
 
-function SelectEmployee({
+function EmployeeSelect({
   onSelectedEmployee,
   employees,
   ...props
-}: AddMembersProps) {
+}: EmployeeSelectProps) {
   return (
     <Modal {...props}>
       <List
@@ -39,7 +39,7 @@ function SelectEmployee({
               }
             >
               <List.Item.Meta
-                avatar={<QuickUserDialogAvatar employee={emp} />}
+                avatar={<UserInfoAvatar employee={emp} />}
                 title={`${emp.name} ${emp.lastName}`}
                 description={emp.email}
               />
@@ -51,4 +51,4 @@ function SelectEmployee({
   );
 }
 
-export default SelectEmployee;
+export default EmployeeSelect;

@@ -10,7 +10,8 @@
     "publish": "npm run build && firebase deploy --only hosting",
     "test": "jest --coverage",
     "push:i18n": "node push-google-spreadsheet.js",
-    "fetch:i18n": "node fetch-google-spreadsheet.js"
+    "fetch:i18n": "node fetch-google-spreadsheet.js",
+    "deploy-rules": "firebase deploy --only firestore:rules"
   },
   "author": "Elevvate Technologies, Inc. <info@cuttinboard.com> (https://cuttinboard.com)",
   "license": "Unlicensed",
@@ -25,7 +26,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
     "@ant-design/pro-layout": "^7.2.5",
-    "@cuttinboard-solutions/cuttinboard-library": "^2.0.5",
+    "@cuttinboard-solutions/cuttinboard-library": "^2.1.4",
     "@fontsource/roboto": "^4.5.8",
     "@mdi/svg": "^7.0.96",
     "@rehooks/local-storage": "^2.4.4",
@@ -53,8 +54,7 @@
     "pdfmake": "^0.2.6",
     "react": "^18.2.0",
     "react-avatar-editor": "^13.0.0",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
     "react-h5-audio-player": "^3.8.5",
@@ -64,7 +64,7 @@
     "react-onesignal": "^2.0.4",
     "react-player": "^2.10.1",
     "react-resize-detector": "^7.1.2",
-    "react-router-dom": "^6.4.2",
+    "react-router-dom": "^6.4.5",
     "rooks": "^6.4.3",
     "rrule": "^2.7.1",
     "translation-check": "^1.0.2"
@@ -83,6 +83,7 @@
     "@types/pdfmake": "^0.2.2",
     "@types/react": "^18.0.19",
     "@types/react-avatar-editor": "^12.0.0",
+    "@types/react-beautiful-dnd": "^13.1.3",
     "@types/react-dom": "^18.0.9",
     "@types/webpack": "^5.28.0",
     "@typescript-eslint/eslint-plugin": "^5.44.0",

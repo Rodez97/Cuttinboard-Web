@@ -7,7 +7,7 @@ import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 import { Divider, Layout, Space, Spin, Typography } from "antd";
 import DirectMessageBubble from "./DirectMessageBubble";
-import { PageLoading } from "../../components";
+import { LoadingPage } from "../../shared";
 import {
   Message,
   useMessages,
@@ -33,7 +33,7 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
   }, [chatId]);
 
   if (isLoading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   return (

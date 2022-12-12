@@ -44,6 +44,7 @@ export default function SplitButton({
           )
         }
         buttonsRender={([leftButton, rightButton]) => [
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           React.cloneElement(leftButton as React.ReactElement<any, string>, {
             icon:
               order === "asc" ? (
@@ -52,6 +53,7 @@ export default function SplitButton({
                 <SortDescendingOutlined />
               ),
           }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           React.cloneElement(rightButton as React.ReactElement<any, string>, {
             icon: <FilterOutlined />,
           }),

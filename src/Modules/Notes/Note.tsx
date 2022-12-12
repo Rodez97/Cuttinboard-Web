@@ -7,8 +7,8 @@ import Linkify from "linkify-react";
 import { Card, Modal, Tooltip, Typography } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { StickyNoteCard } from "../../components";
 import { Note } from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { StickyNote } from "../../shared";
 
 interface INoteCard {
   note: Note;
@@ -51,7 +51,7 @@ export default ({ note, onEdit }: INoteCard) => {
   return (
     <React.Fragment>
       <Tooltip title={note.title}>
-        <StickyNoteCard hoverable onClick={handleClick} bordered={false}>
+        <StickyNote hoverable onClick={handleClick} bordered={false}>
           <Card.Meta
             title={note.title}
             description={
@@ -75,7 +75,7 @@ export default ({ note, onEdit }: INoteCard) => {
               </Typography.Paragraph>
             }
           />
-        </StickyNoteCard>
+        </StickyNote>
       </Tooltip>
       <ReadonlyNoteDialog
         note={note}

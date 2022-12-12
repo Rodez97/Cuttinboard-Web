@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
 import authImage from "../assets/images/authImage.jpg";
 import AuthFooter from "./AuthFooter";
-import AuthRouter from "./AuthRouter";
+import AuthRouter from ".";
 
 const ImageColumn = styled(Col)`
   background-image: linear-gradient(0deg, #00000050, #00000050),

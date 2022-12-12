@@ -24,11 +24,12 @@ import Icon, {
 import PickFile from "./PickFile";
 import { matchSorter } from "match-sorter";
 import {
-  EmptyMainModule,
   GrayPageHeader,
   PageError,
-  PageLoading,
-} from "../../components";
+  LoadingPage,
+  NotFound,
+  EmptyBoard,
+} from "../../shared";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import fileSize from "filesize";
 import FileMenu from "./FileMenu";
@@ -38,7 +39,6 @@ import ManageModuleDialog, {
 } from "../ManageApp/ManageModuleDialog";
 import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
-import { NotFound } from "../../components/NotFound";
 import {
   Cuttinboard_File,
   useBoard,
@@ -194,7 +194,7 @@ function Main() {
   };
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (drawerFilesError) {
@@ -202,7 +202,7 @@ function Main() {
   }
 
   if (!selectedBoard || !storagePathRef) {
-    return <EmptyMainModule />;
+    return <EmptyBoard />;
   }
 
   return (
@@ -291,7 +291,7 @@ function Main() {
           )}
         </div>
       ) : (
-        <EmptyMainModule
+        <EmptyBoard
           description={
             <span>
               No files. <a onClick={pickFiles}>upload one</a> or{" "}

@@ -28,7 +28,7 @@ function ScheduleSummaryElement() {
       size="large"
       wrap
       split={<Divider type="vertical" />}
-      css={{ backgroundColor: "#00000010", padding: "5px 10px" }}
+      css={{ backgroundColor: "#FCFCFC", padding: "5px 10px" }}
     >
       <Statistic
         title={t("Est. Wages")}

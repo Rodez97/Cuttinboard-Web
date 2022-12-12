@@ -18,7 +18,6 @@ import { MouseEvent } from "react";
 import ShowLegend from "./ShowLegend";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { Shift } from "@cuttinboard-solutions/cuttinboard-library/schedule";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 dayjs.extend(isBetween);
 
 interface ShiftElementProps {
@@ -32,16 +31,18 @@ const BaseContainerStyle = css`
   min-width: 130px !important;
   width: 100% !important;
   height: 50px;
-  border: 3px solid ${Colors.MainBlue};
   position: relative;
+  border-radius: 5px;
+  background-color: #2b7de9;
+  color: #fff;
 `;
 
 const DeletingStyle = css`
-  border: 3px solid #f33d61;
+  background-color: #f33d61;
 `;
 
 const DraftOrEditedStyle = css`
-  border: 3px dotted #505050;
+  background-color: #505050;
 `;
 
 function ShiftElement({ employee, column, shift }: ShiftElementProps) {
@@ -181,11 +182,11 @@ function ShiftElement({ employee, column, shift }: ShiftElementProps) {
             <Tag color="error">{t("No position")}</Tag>
           )}
 
-          {shift.wageData?.overtimeHours > 0 && (
+          {true && (
             <Icon
               component={mdiClockAlert}
               css={{
-                color: Colors.Error.errorMain,
+                color: "#fff",
                 position: "absolute",
                 bottom: 5,
                 right: 5,

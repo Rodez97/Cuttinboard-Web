@@ -2,10 +2,10 @@
 import { jsx } from "@emotion/react";
 import { Button, Layout, Space, Tabs } from "antd";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import PageError from "../../components/PageError";
-import PageLoading from "../../components/PageLoading";
+import ErrorPage from "../../shared/molecules/PageError";
+import LoadingPage from "../../shared/molecules/LoadingPage";
 import { useTranslation } from "react-i18next";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import TasksMain from "./TasksMain";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { capitalize } from "lodash";
@@ -38,6 +38,7 @@ export default () => {
   const { user } = useCuttinboard();
   const { location, locationAccessKey } = useCuttinboardLocation();
   const managePeriodicTaskRef = useRef<ManagePeriodicTaskRef>(null);
+  const scrollBottomTarget = useRef<HTMLDivElement>(null);
   const [recurringTaskDoc, loading, error] = useDocumentData<RecurringTaskDoc>(
     doc(
       FIRESTORE,
@@ -86,16 +87,26 @@ export default () => {
       }
     } catch (error) {
       recordError(error);
+    } finally {
+      if (scrollBottomTarget.current) {
+        scrollBottomTarget.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }
     }
   };
 
-  if (error || errorTasks) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return <PageError error={error ?? errorTasks!} />;
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
+
+  if (errorTasks) {
+    return <ErrorPage error={errorTasks} />;
   }
 
   if (loading || loadingTasks) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   return (
@@ -143,6 +154,9 @@ export default () => {
               tasksDocument={tasks}
               recurringTaskDoc={recurringTaskDoc}
               createTask={addBlock}
+              bottomElement={
+                <div ref={scrollBottomTarget} css={{ height: 50 }} />
+              }
             />
           }
         />

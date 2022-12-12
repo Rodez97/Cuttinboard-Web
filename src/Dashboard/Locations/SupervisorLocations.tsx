@@ -10,7 +10,7 @@ import React from "react";
 import { useMemo } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
-import { PageError, PageLoading } from "../../components";
+import { PageError, LoadingPage } from "../../shared";
 import LocationCard from "./LocationCard";
 
 export default () => {
@@ -29,7 +29,7 @@ export default () => {
   );
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (error) {
@@ -38,7 +38,7 @@ export default () => {
   return (
     <div css={{ gap: "16px" }}>
       {groupedByOrganizations?.length ? (
-        groupedByOrganizations?.map(([organization, locations], index) => (
+        groupedByOrganizations.map(([organization, locations], index) => (
           <React.Fragment key={organization}>
             <Divider orientation="left">{`${t("Organization")} # ${
               index + 1

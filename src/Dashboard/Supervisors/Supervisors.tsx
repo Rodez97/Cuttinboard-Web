@@ -5,9 +5,9 @@ import { jsx } from "@emotion/react";
 import { Button, Empty, Layout, List, Tag } from "antd";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { QuickUserDialogAvatar } from "../../components";
 import { PageHeader } from "@ant-design/pro-layout";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { UserInfoAvatar } from "../../shared";
 
 export default ({ supervisors }: { supervisors: Employee[] }) => {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ export default ({ supervisors }: { supervisors: Employee[] }) => {
                           })}
                         </Tag>
                       }
-                      avatar={<QuickUserDialogAvatar employee={sup} />}
+                      avatar={<UserInfoAvatar employee={sup} />}
                     />
                   </List.Item>
                 )}

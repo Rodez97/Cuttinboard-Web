@@ -8,7 +8,7 @@ import { collection, query, where } from "firebase/firestore";
 import { createContext, lazy, Suspense, useContext } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { Route, Routes } from "react-router-dom";
-import { PageError, PageLoading } from "../../components";
+import { PageError, LoadingPage } from "../../shared";
 
 const SupervisorsRouter = lazy(() => import("../Supervisors"));
 const MyLocations = lazy(() => import("./MyLocations"));
@@ -31,7 +31,7 @@ export default () => {
   );
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (error) {
@@ -45,7 +45,7 @@ export default () => {
             <Route
               index
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <MyLocations />
                 </Suspense>
               }
@@ -53,7 +53,7 @@ export default () => {
             <Route
               path="locationDetails/:locationId"
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <EditLocation />
                 </Suspense>
               }
@@ -61,7 +61,7 @@ export default () => {
             <Route
               path="add-location"
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <AddLocation />
                 </Suspense>
               }
@@ -69,7 +69,7 @@ export default () => {
             <Route
               path="supervisors/*"
               element={
-                <Suspense fallback={<PageLoading />}>
+                <Suspense fallback={<LoadingPage />}>
                   <SupervisorsRouter />
                 </Suspense>
               }

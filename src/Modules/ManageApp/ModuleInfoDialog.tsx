@@ -92,58 +92,60 @@ function ModuleInfoDialog({
         ]
       }
     >
-      <List.Item>
-        <List.Item.Meta
-          avatar={<FormOutlined />}
-          title={t("Name")}
-          description={selectedBoard.name}
-        />
-      </List.Item>
-      <List.Item>
-        <List.Item.Meta
-          avatar={
-            selectedBoard.privacyLevel === PrivacyLevel.PRIVATE ? (
-              <LockOutlined />
-            ) : selectedBoard.privacyLevel === PrivacyLevel.POSITIONS ? (
-              <TagsOutlined />
-            ) : (
-              <GlobalOutlined />
-            )
-          }
-          title={t("Privacy Level")}
-          description={t(privacyLevelToString(selectedBoard.privacyLevel))}
-        />
-      </List.Item>
-      {Boolean(admins.length) && (
+      <List>
         <List.Item>
           <List.Item.Meta
-            avatar={<CrownOutlined />}
-            title={t("Admins")}
-            description={admins.map((admin) => (
-              <p key={admin.id}>{admin.fullName}</p>
-            ))}
+            avatar={<FormOutlined />}
+            title={t("Name")}
+            description={selectedBoard.name}
           />
         </List.Item>
-      )}
-      <List.Item>
-        <List.Item.Meta
-          avatar={<InfoCircleOutlined />}
-          title={t("Description")}
-          description={
-            selectedBoard.description ? selectedBoard.description : "---"
-          }
-        />
-      </List.Item>
-      {selectedBoard.privacyLevel === PrivacyLevel.POSITIONS &&
-        Boolean(selectedBoard.position) && (
+        <List.Item>
+          <List.Item.Meta
+            avatar={
+              selectedBoard.privacyLevel === PrivacyLevel.PRIVATE ? (
+                <LockOutlined />
+              ) : selectedBoard.privacyLevel === PrivacyLevel.POSITIONS ? (
+                <TagsOutlined />
+              ) : (
+                <GlobalOutlined />
+              )
+            }
+            title={t("Privacy Level")}
+            description={t(privacyLevelToString(selectedBoard.privacyLevel))}
+          />
+        </List.Item>
+        {Boolean(admins.length) && (
           <List.Item>
             <List.Item.Meta
-              avatar={<TagOutlined />}
-              title={t("Position")}
-              description={selectedBoard.position}
+              avatar={<CrownOutlined />}
+              title={t("Admins")}
+              description={admins.map((admin) => (
+                <p key={admin.id}>{admin.fullName}</p>
+              ))}
             />
           </List.Item>
         )}
+        <List.Item>
+          <List.Item.Meta
+            avatar={<InfoCircleOutlined />}
+            title={t("Description")}
+            description={
+              selectedBoard.description ? selectedBoard.description : "---"
+            }
+          />
+        </List.Item>
+        {selectedBoard.privacyLevel === PrivacyLevel.POSITIONS &&
+          Boolean(selectedBoard.position) && (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<TagOutlined />}
+                title={t("Position")}
+                description={selectedBoard.position}
+              />
+            </List.Item>
+          )}
+      </List>
     </Modal>
   );
 }

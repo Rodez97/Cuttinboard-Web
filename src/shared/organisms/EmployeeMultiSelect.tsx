@@ -4,27 +4,27 @@ import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { QuickUserDialogAvatar } from "../QuickUserDialog";
 import { UsergroupAddOutlined } from "@ant-design/icons";
 import {
   Employee,
   useEmployeesList,
 } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import UserInfoAvatar from "./UserInfoAvatar";
 
-type AddMembersProps = {
+type EmployeeMultiSelectProps = {
   onSelectedEmployees: (employees: Employee[]) => void;
   initialSelected?: Employee[];
   admins?: string[];
   onClose: () => void;
 } & ModalProps;
 
-function AddMembers({
+function EmployeeMultiSelect({
   onSelectedEmployees,
   initialSelected,
   admins,
   onClose,
   ...props
-}: AddMembersProps) {
+}: EmployeeMultiSelectProps) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const { getEmployees } = useEmployeesList();
@@ -55,14 +55,18 @@ function AddMembers({
     onClose();
   };
 
+  // Calculate a list of employees based on certain conditions
   const employees = useMemo(() => {
+    // Filter the list of employees based on the search text and other conditions
     const filtered = getEmployees.filter((emp) => {
+      // Exclude employees who are admins or are already selected
       if (
         admins?.includes(emp.id) ||
         initialSelected?.some((e) => e.id === emp.id)
       ) {
         return false;
       }
+      // Include employees whose name includes the search text (case-insensitive)
       return emp.name.toLowerCase().includes(searchText.toLowerCase());
     });
     return filtered;
@@ -113,7 +117,7 @@ function AddMembers({
               }
             >
               <List.Item.Meta
-                avatar={<QuickUserDialogAvatar employee={emp} />}
+                avatar={<UserInfoAvatar employee={emp} />}
                 title={emp.fullName}
                 description={emp.email}
               />
@@ -125,4 +129,4 @@ function AddMembers({
   );
 }
 
-export default AddMembers;
+export default EmployeeMultiSelect;

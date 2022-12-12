@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import ChatMain from "../components/ChatMain";
 import { Button, Layout } from "antd";
-import { GrayPageHeader } from "../../components/PageHeaders";
 import { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import ConvDetails from "./ConvDetails";
 import ManageConvDialog, { useManageConvs } from "./ManageConvDialog";
@@ -18,6 +17,7 @@ import {
   useConversations,
 } from "@cuttinboard-solutions/cuttinboard-library/chats";
 import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { GrayPageHeader } from "../../shared";
 
 function ConversationsMain() {
   const { t } = useTranslation();

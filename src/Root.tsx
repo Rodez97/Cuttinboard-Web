@@ -1,17 +1,13 @@
 import React, { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { LoadingScreen } from "./components";
 import { MainApp } from "./index";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import { RootLoading } from "./shared";
 
 export default () => (
   <React.StrictMode>
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<RootLoading />}>
       <BrowserRouter>
-        <DndProvider backend={HTML5Backend}>
-          <MainApp />
-        </DndProvider>
+        <MainApp />
       </BrowserRouter>
     </Suspense>
   </React.StrictMode>

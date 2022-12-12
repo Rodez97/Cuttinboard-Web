@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useCallback, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EmployeeCard from "./EmployeeCard";
 import { matchSorter } from "match-sorter";
@@ -25,7 +25,7 @@ import { recordError } from "../../utils/utils";
 import ManagePositions from "./ManagePositions";
 import { groupBy, orderBy } from "lodash";
 import CreateEmployee from "./CreateEmployee";
-import { GrayPageHeader } from "../../components";
+import { GrayPageHeader } from "../../shared";
 import {
   Employee,
   useEmployeesList,
@@ -53,7 +53,11 @@ function Employees() {
     useDisclose(false);
 
   const addPrimaryOwner = async () => {
-    await location.ownerJoin(true);
+    try {
+      await location.ownerJoin(true);
+    } catch (error) {
+      recordError(error);
+    }
   };
 
   const removePrimaryOwner = () => {
@@ -70,10 +74,8 @@ function Employees() {
     });
   };
 
-  const getEmployeeByRole = useCallback(() => {
-    const employees = getEmployees;
-
-    const groupedByRole = groupBy(employees, (e) => e.locationRole);
+  const getEmployeeByRole = useMemo(() => {
+    const groupedByRole = groupBy(getEmployees, (e) => e.locationRole);
 
     const finalAfterQuery = Object.entries(groupedByRole).reduce<
       Record<RoleAccessLevels, Employee[]>
@@ -217,34 +219,30 @@ function Employees() {
               <Skeleton active />
             ) : (
               <List>
-                {isOwner && !getEmployees?.some((e) => e.id === user.uid) && (
-                  <Button type="dashed" onClick={addPrimaryOwner} block>
-                    {t("Join this location")}
-                  </Button>
-                )}
-                {isAdmin && !getEmployees?.some((e) => e.id === user.uid) && (
-                  <Button type="dashed" onClick={joinSupervisor} block>
-                    {t("Join this location")}
-                  </Button>
-                )}
+                {(isOwner || isAdmin) &&
+                  !getEmployees.some((e) => e.id === user.uid) && (
+                    <Button
+                      type="dashed"
+                      onClick={isOwner ? addPrimaryOwner : joinSupervisor}
+                      block
+                    >
+                      {t("Join this location")}
+                    </Button>
+                  )}
 
-                {isOwner && getEmployees?.some((e) => e.id === user.uid) && (
-                  <Button
-                    type="dashed"
-                    danger
-                    onClick={removePrimaryOwner}
-                    block
-                  >
-                    {t("Leave this location")}
-                  </Button>
-                )}
-                {isAdmin && getEmployees?.some((e) => e.id === user.uid) && (
-                  <Button type="dashed" danger onClick={leaveSupervisor} block>
-                    {t("Leave this location")}
-                  </Button>
-                )}
+                {(isOwner || isAdmin) &&
+                  getEmployees.some((e) => e.id === user.uid) && (
+                    <Button
+                      type="dashed"
+                      danger
+                      onClick={isOwner ? removePrimaryOwner : leaveSupervisor}
+                      block
+                    >
+                      {t("Leave this location")}
+                    </Button>
+                  )}
 
-                {getEmployeeByRole().map(([role, employees]) => {
+                {getEmployeeByRole.map(([role, employees]) => {
                   if (employees.length > 0) {
                     return (
                       <React.Fragment key={role}>

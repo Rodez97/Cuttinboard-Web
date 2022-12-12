@@ -12,18 +12,18 @@ import Icon, { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { NotePlus } from "./notesIcons";
 import { matchSorter } from "match-sorter";
 import {
-  EmptyMainModule,
   GrayPageHeader,
   PageError,
-  PageLoading,
-} from "../../components";
+  LoadingPage,
+  NotFound,
+  EmptyBoard,
+} from "../../shared";
 import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
 import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 import { useParams } from "react-router-dom";
-import { NotFound } from "../../components/NotFound";
 import {
   Note,
   useBoard,
@@ -76,20 +76,25 @@ function Main() {
     manageNoteDialogRef.current?.openNew();
   };
 
+  // Define a function to filter, sort, and memoize the list of notes
   const getOrderedNotes = useMemo(() => {
+    // Return an empty array if the notes are not provided
     if (!notes) {
       return [];
     }
 
-    const filtered: Note[] = searchQuery
-      ? matchSorter(notes, searchQuery, {
-          keys: ["title", "content"],
-        })
-      : notes;
+    // Filter the list of notes based on the search query
+    let filtered = notes;
+    if (searchQuery) {
+      filtered = matchSorter(notes, searchQuery, {
+        keys: ["title", "content"],
+      });
+    }
 
+    // Sort the list of notes based on the index and order parameters
     switch (index) {
       case 0:
-        return orderBy(filtered, (e) => e.author.at.toDate(), order);
+        return orderBy(filtered, (e) => e.author.at?.toDate(), order);
       case 1:
         return orderBy(filtered, "title", order);
       default:
@@ -98,7 +103,7 @@ function Main() {
   }, [notes, index, order, searchQuery]);
 
   if (loading) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (error) {
@@ -106,7 +111,7 @@ function Main() {
   }
 
   if (!selectedBoard) {
-    return <EmptyMainModule />;
+    return <EmptyBoard />;
   }
 
   return (
@@ -160,7 +165,7 @@ function Main() {
           ))}
         </Space>
       ) : (
-        <EmptyMainModule
+        <EmptyBoard
           description={
             <span>
               No notes. <a onClick={handleCreateNote}>Create one</a> or{" "}

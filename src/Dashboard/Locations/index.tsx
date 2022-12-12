@@ -8,7 +8,7 @@ import { CrownOutlined } from "@ant-design/icons";
 import MemberLocations from "./MemberLocations";
 import SupervisorLocations from "./SupervisorLocations";
 import { PageHeader } from "@ant-design/pro-layout";
-import GoldButton from "./GoldButton";
+import { GoldButton } from "../../shared";
 
 const { Content } = Layout;
 

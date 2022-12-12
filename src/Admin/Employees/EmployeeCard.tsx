@@ -14,7 +14,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { GrayPageHeader, UserInfoElement } from "../../components";
+import { GrayPageHeader, UserInfoElement } from "../../shared";
 import EmployeeContactDialog from "./EmployeeContactDialog";
 import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
@@ -54,7 +54,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
 
   const compareRoles = useMemo(() => {
     return CompareRoles(locationAccessKey.role, Number(employee.locationRole));
-  }, [locationAccessKey, employee]);
+  }, [locationAccessKey.role, employee.locationRole]);
 
   const items: MenuProps["items"] = [
     {
@@ -90,16 +90,27 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
 
   const handleAvatarClick = () => {
     Modal.info({
-      title: t("User Info"),
+      title: (
+        <span css={{ textAlign: "center", display: "block" }}>
+          {t("User Info")}
+        </span>
+      ),
       content: <UserInfoElement employee={employee} />,
+      icon: null,
+      className: "user-info-modal",
+      bodyStyle: {
+        maxWidth: "100%",
+      },
     });
   };
 
-  const getPositions = () => {
-    return employee.positions.filter(
-      (position) => position !== employee.mainPosition
-    );
-  };
+  const getPositions = useMemo(
+    () =>
+      employee.positions.filter(
+        (position) => position !== employee.mainPosition
+      ),
+    [employee.mainPosition, employee.positions]
+  );
 
   return (
     <React.Fragment>
@@ -120,7 +131,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
               menu={{
                 items: [
                   ...items,
-                  ...(employee.id !== user?.uid && compareRoles
+                  ...(employee.id !== user.uid && compareRoles
                     ? manageItems
                     : []),
                 ],
@@ -140,8 +151,8 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
               : []
           }
           footer={
-            getPositions().length
-              ? getPositions().map((pos) => (
+            getPositions.length
+              ? getPositions.map((pos) => (
                   <Tag key={pos} color="processing">
                     {pos}
                   </Tag>

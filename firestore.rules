@@ -12,7 +12,7 @@ service cloud.firestore {
     }
 
     function orgMember(orgId){
-      return request.auth != null && ((request.auth.token.organizationKey != null && request.auth.token.organizationKey.orgId == orgId) || request.auth.uid == orgId);
+      return isAuthenticated() && ((request.auth.token.organizationKey != null && request.auth.token.organizationKey.orgId == orgId) || request.auth.uid == orgId);
     }
 
     function locMember(orgId, locId){
@@ -85,13 +85,13 @@ service cloud.firestore {
       allow read: if isAuthenticated();
 
       match /recurringTasks/{locId} {
-        allow read: if isOwner(organizationId) || locMember(organizationId, locId);
-        allow write: if isOwner(organizationId) || locMember(organizationId, locId);
+        allow read: if isOwnerOrSupervisor(organizationId) || locMember(organizationId, locId);
+        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, locId) || isManager(organizationId, locId);
       }
 
       match /tasks/{locId} {
-        allow read: if isOwner(organizationId) || locMember(organizationId, locId);
-        allow write: if isOwner(organizationId) || locMember(organizationId, locId);
+        allow read: if isOwnerOrSupervisor(organizationId) || locMember(organizationId, locId);
+        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, locId) || isManager(organizationId, locId);
       }
 
       match /settings/{settingId} {

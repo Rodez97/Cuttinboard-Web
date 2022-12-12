@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { doc } from "firebase/firestore";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useDocumentData } from "react-firebase-hooks/firestore";
@@ -25,7 +25,7 @@ import {
 } from "@ant-design/icons";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { getAnalytics, logEvent } from "firebase/analytics";
-import { PageError, PageLoading } from "../components";
+import { PageError, LoadingPage } from "../shared";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
@@ -92,8 +92,30 @@ export default () => {
     }
   };
 
+  const features = useMemo(
+    () => [
+      {
+        label: t("Enjoy your first month for free."),
+        icon: <GiftOutlined css={{ color: "#10AFDC" }} />,
+      },
+      {
+        label: t("No credit card required."),
+        icon: <CreditCardOutlined css={{ color: "#10AFDC" }} />,
+      },
+      {
+        label: t("Up to 100 employees per Location."),
+        icon: <TeamOutlined css={{ color: "#10AFDC" }} />,
+      },
+      {
+        label: t("5 GB file storage per Location."),
+        icon: <FolderOpenOutlined css={{ color: "#10AFDC" }} />,
+      },
+    ],
+    [t]
+  );
+
   if (loadingPrice) {
-    return <PageLoading />;
+    return <LoadingPage />;
   }
 
   if (priceError) {
@@ -103,25 +125,6 @@ export default () => {
   if (!price) {
     return <Result status="404" title="404" subTitle="Not found" />;
   }
-
-  const features = [
-    {
-      label: t("Enjoy your first month for free."),
-      icon: <GiftOutlined css={{ color: "#10AFDC" }} />,
-    },
-    {
-      label: t("No credit card required."),
-      icon: <CreditCardOutlined css={{ color: "#10AFDC" }} />,
-    },
-    {
-      label: t("Up to 100 employees per Location."),
-      icon: <TeamOutlined css={{ color: "#10AFDC" }} />,
-    },
-    {
-      label: t("5 GB file storage per Location."),
-      icon: <FolderOpenOutlined css={{ color: "#10AFDC" }} />,
-    },
-  ];
 
   return (
     <Layout

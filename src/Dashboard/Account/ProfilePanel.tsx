@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
-import { EditableAvatar } from "../../components";
+import { EditableAvatar } from "../../shared";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library/account";
 import { STORAGE } from "@cuttinboard-solutions/cuttinboard-library/utils";
@@ -27,9 +27,9 @@ function ProfilePanel() {
   };
 
   const onFinish = async (values) => {
-    const { avatar, ...others } = values;
-    setIsSubmitting(true);
     try {
+      const { avatar, ...others } = values;
+      setIsSubmitting(true);
       let photoURL: string = user.photoURL ?? "";
       if (avatar?.file) {
         const profilePictureRef = ref(STORAGE, `users/${user.uid}/avatar`);
@@ -48,8 +48,9 @@ function ProfilePanel() {
       message.success(t("Changes saved"));
     } catch (error) {
       recordError(error);
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (
