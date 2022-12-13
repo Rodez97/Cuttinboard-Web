@@ -26,7 +26,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
     "@ant-design/pro-layout": "^7.2.5",
-    "@cuttinboard-solutions/cuttinboard-library": "^2.1.4",
+    "@cuttinboard-solutions/cuttinboard-library": "^2.2.1",
     "@fontsource/roboto": "^4.5.8",
     "@mdi/svg": "^7.0.96",
     "@rehooks/local-storage": "^2.4.4",

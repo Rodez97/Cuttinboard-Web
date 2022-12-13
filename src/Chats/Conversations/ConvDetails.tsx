@@ -101,87 +101,91 @@ function ConvDetails({
         ]
       }
     >
-      <List.Item>
-        <List.Item.Meta
-          avatar={<FormOutlined />}
-          title={t("Name")}
-          description={activeConversation.name}
-        />
-      </List.Item>
-      <List.Item>
-        <List.Item.Meta
-          avatar={
-            activeConversation.privacyLevel === PrivacyLevel.PRIVATE ? (
-              <LockOutlined />
-            ) : activeConversation.privacyLevel === PrivacyLevel.POSITIONS ? (
-              <TagsOutlined />
-            ) : (
-              <GlobalOutlined />
-            )
-          }
-          title={t("Privacy Level")}
-          description={t(privacyLevelToString(activeConversation.privacyLevel))}
-        />
-      </List.Item>
-      {Boolean(admins.length) && (
+      <List>
         <List.Item>
           <List.Item.Meta
-            avatar={<CrownOutlined />}
-            title={t("Admins")}
-            description={admins.map((admin) => (
-              <p key={admin.id}>{admin.fullName}</p>
-            ))}
+            avatar={<FormOutlined />}
+            title={t("Name")}
+            description={activeConversation.name}
           />
         </List.Item>
-      )}
-      <List.Item>
-        <List.Item.Meta
-          avatar={<InfoCircleOutlined />}
-          title={t("Description")}
-          description={
-            activeConversation.description
-              ? activeConversation.description
-              : "---"
-          }
-        />
-      </List.Item>
-      {activeConversation.privacyLevel === PrivacyLevel.PRIVATE && (
         <List.Item>
           <List.Item.Meta
-            avatar={<TeamOutlined />}
-            title={t("Members")}
-            description={activeConversation.members?.length ?? 0}
+            avatar={
+              activeConversation.privacyLevel === PrivacyLevel.PRIVATE ? (
+                <LockOutlined />
+              ) : activeConversation.privacyLevel === PrivacyLevel.POSITIONS ? (
+                <TagsOutlined />
+              ) : (
+                <GlobalOutlined />
+              )
+            }
+            title={t("Privacy Level")}
+            description={t(
+              privacyLevelToString(activeConversation.privacyLevel)
+            )}
           />
         </List.Item>
-      )}
-
-      {activeConversation.privacyLevel === PrivacyLevel.POSITIONS &&
-        Boolean(activeConversation.position) && (
+        {Boolean(admins.length) && (
           <List.Item>
             <List.Item.Meta
-              avatar={<TagOutlined />}
-              title={t("Position")}
-              description={activeConversation.position}
+              avatar={<CrownOutlined />}
+              title={t("Admins")}
+              description={admins.map((admin) => (
+                <p key={admin.id}>{admin.fullName}</p>
+              ))}
             />
           </List.Item>
         )}
-      <Divider />
-      <List.Item
-        hidden={!activeConversation.iAmMember}
-        extra={
-          <Switch
-            checked={activeConversation.isMuted}
-            onChange={() => {
-              activeConversation.toggleMuteChat();
-            }}
+        <List.Item>
+          <List.Item.Meta
+            avatar={<InfoCircleOutlined />}
+            title={t("Description")}
+            description={
+              activeConversation.description
+                ? activeConversation.description
+                : "---"
+            }
           />
-        }
-      >
-        <List.Item.Meta
-          avatar={<NotificationOutlined />}
-          title={t("Mute push notifications")}
-        />
-      </List.Item>
+        </List.Item>
+        {activeConversation.privacyLevel === PrivacyLevel.PRIVATE && (
+          <List.Item>
+            <List.Item.Meta
+              avatar={<TeamOutlined />}
+              title={t("Members")}
+              description={activeConversation.members?.length ?? 0}
+            />
+          </List.Item>
+        )}
+
+        {activeConversation.privacyLevel === PrivacyLevel.POSITIONS &&
+          Boolean(activeConversation.position) && (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<TagOutlined />}
+                title={t("Position")}
+                description={activeConversation.position}
+              />
+            </List.Item>
+          )}
+        <Divider />
+        <List.Item
+          hidden={!activeConversation.iAmMember}
+          extra={
+            <Switch
+              checked={activeConversation.isMuted}
+              onChange={() => {
+                activeConversation.toggleMuteChat();
+              }}
+            />
+          }
+        >
+          <List.Item.Meta
+            avatar={<NotificationOutlined />}
+            title={t("Mute push notifications")}
+          />
+        </List.Item>
+      </List>
     </Modal>
   );
 }

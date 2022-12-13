@@ -9,7 +9,7 @@ import { PageError, RootLoading } from "./shared";
 function App() {
   return (
     <CuttinboardProvider
-      LoadingRenderer={RootLoading}
+      LoadingRenderer={<RootLoading />}
       ErrorRenderer={(err) => {
         recordError(err);
         return <PageError error={err} />;

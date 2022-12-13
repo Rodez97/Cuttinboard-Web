@@ -23,6 +23,9 @@ export default ({ shift }: ShiftCardProps) => {
 
   return (
     <GrayPageHeader
+      css={{
+        marginBottom: 5,
+      }}
       subTitle={`${shift.origData.start.format(
         "h:mm A"
       )} - ${shift.origData.end.format("h:mm A")}`}

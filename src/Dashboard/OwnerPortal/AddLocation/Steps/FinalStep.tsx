@@ -8,7 +8,7 @@ import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc } from "firebase/firestore";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { useDashboard } from "../../../DashboardProvider";
-import { List, Space, Typography } from "antd";
+import { List, Typography } from "antd";
 import { ShopOutlined, UserOutlined } from "@ant-design/icons";
 import { PageError, LoadingPage } from "../../../../shared";
 import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
@@ -30,10 +30,10 @@ const SummaryNewLocationContainer = styled.div`
   );
   color: #fff !important;
   & .ant-list-item-meta-title {
-    color: #fff;
+    color: #fff !important;
   }
   & .ant-list-item-meta-description {
-    color: #ffffff80;
+    color: #ffffff80 !important;
   }
   & .ant-typography {
     color: #fff;
@@ -98,24 +98,26 @@ function FinalStep() {
           {t("A new location will be added")}
         </Typography.Title>
 
-        <Space
-          css={{ border: "1px solid #ffffff80", padding: 5 }}
-          size="large"
-          direction="vertical"
-        >
-          <List.Item.Meta
-            avatar={<ShopOutlined />}
-            title={t("Name")}
-            description={location.name}
-          />
-          {generalManager && (
+        <List css={{ border: "1px solid #ffffff80", padding: 5 }} size="small">
+          <List.Item>
             <List.Item.Meta
-              avatar={<UserOutlined />}
-              title={t("General Manager")}
-              description={generalManager.name}
+              avatar={<ShopOutlined />}
+              title={t("Name")}
+              description={location.name}
+              css={{ color: "#fff" }}
             />
+          </List.Item>
+          {generalManager && (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<UserOutlined />}
+                title={t("General Manager")}
+                description={generalManager.name}
+                css={{ color: "#fff" }}
+              />
+            </List.Item>
           )}
-        </Space>
+        </List>
 
         <Typography.Title level={5}>
           {t("Your new bill will be:")}

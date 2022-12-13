@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { doc } from "firebase/firestore";
-import { capitalize, orderBy } from "lodash";
-import React, { useCallback, useMemo, useState } from "react";
+import { capitalize, groupBy, orderBy } from "lodash";
+import React, { useMemo, useState } from "react";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import ShiftCard from "./Card";
 import dayjs from "dayjs";
@@ -22,11 +22,7 @@ import {
   useCuttinboard,
   useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  EmployeeShifts,
-  Shift,
-  weekToDate,
-} from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { EmployeeShifts } from "@cuttinboard-solutions/cuttinboard-library/schedule";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -52,37 +48,25 @@ export default () => {
     ).withConverter(EmployeeShifts.Converter)
   );
 
-  const weekDays = useMemo(() => {
-    const year = Number.parseInt(currentWeekId.split("-")[2]);
-    const weekNo = Number.parseInt(currentWeekId.split("-")[1]);
-    const firstDayWeek = weekToDate(year, weekNo, 1);
-    const weekDays: Date[] = [];
-    weekDays.push(firstDayWeek);
-    for (let index = 1; index < 7; index++) {
-      weekDays.push(dayjs(firstDayWeek).add(index, "days").toDate());
+  const groupByDay = useMemo(() => {
+    if (!shifts?.shiftsArray) {
+      return [];
     }
-    return weekDays;
-  }, [currentWeekId]);
+    const orderedShifts = orderBy(
+      shifts?.shiftsArray,
+      (shf) => shf.getStartDayjsDate.toDate(),
+      "asc"
+    );
 
-  const groupByDay = useCallback(
-    (shifts: Shift[]) => {
-      const orderedShifts = orderBy(
-        shifts,
-        (shf) => shf.getStartDayjsDate,
-        "asc"
-      );
-      return weekDays.reduce<{ day: Date; shifts: Shift[] }[]>((acc, day) => {
-        const dayShifts = orderedShifts.filter(
-          (shf) => shf.shiftIsoWeekday === dayjs(day).isoWeekday()
-        );
-        if (dayShifts?.length) {
-          return [...acc, { day, shifts: dayShifts }];
-        }
-        return acc;
-      }, []);
-    },
-    [weekDays]
-  );
+    const filterPublishedShifts = orderedShifts.filter(
+      (shf) => shf.status === "published"
+    );
+
+    const grouped = groupBy(filterPublishedShifts, (shf) =>
+      capitalize(shf.origData.start.format("dddd, MMMM DD, YYYY"))
+    );
+    return Object.entries(grouped);
+  }, [shifts?.shiftsArray]);
 
   useLayoutEffect(() => {
     return () => {
@@ -141,32 +125,30 @@ export default () => {
                   width: "100%",
                 }}
               >
-                {shifts?.shiftsArray.length ? (
+                {groupByDay.length ? (
                   <Space
                     style={{ display: "flex", width: "100%" }}
                     direction="vertical"
                   >
                     {isInCurrentWeek ? (
-                      groupByDay(shifts?.shiftsArray).map(
-                        ({ day, shifts }, index) => (
+                      groupByDay.map(([day, shifts], index) => {
+                        const isToday = shifts[0].getStartDayjsDate.isSame(
+                          dayjs(),
+                          "day"
+                        );
+                        return (
                           <div
                             key={index}
                             css={{
-                              border:
-                                day.getDate() === new Date().getDate()
-                                  ? "1px dotted #00000025"
-                                  : "initial",
-                              padding:
-                                day.getDate() === new Date().getDate()
-                                  ? 3
-                                  : "initial",
+                              border: isToday
+                                ? "1px dotted #00000025"
+                                : "initial",
+                              padding: isToday ? 3 : "initial",
                             }}
                           >
                             <Divider orientation="left">
-                              {capitalize(
-                                dayjs(day).format("dddd, MMMM DD, YYYY")
-                              )}
-                              {day.getDate() === new Date().getDate() && (
+                              {day}
+                              {isToday && (
                                 <Tag
                                   color={Colors.MainBlue}
                                   css={{ marginLeft: 10 }}
@@ -180,27 +162,23 @@ export default () => {
                               <ShiftCard key={shift.id} shift={shift} />
                             ))}
                           </div>
-                        )
-                      )
+                        );
+                      })
                     ) : (
                       <React.Fragment>
                         {/* 📅 Next Week */}
                         {shifts &&
-                          groupByDay(shifts?.shiftsArray).map(
-                            ({ day, shifts }, index) => (
+                          groupByDay.map(([day, shifts], index) => {
+                            return (
                               <div key={index}>
-                                <Divider orientation="left">
-                                  {capitalize(
-                                    dayjs(day).format("dddd, MMMM DD, YYYY")
-                                  )}
-                                </Divider>
+                                <Divider orientation="left">{day}</Divider>
 
                                 {shifts.map((shift) => (
                                   <ShiftCard key={shift.id} shift={shift} />
                                 ))}
                               </div>
-                            )
-                          )}
+                            );
+                          })}
                       </React.Fragment>
                     )}
                   </Space>

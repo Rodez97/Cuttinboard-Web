@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { Space, Tag, Tooltip, Typography } from "antd";
 import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { UserInfoAvatar } from "../../shared";
@@ -16,7 +16,7 @@ interface EmpColumnCellProps {
 }
 
 function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
-  const getSecondaryElement = useCallback(() => {
+  const SecondaryElement = useMemo(() => {
     if (!empShifts) {
       if (employee.locationRole === RoleAccessLevels.OWNER) {
         return <Tag color="processing">{`${0}h ${0}min`}</Tag>;
@@ -90,19 +90,29 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
   return (
     <div
       css={{
-        zIndex: 2,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        height: 50,
-        paddingLeft: 5,
         backgroundColor: "white",
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
       }}
     >
-      <UserInfoAvatar employee={employee} size={25} />
-      <div css={{ marginLeft: 5, display: "flex", flexDirection: "column" }}>
-        <Typography.Text strong>{employee.fullName}</Typography.Text>
-        {getSecondaryElement()}
+      <div
+        css={{
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          height: 50,
+          paddingLeft: 5,
+          backgroundColor: "white",
+        }}
+      >
+        <UserInfoAvatar employee={employee} size={25} />
+        <div css={{ marginLeft: 5, display: "flex", flexDirection: "column" }}>
+          <Typography.Text strong>{employee.fullName}</Typography.Text>
+          {SecondaryElement}
+        </div>
       </div>
     </div>
   );

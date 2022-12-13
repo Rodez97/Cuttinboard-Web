@@ -24,6 +24,7 @@ interface ShiftElementProps {
   employee: Employee;
   column: Date;
   shift: Shift;
+  index: number;
 }
 
 const BaseContainerStyle = css`
@@ -45,7 +46,7 @@ const DraftOrEditedStyle = css`
   background-color: #505050;
 `;
 
-function ShiftElement({ employee, column, shift }: ShiftElementProps) {
+function ShiftElement({ employee, column, shift, index }: ShiftElementProps) {
   const { editShift, newShift } = useScheduler();
   const { t } = useTranslation();
 
@@ -149,6 +150,7 @@ function ShiftElement({ employee, column, shift }: ShiftElementProps) {
             : shift.status === "draft" || shift.hasPendingUpdates
             ? DraftOrEditedStyle
             : undefined,
+          index !== 0 && { marginTop: 1 },
         ]}
       >
         <div
@@ -182,7 +184,7 @@ function ShiftElement({ employee, column, shift }: ShiftElementProps) {
             <Tag color="error">{t("No position")}</Tag>
           )}
 
-          {true && (
+          {shift.wageData.overtimeHours > 0 && (
             <Icon
               component={mdiClockAlert}
               css={{

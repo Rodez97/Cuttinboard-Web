@@ -45,12 +45,13 @@ function ShiftCell({ employee, allShifts, date }: ShiftCellProps) {
       }}
     >
       {cellShifts && cellShifts.length > 0 ? (
-        cellShifts.map((shift) => (
+        cellShifts.map((shift, i) => (
           <ShiftElement
             key={shift.id}
             employee={employee}
             column={date}
             shift={shift}
+            index={i}
           />
         ))
       ) : (
