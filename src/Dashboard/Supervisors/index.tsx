@@ -1,25 +1,28 @@
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   FIRESTORE,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+  orgEmployeeConverter,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { RoleAccessLevels } from "@cuttinboard-solutions/types-helpers";
 import { collection, query, where } from "firebase/firestore";
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { Route, Routes } from "react-router-dom";
+import usePageTitle from "../../hooks/usePageTitle";
 import { PageError, LoadingPage } from "../../shared";
-import NewSupervisor from "./NewSupervisor";
-import SupervisorDetails from "./SupervisorDetails";
-import Supervisors from "./Supervisors";
+
+const Supervisors = lazy(() => import("./Supervisors"));
+const SupervisorDetails = lazy(() => import("./SupervisorDetails"));
+const NewSupervisor = lazy(() => import("./NewSupervisor"));
 
 export default () => {
+  usePageTitle("Supervisors");
   const { user } = useCuttinboard();
   const [supervisors, loading, error] = useCollectionData(
     query(
       collection(FIRESTORE, "Organizations", user.uid, "employees"),
       where("role", "==", RoleAccessLevels.ADMIN)
-    ).withConverter(Employee.firestoreConverter)
+    ).withConverter(orgEmployeeConverter)
   );
 
   if (loading) {
@@ -31,19 +34,21 @@ export default () => {
   }
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={<Supervisors supervisors={supervisors ?? []} />}
-      />
-      <Route
-        path="new-supervisor"
-        element={<NewSupervisor supervisors={supervisors ?? []} />}
-      />
-      <Route
-        path="details/:supervisorId/*"
-        element={<SupervisorDetails supervisors={supervisors ?? []} />}
-      />
-    </Routes>
+    <Suspense fallback={<LoadingPage />}>
+      <Routes>
+        <Route
+          path="/"
+          element={<Supervisors supervisors={supervisors ?? []} />}
+        />
+        <Route
+          path="new-supervisor"
+          element={<NewSupervisor supervisors={supervisors ?? []} />}
+        />
+        <Route
+          path="details/:supervisorId/*"
+          element={<SupervisorDetails supervisors={supervisors ?? []} />}
+        />
+      </Routes>
+    </Suspense>
   );
 };

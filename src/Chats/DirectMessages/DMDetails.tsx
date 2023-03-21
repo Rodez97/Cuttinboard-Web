@@ -1,37 +1,33 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  Alert,
-  Avatar,
-  Divider,
-  List,
-  Modal,
-  ModalProps,
-  Switch,
-  Typography,
-} from "antd";
+import { Alert, Divider, List, Modal, ModalProps, Typography } from "antd";
 import { useTranslation } from "react-i18next";
+import { MailOutlined, MobileOutlined, UserOutlined } from "@ant-design/icons";
+import { useDirectMessageChat } from "@cuttinboard-solutions/cuttinboard-library";
+import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import {
-  MailOutlined,
-  MobileOutlined,
-  NotificationOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import React from "react";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/account";
-import { useDirectMessageChat } from "@cuttinboard-solutions/cuttinboard-library/chats";
+  ICuttinboardUser,
+  IEmployee,
+} from "@cuttinboard-solutions/types-helpers";
 
 type DMDetailsProps = {
-  employee: Employee | CuttinboardUser | undefined;
+  employee: IEmployee | ICuttinboardUser | undefined;
 } & ModalProps;
 
 export default ({ employee, ...props }: DMDetailsProps) => {
   const { t } = useTranslation();
-  const { selectedDirectMessageChat } = useDirectMessageChat();
+  const { selectedDirectMessage } = useDirectMessageChat();
 
-  if (!selectedDirectMessageChat) {
+  if (!selectedDirectMessage) {
     return null;
+  }
+
+  if (!employee) {
+    return (
+      <Modal {...props} title={t("Details")} footer={null}>
+        <Alert message={t("This employee has been removed")} type="warning" />
+      </Modal>
+    );
   }
 
   return (
@@ -44,56 +40,38 @@ export default ({ employee, ...props }: DMDetailsProps) => {
           alignItems: "center",
         }}
       >
-        <Avatar icon={<UserOutlined />} size={70} src={employee?.avatar} />
-        <Typography.Text type="secondary">{employee?.name}</Typography.Text>
+        <CuttinboardAvatar
+          userId={employee.id}
+          size={70}
+          src={employee.avatar}
+        />
+        <Typography.Text type="secondary">{employee.name}</Typography.Text>
       </div>
       <Divider orientation="left">{t("About")}</Divider>
 
-      {employee ? (
-        <React.Fragment>
-          <List.Item>
-            <List.Item.Meta
-              avatar={<UserOutlined />}
-              title={t("Full Name")}
-              description={`${employee.name} ${employee.lastName}`}
-            />
-          </List.Item>
-          <List.Item>
-            <List.Item.Meta
-              avatar={<MailOutlined />}
-              title={t("Email")}
-              description={employee.email}
-            />
-          </List.Item>
-          <List.Item>
-            <List.Item.Meta
-              avatar={<MobileOutlined />}
-              title={t("Phone Number")}
-              description={employee.phoneNumber ?? "---"}
-            />
-          </List.Item>
-          <Divider />
-          <List.Item
-            extra={
-              <Switch
-                checked={selectedDirectMessageChat.isMuted}
-                onChange={() => {
-                  selectedDirectMessageChat.toggleMuteChat();
-                }}
-              />
-            }
-          >
-            <List.Item.Meta
-              avatar={<NotificationOutlined />}
-              title={t("Mute push notifications")}
-            />
-          </List.Item>
-        </React.Fragment>
-      ) : (
-        <React.Fragment>
-          <Alert message={t("This employee has been removed")} type="warning" />
-        </React.Fragment>
-      )}
+      <List>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<UserOutlined />}
+            title={t("Full Name")}
+            description={`${employee.name} ${employee.lastName}`}
+          />
+        </List.Item>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<MailOutlined />}
+            title={t("Email")}
+            description={employee.email}
+          />
+        </List.Item>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<MobileOutlined />}
+            title={t("Phone Number")}
+            description={employee.phoneNumber ?? "---"}
+          />
+        </List.Item>
+      </List>
     </Modal>
   );
 };

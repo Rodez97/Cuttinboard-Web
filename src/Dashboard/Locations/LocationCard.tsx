@@ -1,22 +1,23 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Badge, Button, Card, List, message, Modal } from "antd";
+import { Button, Card, List, message, Modal } from "antd";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { ReactNode, useCallback, useMemo } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import styled from "@emotion/styled";
-import {
-  Colors,
-  FUNCTIONS,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
+import {
+  Colors,
+  FUNCTIONS,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
+import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 const { Meta } = Card;
 
@@ -42,14 +43,15 @@ const MainCard = styled(Card)<{
 `;
 
 interface LocationCardProps {
-  location: Location;
+  location: ILocation;
   actions?: ReactNode[];
+  showBadge?: boolean;
 }
 
 export default ({ location, actions }: LocationCardProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user, notifications } = useCuttinboard();
+  const { user } = useCuttinboard();
   const [createBillingSession] = useHttpsCallable<
     { return_url: string },
     string
@@ -78,8 +80,7 @@ export default ({ location, actions }: LocationCardProps) => {
           }
 
           // Report to analytics
-          const analytics = getAnalytics();
-          logEvent(analytics, "billing_session_created", {
+          logEvent(ANALYTICS, "billing_session_created", {
             location_id: location.id,
             organization_id: location.organizationId,
             from: "location_card",
@@ -155,14 +156,11 @@ export default ({ location, actions }: LocationCardProps) => {
         <List
           size="small"
           dataSource={[
-            ["Description", "description"],
-            ["Phone", "phoneNumber"],
-            ["Email", "email"],
+            ["Name", "name"],
+            ["ID", "intId"],
             ["City", "address.city"],
             ["State", "address.state"],
-            ["Country", "address.country"],
             ["Zip Code", "address.zip"],
-            ["ID", "intId"],
           ]}
           renderItem={(item) => (
             <List.Item>
@@ -189,43 +187,32 @@ export default ({ location, actions }: LocationCardProps) => {
     [content, location.name]
   );
 
-  const badges = useMemo(
-    () =>
-      notifications?.getAllBadgesByLocation(
-        location.id,
-        location.organizationId
-      ),
-    [location, notifications]
-  );
-
   return (
-    <Badge count={badges} color="primary">
-      <MainCard
-        hoverable
-        onClick={handleSelectLocation}
-        actions={actions}
-        haveActions={Boolean(actions?.length)}
-        deleting={Boolean(location.subscriptionStatus === "canceled")}
-        extra={
-          <Button
-            type="text"
-            shape="circle"
-            icon={<InfoCircleOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              showInfo();
-            }}
-          />
-        }
-        title={location.name}
-      >
-        <Meta
-          css={{ color: "inherit" }}
-          description={`${
-            location.members ? location.members.length : 0
-          } Member(s)`}
+    <MainCard
+      hoverable
+      onClick={handleSelectLocation}
+      actions={actions}
+      haveActions={Boolean(actions?.length)}
+      deleting={Boolean(location.subscriptionStatus === "canceled")}
+      extra={
+        <Button
+          type="text"
+          shape="circle"
+          icon={<InfoCircleOutlined />}
+          onClick={(e) => {
+            e.stopPropagation();
+            showInfo();
+          }}
         />
-      </MainCard>
-    </Badge>
+      }
+      title={location.name}
+    >
+      <Meta
+        css={{ color: "inherit" }}
+        description={`${
+          location.members ? location.members.length : 0
+        } Member(s)`}
+      />
+    </MainCard>
   );
 };

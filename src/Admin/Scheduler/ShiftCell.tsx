@@ -1,72 +1,70 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react";
+import React from "react";
 import dayjs from "dayjs";
 import ShiftElement from "./ShiftElement";
-import duration from "dayjs/plugin/duration";
-import advancedFormat from "dayjs/plugin/advancedFormat";
 import { PlusOutlined } from "@ant-design/icons";
-import { Space } from "antd";
 import isoWeek from "dayjs/plugin/isoWeek";
-import { useScheduler } from "./Scheduler";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { Shift } from "@cuttinboard-solutions/cuttinboard-library/schedule";
 import { useMemo } from "react";
+import {
+  getShiftDayjsDate,
+  getShiftIsoWeekday,
+  IEmployee,
+  IShift,
+} from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
-dayjs.extend(advancedFormat);
-dayjs.extend(duration);
 
-interface ShiftCellProps {
-  employee: Employee;
-  allShifts?: Shift[];
-  date: Date;
+export interface ManageShiftsProps {
+  editShift: (employee: IEmployee, shift: IShift) => void;
+  newShift: (employee: IEmployee, date: dayjs.Dayjs) => void;
 }
 
-function ShiftCell({ employee, allShifts, date }: ShiftCellProps) {
-  const { newShift } = useScheduler();
+interface ShiftCellProps extends ManageShiftsProps {
+  employee: IEmployee;
+  allShifts?: IShift[];
+  column: dayjs.Dayjs;
+}
+
+function ShiftCell({
+  employee,
+  allShifts,
+  column,
+  newShift,
+  editShift,
+}: ShiftCellProps) {
   const handleCellClick = () => {
-    newShift(employee, date);
+    newShift(employee, column);
   };
 
-  const cellShifts = useMemo(
-    () =>
-      allShifts?.filter((s) => s.shiftIsoWeekday === dayjs(date).isoWeekday()),
-    [allShifts, date]
-  );
-
-  console.log("cellShifts", cellShifts);
+  const cellShifts = useMemo(() => {
+    if (!allShifts) {
+      return [];
+    }
+    return allShifts
+      .filter((s) => getShiftIsoWeekday(s) === column.isoWeekday())
+      .sort((a, b) => {
+        const aStart = getShiftDayjsDate(a, "start");
+        const bStart = getShiftDayjsDate(b, "start");
+        if (aStart.isBefore(bStart)) return -1;
+        if (aStart.isAfter(bStart)) return 1;
+        return 0;
+      });
+  }, [allShifts, column]);
 
   return (
-    <div
-      css={{
-        display: "flex",
-        height: "100%",
-        width: "100%",
-        flexDirection: "column",
-      }}
-    >
+    <div className="shift-cell-container">
       {cellShifts && cellShifts.length > 0 ? (
-        cellShifts.map((shift, i) => (
+        cellShifts.map((shift, index) => (
           <ShiftElement
             key={shift.id}
-            employee={employee}
-            column={date}
-            shift={shift}
-            index={i}
+            {...{ editShift, newShift, employee, shift, column, index }}
           />
         ))
       ) : (
-        <Space
-          css={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-            cursor: "pointer",
-          }}
+        <div
+          className="shift-cell-container__add-shift"
           onClick={handleCellClick}
         >
           <PlusOutlined />
-        </Space>
+        </div>
       )}
     </div>
   );

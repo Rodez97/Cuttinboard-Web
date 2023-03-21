@@ -3,19 +3,19 @@ import { jsx } from "@emotion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 // third party
 import { recordError } from "../utils/utils";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { Alert, Button, Form, Input, Typography } from "antd";
-import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
 
 //= ===========================|| FIREBASE - LOGIN ||============================//
 
 const FirebaseLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [loginError, setLoginError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signInWithEmailAndPassword, user, loading, error] =
     useSignInWithEmailAndPassword(AUTH);
@@ -30,14 +30,13 @@ const FirebaseLogin = () => {
     setIsSubmitting(true);
     try {
       await signInWithEmailAndPassword(email, password);
-      setIsSubmitting(false);
-      logEvent(getAnalytics(), "login", {
+      logEvent(ANALYTICS, "login", {
         method: "Email-Password",
         email,
       });
     } catch (error) {
       recordError(error);
-      setLoginError(error?.message);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -116,14 +115,13 @@ const FirebaseLogin = () => {
           </Typography.Link>
         </Form.Item>
       </Form>
-      {(loginError || error) && (
+      {error && (
         <Alert
           message="Error"
-          description={t(loginError ?? error?.message)}
+          description={t(error?.message)}
           type="error"
           showIcon
           closable
-          onClose={() => setLoginError("")}
         />
       )}
     </div>

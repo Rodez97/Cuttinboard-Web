@@ -4,17 +4,19 @@ import {
   MinusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/utensils";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Colors,
+  useUtensils,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { IUtensil } from "@cuttinboard-solutions/types-helpers";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
 
 interface ReportChangeDialogProps {
   open: boolean;
   onClose: () => void;
-  utensil: Utensil;
+  utensil: IUtensil;
 }
 
 function ReportChangeDialog({
@@ -24,9 +26,9 @@ function ReportChangeDialog({
 }: ReportChangeDialogProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const [submitting, setSubmitting] = useState(false);
+  const { addUtensilChange } = useUtensils();
 
-  const saveChanges = async ({
+  const saveChanges = ({
     changeQty,
     reason,
   }: {
@@ -36,14 +38,7 @@ function ReportChangeDialog({
     if (changeQty === 0) {
       return;
     }
-
-    setSubmitting(true);
-    try {
-      await utensil.addChange(changeQty, reason);
-    } catch (error) {
-      recordError(error);
-    }
-    setSubmitting(false);
+    addUtensilChange(utensil, changeQty, reason);
     handleClose();
   };
 
@@ -55,12 +50,11 @@ function ReportChangeDialog({
   return (
     <Modal
       open={open}
-      confirmLoading={submitting}
       maskClosable={false}
       title={t("Report change")}
       onCancel={handleClose}
       footer={[
-        <Button key="cancel" onClick={handleClose} disabled={submitting}>
+        <Button key="cancel" onClick={handleClose}>
           {t("Cancel")}
         </Button>,
         <Button
@@ -68,7 +62,6 @@ function ReportChangeDialog({
           onClick={form.submit}
           type="primary"
           icon={<SaveFilled />}
-          loading={submitting}
         >
           {t("Save")}
         </Button>,
@@ -80,7 +73,6 @@ function ReportChangeDialog({
           reason: "",
         }}
         layout="vertical"
-        disabled={submitting}
         form={form}
         onFinish={saveChanges}
       >
@@ -106,6 +98,7 @@ function ReportChangeDialog({
               </Form.Item>
             }
             style={{ display: "inherit" }}
+            min={-utensil.currentQuantity}
           />
         </Form.Item>
 

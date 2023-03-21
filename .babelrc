@@ -1,14 +1,14 @@
 {
   "presets": [
-    "@babel/preset-react",
     "@babel/preset-typescript",
-    "@babel/preset-env",
+    ["@babel/preset-env", { "useBuiltIns": "usage" }],
     [
       "@babel/preset-react",
       { "runtime": "automatic", "importSource": "@emotion/react" }
     ]
   ],
   "plugins": [
+    "i18next-extract",
     "@babel/plugin-syntax-jsx",
     [
       "import",
@@ -19,6 +19,7 @@
       }
     ],
     "inline-react-svg",
-    "@emotion/babel-plugin"
+    "@emotion/babel-plugin",
+    "@babel/plugin-proposal-class-properties"
   ]
 }

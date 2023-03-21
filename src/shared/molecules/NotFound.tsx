@@ -12,7 +12,7 @@ function NotFound() {
       title="404"
       subTitle={t("Sorry, the page you visited does not exist.")}
       extra={
-        <Button type="primary" onClick={() => navigate(-1)}>
+        <Button type="primary" onClick={() => navigate("../")}>
           {t("Go back")}
         </Button>
       }

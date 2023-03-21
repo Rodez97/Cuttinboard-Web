@@ -1,78 +1,29 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { doc } from "firebase/firestore";
-import { capitalize, groupBy, orderBy } from "lodash";
-import React, { useMemo, useState } from "react";
-import { useDocumentData } from "react-firebase-hooks/firestore";
 import ShiftCard from "./Card";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useTranslation } from "react-i18next";
-import { Divider, Empty, Layout, Space, Spin, Tabs, Tag } from "antd";
+import { Checkbox, Divider, Empty, Layout, Space, Spin, Tag } from "antd";
 import {
   Colors,
-  FIRESTORE,
-  WEEKFORMAT,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useLayoutEffect } from "react";
+  useMyShifts,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader, PageError } from "../../shared";
-import {
-  useCuttinboard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { EmployeeShifts } from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import usePageTitle from "../../hooks/usePageTitle";
+import type { CheckboxChangeEvent } from "antd/es/checkbox";
+import { getShiftDayjsDate } from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
-dayjs.extend(advancedFormat);
-dayjs.extend(customParseFormat);
 
-export default () => {
+export default function MyShifts({ locationId }: { locationId?: string }) {
+  usePageTitle("My Shifts");
   const { t } = useTranslation();
-  const { location } = useCuttinboardLocation();
-  const [currentWeekId, setCurrentWeekId] = useState(
-    dayjs().format(WEEKFORMAT)
-  );
-  const { notifications, user } = useCuttinboard();
-  const isInCurrentWeek = useMemo(
-    () => currentWeekId === dayjs().format(WEEKFORMAT),
-    [currentWeekId]
-  );
-  const [shifts, loadingShifts, errorShifts] = useDocumentData(
-    doc(
-      FIRESTORE,
-      "Organizations",
-      location.organizationId,
-      "shifts",
-      `${currentWeekId}_${user.uid}_${location.id}`
-    ).withConverter(EmployeeShifts.Converter)
-  );
+  const { loading, error, groupedByDay, setOnlyLocation, onlyLocation } =
+    useMyShifts(locationId);
 
-  const groupByDay = useMemo(() => {
-    if (!shifts?.shiftsArray) {
-      return [];
-    }
-    const orderedShifts = orderBy(
-      shifts?.shiftsArray,
-      (shf) => shf.getStartDayjsDate.toDate(),
-      "asc"
-    );
-
-    const filterPublishedShifts = orderedShifts.filter(
-      (shf) => shf.status === "published"
-    );
-
-    const grouped = groupBy(filterPublishedShifts, (shf) =>
-      capitalize(shf.origData.start.format("dddd, MMMM DD, YYYY"))
-    );
-    return Object.entries(grouped);
-  }, [shifts?.shiftsArray]);
-
-  useLayoutEffect(() => {
-    return () => {
-      notifications?.removeScheduleBadges(location.organizationId, location.id);
-    };
-  }, [location.id, location.organizationId, notifications]);
+  const onChange = (e: CheckboxChangeEvent) => {
+    setOnlyLocation(e.target.checked);
+  };
 
   return (
     <Layout.Content
@@ -80,40 +31,28 @@ export default () => {
     >
       <GrayPageHeader title={t("My Shifts")} />
 
-      <div
-        css={{
-          minWidth: 270,
-          maxWidth: 700,
-          margin: "auto",
-          width: "100%",
-        }}
-      >
-        <Tabs
-          centered
-          onChange={setCurrentWeekId}
-          defaultActiveKey={currentWeekId}
-          items={[
-            {
-              label: t("This week"),
-              key: dayjs().format(WEEKFORMAT),
-              disabled: Boolean(loadingShifts || errorShifts),
-            },
-            {
-              label: t("Next week"),
-              key: dayjs().add(7, "days").format(WEEKFORMAT),
-              disabled: Boolean(loadingShifts || errorShifts),
-            },
-          ]}
-        />
-      </div>
+      {locationId && groupedByDay.length > 0 && (
+        <div
+          css={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 10,
+          }}
+        >
+          <Checkbox onChange={onChange} checked={onlyLocation}>
+            {t("Only show shifts at this location")}
+          </Checkbox>
+        </div>
+      )}
 
-      {errorShifts ? (
-        <PageError error={errorShifts} />
+      {error ? (
+        <PageError error={new Error(error)} />
       ) : (
         <Layout.Content
           css={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          <Spin spinning={loadingShifts || loadingShifts === undefined}>
+          <Spin spinning={loading}>
             <div
               css={{ display: "flex", flexDirection: "column", padding: 20 }}
             >
@@ -125,62 +64,44 @@ export default () => {
                   width: "100%",
                 }}
               >
-                {groupByDay.length ? (
+                {groupedByDay.length ? (
                   <Space
                     style={{ display: "flex", width: "100%" }}
                     direction="vertical"
                   >
-                    {isInCurrentWeek ? (
-                      groupByDay.map(([day, shifts], index) => {
-                        const isToday = shifts[0].getStartDayjsDate.isSame(
-                          dayjs(),
-                          "day"
-                        );
-                        return (
-                          <div
-                            key={index}
-                            css={{
-                              border: isToday
-                                ? "1px dotted #00000025"
-                                : "initial",
-                              padding: isToday ? 3 : "initial",
-                            }}
-                          >
-                            <Divider orientation="left">
-                              {day}
-                              {isToday && (
-                                <Tag
-                                  color={Colors.MainBlue}
-                                  css={{ marginLeft: 10 }}
-                                >
-                                  {t("Today")}
-                                </Tag>
-                              )}
-                            </Divider>
+                    {groupedByDay.map(([day, shifts], index) => {
+                      const isToday = getShiftDayjsDate(
+                        shifts[0],
+                        "start"
+                      ).isSame(dayjs(), "day");
+                      return (
+                        <div
+                          key={index}
+                          css={{
+                            border: isToday
+                              ? "1px dotted #00000025"
+                              : "initial",
+                            padding: isToday ? 3 : "initial",
+                          }}
+                        >
+                          <Divider orientation="left">
+                            {day}
+                            {isToday && (
+                              <Tag
+                                color={Colors.MainBlue}
+                                css={{ marginLeft: 10 }}
+                              >
+                                {t("Today")}
+                              </Tag>
+                            )}
+                          </Divider>
 
-                            {shifts.map((shift) => (
-                              <ShiftCard key={shift.id} shift={shift} />
-                            ))}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <React.Fragment>
-                        {/* 📅 Next Week */}
-                        {shifts &&
-                          groupByDay.map(([day, shifts], index) => {
-                            return (
-                              <div key={index}>
-                                <Divider orientation="left">{day}</Divider>
-
-                                {shifts.map((shift) => (
-                                  <ShiftCard key={shift.id} shift={shift} />
-                                ))}
-                              </div>
-                            );
-                          })}
-                      </React.Fragment>
-                    )}
+                          {shifts.map((shift) => (
+                            <ShiftCard key={shift.id} shift={shift} />
+                          ))}
+                        </div>
+                      );
+                    })}
                   </Space>
                 ) : (
                   <Empty description={t("There are no scheduled shifts")} />
@@ -192,4 +113,4 @@ export default () => {
       )}
     </Layout.Content>
   );
-};
+}

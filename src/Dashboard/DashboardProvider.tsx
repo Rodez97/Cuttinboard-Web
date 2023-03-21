@@ -1,15 +1,15 @@
-import { CuttinboardUser } from "@cuttinboard-solutions/cuttinboard-library/account";
-import { Organization } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  ICuttinboardUser,
+  Organization,
+} from "@cuttinboard-solutions/types-helpers";
 import { Result } from "antd";
-import { doc, DocumentData, DocumentReference } from "firebase/firestore";
+import { DocumentData } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import { PageError, LoadingPage } from "../shared";
+import { LoadingPage } from "../shared";
+import { useDashboardData } from "./useDashboardData";
 
 interface DashboardContextProps {
-  userDocument: CuttinboardUser;
+  userDocument: ICuttinboardUser;
   subscriptionDocument: DocumentData | undefined;
   organization: Organization | undefined;
 }
@@ -19,44 +19,11 @@ const DashboardContext = createContext<DashboardContextProps>(
 );
 
 export default ({ children }: { children: ReactNode }) => {
-  const { user } = useCuttinboard();
-  const [userDocument, loadingUserDocument, userDocumentError] =
-    useDocumentData<CuttinboardUser>(
-      doc(FIRESTORE, "Users", user.uid).withConverter(
-        CuttinboardUser.firestoreConverter
-      )
-    );
-  const [subscriptionDocument, loadingSubscriptionDocument, SubDocumentError] =
-    useDocumentData(
-      doc(FIRESTORE, "Users", user.uid, "subscription", "subscriptionDetails")
-    );
-  const [organization, loadingOrganization, organizationError] =
-    useDocumentData<Organization>(
-      doc(
-        FIRESTORE,
-        "Organizations",
-        user.uid
-      ) as DocumentReference<Organization>
-    );
+  const [userDocument, subscriptionDocument, organization, loading] =
+    useDashboardData();
 
-  if (
-    loadingUserDocument ||
-    loadingSubscriptionDocument ||
-    loadingOrganization
-  ) {
+  if (loading) {
     return <LoadingPage />;
-  }
-
-  if (userDocumentError) {
-    return <PageError error={userDocumentError} />;
-  }
-
-  if (SubDocumentError) {
-    return <PageError error={SubDocumentError} />;
-  }
-
-  if (organizationError) {
-    return <PageError error={organizationError} />;
   }
 
   if (!userDocument) {

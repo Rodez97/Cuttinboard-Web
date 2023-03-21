@@ -1,113 +1,102 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { orderBy } from "lodash";
-import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Checkbox,
-  Input,
-  Menu,
-  Space,
-  Typography,
-} from "antd";
+import { Badge, Button, Input, Spin, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import NewDM from "./NewDM";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
-  Chat,
   useDirectMessageChat,
-} from "@cuttinboard-solutions/cuttinboard-library/chats";
-import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
+  useNotifications,
+  useDisclose,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import CuttinboardAvatar from "../../shared/atoms/Avatar";
+import { orderBy } from "lodash";
+import { useNavigate } from "react-router-dom";
+import {
+  getDmRecipient,
+  IDirectMessage,
+  Sender,
+} from "@cuttinboard-solutions/types-helpers";
+
+interface IDMItem {
+  chat: IDirectMessage;
+  recipient: Sender;
+}
 
 export default () => {
-  const { locationId } = useParams();
-  const [underLocation] = useState(!!locationId);
-  const [filterByLocation, setFilterByLocation] = useState(
-    Boolean(locationId != null)
-  );
-  const navigate = useNavigate();
   const { t } = useTranslation();
-  const { directMessageChats, selectedDirectMessageChatId } =
-    useDirectMessageChat();
+  const { user } = useCuttinboard();
+  const { directMessages, loading, error } = useDirectMessageChat();
   const [searchQuery, setSearchQuery] = useState("");
-  const { notifications } = useCuttinboard();
-  const empContext = underLocation && useEmployeesList();
   const [newDmOpen, openNewDm, closeNewDm] = useDisclose();
 
-  const getChats = useMemo(() => {
-    let filteredChats: Chat[] = [];
-    if (underLocation && filterByLocation && empContext) {
-      filteredChats = directMessageChats
-        ? directMessageChats.filter((chat) =>
-            empContext.getEmployees.some(
-              (employee) => chat.recipient?.id === employee.id
-            )
-          )
-        : [];
-    } else {
-      filteredChats = directMessageChats ? directMessageChats : [];
+  const getChats = useMemo<IDMItem[]>(() => {
+    if (!directMessages) {
+      return [];
     }
-    const sorted = matchSorter(filteredChats, searchQuery, {
-      keys: [(chat) => (chat.recipient ? chat.recipient.fullName : "")],
+
+    const ordered = directMessages.map((chat) => {
+      return {
+        chat,
+        recipient: getDmRecipient(chat, user.uid),
+      };
     });
+
+    const sorted = searchQuery
+      ? matchSorter(ordered, searchQuery, {
+          keys: ["recipient.name"],
+        })
+      : ordered;
 
     return orderBy(
       sorted,
-      (chat) => (chat.recipient ? chat.recipient.fullName : t("Removed User")),
+      (e) => e.chat.recentMessage ?? e.chat.createdAt,
       "desc"
-    ).map((chat) => {
-      const fullName = chat.recipient
-        ? chat.recipient.fullName
-        : t("Removed User");
-      const avatar = chat.recipient ? chat.recipient.avatar : null;
-      const badges = notifications ? notifications.getDMBadge(chat.id) : 0;
-      return {
-        label: (
-          <div
-            css={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
-            <Badge count={badges} size="small" />
-            <Avatar src={avatar} icon={<UserOutlined />} />
-            {fullName}
-          </div>
-        ),
-        value: chat.id,
-        key: chat.id,
-      };
-    });
-  }, [
-    underLocation,
-    filterByLocation,
-    empContext,
-    searchQuery,
-    directMessageChats,
-    t,
-    notifications,
-  ]);
+    );
+  }, [directMessages, searchQuery, user.uid]);
+
+  const renderChatItem = useCallback(
+    (chat: IDMItem) => <DMListItem {...chat} />,
+    []
+  );
+
+  if (loading) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <Spin />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <div className="module-sider-error">
+          <h1>{t("Error")}</h1>
+          <p>{t(error)}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Space direction="vertical" className="module-sider-container">
-      <Space direction="vertical" className="module-sider-content">
-        <div
-          css={{
-            display: "flex",
-            alignItems: "center",
-            padding: "5px 10px",
-            justifyContent: "center",
-          }}
-        >
+    <div className="module-sider-container">
+      <div className="module-sider-content">
+        <div className="module-sider-header">
           <Icon
             component={MessageTextLock}
             css={{
@@ -122,7 +111,7 @@ export default () => {
               marginLeft: "10px",
             }}
           >
-            {t("Chats")}
+            {t("My Chats")}
           </Typography.Text>
         </div>
         <Button icon={<PlusOutlined />} block type="dashed" onClick={openNewDm}>
@@ -133,24 +122,52 @@ export default () => {
           value={searchQuery}
           onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
         />
-        {underLocation && (
-          <Checkbox
-            css={{ justifySelf: "center", color: "#74726e" }}
-            checked={filterByLocation}
-            onChange={(e) => setFilterByLocation(e.target.checked)}
-          >
-            {t("Show only location members")}
-          </Checkbox>
-        )}
-      </Space>
-      <Menu
-        items={getChats}
-        onSelect={({ key }) => navigate(key, { replace: true })}
-        selectedKeys={[selectedDirectMessageChatId]}
-        className="module-sider-menu"
-      />
-
+      </div>
+      <div className="module-sider-menu-container">
+        {getChats.map(renderChatItem)}
+      </div>
       <NewDM open={newDmOpen} onCancel={closeNewDm} onClose={closeNewDm} />
-    </Space>
+    </div>
+  );
+};
+
+const DMListItem = ({ chat, recipient }: IDMItem) => {
+  const navigate = useNavigate();
+  const { selectedDirectMessage } = useDirectMessageChat();
+  const { getDMBadgesById } = useNotifications();
+
+  const badges = useMemo(
+    () => getDMBadgesById(chat.id),
+    [chat.id, getDMBadgesById]
+  );
+
+  const selectActiveDM = useCallback(
+    (chatId: string) => () => {
+      navigate(chatId);
+    },
+    [navigate]
+  );
+
+  return (
+    <div
+      className={`dm-list-item`}
+      onClick={selectActiveDM(chat.id)}
+      style={
+        selectedDirectMessage?.id === chat.id
+          ? {
+              backgroundColor: "#f1f1f0",
+            }
+          : {}
+      }
+    >
+      <CuttinboardAvatar
+        src={recipient.avatar || undefined}
+        userId={recipient._id}
+        icon={<UserOutlined />}
+        className="dm-list-item__avatar"
+      />
+      <p className="dm-list-item__text">{recipient.name}</p>
+      <Badge count={badges} size="small" />
+    </div>
   );
 };

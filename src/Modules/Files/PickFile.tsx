@@ -1,23 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { ref as storageRef, uploadBytes } from "@firebase/storage";
-import React, { useState } from "react";
+import { ref as storageRef, uploadBytes } from "firebase/storage";
+import React, { useCallback, useMemo, useState } from "react";
 import fileSize from "filesize";
 import { useTranslation } from "react-i18next";
 import { message, Modal, Upload, UploadFile, UploadProps } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, Timestamp } from "firebase/firestore";
 import { StorageReference } from "firebase/storage";
-import {
-  useCuttinboard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
 import { nanoid } from "nanoid";
 import {
   FIRESTORE,
   STORAGE,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+  useBoard,
+  useCuttinboardLocation,
+  useFiles,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  getLocationUsage,
+  ICuttinboard_File,
+} from "@cuttinboard-solutions/types-helpers";
 
 const { Dragger } = Upload;
 
@@ -36,17 +38,21 @@ export default ({
   onClose,
   open,
 }: PickFileProps) => {
-  const { t } = useTranslation();
-  const { user } = useCuttinboard();
-  const { location } = useCuttinboardLocation();
   const { selectedBoard } = useBoard();
+  if (!selectedBoard) {
+    throw new Error("No board selected");
+  }
+  const { t } = useTranslation();
+  const { location } = useCuttinboardLocation();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const { addFile } = useFiles(selectedBoard);
 
   const close = () => {
     setFileList([]);
+    setFilesToUpload([]);
     onClose();
   };
 
@@ -58,45 +64,59 @@ export default ({
     }
   };
 
-  const props: UploadProps = {
-    multiple: true,
-    maxCount: maxFiles,
-    onRemove: (file) => {
-      const index = fileList.indexOf(file);
-      const newFileList = fileList.slice();
-      const newFilesToUpload = filesToUpload.slice();
-      newFileList.splice(index, 1);
-      newFilesToUpload.splice(index, 1);
-      setFileList(newFileList);
-      setFilesToUpload(newFilesToUpload);
-    },
-    beforeUpload: (file) => {
-      if (file.size > maxSize) {
-        messageApi.open({
-          type: "warning",
-          content: t("File size limit {{0}}", {
-            0: fileSize(maxSize),
-          }),
-        });
-      } else {
-        setFileList([...fileList, file]);
-        setFilesToUpload([...filesToUpload, file]);
-      }
-      return false;
-    },
-    fileList,
-  };
+  const props: UploadProps = useMemo(
+    () => ({
+      multiple: true,
+      maxCount: maxFiles,
+      onRemove: (file) => {
+        const index = fileList.indexOf(file);
+        const newFileList = fileList.slice();
+        const newFilesToUpload = filesToUpload.slice();
+        newFileList.splice(index, 1);
+        newFilesToUpload.splice(index, 1);
+        setFileList(newFileList);
+        setFilesToUpload(newFilesToUpload);
+      },
+      beforeUpload: (file) => {
+        if (file.size > maxSize) {
+          messageApi.open({
+            type: "warning",
+            content: t("File size limit {{0}}", {
+              0: fileSize(maxSize),
+            }),
+          });
+        } else {
+          setFileList([...fileList, file]);
+          setFilesToUpload([...filesToUpload, file]);
+        }
+        return false;
+      },
+      fileList,
+    }),
+    [
+      fileList,
+      filesToUpload,
+      maxFiles,
+      maxSize,
+      messageApi,
+      t,
+      setFileList,
+      setFilesToUpload,
+    ]
+  );
 
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (!selectedBoard) {
       return;
     }
 
+    const locationUsage = getLocationUsage(location);
+
     const total =
       fileList.reduce((acc, current) => acc + (current.size ?? 0), 0) +
-      location.usage.storageUsed;
+      locationUsage.storageUsed;
 
-    if (total > location.usage.storageLimit) {
+    if (total > locationUsage.storageLimit) {
       return messageApi.open({
         type: "warning",
         content: t("You don't have enough storage to upload this file"),
@@ -110,27 +130,27 @@ export default ({
         STORAGE,
         `${baseStorageRef.fullPath}/${fileName}`
       );
+      const documentRef = doc(
+        FIRESTORE,
+        selectedBoard.refPath,
+        "content",
+        fileId
+      );
       try {
         await uploadBytes(fileRef, file, {
           contentType: file.type,
           customMetadata: { fileId },
         });
-        const newFileRecord = {
+        const newFileRecord: ICuttinboard_File = {
           id: fileId,
           name: file.name,
-          createdAt: serverTimestamp(),
-          createdBy: user.uid,
+          createdAt: Timestamp.now().toMillis(),
           fileType: file.type,
           size: file.size,
           storagePath: fileRef.fullPath,
+          refPath: documentRef.path,
         };
-        await setDoc(
-          doc(FIRESTORE, selectedBoard.contentRef.path, fileId),
-          newFileRecord,
-          {
-            merge: true,
-          }
-        );
+        addFile(newFileRecord);
         messageApi.open({
           type: "success",
           content: t("Upload successfully"),
@@ -148,7 +168,16 @@ export default ({
     setFilesToUpload([]);
     setUploading(false);
     close();
-  };
+  }, [
+    baseStorageRef,
+    fileList,
+    filesToUpload,
+    messageApi,
+    selectedBoard,
+    t,
+    addFile,
+    location,
+  ]);
 
   return (
     <Modal

@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library";
-import { Alert, Button, Layout, Modal, Table } from "antd";
+import { Alert, Button, Layout, message, Modal, Table } from "antd";
 import React from "react";
 import { GrayPageHeader, UserInfoElement } from "../../shared";
 import { useNavigate } from "react-router-dom";
@@ -12,15 +11,20 @@ import {
   PlusSquareOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { deleteDoc } from "firebase/firestore";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { deleteDoc, doc } from "firebase/firestore";
+import { logEvent } from "firebase/analytics";
 import { recordError } from "../../utils/utils";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
+import {
+  ILocation,
+  IOrganizationEmployee,
+} from "@cuttinboard-solutions/types-helpers";
 
 type props = {
-  locations: Location[];
-  onUnassign: (location: Location) => void;
-  supervisor: Employee;
+  locations: ILocation[];
+  onUnassign: (location: ILocation) => void;
+  supervisor: IOrganizationEmployee;
 };
 
 export default ({ locations, onUnassign, supervisor }: props) => {
@@ -41,11 +45,13 @@ export default ({ locations, onUnassign, supervisor }: props) => {
       async onOk() {
         try {
           navigate(-1);
-          await deleteDoc(supervisor.docRef);
+          await deleteDoc(doc(FIRESTORE, supervisor.refPath));
+          message.success(t("Supervisor deleted"));
           // Report to analytics
-          logEvent(getAnalytics(), "delete_supervisor");
+          logEvent(ANALYTICS, "delete_supervisor");
         } catch (error) {
           recordError(error);
+          message.error(t("Failed to delete supervisor"));
         }
       },
     });
@@ -61,7 +67,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
           style: { cursor: "pointer" },
           icon: <UserOutlined />,
         }}
-        title={supervisor.fullName}
+        title={`${supervisor.name} ${supervisor.lastName}`}
         subTitle={
           <Alert
             message={t("Supervising {{0}} location(s)", {
@@ -90,7 +96,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
         ]}
       />
       <Layout.Content>
-        <Table<Location>
+        <Table<ILocation>
           css={{ width: "100%", padding: 15 }}
           columns={[
             {

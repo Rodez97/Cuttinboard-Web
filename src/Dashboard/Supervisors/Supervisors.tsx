@@ -1,15 +1,16 @@
 /** @jsx jsx */
 import { ArrowRightOutlined, PlusOutlined } from "@ant-design/icons";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { jsx } from "@emotion/react";
-import { Button, Empty, Layout, List, Tag } from "antd";
+import { Button, Layout, List, Tag } from "antd";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@ant-design/pro-layout";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import { UserInfoAvatar } from "../../shared";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { IOrganizationEmployee } from "@cuttinboard-solutions/types-helpers";
+import EmptyExtended from "../../shared/molecules/EmptyExtended";
 
-export default ({ supervisors }: { supervisors: Employee[] }) => {
+export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -54,7 +55,7 @@ export default ({ supervisors }: { supervisors: Employee[] }) => {
                   <List.Item
                     css={{
                       backgroundColor: Colors.MainOnWhite,
-                      padding: "10px",
+                      padding: "10px !important",
                       marginTop: "10px",
                     }}
                     key={sup.id}
@@ -80,22 +81,20 @@ export default ({ supervisors }: { supervisors: Employee[] }) => {
                 )}
               />
             ) : (
-              <div
-                css={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Empty
-                  description={
-                    <p>
-                      {t("Supervisors help you manage your locations.")}{" "}
-                      <Link to="new-supervisor">{t("Add Supervisor")}</Link>
-                    </p>
-                  }
-                />
-              </div>
+              <EmptyExtended
+                descriptions={[
+                  "Invite Supervisors to administer several locations",
+                  "Delegate administrative tasks to your Supervisors",
+                  "Give your Supervisors absolute permissions in the locations you assign to them",
+                ]}
+                description={
+                  <p>
+                    {t("Supervisors help you manage your locations")}
+                    {". "}
+                    <Link to="new-supervisor">{t("Add Supervisor")}</Link>
+                  </p>
+                }
+              />
             )}
           </div>
         </div>

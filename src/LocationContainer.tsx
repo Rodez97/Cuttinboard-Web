@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   Navigate,
   Route,
@@ -11,16 +11,13 @@ import {
 } from "react-router-dom";
 import { Badge, Button, Layout, Menu, MenuProps } from "antd";
 import { useTranslation } from "react-i18next";
-import Icon, { SettingFilled, SwapOutlined } from "@ant-design/icons";
+import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
 import Forum from "@mdi/svg/svg/forum.svg";
+import mdiMessageCogOutline from "@mdi/svg/svg/message-cog-outline.svg";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import {
-  RoleAccessLevels,
-  roleToString,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { DarkPageHeader, LoadingPage, UserMenu } from "./shared";
 import mdiViewDashboard from "@mdi/svg/svg/view-dashboard.svg";
-import mdiMyShifts from "@mdi/svg/svg/account-clock-outline.svg";
+import mdiMyShifts from "@mdi/svg/svg/account-clock.svg";
 import mdiNotes from "@mdi/svg/svg/note-multiple-outline.svg";
 import mdiTasks from "@mdi/svg/svg/checkbox-marked-circle-plus-outline.svg";
 import mdiFiles from "@mdi/svg/svg/folder-home-outline.svg";
@@ -28,13 +25,16 @@ import mdiChecklist from "@mdi/svg/svg/clipboard-list-outline.svg";
 import mdiEmployees from "@mdi/svg/svg/account-group-outline.svg";
 import mdiSchedule from "@mdi/svg/svg/store-clock-outline.svg";
 import mdiUtensils from "@mdi/svg/svg/silverware-fork-knife.svg";
-import AppsView from "./Modules/AppsView";
 import {
   useCuttinboard,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+  useNotifications,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  RoleAccessLevels,
+  roleToString,
+} from "@cuttinboard-solutions/types-helpers";
 
-const Settings = lazy(() => import("./Admin/Settings"));
 const DM = lazy(() => import("./Chats/DirectMessages"));
 const Conversations = lazy(() => import("./Chats/Conversations"));
 const Tasks = lazy(() => import("./Modules/Tasks"));
@@ -42,114 +42,123 @@ const Notes = lazy(() => import("./Modules/Notes"));
 const Shifts = lazy(() => import("./Modules/MyShifts"));
 const Storage = lazy(() => import("./Modules/Files"));
 const GlobalChecklist = lazy(() => import("./Modules/GlobalChecklist"));
+const ManageConversations = lazy(() => import("./Chats/ManageConversations"));
 const Employees = lazy(() => import("./Admin/Employees"));
-const Schedule = lazy(() => import("./Admin/Scheduler"));
+const Scheduler = lazy(() => import("./Admin/Scheduler"));
 const Utensils = lazy(() => import("./Admin/Utensils"));
+const Summary = lazy(() => import("./Modules/Summary"));
 
 export default () => {
   const { locationId } = useParams();
+  if (!locationId) {
+    throw new Error("No locationId found");
+  }
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
-  const { locationAccessKey, location } = useCuttinboardLocation();
-  const { t } = useTranslation();
-  const { notifications } = useCuttinboard();
-  const [collapsed, setCollapsed] = useState(false);
-
-  const AdminItems: MenuProps["items"] = [
-    {
-      key: "home",
-      icon: <Icon component={mdiViewDashboard} />,
-      label: t("Summary"),
-    },
-    {
-      key: "divider",
-      type: "divider",
-      style: { borderColor: "#fbfbfa25", borderWidth: 0.2 },
-    },
-    {
-      key: "employees",
-      label: "Employees",
-      icon: <Icon component={mdiEmployees} />,
-    },
-    {
-      key: "schedule",
-      label: "Schedule",
-      icon: <Icon component={mdiSchedule} />,
-    },
-    {
-      key: "utensils",
-      label: "Utensils",
-      icon: <Icon component={mdiUtensils} />,
-    },
-    {
-      key: "divider-2",
-      type: "divider",
-      style: { borderColor: "#fbfbfa25", borderWidth: 0.2 },
-    },
-  ];
-
-  const NavItems: MenuProps["items"] = [
-    {
-      key: "my-shifts",
-      label: "My Shifts",
-      icon: (
-        <Badge
-          count={notifications?.getScheduleBadges(
-            location.organizationId,
-            locationId!
-          )}
-          size="small"
-          dot
-        >
-          <Icon component={mdiMyShifts} />
-        </Badge>
-      ),
-    },
-    {
-      key: "notes",
-      label: "Notes",
-      icon: <Icon component={mdiNotes} />,
-    },
-    {
-      key: "tasks",
-      label: "Tasks",
-      icon: <Icon component={mdiTasks} />,
-    },
-    {
-      key: "files",
-      label: "Files",
-      icon: <Icon component={mdiFiles} />,
-    },
-    {
-      key: "checklist",
-      label: "Daily Checklists",
-      icon: <Icon component={mdiChecklist} />,
-    },
-  ];
-
-  if (
-    !locationAccessKey ||
-    locationAccessKey.locId !== locationId ||
-    !location
-  ) {
-    // If the locationKey is not set or the locationId does not match the one in the url, redirect to the dashboard
-    return <Navigate to="/dashboard" replace />;
+  const { role, location } = useCuttinboardLocation();
+  const { organizationKey } = useCuttinboard();
+  if (!organizationKey || !location) {
+    throw new Error("No organization key found");
   }
+  const { t } = useTranslation();
+  const [collapsed, setCollapsed] = useState(false);
+  const {
+    getTotalBadgesForConversations,
+    getTotalDMBadges,
+    getTotalScheduleBadges,
+  } = useNotifications();
+
+  const sidebarItems = useMemo(() => {
+    const adminItems: MenuProps["items"] = [
+      {
+        key: "home",
+        icon: <Icon component={mdiViewDashboard} />,
+        label: t("Summary"),
+      },
+      {
+        key: "divider",
+        type: "divider",
+        style: { borderColor: "#fbfbfa25", borderWidth: 0.2 },
+      },
+      {
+        key: "employees",
+        label: t("Employees"),
+        icon: <Icon component={mdiEmployees} />,
+      },
+      {
+        key: "schedule",
+        label: t("Schedule"),
+        icon: <Icon component={mdiSchedule} />,
+      },
+      {
+        key: "manage-conversations",
+        label: t("Conversations"),
+        icon: <Icon component={mdiMessageCogOutline} />,
+      },
+      {
+        key: "utensils",
+        label: t("Utensils"),
+        icon: <Icon component={mdiUtensils} />,
+      },
+      {
+        key: "divider-2",
+        type: "divider",
+        style: { borderColor: "#fbfbfa25", borderWidth: 0.2 },
+      },
+    ];
+
+    const navItems: MenuProps["items"] = [
+      {
+        key: "notes",
+        label: t("Notes"),
+        icon: <Icon component={mdiNotes} />,
+      },
+      {
+        key: "tasks",
+        label: t("Tasks"),
+        icon: <Icon component={mdiTasks} />,
+      },
+      {
+        key: "files",
+        label: t("Files"),
+        icon: <Icon component={mdiFiles} />,
+      },
+      {
+        key: "checklist",
+        label: t("Daily Checklists"),
+        icon: <Icon component={mdiChecklist} />,
+      },
+    ];
+
+    return role <= RoleAccessLevels.MANAGER
+      ? [...adminItems, ...navItems]
+      : navItems;
+  }, [role, t]);
 
   return (
     <Layout>
       <DarkPageHeader
         onBack={() => navigate("/dashboard", { replace: true })}
-        backIcon={<SwapOutlined />}
+        backIcon={<ArrowLeftOutlined />}
         title={location.name}
-        subTitle={t(roleToString(locationAccessKey.role))}
+        subTitle={t(roleToString(role))}
         extra={[
           <Badge
+            key="my-shifts"
+            count={getTotalScheduleBadges}
+            size="small"
+            offset={[-20, 5]}
+          >
+            <Button
+              icon={<Icon component={mdiMyShifts} />}
+              type={pathname.split("/")[4] === "my-shifts" ? "primary" : "text"}
+              shape="circle"
+              onClick={() => navigate("my-shifts", { replace: true })}
+            />
+          </Badge>,
+          <Badge
             key="conversations"
-            count={notifications?.getAllConversationBadges(
-              location.organizationId,
-              locationId
-            )}
+            count={getTotalBadgesForConversations}
             size="small"
             offset={[-20, 5]}
           >
@@ -162,10 +171,9 @@ export default () => {
               onClick={() => navigate("conversations", { replace: true })}
             />
           </Badge>,
-
           <Badge
             key="directMessages"
-            count={notifications?.allDMBadges}
+            count={getTotalDMBadges}
             size="small"
             offset={[-20, 5]}
           >
@@ -176,16 +184,6 @@ export default () => {
               onClick={() => navigate("chats", { replace: true })}
             />
           </Badge>,
-          <Button
-            hidden={locationAccessKey.role > RoleAccessLevels.GENERAL_MANAGER}
-            icon={<SettingFilled />}
-            key="locSettings"
-            type={pathname.split("/")[4] === "locSettings" ? "primary" : "text"}
-            shape="circle"
-            onClick={() => navigate("locSettings", { replace: true })}
-            className="settings-btn"
-            css={{ marginRight: 15 }}
-          />,
           <UserMenu key="userMenu" />,
         ]}
       />
@@ -199,11 +197,7 @@ export default () => {
         >
           <Menu
             mode="inline"
-            items={
-              locationAccessKey.role <= RoleAccessLevels.MANAGER
-                ? [...AdminItems, ...NavItems]
-                : NavItems
-            }
+            items={sidebarItems}
             onSelect={({ key }) => {
               navigate(key, { replace: true });
             }}
@@ -213,126 +207,45 @@ export default () => {
           />
         </Layout.Sider>
         <Layout.Content css={{ display: "flex" }}>
-          <Routes>
-            {locationAccessKey.role <= 3 && [
-              <Route
-                path={`home`}
-                key="home"
-                element={
-                  <Suspense fallback={<LoadingPage />}>
-                    <AppsView />
-                  </Suspense>
-                }
-              />,
-              <Route
-                key="emp"
-                path={`employees/*`}
-                element={
-                  <Suspense fallback={<LoadingPage />}>
-                    <Employees />
-                  </Suspense>
-                }
-              />,
-              <Route
-                key="sch"
-                path={`schedule/*`}
-                element={
-                  <Suspense fallback={<LoadingPage />}>
-                    <Schedule />
-                  </Suspense>
-                }
-              />,
-              <Route
-                key="uts"
-                path={`utensils/*`}
-                element={
-                  <Suspense fallback={<LoadingPage />}>
-                    <Utensils />
-                  </Suspense>
-                }
-              />,
-            ]}
+          <Suspense fallback={<LoadingPage />}>
+            <Routes>
+              {role <= 3 && [
+                <Route path={`home`} key="home" element={<Summary />} />,
+                <Route
+                  key="emp"
+                  path={`employees/*`}
+                  element={<Employees />}
+                />,
+                <Route key="sch" path={`schedule/*`} element={<Scheduler />} />,
+                <Route key="uts" path={`utensils/*`} element={<Utensils />} />,
+                <Route
+                  key="mdg-conv"
+                  path={`manage-conversations/*`}
+                  element={<ManageConversations />}
+                />,
+              ]}
 
-            <Route
-              path={`my-shifts/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <Shifts />
-                </Suspense>
-              }
-            />
-            <Route
-              path={`notes/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <Notes />
-                </Suspense>
-              }
-            />
-            <Route
-              path={`tasks/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <Tasks />
-                </Suspense>
-              }
-            />
-            <Route
-              path={`files/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <Storage />
-                </Suspense>
-              }
-            />
-            <Route
-              path={`checklist/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <GlobalChecklist />
-                </Suspense>
-              }
-            />
-
-            <Route
-              path={`conversations/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <Conversations />
-                </Suspense>
-              }
-            />
-            <Route
-              path={`chats/*`}
-              element={
-                <Suspense fallback={<LoadingPage />}>
-                  <DM />
-                </Suspense>
-              }
-            />
-            {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
               <Route
-                path={`locSettings/*`}
+                path={`my-shifts`}
+                element={<Shifts locationId={locationId} />}
+              />
+              <Route path={`notes/*`} element={<Notes />} />
+              <Route path={`tasks/*`} element={<Tasks />} />
+              <Route path={`files/*`} element={<Storage />} />
+              <Route path={`checklist/*`} element={<GlobalChecklist />} />
+
+              <Route path={`conversations/*`} element={<Conversations />} />
+              <Route path={`chats/*`} element={<DM />} />
+              <Route
+                path="*"
                 element={
-                  <Suspense fallback={<LoadingPage />}>
-                    <Settings />
-                  </Suspense>
+                  <Navigate
+                    to={role <= RoleAccessLevels.MANAGER ? "home" : "my-shifts"}
+                  />
                 }
               />
-            )}
-            <Route
-              path="*"
-              element={
-                <Navigate
-                  to={
-                    locationAccessKey.role <= RoleAccessLevels.MANAGER
-                      ? "home"
-                      : "my-shifts"
-                  }
-                />
-              }
-            />
-          </Routes>
+            </Routes>
+          </Suspense>
         </Layout.Content>
       </Layout>
     </Layout>

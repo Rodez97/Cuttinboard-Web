@@ -1,14 +1,25 @@
-import React, { Suspense } from "react";
+import { CuttinboardProvider } from "@cuttinboard-solutions/cuttinboard-library";
+import React, { lazy, Suspense } from "react";
+import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
-import { MainApp } from "./index";
-import { RootLoading } from "./shared";
+import store from "./Redux/store";
+import { LoadingPage } from "./shared";
+import { recordError } from "./utils/utils";
 
-export default () => (
-  <React.StrictMode>
-    <Suspense fallback={<RootLoading />}>
+const App = lazy(() => import("./App"));
+
+export default function Root() {
+  return (
+    <React.StrictMode>
       <BrowserRouter>
-        <MainApp />
+        <Suspense fallback={<LoadingPage />}>
+          <Provider store={store}>
+            <CuttinboardProvider onError={recordError}>
+              <App />
+            </CuttinboardProvider>
+          </Provider>
+        </Suspense>
       </BrowserRouter>
-    </Suspense>
-  </React.StrictMode>
-);
+    </React.StrictMode>
+  );
+}

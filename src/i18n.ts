@@ -33,7 +33,7 @@ i18n
       //react: { useSuspense: false },
       supportedLngs: availableLanguages,
     },
-    (err, t) => {
+    (err) => {
       if (err) {
         console.log(err);
       } else {

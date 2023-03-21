@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { PageHeader } from "@ant-design/pro-layout";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import { Alert, Button, Input, Layout, Result, Space, Typography } from "antd";
 import dayjs from "dayjs";
@@ -17,13 +16,14 @@ import DeleteLocationDialog, {
   DeleteLocationDialogRef,
 } from "./DeleteLocationDialog";
 import { useOwner } from ".";
+import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 export default () => {
   const { t } = useTranslation();
   const deleteLocDialogRef = useRef<DeleteLocationDialogRef>(null);
   const { locations } = useOwner();
   const navigate = useNavigate();
-  const { organization, userDocument } = useDashboard();
+  const { organization, userDocument, subscriptionDocument } = useDashboard();
   const [{ order, index }, setOrderData] = useState<{
     index: number;
     order: "desc" | "asc";
@@ -33,7 +33,7 @@ export default () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  const deleteLocation = (loc: Location) => {
+  const deleteLocation = (loc: ILocation) => {
     deleteLocDialogRef.current?.openDialog(loc);
   };
 
@@ -69,13 +69,15 @@ export default () => {
         backIcon={false}
         title={t("My Locations")}
         extra={[
-          <Button
-            key="2"
-            onClick={() => navigate("supervisors")}
-            disabled={Boolean(organization.subscriptionStatus === "canceled")}
-          >
-            {t("Supervisors")}
-          </Button>,
+          Boolean(organization?.hadMultipleLocations) && (
+            <Button
+              key="2"
+              onClick={() => navigate("supervisors")}
+              disabled={Boolean(organization.subscriptionStatus === "canceled")}
+            >
+              {t("Supervisors")}
+            </Button>
+          ),
           <Button
             key="1"
             type="primary"
@@ -87,7 +89,21 @@ export default () => {
         ]}
       />
       <div css={{ padding: "5px 20px" }}>
-        {organization.subscriptionStatus !== "canceled" &&
+        {subscriptionDocument?.cancel_at_period_end ? (
+          <Alert
+            message={t(
+              "This plan will be cancelled on {{0}}, all your locations will be deleted 15 days after the cancellation.",
+              {
+                0: dayjs(subscriptionDocument?.cancel_at?.toDate()).format(
+                  "MM/DD/YYYY"
+                ),
+              }
+            )}
+            type="warning"
+            showIcon
+          />
+        ) : (
+          organization.subscriptionStatus !== "canceled" &&
           (!userDocument?.paymentMethods ||
             userDocument?.paymentMethods.length < 1) && (
             <Alert
@@ -105,21 +121,7 @@ export default () => {
                 </Button>
               }
             />
-          )}
-
-        {organization.subscriptionStatus === "canceled" && (
-          <Alert
-            message={t(
-              "Your plan was cancelled on {{0}}, all your locations will be deleted after 15 days.",
-              {
-                0: dayjs(organization.cancellationDate?.toDate()).format(
-                  "MM/DD/YYYY"
-                ),
-              }
-            )}
-            type="error"
-            showIcon
-          />
+          )
         )}
       </div>
       <Layout.Content css={{ padding: "5px 20px" }}>

@@ -2,7 +2,6 @@
 import { jsx } from "@emotion/react";
 import { ref } from "firebase/storage";
 import { useLayoutEffect, useMemo, useState } from "react";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,11 +12,13 @@ import {
   Space,
   Table,
   TableColumnsType,
+  Tag,
   Tooltip,
   Typography,
 } from "antd";
 import Icon, {
   CloudUploadOutlined,
+  GlobalOutlined,
   InfoCircleOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
@@ -25,10 +26,9 @@ import PickFile from "./PickFile";
 import { matchSorter } from "match-sorter";
 import {
   GrayPageHeader,
-  PageError,
-  LoadingPage,
   NotFound,
   EmptyBoard,
+  LoadingPage,
 } from "../../shared";
 import { getFileColorsByType, getFileIconByType } from "./FileTypeIcons";
 import fileSize from "filesize";
@@ -39,28 +39,43 @@ import ManageModuleDialog, {
 } from "../ManageApp/ManageModuleDialog";
 import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
+import { useRenameFile } from "./RenameFile";
 import {
-  Cuttinboard_File,
-  useBoard,
-} from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
+  getFileUrl,
   STORAGE,
+  useBoard,
+  useCuttinboardLocation,
   useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+  useFiles,
+  useFilesData,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import dayjs from "dayjs";
+import ErrorPage from "../../shared/molecules/PageError";
+import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
 
 export default function FilesMain() {
   const { boardId } = useParams();
-  const { selectedBoard, selectBoard } = useBoard();
+  if (!boardId) {
+    throw new Error("No board id");
+  }
+  const { selectedBoard, selectActiveBoard, loading, error } = useBoard();
 
   useLayoutEffect(() => {
     if (boardId) {
-      selectBoard(boardId);
+      selectActiveBoard(boardId);
     }
     return () => {
-      selectBoard("");
+      selectActiveBoard();
     };
-  }, [boardId, selectBoard]);
+  }, [boardId, selectActiveBoard]);
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={new Error(error)} />;
+  }
 
   if (!selectedBoard) {
     return <NotFound />;
@@ -70,119 +85,123 @@ export default function FilesMain() {
 }
 
 function Main() {
+  const { selectedBoard, canManageBoard } = useBoard();
+  if (!selectedBoard) {
+    throw new Error("No board selected");
+  }
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [pickFileOpen, pickFiles, closePickFile] = useDisclose();
   const [viewImage, setViewImage] = useState<string | null>("");
-  const { selectedBoard, canManageBoard } = useBoard();
   const { location } = useCuttinboardLocation();
-  const [drawerFiles, loading, drawerFilesError] =
-    useCollectionData<Cuttinboard_File>(
-      selectedBoard &&
-        selectedBoard.contentRef.withConverter(
-          Cuttinboard_File.firestoreConverter
-        )
-    );
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const [manageMembersOpen, openManageMembers, closeManageMembers] =
     useDisclose();
   const { baseRef, editModule } = useManageModule();
+  const { renameCuttinboardFile, RenameFile } = useRenameFile(selectedBoard);
+  const { files, loading, error } = useFiles(selectedBoard);
   const storagePathRef = useMemo(
-    () =>
-      selectedBoard &&
-      ref(
-        STORAGE,
-        `${location.storageRef.fullPath}/storage/${selectedBoard.id}`
-      ),
-    [location.storageRef.fullPath, selectedBoard]
+    () => ref(STORAGE, `locations/${location.id}/files/${selectedBoard.id}`),
+    [location, selectedBoard]
   );
 
+  useFilesData(selectedBoard);
+
   const getOrderedFiles = useMemo(() => {
-    if (!drawerFiles) {
+    if (!files) {
       return [];
     }
     return searchQuery
-      ? matchSorter(drawerFiles, searchQuery, {
+      ? matchSorter(files, searchQuery, {
           keys: ["name"],
         })
-      : drawerFiles;
-  }, [drawerFiles, searchQuery]);
+      : files;
+  }, [files, searchQuery]);
 
-  const columns: TableColumnsType<Cuttinboard_File> = [
-    {
-      title: t("Name"),
-      dataIndex: "name",
-      key: "name",
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (_, { name, fileType }) => {
-        const fileIcon = getFileIconByType(name, fileType);
-        const fileColor = getFileColorsByType(name, fileType);
+  const columns = useMemo<TableColumnsType<ICuttinboard_File>>(
+    () => [
+      {
+        title: t("Name"),
+        dataIndex: "name",
+        key: "name",
+        ellipsis: {
+          showTitle: false,
+        },
+        render: (_, { name, fileType }) => {
+          const fileIcon = getFileIconByType(name, fileType);
+          const fileColor = getFileColorsByType(name, fileType);
 
-        return (
-          <Tooltip
-            placement="topLeft"
-            title={name}
-            css={{ gap: 5, display: "flex", alignItems: "center" }}
-          >
-            <Icon
-              component={fileIcon}
-              css={{ color: fileColor, fontSize: "20px" }}
-            />
-            <Typography.Paragraph
-              ellipsis={{ rows: 1 }}
-              css={{
-                marginBottom: "0px !important",
-              }}
+          return (
+            <Tooltip
+              placement="topLeft"
+              title={name}
+              css={{ gap: 5, display: "flex", alignItems: "center" }}
             >
-              {name}
-            </Typography.Paragraph>
-          </Tooltip>
-        );
-      },
-      width: "61%",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      defaultSortOrder: "ascend",
-      sortDirections: ["ascend", "descend", "ascend"],
-    },
-    {
-      title: t("Size"),
-      dataIndex: "size",
-      key: "size",
-      render: (_, { size }) => (
-        <Typography.Text>{fileSize(size)}</Typography.Text>
-      ),
-      width: "12%",
-      align: "right",
-      sorter: (a, b) => a.size - b.size,
-    },
-    {
-      title: "Created",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (_, { createdAt }) => (
-        <Typography.Text>
-          {createdAt?.toDate().toLocaleString()}
-        </Typography.Text>
-      ),
-      width: "20%",
-      sorter: (a, b) => a.createdAt.toMillis() - b.createdAt.toMillis(),
-      align: "right",
-    },
-    {
-      title: "",
-      dataIndex: "actions",
-      key: "actions",
-      render: (_, file) => <FileMenu file={file} />,
-      width: "7%",
-      align: "center",
-    },
-  ];
+              <Icon
+                component={fileIcon}
+                css={{ color: fileColor, fontSize: "20px" }}
+              />
+              <Typography.Paragraph
+                ellipsis={{ rows: 1 }}
+                css={{
+                  marginBottom: "0px !important",
+                }}
+              >
+                {name}
+              </Typography.Paragraph>
+            </Tooltip>
+          );
+        },
+        width: "61%",
+        sorter: (a, b) => a.name.localeCompare(b.name),
 
-  const fileClick = async (file: Cuttinboard_File) => {
+        sortDirections: ["ascend", "descend", "ascend"],
+      },
+      {
+        title: t("Size"),
+        dataIndex: "size",
+        key: "size",
+        render: (_, { size }) => (
+          <Typography.Text>{fileSize(size)}</Typography.Text>
+        ),
+        width: "12%",
+        align: "right",
+        sorter: (a, b) => a.size - b.size,
+      },
+      {
+        title: "Created",
+        dataIndex: "createdAt",
+        key: "createdAt",
+        render: (_, { createdAt }) => (
+          <Typography.Text>{dayjs(createdAt).toLocaleString()}</Typography.Text>
+        ),
+        width: "20%",
+        sorter: (a, b) => a.createdAt - b.createdAt,
+        align: "right",
+        defaultSortOrder: "descend",
+      },
+      {
+        title: "",
+        dataIndex: "actions",
+        key: "actions",
+        render: (_, file) => (
+          <FileMenu
+            file={file}
+            onRename={renameCuttinboardFile}
+            canManage={!selectedBoard?.global && canManageBoard}
+            board={selectedBoard}
+          />
+        ),
+        width: "7%",
+        align: "center",
+      },
+    ],
+    [canManageBoard, renameCuttinboardFile, selectedBoard, t]
+  );
+
+  const fileClick = async (file: ICuttinboard_File) => {
     try {
-      const fileUrl = await file.getUrl();
+      const fileUrl = await getFileUrl(file);
       if (file.fileType.startsWith("image/")) {
         setViewImage(fileUrl);
       } else {
@@ -193,16 +212,12 @@ function Main() {
     }
   };
 
-  if (loading) {
-    return <LoadingPage />;
-  }
-
-  if (drawerFilesError) {
-    return <PageError error={drawerFilesError} />;
-  }
-
   if (!selectedBoard || !storagePathRef) {
     return <EmptyBoard />;
+  }
+
+  if (error) {
+    return <ErrorPage error={new Error(error)} />;
   }
 
   return (
@@ -213,16 +228,22 @@ function Main() {
         backIcon={<InfoCircleOutlined />}
         onBack={openInfo}
         title={selectedBoard.name}
-        extra={[
-          <Button
-            key="members"
-            type="primary"
-            onClick={openManageMembers}
-            icon={<TeamOutlined />}
-          >
-            {t("Members")}
-          </Button>,
-        ]}
+        extra={
+          selectedBoard.global ? (
+            <Tag color="processing" icon={<GlobalOutlined />}>
+              {t("Global Board")}
+            </Tag>
+          ) : (
+            <Button
+              key="members"
+              type="primary"
+              onClick={openManageMembers}
+              icon={<TeamOutlined />}
+            >
+              {t("Members")}
+            </Button>
+          )
+        }
       />
 
       <Space
@@ -233,14 +254,16 @@ function Main() {
           alignItems: "center",
         }}
       >
-        <Button
-          disabled={!canManageBoard}
-          onClick={pickFiles}
-          icon={<CloudUploadOutlined />}
-          type="primary"
-        >
-          {t("Upload Files")}
-        </Button>
+        {!selectedBoard.global && canManageBoard && (
+          <Button
+            onClick={pickFiles}
+            icon={<CloudUploadOutlined />}
+            type="primary"
+          >
+            {t("Upload Files")}
+          </Button>
+        )}
+
         <Input.Search
           placeholder={t("Search")}
           value={searchQuery}
@@ -249,7 +272,30 @@ function Main() {
         />
       </Space>
 
-      {getOrderedFiles?.length ? (
+      {loading ? (
+        <LoadingPage />
+      ) : files.length === 0 ? (
+        <EmptyBoard
+          description={
+            <span>
+              {t("No files")}
+              {". "}
+              {!selectedBoard.global && canManageBoard && (
+                <span>
+                  <a onClick={pickFiles}>{t("upload one")}</a> {t("or")}{" "}
+                </span>
+              )}
+              <a
+                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("learn more")}
+              </a>
+            </span>
+          }
+        />
+      ) : (
         <div
           css={{
             display: "flex",
@@ -271,6 +317,7 @@ function Main() {
             sticky
             onRow={(file) => ({
               onClick: () => fileClick(file),
+              style: { cursor: "pointer" },
             })}
           />
           {viewImage && (
@@ -290,23 +337,9 @@ function Main() {
             />
           )}
         </div>
-      ) : (
-        <EmptyBoard
-          description={
-            <span>
-              No files. <a onClick={pickFiles}>upload one</a> or{" "}
-              <a
-                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
-                target="_blank"
-                rel="noreferrer"
-              >
-                learn more.
-              </a>
-            </span>
-          }
-        />
       )}
 
+      {RenameFile}
       <PickFile
         maxSize={5e7}
         maxFiles={3}

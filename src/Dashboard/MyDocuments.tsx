@@ -6,7 +6,6 @@ import Icon, {
   ExclamationCircleOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   Alert,
   Button,
@@ -27,23 +26,30 @@ import {
   StorageReference,
   uploadBytes,
 } from "firebase/storage";
-import { useCallback, useLayoutEffect, useState } from "react";
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../utils/utils";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import {
   getFileColorsByType,
   getFileIconByType,
 } from "../Modules/Files/FileTypeIcons";
+import usePageTitle from "../hooks/usePageTitle";
+import {
+  STORAGE,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
 import {
   MAX_DOCUMENTS,
   MAX_FILE_SIZE,
-  STORAGE,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/types-helpers";
+import { GrayPageHeader } from "../shared";
 
 const { Dragger } = Upload;
 
 function MyDocuments() {
+  usePageTitle("My Documents");
   const { t } = useTranslation();
   const { user } = useCuttinboard();
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
@@ -97,7 +103,7 @@ function MyDocuments() {
       });
       setUserFiles([...userFiles, uploadRef.ref]);
       // Report document upload to analytics
-      logEvent(getAnalytics(), "upload_document", {
+      logEvent(ANALYTICS, "upload_document", {
         contentType: file.type,
         size: file.size,
         from: "MyDocuments",
@@ -152,126 +158,125 @@ function MyDocuments() {
   };
 
   return (
-    <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-      <div
-        css={{
-          minWidth: 270,
-          maxWidth: 500,
-          margin: "auto",
-          width: "100%",
-        }}
-      >
-        <Typography.Title css={{ textAlign: "center" }}>
-          {t("My Documents")}
-        </Typography.Title>
-
-        <Alert
-          type="warning"
-          showIcon
-          css={{ marginBottom: 10 }}
-          message={t(
-            "Employers will have access to the documents you upload in this section"
-          )}
-        />
-
-        <div>
-          <Dragger
-            {...props}
-            disabled={Boolean(userFiles.length >= MAX_DOCUMENTS)}
-          >
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">{t("Upload Document")}</p>
-            <p className="ant-upload-hint">
-              {t("Click or drag file to this area to upload")}
-            </p>
-            <p className="ant-upload-hint">
-              {t("Files must be PDFs and less than 8MB in size")}
-            </p>
-          </Dragger>
-        </div>
-
-        <Divider>
-          {t("Documents")}{" "}
-          <Typography.Text type="secondary">{`${userFiles.length}/${MAX_DOCUMENTS}`}</Typography.Text>
-        </Divider>
-
-        <Table
-          dataSource={userFiles}
-          loading={loadingFiles}
-          columns={[
-            {
-              title: t("Name"),
-              dataIndex: "name",
-              key: "name",
-              ellipsis: {
-                showTitle: false,
-              },
-              render: (_, { name }) => {
-                const fileIcon = getFileIconByType(name);
-                const fileColor = getFileColorsByType(name);
-
-                return (
-                  <Tooltip
-                    placement="topLeft"
-                    title={name}
-                    css={{ gap: 5, display: "flex", alignItems: "center" }}
-                  >
-                    <Icon
-                      component={fileIcon}
-                      css={{ color: fileColor, fontSize: "20px" }}
-                    />
-                    <Typography.Paragraph
-                      ellipsis={{ rows: 1 }}
-                      css={{
-                        marginBottom: "0px !important",
-                      }}
-                    >
-                      {name}
-                    </Typography.Paragraph>
-                  </Tooltip>
-                );
-              },
-              sorter: (a, b) => a.name.localeCompare(b.name),
-              defaultSortOrder: "ascend",
-              sortDirections: ["ascend", "descend", "ascend"],
-            },
-            {
-              title: "",
-              dataIndex: "actions",
-              key: "actions",
-              render: (_, file) => (
-                <Button.Group>
-                  <Button
-                    key="delete"
-                    icon={<DeleteFilled />}
-                    onClick={handleDeleteFile(file)}
-                    type="link"
-                    danger
-                  />
-                  <Button
-                    key="download"
-                    icon={<DownloadOutlined />}
-                    onClick={handleFileClick(file)}
-                    type="link"
-                  />
-                </Button.Group>
-              ),
-              align: "center",
-              width: 100,
-            },
-          ]}
-          size="small"
+    <React.Fragment>
+      <GrayPageHeader title={t("My Documents")} />
+      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
+        <div
           css={{
-            minWidth: 500,
+            minWidth: 270,
+            maxWidth: 500,
             margin: "auto",
+            width: "100%",
           }}
-          pagination={false}
-          sticky
-        />
+        >
+          <Alert
+            type="warning"
+            showIcon
+            css={{ marginBottom: 10 }}
+            message={t(
+              "Employers will have access to the documents you upload in this section"
+            )}
+          />
+
+          <div>
+            <Dragger
+              {...props}
+              disabled={Boolean(userFiles.length >= MAX_DOCUMENTS)}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">{t("Upload Document")}</p>
+              <p className="ant-upload-hint">
+                {t("Click or drag file to this area to upload")}
+              </p>
+              <p className="ant-upload-hint">
+                {t("Files must be PDFs and less than 8MB in size")}
+              </p>
+            </Dragger>
+          </div>
+
+          <Divider>
+            {t("Documents")}{" "}
+            <Typography.Text type="secondary">{`${userFiles.length}/${MAX_DOCUMENTS}`}</Typography.Text>
+          </Divider>
+
+          <Table
+            dataSource={userFiles}
+            loading={loadingFiles}
+            columns={[
+              {
+                title: t("Name"),
+                dataIndex: "name",
+                key: "name",
+                ellipsis: {
+                  showTitle: false,
+                },
+                render: (_, { name }) => {
+                  const fileIcon = getFileIconByType(name);
+                  const fileColor = getFileColorsByType(name);
+
+                  return (
+                    <Tooltip
+                      placement="topLeft"
+                      title={name}
+                      css={{ gap: 5, display: "flex", alignItems: "center" }}
+                    >
+                      <Icon
+                        component={fileIcon}
+                        css={{ color: fileColor, fontSize: "20px" }}
+                      />
+                      <Typography.Paragraph
+                        ellipsis={{ rows: 1 }}
+                        css={{
+                          marginBottom: "0px !important",
+                        }}
+                      >
+                        {name}
+                      </Typography.Paragraph>
+                    </Tooltip>
+                  );
+                },
+                sorter: (a, b) => a.name.localeCompare(b.name),
+                defaultSortOrder: "ascend",
+                sortDirections: ["ascend", "descend", "ascend"],
+              },
+              {
+                title: "",
+                dataIndex: "actions",
+                key: "actions",
+                render: (_, file) => (
+                  <Button.Group>
+                    <Button
+                      key="delete"
+                      icon={<DeleteFilled />}
+                      onClick={handleDeleteFile(file)}
+                      type="link"
+                      danger
+                    />
+                    <Button
+                      key="download"
+                      icon={<DownloadOutlined />}
+                      onClick={handleFileClick(file)}
+                      type="link"
+                    />
+                  </Button.Group>
+                ),
+                align: "center",
+                width: 100,
+              },
+            ]}
+            size="small"
+            css={{
+              minWidth: 500,
+              margin: "auto",
+            }}
+            pagination={false}
+            sticky
+          />
+        </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 }
 

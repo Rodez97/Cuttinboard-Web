@@ -3,6 +3,7 @@ import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import React, {
   forwardRef,
+  useCallback,
   useImperativeHandle,
   useMemo,
   useState,
@@ -28,57 +29,83 @@ import {
   TimePicker,
   Typography,
 } from "antd";
-import moment from "moment";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { recordError } from "../../utils/utils";
 import { capitalize, isEmpty } from "lodash";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
+  selectLocationScheduleSettings,
+  useAppSelector,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { Timestamp } from "firebase/firestore";
+import {
+  checkForOverlappingShiftsARRAY,
+  getEmployeeHourlyWage,
+  getShiftDayjsDate,
+  getShiftLatestData,
+  IEmployee,
+  IPrimaryShiftData,
   IShift,
+  RoleAccessLevels,
   Shift,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/schedule";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+  WEEKFORMAT,
+} from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
 dayjs.extend(duration);
 
+export const useManageShiftDialog = () => {
+  const manageShiftDialogRef = React.useRef<IManageShiftDialogRef>(null);
+
+  const openNew = useCallback((employee: IEmployee, date: dayjs.Dayjs) => {
+    manageShiftDialogRef.current?.openNew(employee, date);
+  }, []);
+
+  const openEdit = useCallback((employee: IEmployee, shift: IShift) => {
+    manageShiftDialogRef.current?.openEdit(employee, shift);
+  }, []);
+
+  return {
+    openNew,
+    openEdit,
+    ManageShiftDialog: <ManageShiftDialog ref={manageShiftDialogRef} />,
+  };
+};
+
 export interface IManageShiftDialogRef {
-  openNew: (employee: Employee, column: Date) => void;
-  openEdit: (employee: Employee, shift: Shift) => void;
+  openNew: (employee: IEmployee, date: dayjs.Dayjs) => void;
+  openEdit: (employee: IEmployee, shift: IShift) => void;
 }
 
 type FormDataType = {
   applyTo: number[];
   notes?: string;
   position?: string;
-  timeRange: { start: moment.Moment; end: moment.Moment };
+  timeRange: { start: dayjs.Dayjs; end: dayjs.Dayjs };
 };
 
 type State = {
   open: boolean;
-  employee: Employee;
-  shift: Shift | null;
-  date: Date;
+  employee: IEmployee;
+  shift: IShift | null;
+  date: dayjs.Dayjs;
 };
 
 const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
   (_, ref) => {
+    const scheduleSettings = useAppSelector(selectLocationScheduleSettings);
+    const { location } = useCuttinboardLocation();
     const [form] = Form.useForm<FormDataType>();
-    const [saving, setSaving] = useState(false);
-    const {
-      createShift,
-      weekDays,
-      employeeShiftsCollection,
-      scheduleSettingsData,
-    } = useSchedule();
+    const { createShift, weekDays, updateShift, cancelShiftUpdate, shifts } =
+      useSchedule();
     const { t } = useTranslation();
     const [state, setState] = useState<State>({
       open: false,
-      employee: {} as Employee,
+      employee: {} as IEmployee,
       shift: null,
-      date: new Date(),
+      date: dayjs(),
     });
 
     useImperativeHandle(ref, () => ({
@@ -86,116 +113,227 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
       openEdit,
     }));
 
-    const openNew = (employee: Employee, date: Date) => {
-      const weekDay = dayjs(date).isoWeekday();
-      const position =
-        employee.role === "employee"
-          ? employee.mainPosition ?? employee.positions[0]
-          : undefined;
-      form.setFieldsValue({
-        applyTo: [weekDay],
-        timeRange: {
-          start: moment(date).add(8, "hours"),
-          end: moment(date).add(16, "hours"),
-        },
-        position,
-      });
-      setState({
-        open: true,
-        employee,
-        shift: null,
-        date,
-      });
-    };
+    const openNew = useCallback(
+      (employee: IEmployee, date: dayjs.Dayjs) => {
+        const weekDay = date.isoWeekday();
+        const position =
+          employee.positions && employee.positions.length === 1
+            ? employee.positions[0]
+            : undefined;
 
-    const openEdit = (employee: Employee, shift: Shift) => {
-      // get the date of the shift
-      const startDate = shift.getStartDayjsDate;
-      form.setFieldsValue({
-        applyTo: [startDate.isoWeekday()],
-        notes: shift.notes,
-        position: shift.position,
-        timeRange: {
-          start: moment(startDate.toDate()),
-          end: moment(shift.getEndDayjsDate.toDate()),
-        },
-      });
-      setState({
-        open: true,
-        employee,
-        shift,
-        date: startDate.toDate(),
-      });
-    };
+        form.setFieldsValue({
+          applyTo: [weekDay],
+          timeRange: {
+            start: date.add(8, "hours"),
+            end: date.add(16, "hours"),
+          },
+          position,
+        });
+        setState({
+          open: true,
+          employee,
+          shift: null,
+          date,
+        });
+      },
+      [form]
+    );
 
-    const handleClose = () => {
+    const openEdit = useCallback(
+      (employee: IEmployee, shiftRaw: IShift) => {
+        const shift = getShiftLatestData(shiftRaw);
+        const startDate = getShiftDayjsDate(shift, "start");
+        const applyTo = [startDate.isoWeekday()];
+        const notes = shift.notes;
+        const position = shift.position;
+        const timeRange = {
+          start: startDate,
+          end: getShiftDayjsDate(shift, "end"),
+        };
+        form.setFieldsValue({ applyTo, notes, position, timeRange });
+        setState({
+          open: true,
+          employee,
+          shift,
+          date: startDate,
+        });
+      },
+      [form]
+    );
+
+    const handleClose = useCallback(() => {
       setState({
         open: false,
-        employee: {} as Employee,
+        employee: {} as IEmployee,
         shift: null,
-        date: new Date(),
+        date: dayjs(),
       });
       form.resetFields();
-    };
+    }, [form]);
 
-    const onFinish = async (values: FormDataType) => {
-      const { applyTo, notes, position, timeRange } = values;
+    const onFinish = useCallback(
+      (values: FormDataType) => {
+        const { applyTo, notes, position, timeRange } = values;
 
-      const hourlyWage = position ? state.employee.getHourlyWage(position) : 0;
+        const hourlyWage = position
+          ? getEmployeeHourlyWage(state.employee, position)
+          : 0;
 
-      const shiftToSave: Partial<IShift> = {
-        start: Shift.toString(timeRange.start.toDate()),
-        end: Shift.toString(timeRange.end.toDate()),
-        notes,
-        position,
-        hourlyWage,
-      };
+        const shiftToSaveBase: IPrimaryShiftData = {
+          start: Shift.toString(timeRange.start.toDate()),
+          end: Shift.toString(timeRange.end.toDate()),
+          notes: notes ?? "",
+          position: position ?? "",
+          hourlyWage,
+        };
 
-      setSaving(true);
-      try {
+        const weekId = state.date.format(WEEKFORMAT);
+
         if (!state.shift) {
-          await createShift(
-            shiftToSave as IShift,
-            weekDays,
-            applyTo,
-            nanoid(),
-            state.employee.id
-          );
+          const newShift: IShift = {
+            ...shiftToSaveBase,
+            id: nanoid(),
+            status: "draft",
+            updatedAt: Timestamp.now().toMillis(),
+            weekId,
+            locationName: location.name,
+            locationId: location.id,
+            employeeId: state.employee.id,
+          };
+          createShift(newShift, weekDays, applyTo, state.employee.id);
         } else {
-          await state.shift.editShift(shiftToSave);
+          updateShift(state.shift, state.employee.id, shiftToSaveBase);
         }
         handleClose();
-      } catch (error) {
-        recordError(error);
-      }
-      setSaving(false);
-    };
+      },
+      [
+        createShift,
+        handleClose,
+        location.id,
+        location.name,
+        state.date,
+        state.employee,
+        state.shift,
+        updateShift,
+        weekDays,
+      ]
+    );
 
-    const cancelPendingUpdate = async () => {
+    const cancelPendingUpdate = useCallback(() => {
       Modal.confirm({
         title: t("Are you sure to cancel this update?"),
         content: t("The shift will be restored to the previous state"),
         icon: <ExclamationCircleOutlined />,
-        async onOk() {
-          try {
-            await state.shift?.cancelUpdate();
-            handleClose();
-          } catch (error) {
-            recordError(error);
+        onOk() {
+          if (!state.shift) {
+            return;
           }
+          cancelShiftUpdate(state.shift, state.employee.id);
         },
       });
-    };
+    }, [t, state.shift, state.employee.id, cancelShiftUpdate]);
 
     // Get Employee shifts
-    const shiftsDoc = useMemo(() => {
+    const employeeShiftsArray = useMemo(() => {
       if (!state.employee) {
         return null;
       }
-      return employeeShiftsCollection.find(
-        (shift) => shift.employeeId === state.employee.id
+      return shifts.filter(
+        ({ employeeId }) => employeeId === state.employee.id
       );
-    }, [state, employeeShiftsCollection]);
+    }, [state.employee, shifts]);
+
+    const validateTimeRange = useCallback(
+      async (_: unknown, value: FormDataType["timeRange"]) => {
+        // Check if a time range has been selected
+        if (!value) {
+          return Promise.reject(t("Please select a time range"));
+        }
+
+        // Get the value for the "applyTo" field
+        const applyTo: FormDataType["applyTo"] = form.getFieldValue("applyTo");
+
+        // Destructure the start and end values from the time range
+        const { start, end } = value;
+
+        if (start.isSame(end)) {
+          return Promise.reject(t("Start and end times cannot be the same"));
+        }
+
+        // Iterate over the days that the shift should be applied to
+        for (const day of applyTo) {
+          // Find the week day object corresponding to the current day
+          const weekDay = weekDays.find((wd) => wd.isoWeekday() === day);
+          // If no week day is found, return an error
+          if (!weekDay) {
+            return Promise.reject(t("Invalid day"));
+          }
+
+          // Set the start and end times for the current day
+          const fixedStart = weekDay.hour(start.hour()).minute(start.minute());
+          let fixedEnd = weekDay.hour(end.hour()).minute(end.minute());
+
+          // If the end time is before the start time, add a day to the end time
+          if (fixedEnd.isBefore(fixedStart)) {
+            fixedEnd = fixedEnd.add(1, "day");
+          }
+
+          // Check if the shift overlaps with any other shifts for the employee
+          const shiftOverlaps =
+            employeeShiftsArray &&
+            checkForOverlappingShiftsARRAY(
+              employeeShiftsArray,
+              fixedStart,
+              fixedEnd,
+              state.shift?.id ?? ""
+            );
+
+          // If the shift overlaps with another shift, return an error
+          if (shiftOverlaps) {
+            return Promise.reject(
+              t("This shift overlaps with another shift for this employee")
+            );
+          }
+        }
+
+        // If there are no overlapping shifts, return a resolved promise
+        return Promise.resolve();
+      },
+      [form, employeeShiftsArray, state.shift?.id, t, weekDays]
+    );
+
+    const normalizeStart = useCallback(
+      (
+        value: FormDataType["timeRange"]["start"],
+        _: unknown,
+        all: FormDataType
+      ) => {
+        // If end time is before start time, add a day to the end time
+        if (all?.timeRange?.end?.isBefore(value)) {
+          console.log("all.timeRange.end", all.timeRange.end);
+
+          // Add a day to the end time
+          const end = all.timeRange.end.add(1, "day");
+
+          console.log("end", end);
+
+          form.setFieldValue(["timeRange", "end"], end);
+        }
+        return value;
+      },
+      [form]
+    );
+
+    const normalizeEnd = useCallback(
+      (value: FormDataType["timeRange"]["end"], _, all: FormDataType) => {
+        // If end time is before start time, add a day to the end time
+        const end = value?.isBefore(all?.timeRange?.start)
+          ? value?.add(1, "day")
+          : value;
+        return end;
+      },
+      []
+    );
 
     if (!form) {
       return null;
@@ -213,21 +351,15 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
               key="reset"
               danger
               type="dashed"
-              disabled={saving}
               onClick={cancelPendingUpdate}
             >
               {t("Cancel Update")}
             </Button>
           ),
-          <Button key="back" onClick={handleClose} disabled={saving}>
+          <Button key="back" onClick={handleClose}>
             {t("Cancel")}
           </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            loading={saving}
-            onClick={form.submit}
-          >
+          <Button key="submit" type="primary" onClick={form.submit}>
             {t("Accept")}
           </Button>,
         ]}
@@ -235,7 +367,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
         <Form<FormDataType>
           form={form}
           onFinish={onFinish}
-          disabled={saving}
           size="small"
           layout="vertical"
           autoComplete="off"
@@ -249,174 +380,113 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
             ]}
             rules={[
               {
-                validator: async (_, value: FormDataType["timeRange"]) => {
-                  if (!value) {
-                    return Promise.reject(t("Please select a time range"));
-                  }
-
-                  const applyTo: FormDataType["applyTo"] =
-                    form.getFieldValue("applyTo");
-
-                  const { start, end } = value;
-
-                  // Convert to dayjs
-                  const startDayjs = dayjs(start.toDate());
-                  const endDayjs = dayjs(end.toDate());
-
-                  for (const day of applyTo) {
-                    const weekDay = weekDays.find(
-                      (wd) => dayjs(wd).isoWeekday() === day
-                    );
-                    if (!weekDay) {
-                      return Promise.reject(t("Invalid day"));
-                    }
-                    const start = dayjs(weekDay)
-                      .set("hour", startDayjs.hour())
-                      .set("minute", startDayjs.minute());
-                    const end = dayjs(weekDay)
-                      .set("hour", endDayjs.hour())
-                      .set("minute", endDayjs.minute());
-                    // Check if overlaps
-                    const shiftOverlaps = shiftsDoc?.checkForOverlappingShifts(
-                      start,
-                      end,
-                      state.shift?.id ?? ""
-                    );
-
-                    if (shiftOverlaps) {
-                      return Promise.reject(
-                        t(
-                          "This shift overlaps with another shift for this employee"
-                        )
-                      );
-                    }
-                  }
-
-                  return Promise.resolve();
-                },
+                validator: validateTimeRange,
               },
             ]}
           >
-            <div
-              css={{
-                display: "flex",
-                flexDirection: "row",
-                gap: 1,
-                width: "100%",
-              }}
-            >
-              <Form.Item
-                name={["timeRange", "start"]}
-                css={{ width: "100%" }}
-                trigger="onSelect"
-                rules={[{ required: true, message: "" }]}
-                required
-                help={t("Start time of the shift")}
-                normalize={(
-                  value: FormDataType["timeRange"]["start"],
-                  _,
-                  all: FormDataType
-                ) => {
-                  // If end time is before start time, add a day to the end time
-                  if (all?.timeRange?.end?.isBefore(value)) {
-                    form.setFieldsValue({
-                      timeRange: {
-                        ...all.timeRange,
-                        end: all.timeRange.end.add(1, "day"),
-                      },
-                    });
-                  }
-                  return value;
+            <React.Fragment>
+              <div
+                css={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 1,
+                  width: "100%",
                 }}
               >
-                <TimePicker
-                  allowClear={false}
-                  placeholder={t("Start")}
-                  minuteStep={5}
-                  format="hh:mm a"
-                  use12Hours
+                <Form.Item
+                  name={["timeRange", "start"]}
                   css={{ width: "100%" }}
-                />
-              </Form.Item>
+                  trigger="onSelect"
+                  rules={[{ required: true, message: "" }]}
+                  required
+                  help={t("Start time of the shift")}
+                  normalize={normalizeStart}
+                  dependencies={["timeRange", "end"]}
+                >
+                  <TimePicker
+                    allowClear={false}
+                    placeholder={t("Start")}
+                    minuteStep={5}
+                    format="hh:mm a"
+                    use12Hours
+                    css={{ width: "100%" }}
+                    showNow={false}
+                  />
+                </Form.Item>
 
-              <Form.Item<FormDataType["timeRange"]>
-                name={["timeRange", "end"]}
-                css={{ width: "100%" }}
-                trigger="onSelect"
-                rules={[{ required: true, message: "" }]}
-                required
-                help={t("End time of the shift")}
-                normalize={(
-                  value: FormDataType["timeRange"]["end"],
-                  _,
-                  all: FormDataType
-                ) => {
-                  // If end time is before start time, add a day to the end time
-                  const end = value?.isBefore(all?.timeRange?.start)
-                    ? value?.add(1, "day")
-                    : value;
-                  return end;
-                }}
-              >
-                <TimePicker
-                  allowClear={false}
-                  placeholder={t("End")}
-                  minuteStep={5}
-                  format="hh:mm a"
-                  use12Hours
+                <Form.Item<FormDataType["timeRange"]>
+                  name={["timeRange", "end"]}
                   css={{ width: "100%" }}
-                />
-              </Form.Item>
-              <Form.Item
-                css={{ width: 230, textAlign: "center" }}
-                shouldUpdate={(
-                  prevValues: FormDataType,
-                  curValues: FormDataType
-                ) =>
-                  // Only update if the time range changes
-                  prevValues.timeRange !== curValues.timeRange
-                }
-              >
-                {({ getFieldValue }) => {
-                  const timeRange = getFieldValue("timeRange");
-                  if (
-                    isEmpty(timeRange) ||
-                    !timeRange.start ||
-                    !timeRange.end
-                  ) {
-                    return null;
+                  trigger="onSelect"
+                  rules={[{ required: true, message: "" }]}
+                  required
+                  help={t("End time of the shift")}
+                  normalize={normalizeEnd}
+                  dependencies={["timeRange", "start"]}
+                >
+                  <TimePicker
+                    allowClear={false}
+                    placeholder={t("End")}
+                    minuteStep={5}
+                    format="hh:mm a"
+                    use12Hours
+                    css={{ width: "100%" }}
+                    showNow={false}
+                  />
+                </Form.Item>
+                <Form.Item
+                  css={{ width: 230, textAlign: "center" }}
+                  shouldUpdate={(
+                    prevValues: FormDataType,
+                    curValues: FormDataType
+                  ) =>
+                    // Only update if the time range changes
+                    prevValues.timeRange !== curValues.timeRange
                   }
-                  const start = dayjs(timeRange?.start?.toDate());
-                  const end = dayjs(timeRange?.end?.toDate());
-                  const duration = dayjs
-                    .duration(end.diff(start))
-                    .format("[🕘] HH[h] mm[min]");
+                >
+                  {({ getFieldValue }) => {
+                    const timeRange: FormDataType["timeRange"] =
+                      getFieldValue("timeRange");
+                    if (
+                      isEmpty(timeRange) ||
+                      !timeRange.start ||
+                      !timeRange.end
+                    ) {
+                      return null;
+                    }
+                    const start = timeRange.start;
+                    const end = timeRange.end;
+                    const duration = dayjs
+                      .duration(end.diff(start))
+                      .format("[🕘] HH[h] mm[min]");
 
-                  return (
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {duration}
-                    </Typography.Text>
-                  );
-                }}
-              </Form.Item>
-            </div>
+                    return (
+                      <Typography.Text
+                        type="secondary"
+                        style={{ fontSize: 12 }}
+                      >
+                        {duration}
+                      </Typography.Text>
+                    );
+                  }}
+                </Form.Item>
+              </div>
 
-            {/**
-             * Quick add buttons
-             */}
-            {scheduleSettingsData?.presetTimes &&
-              scheduleSettingsData.presetTimes.length > 0 && (
-                <Form.Item css={{ marginTop: 20 }}>
-                  <Space wrap>
-                    {scheduleSettingsData.presetTimes.map(
-                      (presetTime, index) => {
+              {/**
+               * Quick add buttons
+               */}
+              {scheduleSettings?.presetTimes &&
+                scheduleSettings.presetTimes.length > 0 && (
+                  <Form.Item css={{ marginTop: 20 }}>
+                    <Space wrap>
+                      {scheduleSettings.presetTimes.map((presetTime, index) => {
                         const startTime = dayjs(presetTime.start, "HH:mm");
                         const endTime = dayjs(presetTime.end, "HH:mm");
                         // create moment objects for the start and end times based on the current date
-                        const startMoment = dayjs(state.date)
+                        const startMoment = state.date
                           .set("hour", startTime.hour())
                           .set("minute", startTime.minute());
-                        const endMoment = dayjs(state.date)
+                        const endMoment = state.date
                           .set("hour", endTime.hour())
                           .set("minute", endTime.minute());
                         // If the end time is before the start time, add a day to the end time
@@ -445,11 +515,11 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
                             {label}
                           </Button>
                         );
-                      }
-                    )}
-                  </Space>
-                </Form.Item>
-              )}
+                      })}
+                    </Space>
+                  </Form.Item>
+                )}
+            </React.Fragment>
           </Form.Item>
 
           <Divider />
@@ -461,13 +531,12 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
                   {weekDays.map((wd, i) => (
                     <Col xs={12} sm={8} md={6} key={i}>
                       <Checkbox
-                        value={dayjs(wd).isoWeekday()}
+                        value={wd.isoWeekday()}
                         disabled={Boolean(
-                          dayjs(wd).isoWeekday() ===
-                            dayjs(state.date).isoWeekday()
+                          wd.isoWeekday() === state.date.isoWeekday()
                         )}
                       >
-                        {capitalize(dayjs(wd).format("dddd"))}
+                        {capitalize(wd.format("dddd"))}
                       </Checkbox>
                     </Col>
                   ))}
@@ -476,12 +545,12 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
             </Form.Item>
           )}
 
-          {state.employee.role === "employee" && (
+          {state.employee.role > RoleAccessLevels.ADMIN && (
             <React.Fragment>
               <Form.Item name="position">
                 <Select placeholder={t("Select Position")}>
                   <Select.Option value="">{t("No Position")}</Select.Option>
-                  {state.employee.positions.map((position) => {
+                  {state.employee.positions?.map((position) => {
                     const isMainPos = state.employee.mainPosition === position;
                     return (
                       <Select.Option
@@ -511,7 +580,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
                     ["position"]
                   );
                   const hWage = position
-                    ? state.employee.getHourlyWage(position)
+                    ? getEmployeeHourlyWage(state.employee, position)
                     : 0;
                   return (
                     <div

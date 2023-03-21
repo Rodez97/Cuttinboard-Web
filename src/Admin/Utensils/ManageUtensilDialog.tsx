@@ -2,29 +2,31 @@
 import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, Modal } from "antd";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
 import {
-  IUtensil,
-  Utensil,
-} from "@cuttinboard-solutions/cuttinboard-library/utensils";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+  FIRESTORE,
+  useCuttinboardLocation,
+  useUtensils,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { nanoid } from "nanoid";
+import { doc } from "firebase/firestore";
+import { IUtensil } from "@cuttinboard-solutions/types-helpers";
 
-export interface IManageUtensilDialogRef {
+interface IManageUtensilDialogRef {
   openNew: () => void;
-  openEdit: (utensil: Utensil) => void;
+  openEdit: (utensil: IUtensil) => void;
 }
 
 const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
-  (_props, ref) => {
-    const [form] = Form.useForm<Omit<IUtensil, "percent" | "locationId">>();
-    const [saving, setSaving] = useState(false);
+  (_, ref) => {
     const { location } = useCuttinboardLocation();
+    const [form] = Form.useForm<Omit<IUtensil, "percent">>();
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState("");
-    const [utensil, setUtensil] = useState<Utensil | null>(null);
+    const [utensil, setUtensil] = useState<IUtensil | null>(null);
+    const { updateUtensil, createUtensil } = useUtensils();
 
     useImperativeHandle(ref, () => ({
       openNew,
@@ -36,7 +38,7 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
       setOpen(true);
     };
 
-    const openEdit = (utensilToEdit: Utensil) => {
+    const openEdit = (utensilToEdit: IUtensil) => {
       setTitle("Edit Utensil");
       form.setFieldsValue(utensilToEdit);
       setUtensil(utensilToEdit);
@@ -49,20 +51,25 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
       setUtensil(null);
     };
 
-    const onFinish = async (
-      values: Omit<IUtensil, "percent" | "locationId">
-    ) => {
-      setSaving(true);
-      try {
-        if (utensil) {
-          await utensil.update(values);
-        } else {
-          await Utensil.NewUtensil({ ...values, locationId: location.id });
-        }
-      } catch (error) {
-        recordError(error);
+    const onFinish = (values: Omit<IUtensil, "percent">) => {
+      if (utensil) {
+        updateUtensil(utensil, values);
+      } else {
+        const newId = nanoid();
+        const reference = doc(
+          FIRESTORE,
+          "Locations",
+          location.id,
+          "utensils",
+          newId
+        );
+        const newUtensil: Omit<IUtensil, "percent"> = {
+          ...values,
+          id: newId,
+          refPath: reference.path,
+        };
+        createUtensil(newUtensil);
       }
-      setSaving(false);
       handleClose();
     };
 
@@ -73,11 +80,10 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
         maskClosable={false}
         onCancel={handleClose}
         footer={[
-          <Button disabled={saving} onClick={handleClose} key="cancel">
+          <Button onClick={handleClose} key="cancel">
             {t("Cancel")}
           </Button>,
           <Button
-            loading={saving}
             type="primary"
             onClick={form.submit}
             key="submit"
@@ -92,7 +98,6 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           onFinish={onFinish}
           size="small"
           layout="vertical"
-          disabled={saving}
           autoComplete="off"
           initialValues={{
             name: "",
@@ -156,5 +161,23 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
     );
   }
 );
+
+export const useManageUtensilDialog = () => {
+  const ref = useRef<IManageUtensilDialogRef>(null);
+
+  const openNew = () => {
+    ref.current?.openNew();
+  };
+
+  const openEdit = (utensil: IUtensil) => {
+    ref.current?.openEdit(utensil);
+  };
+
+  return {
+    openNew,
+    openEdit,
+    ManageUtensilDialog: <ManageUtensilDialog ref={ref} />,
+  };
+};
 
 export default ManageUtensilDialog;

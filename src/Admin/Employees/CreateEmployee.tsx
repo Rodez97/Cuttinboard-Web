@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import {
@@ -19,27 +19,28 @@ import {
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { collection, getDocs, query, where } from "firebase/firestore";
 import { compact } from "lodash";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import {
-  FIRESTORE,
+  useAddEmployee,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
+import {
   POSITIONS,
   RoleAccessLevels,
   roleToString,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import {
-  useEmployeeCreator,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+} from "@cuttinboard-solutions/types-helpers";
 
 type EmployeeData = {
   name: string;
   lastName: string;
   email: string;
   positions?: { position: string; wage: number }[];
-  role: RoleAccessLevels;
+  role:
+    | RoleAccessLevels.GENERAL_MANAGER
+    | RoleAccessLevels.MANAGER
+    | RoleAccessLevels.STAFF;
 };
 
 /**
@@ -47,96 +48,38 @@ type EmployeeData = {
  */
 function CreateEmployee(props: DrawerProps) {
   const [form] = Form.useForm<EmployeeData>();
-  const { getEmployees } = useEmployeesList();
-  const { availablePositions, location } = useCuttinboardLocation();
+  const { location, role } = useCuttinboardLocation();
   const { t } = useTranslation();
-  const { createEmployee, loading, error } = useEmployeeCreator();
+  const addEmployee = useAddEmployee();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const onFinish = async ({ positions, ...values }: EmployeeData) => {
-    if (getEmployees.some((e) => e.email === values.email)) {
-      message.warning(t("Employee already exists"));
-      return;
-    }
-    if (location.usage.employeesCount >= location.usage.employeesLimit) {
-      message.warning(t("Limit Reached"));
-      return;
-    }
-    try {
-      const checkForSupervisor = await getDocs(
-        query(
-          collection(
-            FIRESTORE,
-            "Organizations",
-            location.organizationId,
-            "employees"
-          ),
-          where("email", "==", values.email),
-          where("role", "in", [0, 1])
-        )
-      );
-      if (checkForSupervisor.size === 1) {
-        message.error(
-          t("This user is already an owner or supervisor in the organization")
-        );
-        return;
-      }
-
-      const employeeToAdd = {
-        ...values,
-        positions: positions ? positions.map((pos) => pos.position) : [],
-        wagePerPosition: positions
-          ? positions.reduce(
-              (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
-              {}
-            )
-          : {},
-        mainPosition: "",
-      };
-
-      const result = await createEmployee({
-        ...employeeToAdd,
-        locationId: location.id,
-      });
-
-      if (!result || !result.data) {
-        message.error(
-          t("There was an error creating the employee. Please try again")
-        );
-        return;
-      }
-
-      const { status, employeeId } = result.data;
-
-      if (status === "CANT_ADD_ORG_EMP") {
-        message.error(
-          t("This user is already an owner or supervisor in the organization")
-        );
-        return;
-      }
-
-      if (status === "CREATED") {
-        message.success(
-          t(
-            "An account has been created and a temporary password has been emailed to this user"
+    const employeeToAdd = {
+      ...values,
+      positions: positions ? positions.map((pos) => pos.position) : [],
+      wagePerPosition: positions
+        ? positions.reduce(
+            (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
+            {}
           )
-        );
-        // Report to analytics
-        logEvent(getAnalytics(), "employee_created", {
-          employeeId,
-          locationId: location.id,
-        });
-      }
-      if (["ADDED", "ALREADY_MEMBER"].includes(status)) {
-        message.success(t("Employee added"));
-        // Report to analytics
-        logEvent(getAnalytics(), "employee_added", {
-          employeeId,
-          locationId: location.id,
-        });
-      }
+        : {},
+      mainPosition: "",
+    };
+
+    try {
+      setLoading(true);
+      const result = await addEmployee(employeeToAdd);
+      message.success(t(result));
+      // Report to analytics
+      logEvent(ANALYTICS, "employee_added");
       form.resetFields();
     } catch (error) {
+      message.error(t(error.message));
+      setError(error);
       recordError(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -250,9 +193,9 @@ function CreateEmployee(props: DrawerProps) {
         >
           <Select
             defaultValue={RoleAccessLevels.STAFF}
-            options={availablePositions
-              .filter((p) => p !== RoleAccessLevels.ADMIN)
-              .map((role) => ({
+            options={Object.values(RoleAccessLevels)
+              .filter((p) => p > role && p !== RoleAccessLevels.ADMIN)
+              .map((role: RoleAccessLevels) => ({
                 label: t(roleToString(role)),
                 value: role,
               }))}

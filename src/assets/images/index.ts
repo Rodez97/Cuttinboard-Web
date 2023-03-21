@@ -1,13 +1,15 @@
 // @index('./*.{png,jpg,svg}', (f, _) => `export { default as img${_.pascalCase(f.name)} } from '${f.path}${f.ext}'`)
 export { default as imgAllBlackLogo } from "./allBlackLogo.svg";
 export { default as imgAllWhiteLogo } from "./allWhiteLogo.svg";
+export { default as imgAndroidStore } from "./android-store.png";
+export { default as imgAppleStore } from "./apple-store.png";
 export { default as imgAuthImage } from "./authImage.jpg";
 export { default as imgBusinessAvatar } from "./BusinessAvatar.svg";
 export { default as imgChat } from "./chat.png";
 export { default as imgChecklist } from "./checklist.png";
 export { default as imgColorLogo } from "./Color Logo.png";
+export { default as imgColorOnLightBackgrounds } from "./Color-on-light-backgrounds.png";
 export { default as imgColorLogoOnDarkBackgrounds } from "./colorLogoOnDarkBackgrounds.svg";
-export { default as imgColorOnLightBackgrounds } from "./colorOnLightBackgrounds.svg";
 export { default as imgCuttinboardBusiness } from "./cuttinboardBusiness.svg";
 export { default as imgCuttinboardLite } from "./cuttinboardLite.png";
 export { default as imgDrawer } from "./drawer.png";

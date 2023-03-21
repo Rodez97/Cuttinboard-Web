@@ -8,7 +8,7 @@ import {
   StorageReference,
   uploadBytes,
 } from "firebase/storage";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Avatar,
@@ -30,41 +30,49 @@ import {
   InboxOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import {
-  Colors,
-  STORAGE,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
 import { recordError } from "../../utils/utils";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrayPageHeader } from "../../shared";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import {
+  Colors,
+  employeesSelectors,
+  STORAGE,
+  useAppSelector,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
 
 const { Dragger } = Upload;
 
 export default () => {
   const { id } = useParams();
+  if (!id) throw new Error("No id provided");
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { getEmployeeById } = useEmployeesList();
   const { location } = useCuttinboardLocation();
   const [files, setFiles] = useState<StorageReference[]>([]);
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
-  const employee = useMemo(
-    () => (id ? getEmployeeById(id) : null),
-    [getEmployeeById, id]
+  const employee = useAppSelector((state) =>
+    employeesSelectors.selectById(state, id)
   );
+
+  if (!location) {
+    throw new Error("No location found");
+  }
+
+  if (!employee) {
+    throw new Error("No employee found");
+  }
 
   useEffect(() => {
     if (employee) {
       const loadFilesFromStorage = async () => {
         const employeeStorageRef = ref(
           STORAGE,
-          `organizations/${location.organizationId}/employees/${employee.id}/location/${location.id}`
+          `locations/${location.id}/employees/${employee.id}`
         );
         const userStorageRef = ref(STORAGE, `users/${employee.id}/documents`);
         try {
@@ -101,11 +109,10 @@ export default () => {
       throw new Error("Employee not found");
     }
     const { type, name, size } = file;
-    const { organizationId, id: locationId } = location;
-    const { id: employeeId } = employee;
+    const { id: locationId } = location;
     const storageRef = ref(
       STORAGE,
-      `organizations/${organizationId}/employees/${employeeId}/location/${locationId}/${name}`
+      `locations/${location.id}/employees/${employee.id}/${name}`
     );
 
     try {
@@ -114,7 +121,7 @@ export default () => {
       });
       setFiles([...files, uploadRef.ref]);
       // Report to analytics
-      logEvent(getAnalytics(), "file_upload", {
+      logEvent(ANALYTICS, "file_upload", {
         size,
         type,
         locationId,
@@ -179,12 +186,12 @@ export default () => {
     <Layout>
       <GrayPageHeader
         onBack={() => navigate(-1)}
-        title={employee.fullName}
-        subTitle={t("Employee Documents")}
+        title={employee.name}
+        subTitle={employee.lastName}
         avatar={{
           src: employee.avatar,
           icon: <UserOutlined />,
-          alt: employee.fullName,
+          alt: employee.name,
         }}
       />
       <Layout.Content

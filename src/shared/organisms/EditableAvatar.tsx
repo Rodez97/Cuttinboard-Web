@@ -21,13 +21,8 @@ import {
 import { EditOutlined, PaperClipOutlined } from "@ant-design/icons";
 
 interface EditableAvatarProps {
-  initialValue?: string;
-  value?: { url: string; file?: File };
-  size?: number;
-  align?: "left" | "center" | "right";
-  onImageEdited: (newValue: { url: string; file?: File }) => void;
-  imageBorderRadius?: number;
-  compressSize?: number;
+  value: { url: string; file?: File } | null | undefined;
+  onImageEdited: (newValue: { url: string; file: File }) => void;
   disabled?: boolean;
 }
 
@@ -35,14 +30,12 @@ const StyledAvatarEditor = styled(AvatarEditor)({
   alignSelf: "center",
 });
 
+const compressSize = 130;
+const imageBorderRadius = 150;
+
 function EditableAvatar({
   value,
   onImageEdited,
-  size,
-  align,
-  initialValue,
-  imageBorderRadius = 150,
-  compressSize = 130,
   disabled,
 }: EditableAvatarProps) {
   const { t } = useTranslation();
@@ -110,13 +103,13 @@ function EditableAvatar({
     <React.Fragment>
       <Avatar
         css={{
-          alignSelf: align ?? "flex-start",
-          justifySelf: align ?? "flex-start",
+          alignSelf: "center",
+          justifySelf: "center",
           cursor: disabled ? "initial" : "pointer",
         }}
-        size={size ?? 100}
+        size={100}
         icon={<EditOutlined />}
-        src={value?.url ?? initialValue}
+        src={value && value.url}
         onClick={() => !disabled && setEditOpen(true)}
       />
 
@@ -144,7 +137,7 @@ function EditableAvatar({
           <StyledAvatarEditor
             width={150}
             height={150}
-            image={selectedImageFile ?? value?.url ?? initialValue ?? ""}
+            image={selectedImageFile ?? value?.url ?? ""}
             borderRadius={imageBorderRadius}
             scale={imageScale}
             ref={avatarEditorRef}

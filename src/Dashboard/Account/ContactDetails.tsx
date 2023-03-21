@@ -16,7 +16,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
-import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library/account";
+import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library";
 
 type EmployeeContactData = {
   phoneNumber: string;

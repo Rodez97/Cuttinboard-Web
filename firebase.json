@@ -5,6 +5,9 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "hosting": {
     "public": "build",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
@@ -15,7 +18,11 @@
           { "key": "Access-Control-Allow-Origin", "value": "*" },
           { "key": "X-Frame-Options", "value": "deny" },
           { "key": "X-Content-Type-Options", "value": "nosniff" },
-          { "key": "X-XSS-Protection", "value": "1; mode=block" }
+          { "key": "X-XSS-Protection", "value": "1; mode=block" },
+          {
+            "key": "Content-Encoding",
+            "value": "gzip"
+          }
         ]
       }
     ],

@@ -2,10 +2,22 @@
 import { jsx } from "@emotion/react";
 import fileSize from "filesize";
 import { Progress, Space, Typography } from "antd";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { useMemo } from "react";
+import { getLocationUsage } from "@cuttinboard-solutions/types-helpers";
 
 export default () => {
   const { location } = useCuttinboardLocation();
+
+  const locationUsage = useMemo(() => {
+    const usage = getLocationUsage(location);
+
+    return {
+      percent: (usage.storageUsed / usage.storageLimit) * 100,
+      storageUsed: fileSize(usage.storageUsed),
+      storageLimit: fileSize(usage.storageLimit),
+    };
+  }, [location]);
 
   return (
     <Space
@@ -19,18 +31,13 @@ export default () => {
         border: "1px solid #74726e",
       }}
     >
-      <Progress
-        percent={
-          (location.usage.storageUsed / location.usage.storageLimit) * 100
-        }
-        showInfo={false}
-      />
+      <Progress percent={locationUsage.percent} showInfo={false} />
       <Space css={{ display: "flex", justifyContent: "space-between" }}>
         <Typography.Text css={{ fontSize: "14px", color: "#74726e" }}>
-          {fileSize(location.usage.storageUsed)}
+          {locationUsage.storageUsed}
         </Typography.Text>
         <Typography.Text css={{ fontSize: "14px", color: "#74726e" }}>
-          {fileSize(location.usage.storageLimit)}
+          {locationUsage.storageLimit}
         </Typography.Text>
       </Space>
     </Space>

@@ -3,12 +3,11 @@ import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
 import styled from "@emotion/styled";
 import { Button, Descriptions, InputNumber, Modal } from "antd";
-import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { logEvent } from "firebase/analytics";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
 
 const ProjectedSalesTable = styled(Descriptions)`
   .ant-input-number {
@@ -25,7 +24,7 @@ function ProjectedSalesDialog({
 }) {
   const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
-  const { weekDays, scheduleDocument } = useSchedule();
+  const { weekDays, summaryDoc, updateProjectedSales } = useSchedule();
   const [editing, setEditing] = useState(false);
   const [projectedSalesByDay, setProjectedSalesByDay] = useState<
     Record<number, number>
@@ -59,14 +58,9 @@ function ProjectedSalesDialog({
   };
 
   const save = async () => {
-    try {
-      await scheduleDocument?.updateProjectedSales(projectedSalesByDay);
-      // Report to analytics
-      const analytics = getAnalytics();
-      logEvent(analytics, "projected_sales_edited");
-    } catch (error) {
-      recordError(error);
-    }
+    updateProjectedSales(projectedSalesByDay);
+    // Report to analytics
+    logEvent(ANALYTICS, "projected_sales_edited");
   };
 
   return (
@@ -94,31 +88,27 @@ function ProjectedSalesDialog({
         bordered
         size="small"
       >
-        {weekDays?.map((wd) => (
-          <Descriptions.Item
-            label={dayjs(wd).format("dddd")}
-            key={dayjs(wd).isoWeekday()}
-          >
-            <InputNumber
-              min={0}
-              step={100}
-              bordered={false}
-              value={
-                projectedSalesByDay?.[dayjs(wd).isoWeekday()] ??
-                scheduleDocument?.projectedSalesByDay?.[
-                  dayjs(wd).isoWeekday()
-                ] ??
-                0
-              }
-              formatter={(value) => `$ ${value}`}
-              onChange={(val: number) =>
-                handleInputChange(dayjs(wd).isoWeekday(), val)
-              }
-              disabled={!editing}
-              css={{ width: "100% !important" }}
-            />
-          </Descriptions.Item>
-        ))}
+        {weekDays.map((wd) => {
+          const weekDay = wd.isoWeekday();
+          return (
+            <Descriptions.Item label={wd.format("dddd")} key={weekDay}>
+              <InputNumber
+                min={0}
+                step={100}
+                bordered={false}
+                value={
+                  projectedSalesByDay?.[weekDay] ??
+                  summaryDoc?.projectedSalesByDay?.[weekDay] ??
+                  0
+                }
+                formatter={(value) => `$ ${value}`}
+                onChange={(val: number) => handleInputChange(weekDay, val)}
+                disabled={!editing}
+                css={{ width: "100% !important" }}
+              />
+            </Descriptions.Item>
+          );
+        })}
       </ProjectedSalesTable>
     </Modal>
   );

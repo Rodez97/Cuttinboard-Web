@@ -8,9 +8,11 @@ import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
 import { EditableAvatar } from "../../shared";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library/account";
-import { STORAGE } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  STORAGE,
+  useCuttinboard,
+  useUpdateAccount,
+} from "@cuttinboard-solutions/cuttinboard-library";
 
 function ProfilePanel() {
   const [form] = Form.useForm();
@@ -66,7 +68,7 @@ function ProfilePanel() {
             name: userDocument.name,
             lastName: userDocument.lastName,
             email: userDocument.email,
-            avatar: user.photoURL,
+            avatar: user.photoURL ? { url: user.photoURL } : null,
           }}
           disabled={!editing || isSubmitting || updating}
           onFinish={onFinish}
@@ -79,9 +81,6 @@ function ProfilePanel() {
             }}
           >
             <EditableAvatar
-              initialValue={user.photoURL ?? ""}
-              size={100}
-              align="center"
               value={form.getFieldValue("avatar")}
               onImageEdited={(avatar) => form.setFieldValue("avatar", avatar)}
               disabled={!editing || isSubmitting || updating}

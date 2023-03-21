@@ -3,19 +3,25 @@ import { jsx } from "@emotion/react";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Button, Layout, Modal, Result } from "antd";
 import { arrayRemove, doc, writeBatch } from "firebase/firestore";
-import { useMemo } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { useOwner } from "../OwnerPortal";
-import SupervisorLocations from "./SupervisorLocations";
-import AssignLocations from "./AssignLocations";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
+import { LoadingPage } from "../../shared";
+import {
+  FIRESTORE,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  ILocation,
+  IOrganizationEmployee,
+} from "@cuttinboard-solutions/types-helpers";
 
-export default ({ supervisors }: { supervisors: Employee[] }) => {
+const AssignLocations = lazy(() => import("./AssignLocations"));
+const SupervisorLocations = lazy(() => import("./SupervisorLocations"));
+
+export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
   const { user } = useCuttinboard();
   const { supervisorId } = useParams();
   const navigate = useNavigate();
@@ -36,7 +42,7 @@ export default ({ supervisors }: { supervisors: Employee[] }) => {
     [locations, supervisorId]
   );
 
-  const unassignLocation = (location: Location) => {
+  const unassignLocation = (location: ILocation) => {
     if (!getSupervisor) {
       throw new Error("Supervisor not found");
     }
@@ -85,27 +91,29 @@ export default ({ supervisors }: { supervisors: Employee[] }) => {
 
   return (
     <Layout>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <SupervisorLocations
-              locations={getSupervisorLocations}
-              onUnassign={unassignLocation}
-              supervisor={getSupervisor}
-            />
-          }
-        />
-        <Route
-          path="assign"
-          element={
-            <AssignLocations
-              alreadySelected={getSupervisorLocations}
-              supervisor={getSupervisor}
-            />
-          }
-        />
-      </Routes>
+      <Suspense fallback={<LoadingPage />}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <SupervisorLocations
+                locations={getSupervisorLocations}
+                onUnassign={unassignLocation}
+                supervisor={getSupervisor}
+              />
+            }
+          />
+          <Route
+            path="assign"
+            element={
+              <AssignLocations
+                alreadySelected={getSupervisorLocations}
+                supervisor={getSupervisor}
+              />
+            }
+          />
+        </Routes>
+      </Suspense>
     </Layout>
   );
 };

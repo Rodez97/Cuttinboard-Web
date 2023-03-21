@@ -1,60 +1,38 @@
-import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { useBoard } from "@cuttinboard-solutions/cuttinboard-library";
+import { IEmployee } from "@cuttinboard-solutions/types-helpers";
 import { ModalProps } from "antd";
 import React from "react";
 import ManageBoardMembers from "../../shared/organisms/ManageBoardMembers";
-import { recordError } from "../../utils/utils";
 
 function ModuleManageMembers(props: ModalProps) {
-  const { selectedBoard, canManageBoard } = useBoard();
-
-  const handleRemoveMember = async (employeeId: string) => {
-    if (!selectedBoard) {
-      return;
-    }
-    try {
-      await selectedBoard.removeMember(employeeId);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const handleAddMembers = async (addedEmployees: Employee[]) => {
-    if (!selectedBoard) {
-      return;
-    }
-    try {
-      await selectedBoard.addMembers(addedEmployees);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const handleSetAppHost = async (newHostUser: Employee) => {
-    if (!selectedBoard) {
-      return;
-    }
-    try {
-      await selectedBoard.addHost(newHostUser);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const handleRemoveHost = async (admin: Employee) => {
-    if (!selectedBoard) {
-      return;
-    }
-    try {
-      await selectedBoard.removeHost(admin.id);
-    } catch (error) {
-      recordError(error);
-    }
-  };
+  const {
+    selectedBoard,
+    canManageBoard,
+    removeHost,
+    removeMember,
+    addHost,
+    addMembers,
+  } = useBoard();
 
   if (!selectedBoard) {
     return null;
   }
+
+  const handleRemoveMember = (employee: IEmployee) => {
+    removeMember(selectedBoard, employee.id);
+  };
+
+  const handleAddMembers = (addedEmployees: IEmployee[]) => {
+    addMembers(selectedBoard, addedEmployees);
+  };
+
+  const handleSetAppHost = (newHostUser: IEmployee) => {
+    addHost(selectedBoard, newHostUser);
+  };
+
+  const handleRemoveHost = (admin: IEmployee) => {
+    removeHost(selectedBoard, admin.id);
+  };
 
   return (
     <ManageBoardMembers

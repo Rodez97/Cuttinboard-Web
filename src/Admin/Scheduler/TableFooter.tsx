@@ -2,25 +2,19 @@
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import duration from "dayjs/plugin/duration";
-import advancedFormat from "dayjs/plugin/advancedFormat";
 import { ShiftsTable } from "./Scheduler";
-import { Table, Typography } from "antd";
-import React, { useCallback } from "react";
-import {
-  minutesToTextDuration,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/schedule";
-dayjs.extend(advancedFormat);
-dayjs.extend(duration);
+import { Typography } from "antd";
+import { useCallback } from "react";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import { minutesToTextDuration } from "@cuttinboard-solutions/types-helpers";
 
 function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
   const { t } = useTranslation();
-  const { weekDays, scheduleDocument } = useSchedule();
+  const { weekDays, summaryDoc, wageData } = useSchedule();
 
   const cellData = useCallback(
-    (weekDay: Date) => {
-      const summ: {
+    (weekDay: dayjs.Dayjs) => {
+      const sum: {
         totalHours: number;
         wages: number;
         laborPercent: number;
@@ -30,78 +24,63 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
         laborPercent: 0,
       };
 
-      const isoWeekDay = dayjs(weekDay).isoWeekday();
+      const isoWeekDay = weekDay.isoWeekday();
 
-      data?.forEach(({ empShifts }) => {
-        const shift = empShifts?.wageData?.[isoWeekDay];
-        if (shift) {
-          summ.totalHours += shift.totalHours;
-          summ.wages += shift.totalWage;
+      data?.forEach(({ shifts, employee }) => {
+        if (shifts) {
+          const weekData = wageData?.[employee.id]?.summary;
+          const shiftWage = weekData?.[isoWeekDay];
+          if (shiftWage) {
+            sum.totalHours += shiftWage.totalHours;
+            sum.wages += shiftWage.totalWage;
+          }
         }
       });
 
-      const totalHoursText = minutesToTextDuration(summ.totalHours * 60);
+      const totalHoursText = minutesToTextDuration(sum.totalHours * 60);
 
-      const projectedSales =
-        scheduleDocument?.projectedSalesByDay?.[isoWeekDay] ?? 0;
+      const projectedSales = summaryDoc?.projectedSalesByDay?.[isoWeekDay] ?? 0;
 
-      const laborPercent = (summ.wages / projectedSales) * 100;
+      const laborPercent = (sum.wages / projectedSales) * 100;
 
       return {
         totalHours: totalHoursText,
-        wages: summ.wages,
+        wages: sum.wages,
         laborPercent: `${(isFinite(laborPercent) ? laborPercent : 0).toFixed(
           2
         )}%`,
       };
     },
-    [scheduleDocument, data]
+    [data, summaryDoc?.projectedSalesByDay, wageData]
   );
 
   return (
-    <React.Fragment>
-      <Table.Summary.Row>
-        <Table.Summary.Cell
-          index={0}
-          css={{
-            fontWeight: "bold",
-          }}
-        >
-          {t("SCHEDULED HOURS")}
-        </Table.Summary.Cell>
+    <tfoot>
+      <tr>
+        <th>{t("SCHEDULED HOURS")}</th>
         {weekDays.map((wd, i) => {
-          return (
-            <Table.Summary.Cell index={i + 1} key={i + 1}>
-              {cellData(wd).totalHours}
-            </Table.Summary.Cell>
-          );
+          return <td key={i + 1}>{cellData(wd).totalHours}</td>;
         })}
-      </Table.Summary.Row>
-      <Table.Summary.Row>
-        <Table.Summary.Cell
-          index={0}
-          css={{
-            fontWeight: "bold",
-          }}
-        >
-          {t("LABOR COST")}
-        </Table.Summary.Cell>
+      </tr>
+      <tr>
+        <th>{t("LABOR COST")}</th>
         {weekDays.map((wd, i) => {
+          const { wages, laborPercent } = cellData(wd);
           return (
-            <Table.Summary.Cell index={i + 1} key={i + 1}>
+            <td key={i + 1}>
               <Typography.Text>
-                {cellData(wd).wages.toLocaleString("en-US", {
+                {wages.toLocaleString("en-US", {
                   style: "currency",
                   currency: "USD",
                 })}
                 {" - "}
-                <b>({cellData(wd).laborPercent})</b>
+                <b>({laborPercent})</b>
               </Typography.Text>
-            </Table.Summary.Cell>
+            </td>
           );
         })}
-      </Table.Summary.Row>
-    </React.Fragment>
+      </tr>
+    </tfoot>
   );
 }
 

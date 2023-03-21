@@ -1,16 +1,16 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { UserOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Modal } from "antd";
+import { Modal } from "antd";
 import { useTranslation } from "react-i18next";
 import UserInfoElement from "./UserInfoElement";
+import CuttinboardAvatar from "../atoms/Avatar";
+import { ICuttinboardUser } from "@cuttinboard-solutions/types-helpers";
 
 function UserInfoAvatar({
   employee,
   size,
 }: {
-  employee: Employee;
+  employee: ICuttinboardUser;
   size?: number;
 }) {
   const { t } = useTranslation();
@@ -21,12 +21,12 @@ function UserInfoAvatar({
     });
   };
   return (
-    <Avatar
+    <CuttinboardAvatar
       size={size}
       src={employee?.avatar}
       onClick={handleOpen}
       css={{ cursor: "pointer" }}
-      icon={<UserOutlined />}
+      userId={employee.id}
     />
   );
 }

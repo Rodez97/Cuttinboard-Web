@@ -5,9 +5,10 @@ import { useTranslation } from "react-i18next";
 import { useSendPasswordResetEmail } from "react-firebase-hooks/auth";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { Alert, Button, Form, Input, message, Typography } from "antd";
-import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "../utils/utils";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
+import { ANALYTICS } from "firebase";
 
 const initialCounterTime = new Date();
 
@@ -36,7 +37,7 @@ function FirebaseRecover() {
         t("Email sent, if you don't see it check your spam folder")
       );
       // Report to analytics
-      logEvent(getAnalytics(), "recover_password", {
+      logEvent(ANALYTICS, "recover_password", {
         method: "email",
       });
     } catch (error) {

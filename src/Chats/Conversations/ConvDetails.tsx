@@ -1,112 +1,46 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Divider, Modal, ModalProps, Switch } from "antd";
-import { useMemo } from "react";
+import { Modal, ModalProps } from "antd";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { List } from "antd";
 import {
-  CrownOutlined,
-  DeleteOutlined,
-  EditOutlined,
   FormOutlined,
   GlobalOutlined,
   InfoCircleOutlined,
   LockOutlined,
-  NotificationOutlined,
+  ShopOutlined,
   TagOutlined,
   TagsOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { useCallback } from "react";
-import { recordError } from "../../utils/utils";
+import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
 import {
   PrivacyLevel,
   privacyLevelToString,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/chats";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
+} from "@cuttinboard-solutions/types-helpers";
 
-function ConvDetails({
-  onEdit,
-  ...props
-}: ModalProps & { onEdit: () => void }) {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { activeConversation, canManage } = useConversations();
-  const { locationAccessKey } = useCuttinboardLocation();
-  const { getEmployees } = useEmployeesList();
-
-  const deleteConv = useCallback(async () => {
-    if (!canManage || !activeConversation) {
-      return;
-    }
-    // Confirm delete
-    Modal.confirm({
-      title: t("Delete Conversation"),
-      content: t("Are you sure you want to delete this conversation?"),
-      okText: t("Delete"),
-      okType: "danger",
-      cancelText: t("Cancel"),
-      onOk: async () => {
-        try {
-          await activeConversation.delete();
-          navigate(-1);
-        } catch (error) {
-          recordError(error);
-        }
-      },
-    });
-  }, [canManage, navigate, activeConversation, t]);
-
-  const admins = useMemo(() => {
-    if (!activeConversation || !activeConversation.hosts) {
-      return [];
-    }
-    return getEmployees.filter(
-      (e) =>
-        activeConversation.hosts && activeConversation.hosts.indexOf(e.id) > -1
-    );
-  }, [getEmployees, activeConversation]);
-
+function ConvDetails(props: ModalProps) {
+  const { activeConversation } = useConversations();
   if (!activeConversation) {
-    return null;
+    throw new Error("No active conversation");
   }
+  const { t } = useTranslation();
 
   return (
-    <Modal
-      {...props}
-      title={t("Details")}
-      footer={
-        locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && [
-          <Button
-            icon={<EditOutlined />}
-            type="dashed"
-            onClick={onEdit}
-            key="edit"
-          >
-            {t("Edit Conversation")}
-          </Button>,
-          <Button
-            icon={<DeleteOutlined />}
-            type="dashed"
-            danger
-            onClick={deleteConv}
-            key="delete"
-          >
-            {t("Delete")}
-          </Button>,
-        ]
-      }
-    >
+    <Modal {...props} title={t("Details")} footer={null}>
       <List>
         <List.Item>
           <List.Item.Meta
             avatar={<FormOutlined />}
             title={t("Name")}
             description={activeConversation.name}
+          />
+        </List.Item>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<ShopOutlined />}
+            title={t("Location")}
+            description={activeConversation.locationName}
           />
         </List.Item>
         <List.Item>
@@ -120,23 +54,12 @@ function ConvDetails({
                 <GlobalOutlined />
               )
             }
-            title={t("Privacy Level")}
+            title={t("Membership Type")}
             description={t(
               privacyLevelToString(activeConversation.privacyLevel)
             )}
           />
         </List.Item>
-        {Boolean(admins.length) && (
-          <List.Item>
-            <List.Item.Meta
-              avatar={<CrownOutlined />}
-              title={t("Admins")}
-              description={admins.map((admin) => (
-                <p key={admin.id}>{admin.fullName}</p>
-              ))}
-            />
-          </List.Item>
-        )}
         <List.Item>
           <List.Item.Meta
             avatar={<InfoCircleOutlined />}
@@ -168,23 +91,6 @@ function ConvDetails({
               />
             </List.Item>
           )}
-        <Divider />
-        <List.Item
-          hidden={!activeConversation.iAmMember}
-          extra={
-            <Switch
-              checked={activeConversation.isMuted}
-              onChange={() => {
-                activeConversation.toggleMuteChat();
-              }}
-            />
-          }
-        >
-          <List.Item.Meta
-            avatar={<NotificationOutlined />}
-            title={t("Mute push notifications")}
-          />
-        </List.Item>
       </List>
     </Modal>
   );

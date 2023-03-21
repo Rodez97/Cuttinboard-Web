@@ -1,20 +1,19 @@
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { ANALYTICS } from "firebase";
+import { logEvent } from "firebase/analytics";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-function TrackPageAnalytics() {
+function useTrackPageAnalytics() {
   const location = useLocation();
 
   useEffect(() => {
-    const analytics = getAnalytics();
-    if (analytics) {
+    if (ANALYTICS) {
       const page_path = location.pathname + location.search;
-      logEvent(analytics, "page_view", {
+      logEvent(ANALYTICS, "page_view", {
         page_path,
       });
     }
   }, [location]);
-  return null;
 }
 
-export default TrackPageAnalytics;
+export default useTrackPageAnalytics;

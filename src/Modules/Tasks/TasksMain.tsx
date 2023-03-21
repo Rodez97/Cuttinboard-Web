@@ -6,29 +6,34 @@ import {
   Button,
   Card,
   Divider,
-  Empty,
   Input,
   Layout,
+  Modal,
   Space,
   Typography,
 } from "antd";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { recordError } from "../../utils/utils";
-import TaskBlock from "./TaskBlock";
 import {
-  ArrowDownOutlined,
-  ArrowUpOutlined,
-  ClearOutlined,
-} from "@ant-design/icons";
+  useChecklistsActions,
+  useCuttinboardLocation,
+  useRecurringTasks,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import TaskBlock from "./TaskBlock";
+import { ClearOutlined } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
 import RecurringTaskItem from "./RecurringTaskItem";
-import {
-  Checklist,
-  ChecklistGroup,
-  RecurringTaskDoc,
-} from "@cuttinboard-solutions/cuttinboard-library/checklist";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
 import { DraggableList } from "../../shared";
+import { orderBy } from "lodash";
+import {
+  getChecklistsSummary,
+  extractRecurringTasksArray,
+  IChecklist,
+  IChecklistGroup,
+  IRecurringTaskDoc,
+  recurringTaskIsToday,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/types-helpers";
+import EmptyExtended from "../../shared/molecules/EmptyExtended";
+import NoItems from "../../shared/atoms/NoItems";
 
 export default ({
   tasksDocument,
@@ -36,110 +41,90 @@ export default ({
   createTask,
   bottomElement,
 }: {
-  tasksDocument: ChecklistGroup | undefined;
-  recurringTaskDoc: RecurringTaskDoc | undefined;
+  tasksDocument: IChecklistGroup | undefined;
+  recurringTaskDoc: IRecurringTaskDoc | undefined;
   createTask: () => void;
   bottomElement: ReactElement;
 }) => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const { locationAccessKey } = useCuttinboardLocation();
+  const { role } = useCuttinboardLocation();
+  const {
+    deleteAllChecklists,
+    reorderChecklists,
+    addChecklistTask,
+    removeChecklist,
+    updateChecklistTask,
+    changeChecklistTaskStatus,
+    removeChecklistTask,
+    reorderChecklistTask,
+    updateChecklists,
+    checklistsArray,
+  } = useChecklistsActions("locationChecklists");
+  const { completeRecurringTask } = useRecurringTasks();
 
-  const canUse = useMemo(
-    () => locationAccessKey.role <= RoleAccessLevels.MANAGER,
-    [locationAccessKey]
-  );
+  const canUse = useMemo(() => role <= RoleAccessLevels.MANAGER, [role]);
 
   const getSummaryText = useMemo(() => {
-    const total = tasksDocument?.summary.total ?? 0;
-    const completed = tasksDocument?.summary.completed ?? 0;
+    if (!tasksDocument) {
+      return `0/0 ${t("task(s) completed")}`;
+    }
+    const { total, completed } = getChecklistsSummary(tasksDocument);
     return `${completed}/${total} ${t("task(s) completed")}`;
-  }, [t, tasksDocument?.summary.completed, tasksDocument?.summary.total]);
+  }, [t, tasksDocument]);
 
   const sectionsOrderedByTagAndCreationDate = useMemo(() => {
-    if (!tasksDocument || tasksDocument?.checklistsArray.length === 0) {
+    if (!checklistsArray) {
+      return [];
+    }
+    if (checklistsArray.length === 0) {
       return [];
     }
 
-    const filteredSections = searchText
-      ? matchSorter(tasksDocument.checklistsArray, searchText, {
+    return searchText
+      ? matchSorter(checklistsArray, searchText, {
           keys: ["name"],
         })
-      : tasksDocument.checklistsArray;
-
-    return filteredSections;
-  }, [tasksDocument, searchText]);
+      : checklistsArray;
+  }, [checklistsArray, searchText]);
 
   const recurringTasksToday = useMemo(() => {
     if (!recurringTaskDoc) {
       return [];
     }
-    return recurringTaskDoc.tasksArray.filter(([, task]) => {
-      return task.recurrenceRule && task.isToday;
+    const tasksArray = extractRecurringTasksArray(recurringTaskDoc);
+    const filtered = tasksArray.filter(([, task]) => {
+      return recurringTaskIsToday(task);
     });
+    return orderBy(filtered, (task) => task[1].name);
   }, [recurringTaskDoc]);
 
-  const startNewShift = useCallback(async () => {
-    const confirmed = confirm(
-      t(
-        "Are you sure you want to start a new shift? All tasks will be deleted."
-      )
-    );
-    if (confirmed) {
-      try {
+  const startNewShift = useCallback(() => {
+    Modal.confirm({
+      title: t("Are you sure you want to start a new shift?"),
+      content: t(
+        "All tasks will be deleted and you will not be able to undo this action."
+      ),
+      okText: t("Start New Shift"),
+      cancelText: t("Cancel"),
+      onOk: () => {
         if (tasksDocument) {
-          await tasksDocument.deleteAllTasks();
+          deleteAllChecklists();
         }
-      } catch (error) {
-        recordError(error);
-      }
-    }
-  }, [t, tasksDocument]);
+      },
+    });
+  }, [deleteAllChecklists, t, tasksDocument]);
 
-  const toggleSortOrder = useCallback(() => {
-    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-  }, []);
-
-  const onRecurringTaskChange = useCallback(
-    async (taskId: string) => {
-      if (recurringTaskDoc) {
-        try {
-          await recurringTaskDoc.toggleCompleted(taskId);
-        } catch (error) {
-          reportError(error);
-        }
-      }
-    },
-    [recurringTaskDoc]
-  );
-
-  const reorderItem = async (
-    element: Checklist,
-    sourceIndex: number,
-    targetIndex: number
-  ) => {
+  const reorderItem = (element: IChecklist, _: number, targetIndex: number) => {
     if (!tasksDocument) {
       return;
     }
-    try {
-      await tasksDocument.reorderChecklists(element.id, targetIndex);
-    } catch (error) {
-      recordError(error);
-    }
+    reorderChecklists(element.id, targetIndex);
   };
 
   return (
-    <Layout>
-      <Space css={{ marginBottom: 20, padding: "2px 20px" }}>
-        <Button
-          onClick={toggleSortOrder}
-          icon={
-            sortOrder === "asc" ? <ArrowUpOutlined /> : <ArrowDownOutlined />
-          }
-        >
-          {t("Creation")}
-        </Button>
+    <React.Fragment>
+      <Space css={{ marginBottom: 20, padding: "10px 20px" }}>
         <Input.Search
           placeholder={t("Search")}
           allowClear
@@ -147,12 +132,22 @@ export default ({
           value={searchText}
           css={{ width: 200 }}
         />
-        <Button icon={<ClearOutlined />} onClick={startNewShift} type="primary">
-          {t("Start New Shift")}
-        </Button>
+        {canUse && (
+          <Button
+            icon={<ClearOutlined />}
+            onClick={startNewShift}
+            type="primary"
+          >
+            {t("Start New Shift")}
+          </Button>
+        )}
       </Space>
-      <Layout.Content>
-        {recurringTasksToday.length > 0 && tasksDocument && (
+      <Layout.Content
+        css={{
+          overflow: "auto",
+        }}
+      >
+        {recurringTasksToday.length > 0 && (
           <React.Fragment>
             <Card
               css={{
@@ -186,7 +181,7 @@ export default ({
                   <RecurringTaskItem
                     task={task}
                     key={id}
-                    onChange={() => onRecurringTaskChange(id)}
+                    onChange={() => completeRecurringTask(id)}
                   />
                 ))}
               </div>
@@ -207,9 +202,31 @@ export default ({
               <Typography.Text>{getSummaryText}</Typography.Text>
             </Divider>
             <Space direction="vertical" css={{ display: "flex" }}>
-              {sectionsOrderedByTagAndCreationDate.length > 0 &&
-              tasksDocument ? (
-                <DraggableList<Checklist>
+              {checklistsArray.length === 0 ? (
+                <EmptyExtended
+                  description={
+                    <span>
+                      {t("No tasks found")}
+                      {". "}
+                      <a onClick={createTask}>{t("Create one")}</a> {t("or")}{" "}
+                      <a
+                        href="https://www.cuttinboard.com/help/tasks-app"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("learn more")}
+                      </a>
+                    </span>
+                  }
+                  descriptions={[
+                    "Create, print and distribute shift task lists",
+                    "Monitor progress towards a successful shift",
+                    "Create periodic tasks that keep your restaurant running like clockwork",
+                    "Create recurrent tasks that create a sustainable routine at your restaurant",
+                  ]}
+                />
+              ) : sectionsOrderedByTagAndCreationDate.length > 0 ? (
+                <DraggableList<IChecklist>
                   dataSource={sectionsOrderedByTagAndCreationDate}
                   renderItem={(checklist, i, isDragging) => (
                     <TaskBlock
@@ -217,34 +234,26 @@ export default ({
                       section={checklist}
                       sectionId={checklist.id}
                       canManage={canUse}
-                      rootChecklist={tasksDocument}
                       isDragging={isDragging}
+                      onAddTask={addChecklistTask}
+                      onRemoveChecklist={removeChecklist}
+                      onRenameTask={updateChecklistTask}
+                      onTaskStatusChange={changeChecklistTaskStatus}
+                      onRemoveTask={removeChecklistTask}
+                      onRename={updateChecklists}
+                      onReorderTasks={reorderChecklistTask}
                     />
                   )}
                   onReorder={reorderItem}
                 />
               ) : (
-                <Empty
-                  description={
-                    <span>
-                      {t("No tasks found")}.{" "}
-                      <a onClick={createTask}>Create one</a> or{" "}
-                      <a
-                        href="https://www.cuttinboard.com/help/tasks-app"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        learn more.
-                      </a>
-                    </span>
-                  }
-                />
+                <NoItems />
               )}
             </Space>
           </div>
           {bottomElement}
         </div>
       </Layout.Content>
-    </Layout>
+    </React.Fragment>
   );
 };

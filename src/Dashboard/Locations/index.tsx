@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useDashboard } from "../DashboardProvider";
 import { Layout, Tabs } from "antd";
 import { CrownOutlined } from "@ant-design/icons";
-import MemberLocations from "./MemberLocations";
-import SupervisorLocations from "./SupervisorLocations";
 import { PageHeader } from "@ant-design/pro-layout";
-import { GoldButton } from "../../shared";
+import { GoldButton, LoadingPage } from "../../shared";
+import { lazy, Suspense } from "react";
+
+const MemberLocations = lazy(() => import("./MemberLocations"));
+const SupervisorLocations = lazy(() => import("./SupervisorLocations"));
 
 const { Content } = Layout;
 
@@ -37,20 +39,22 @@ export default (): JSX.Element => {
       />
 
       <Content css={{ padding: "5px 10px", overflow: "auto" }}>
-        <Tabs
-          items={[
-            {
-              label: t("Member"),
-              key: "member",
-              children: <MemberLocations />,
-            },
-            {
-              label: t("Supervisor"),
-              key: "supervisor",
-              children: <SupervisorLocations />,
-            },
-          ]}
-        />
+        <Suspense fallback={<LoadingPage />}>
+          <Tabs
+            items={[
+              {
+                label: t("Member"),
+                key: "member",
+                children: <MemberLocations />,
+              },
+              {
+                label: t("Supervisor"),
+                key: "supervisor",
+                children: <SupervisorLocations />,
+              },
+            ]}
+          />
+        </Suspense>
       </Content>
     </Layout>
   );

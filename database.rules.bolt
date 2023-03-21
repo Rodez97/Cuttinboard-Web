@@ -6,26 +6,24 @@ function orgMember(orgId){
   return auth != null && auth.token.organizationKey != null && auth.token.organizationKey.orgId == orgId;
 }
 
-function locMember(orgId, locId){
-  return orgMember(orgId) && auth.token.organizationKey.locKeys[locId] != null;
+function locMember(locId){
+  return auth != null && auth.token.organizationKey != null && auth.token.organizationKey.locId == locId;
 }
 
-function isOwnerOrSupervisor(orgId){
-  return orgMember(orgId) && auth.token.organizationKey.role <= 1;
+function isOwnerOrSupervisor(organizationId){
+  return orgMember(organizationId) && auth.token.organizationKey.role <= 1;
 }
 
-function isGM(orgId, locId){
-  return locMember(orgId, locId) && auth.token.organizationKey.locKeys[locId].role <= 2;
+function isOwnerOrSupervisorLocation(locId){
+  return  locMember(locId) && auth.token.organizationKey.role <= 1;
 }
 
-function getConversationAccess(orgId, locId, convId, refData){
-  return root.child("conversations").child(orgId).child(locId).child(convId).child("accessTags").child(refData).val();
+function isGM(locId){
+  return locMember(locId) && auth.token.organizationKey.role == 2;
 }
 
-function conversationMember(orgId, locId, convId){
-  return locMember(orgId, locId) && (getConversationAccess(orgId, locId, convId, "isPublic") == true || 
-                                     getConversationAccess(orgId, locId, convId, auth.uid) == auth.uid || 
-                                     auth.token.organizationKey.locKeys[locId].pos.includes(getConversationAccess(orgId, locId, convId, "position")));
+function isM(locId){
+  return locMember(locId) && auth.token.organizationKey.role == 3;
 }
 
 path /users/{uid} {
@@ -33,32 +31,87 @@ path /users/{uid} {
   write() { isUser(uid) };
 }
 
-path /directMessages/{dmId} {
+path /scheduleData/{organizationId} {
+  read() { isOwnerOrSupervisor(organizationId) };
+  write() { isOwnerOrSupervisor(organizationId) };
+
+  /{locationId} {
+    read() { isGM(locationId) || isM(locationId) };
+    write() { isGM(locationId) || isM(locationId) };
+
+    /{weekId}/shifts/{employeeId} {
+      read() { auth != null && employeeId == auth.uid };
+      write() { auth != null && employeeId == auth.uid };
+      index() { ["status"] }
+    }
+  }
+}
+
+path /shifts/{weekId} {
+    index() { ["locationId", "employeeId"] };
+    read() { auth.uid != null && ((query.orderByChild == "locationId" && query.equalTo == auth.token.organizationKey.locId) || (query.orderByChild == "employeeId" && query.equalTo == auth.uid)) };
+    /{shiftId} {
+      read() { locMember(this.locationId) && auth.token.organizationKey.role <= 3 || this.employeeId == auth.uid };
+      write() { (locMember(data.child("locationId").val()) || locMember(newData.child("locationId").val())) && auth.token.organizationKey.role <= 3 };
+    }
+}
+
+path /schedule/{weekId}/{locationId} {
+  read() { locMember(locationId) && auth.token.organizationKey.role <= 3 };
+  write() { locMember(locationId) && auth.token.organizationKey.role <= 3 };
+}
+
+path /conversations {
+  index() { ["locationId"] };
+  read() { auth.uid != null && ((query.orderByChild == "locationId" && query.equalTo == auth.token.organizationKey.locId) || query.equalTo == auth.uid) };
+
+  /{conversationId} {
+    read() { locMember(this.locationId) && auth.token.organizationKey.role <= 2 || data.child("members").child(auth.uid).val() != null };
+    write() { (locMember(data.child("locationId").val()) || locMember(newData.child("locationId").val())) && auth.token.organizationKey.role <= 2 };
+
+    /online/{uid} {
+      read() { isUser(uid) };
+      write() { isUser(uid) };
+    }
+
+    /members/{uid} {
+      write() { isUser(uid) && newData.val() != null };
+    }
+  }
+}
+
+path /directMessages {
+  /{dmId} {
+    read() { auth != null && dmId.includes(auth.uid) };
+    write() { auth != null && dmId.includes(auth.uid) };
+
+    /online/{uid} {
+      read() { isUser(uid) };
+      write() { isUser(uid) };
+    }
+
+    /members/{uid} {
+      write() { isUser(uid) && newData.val() != null };
+    }
+  }
+}
+
+function conversationMember(convId){
+  return (locMember(root.child("conversations").child(convId).child("locationId").val()) && auth.token.organizationKey.role <= 2) || root.child("conversations").child(convId).child("members").child(auth.uid).val() != null;
+}
+
+path /conversationMessages/{conversationId} {
+  read() { conversationMember(conversationId) };
+  write() { conversationMember(conversationId) };
+  index() { ["createdAt"] }
+}
+
+path /dmMessages/{dmId} {
   read() { auth != null && dmId.includes(auth.uid) };
   update() { auth != null && dmId.includes(auth.uid) };
   index() { ["createdAt"] }
 
   /{messageId} {
-    write() { auth != null && (messageId == "firstMessage" || this.sender.id == auth.uid) };
-
-    /reactions/{reactionId} {
-      write() { auth != null && reactionId == auth.uid && dmId.includes(auth.uid) };
-    }
-  }
-}
-
-path /conversationMessages/{organizationId} {
-  read() { isOwnerOrSupervisor(organizationId) };
-  write() { isOwnerOrSupervisor(organizationId) };
-
-  /{locationId} {
-    read() { isGM(organizationId, locationId) };
-    write() { isGM(organizationId, locationId) };
-
-    /{conversationId} {
-      read() { conversationMember(organizationId, locationId, conversationId) };
-      write() { conversationMember(organizationId, locationId, conversationId) };
-      index() { ["createdAt"] }
-    }
+    write() { auth != null && this.user._id == auth.uid };
   }
 }

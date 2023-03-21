@@ -11,30 +11,33 @@ import {
   MinusOutlined,
   MoreOutlined,
   TagOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import { recordError } from "../../utils/utils";
 import { GrayPageHeader, UserInfoElement } from "../../shared";
 import EmployeeContactDialog from "./EmployeeContactDialog";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
 import {
   useCuttinboard,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+  useDisclose,
+  useEmployees,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import AvatarPlaceholder from "../../shared/atoms/AvatarPlaceholder";
 import {
   CompareRoles,
-  useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+  getEmployeeFullName,
+  IEmployee,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/types-helpers";
 
 interface EmployeeCardProps {
-  employee: Employee;
+  employee: IEmployee;
 }
 
 function EmployeeCard({ employee }: EmployeeCardProps) {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
-  const { locationAccessKey } = useCuttinboardLocation();
+  const { role } = useCuttinboardLocation();
   const [infoOpen, openInfo, closeInfo] = useDisclose();
+  const { deleteEmployee } = useEmployees();
 
   const handleRemoveEmployee = async () => {
     Modal.confirm({
@@ -42,19 +45,18 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
         "Are you sure you want to eliminate this user from the location?"
       ),
       icon: <ExclamationCircleOutlined />,
-      async onOk() {
-        try {
-          await employee.delete();
-        } catch (error) {
-          recordError(error);
-        }
+      onOk() {
+        deleteEmployee(employee);
       },
     });
   };
 
   const compareRoles = useMemo(() => {
-    return CompareRoles(locationAccessKey.role, Number(employee.locationRole));
-  }, [locationAccessKey.role, employee.locationRole]);
+    return (
+      CompareRoles(role, employee.role) &&
+      employee.role !== RoleAccessLevels.ADMIN
+    );
+  }, [employee, role]);
 
   const items: MenuProps["items"] = [
     {
@@ -106,10 +108,10 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
 
   const getPositions = useMemo(
     () =>
-      employee.positions.filter(
+      employee.positions?.filter(
         (position) => position !== employee.mainPosition
-      ),
-    [employee.mainPosition, employee.positions]
+      ) || [],
+    [employee]
   );
 
   return (
@@ -123,9 +125,9 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
             src: employee.avatar,
             onClick: handleAvatarClick,
             style: { cursor: "pointer" },
-            icon: <UserOutlined />,
+            icon: <AvatarPlaceholder userId={employee.id} />,
           }}
-          subTitle={employee.fullName}
+          subTitle={getEmployeeFullName(employee)}
           extra={
             <Dropdown
               menu={{
@@ -140,15 +142,6 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
             >
               <Button type="text" shape="circle" icon={<MoreOutlined />} />
             </Dropdown>
-          }
-          tags={
-            employee.mainPosition
-              ? [
-                  <Tag key="mainPosition" color="gold">
-                    {employee.mainPosition}
-                  </Tag>,
-                ]
-              : []
           }
           footer={
             getPositions.length

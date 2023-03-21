@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "node",
     "target": "ESNext",
     "removeComments": true,
@@ -22,10 +22,5 @@
     "strict": false,
     "strictNullChecks": true
   },
-  "include": [
-    "src",
-    "webpack.config.ts",
-    "__tests__/Login.test.ts",
-    "public/OneSignalSDKWorker.js"
-  ]
+  "include": ["src", "webpack.config.js", "__tests__/Login.test.ts"]
 }

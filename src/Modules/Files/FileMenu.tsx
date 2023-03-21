@@ -7,27 +7,30 @@ import {
   MoreOutlined,
 } from "@ant-design/icons";
 import {
-  Cuttinboard_File,
-  useBoard,
-} from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Dropdown, Input, Modal, Typography } from "antd";
+  getFileUrl,
+  useFiles,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  IBoard,
+  ICuttinboard_File,
+} from "@cuttinboard-solutions/types-helpers";
+import { Button, Dropdown, message, Modal } from "antd";
 import axios from "axios";
 import fileDownload from "js-file-download";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 
 interface FilesMenuProps {
-  file: Cuttinboard_File;
+  file: ICuttinboard_File;
+  onRename: (file: ICuttinboard_File) => void;
+  canManage: boolean;
+  board: IBoard;
 }
 
-export default ({ file }: FilesMenuProps) => {
+export default ({ file, onRename, canManage, board }: FilesMenuProps) => {
   const { t } = useTranslation();
-  const { canManageBoard } = useBoard();
-  const [newFileName, setNewFileName] = useState("");
-  const [renameOpen, openRename, closeRename] = useDisclose();
-  const [renaming, startRenaming, endRenaming] = useDisclose();
+  const { deleteFile } = useFiles(board);
 
   const handleDelete = async () => {
     Modal.confirm({
@@ -36,31 +39,15 @@ export default ({ file }: FilesMenuProps) => {
       okText: t("Yes"),
       okType: "danger",
       cancelText: t("No"),
-      async onOk() {
-        try {
-          await file.delete();
-        } catch (error) {
-          recordError(error);
-        }
+      onOk() {
+        deleteFile(file);
       },
     });
   };
 
-  const renameFile = async () => {
-    openRename();
-    startRenaming();
-    try {
-      await file.rename(newFileName.trim());
-    } catch (error) {
-      recordError(error);
-    }
-    endRenaming();
-    closeRename();
-  };
-
   const downloadFile = async () => {
     try {
-      const fileUrl = await file.getUrl();
+      const fileUrl = await getFileUrl(file);
       const res = await axios.get(fileUrl, { responseType: "blob" });
       fileDownload(res.data, file.name, file.fileType);
     } catch (error) {
@@ -77,31 +64,45 @@ export default ({ file }: FilesMenuProps) => {
               label: t("Copy link"),
               key: "onCopyToClipboardClick",
               icon: <CopyOutlined />,
-              onClick: async () => {
-                navigator.clipboard.writeText(await file.getUrl());
+              onClick: async (e) => {
+                e.domEvent.stopPropagation();
+                const fileUrl = await getFileUrl(file);
+                await navigator.clipboard.writeText(fileUrl);
+                message.success(t("Link copied to clipboard"));
               },
             },
             {
               label: t("Download"),
               key: "onDownload",
               icon: <DownloadOutlined />,
-              onClick: downloadFile,
+              onClick: async (e) => {
+                e.domEvent.stopPropagation();
+                await downloadFile();
+              },
             },
-            {
-              label: t("Rename"),
-              key: "renameFile",
-              icon: <FormOutlined />,
-              disabled: !canManageBoard,
-              onClick: openRename,
-            },
-            {
-              label: t("Delete"),
-              key: "deleteFile",
-              icon: <DeleteOutlined />,
-              disabled: !canManageBoard,
-              danger: true,
-              onClick: handleDelete,
-            },
+            ...(canManage
+              ? [
+                  {
+                    label: t("Rename"),
+                    key: "renameFile",
+                    icon: <FormOutlined />,
+                    onClick: (e) => {
+                      e.domEvent.stopPropagation();
+                      onRename(file);
+                    },
+                  },
+                  {
+                    label: t("Delete"),
+                    key: "deleteFile",
+                    icon: <DeleteOutlined />,
+                    danger: true,
+                    onClick: async (e) => {
+                      e.domEvent.stopPropagation();
+                      await handleDelete();
+                    },
+                  },
+                ]
+              : []),
           ],
         }}
         trigger={["click"]}
@@ -114,24 +115,6 @@ export default ({ file }: FilesMenuProps) => {
           }}
         />
       </Dropdown>
-
-      <Modal
-        confirmLoading={renaming}
-        open={renameOpen}
-        title={t(`Rename file`)}
-        okText={t("Accept")}
-        cancelText={t("Cancel")}
-        onCancel={closeRename}
-        onOk={renameFile}
-      >
-        <Typography.Text mark>{file.name}</Typography.Text>
-        <Input
-          placeholder={t("New filename")}
-          value={newFileName}
-          onChange={(e) => setNewFileName(e.currentTarget.value)}
-          disabled={renaming}
-        />
-      </Modal>
     </React.Fragment>
   );
 };

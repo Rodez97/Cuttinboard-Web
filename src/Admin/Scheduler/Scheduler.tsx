@@ -1,420 +1,353 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import { useTranslation } from "react-i18next";
-import duration from "dayjs/plugin/duration";
 import { matchSorter } from "match-sorter";
 import ProjectedSalesDialog from "./ProjectedSalesDialog";
 import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
-import {
-  Button,
-  Empty,
-  Input,
-  Layout,
-  Space,
-  Table,
-  TableColumnsType,
-  Tag,
-  Tooltip,
-} from "antd";
+import { Button, Input, Layout, message, Select, Tag, Tooltip } from "antd";
 import TableFooter from "./TableFooter";
 import {
   FilePdfOutlined,
   FundProjectionScreenOutlined,
+  InfoCircleOutlined,
   ScheduleOutlined,
+  SettingOutlined,
   TeamOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import "./Scheduler.scss";
+import "./ShiftTable.scss";
 import CloneSchedule from "./CloneSchedule";
-import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
-import { generateSchedulePdf } from "./generatePdf";
-import { GrayPageHeader, PageError, LoadingPage } from "../../shared";
-import { useResizeDetector } from "react-resize-detector";
-import { capitalize, compact, uniq } from "lodash";
+import { useManageShiftDialog } from "./ManageShiftDialog";
+import { GrayPageHeader, LoadingPage } from "../../shared";
 import PublishDialog from "./PublishDialog";
 import {
-  Employee,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
-import {
-  EmployeeShifts,
-  Shift,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/schedule";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  POSITIONS,
-  RoleAccessLevels,
+  useCuttinboardLocation,
   useDisclose,
-  WEEKFORMAT,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import ShowLegend from "./ShowLegend";
+import usePageTitle from "../../hooks/usePageTitle";
+import { generateSchedulePdf } from "./NewPDF";
+import { PositionSelect } from "../../shared/molecules/PositionSelect";
+import ErrorPage from "../../shared/molecules/PageError";
+import ScheduleSettings from "../Settings/ScheduleSettings";
+import {
+  checkEmployeePositions,
+  checkShiftArrayChanges,
+  getEmployeeFullName,
+  IEmployee,
+  IShift,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
-dayjs.extend(customParseFormat);
-dayjs.extend(duration);
-
-export interface IScheduleContextProps {
-  editShift: (employee: Employee, shift: Shift) => void;
-  newShift: (employee: Employee, date: Date) => void;
-}
-
-export const ScheduleContext = createContext<IScheduleContextProps>(
-  {} as IScheduleContextProps
-);
 
 export interface ShiftsTable {
   key: string;
-  employee: Employee;
-  empShifts: EmployeeShifts | undefined;
+  employee: IEmployee;
+  shifts: IShift[] | undefined;
 }
 
+const dayjsToComparator = (date: dayjs.Dayjs) =>
+  date.year() + date.isoWeek() / 100;
+
 function Scheduler() {
-  const { ref, height } = useResizeDetector();
+  usePageTitle("Scheduler");
   const {
     weekId,
     setWeekId,
-    employeeShiftsCollection,
+    employeeShifts,
     searchQuery,
     setSearchQuery,
     weekDays,
-    updates,
+    updatesCount,
+    setPosition,
+    position,
+    loading,
+    error,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
-  const manageShiftDialogRef = useRef<IManageShiftDialogRef>(null);
   const { t } = useTranslation();
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
-  const {
-    getEmployees,
-    loading: employeesLoading,
-    error: employeesError,
-  } = useEmployeesList();
-  const { location } = useCuttinboardLocation();
+  const { location, role } = useCuttinboardLocation();
   const [publishDialogOpen, openPublish, closePublish] = useDisclose();
+  const { openNew, openEdit, ManageShiftDialog } = useManageShiftDialog();
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [isSettingsOpen, openSettings, closeSettings] = useDisclose(false);
 
-  const employees = useMemo(() => {
-    // Get all employees except the supervisor
-    const emp = getEmployees.filter(
-      (e) => e.locationRole !== RoleAccessLevels.ADMIN
-    );
+  const columnFilter = useCallback((value: string, record: ShiftsTable) => {
+    if (value === "all_scheduled") {
+      return Boolean(record.shifts && record.shifts.length > 0);
+    }
 
-    const byName = searchQuery
-      ? matchSorter(emp, searchQuery, {
-          keys: [(e) => e.fullName],
-        })
-      : emp;
-    // Return the array sorted by locationRole and if is the same location role, sort by name
-    return byName.sort((a, b) => {
-      if (a.locationRole !== b.locationRole) {
-        return Number(a.locationRole) - Number(b.locationRole);
-      }
-      return a.fullName.localeCompare(b.fullName);
-    });
-  }, [searchQuery, getEmployees]);
+    if (value === "changed") {
+      return Boolean(record.shifts && checkShiftArrayChanges(record.shifts));
+    }
 
-  const newShift = useCallback((employee: Employee, column: Date) => {
-    manageShiftDialogRef.current?.openNew(employee, column);
+    if (value === "staff_only") {
+      return Boolean(record.employee.role === RoleAccessLevels.STAFF);
+    }
+
+    return false;
   }, []);
 
-  const editShift = useCallback(
-    (employee: Employee, shift: Shift) =>
-      manageShiftDialogRef.current?.openEdit(employee, shift),
-    []
-  );
+  // Create an array of objects containing employee data and their shifts
+  const shiftsSource = useMemo(() => {
+    const byStatus =
+      statusFilter && statusFilter !== "all"
+        ? employeeShifts.filter((e) => columnFilter(statusFilter, e))
+        : employeeShifts;
+
+    const byName = searchQuery
+      ? matchSorter(byStatus, searchQuery, {
+          keys: [({ employee }) => getEmployeeFullName(employee)],
+        })
+      : byStatus;
+
+    return position
+      ? byName.filter((e) => checkEmployeePositions(e.employee, [position]))
+      : byName;
+  }, [columnFilter, employeeShifts, position, searchQuery, statusFilter]);
 
   const generatePdf = useCallback(async () => {
-    const empDocs = compact(
-      employees.map((employee) => {
-        const empShifts = employeeShiftsCollection?.find(
-          (shf) => shf.id === `${weekId}_${employee.id}_${location.id}`
-        );
-        if (!empShifts) {
-          return null;
-        }
-        return {
-          key: employee.id,
-          employee,
-          empShifts,
-        };
-      })
-    );
-    generateSchedulePdf(empDocs, location.name, weekId, weekDays);
-  }, [
-    employees,
-    location.name,
-    location.id,
-    weekId,
-    weekDays,
-    employeeShiftsCollection,
-  ]);
-
-  const columns = useMemo<TableColumnsType<ShiftsTable>>(
-    () => [
-      {
-        title: t("Employee"),
-        dataIndex: "employee",
-        key: "employee",
-        render: (_, { employee, empShifts }) => (
-          <EmpColumnCell employee={employee} empShifts={empShifts} />
-        ),
-        fixed: "left",
-        width: 250,
-        className: "employee-column",
-        filters: [
-          {
-            text: t("Scheduled Only"),
-            value: "all_scheduled",
-          },
-          {
-            text: t("Changed"),
-            value: "changed",
-          },
-          {
-            text: t("Staff Only"),
-            value: "staff_only",
-          },
-          {
-            text: t("Positions"),
-            value: "positions",
-            children: uniq([
-              ...POSITIONS,
-              ...(location.settings?.positions ?? []),
-            ])
-              .sort((a, b) => a.localeCompare(b))
-              .map((pos) => ({
-                text: pos,
-                value: pos,
-              })),
-          },
-        ],
-        onFilter: (value: string, record) => {
-          if (value === "all_scheduled") {
-            return Boolean(
-              record.empShifts && record.empShifts.shiftsArray.length > 0
-            );
-          }
-
-          if (value === "changed") {
-            return Boolean(record.empShifts && record.empShifts.haveChanges);
-          }
-
-          if (value === "staff_only") {
-            return Boolean(
-              record.employee.locationRole === RoleAccessLevels.STAFF
-            );
-          }
-
-          if (value) {
-            return record.employee.hasAnyPosition([value]);
-          }
-
-          return true;
-        },
-      },
-      ...weekDays.map((wd) => ({
-        title: capitalize(dayjs(wd).format("ddd DD")),
-        dataIndex: dayjs(wd).isoWeekday(),
-        key: dayjs(wd).isoWeekday(),
-        render: (_, { employee, empShifts }: ShiftsTable) => (
-          <ShiftCell
-            employee={employee}
-            allShifts={empShifts?.shiftsArray}
-            date={wd}
-          />
-        ),
-      })),
-    ],
-    [location.settings?.positions, t, weekDays]
-  );
-
-  const shiftsSource = useMemo(() => {
-    if (!employees) {
-      return [];
+    const empDocs = shiftsSource.filter(
+      (e) => e.shifts && e.shifts.length > 0
+    ) as {
+      key: string;
+      employee: IEmployee;
+      shifts: IShift[];
+    }[];
+    if (empDocs.length === 0) {
+      return message.error(t("There are no employees scheduled"));
     }
-    return employees.map((employee) => {
-      const empShifts = employeeShiftsCollection?.find(
-        (shf) => shf.id === `${weekId}_${employee.id}_${location.id}`
-      );
-      return {
-        key: employee.id,
-        employee,
-        empShifts,
-      };
-    });
-  }, [employeeShiftsCollection, employees, location.id, weekId]);
+    await generateSchedulePdf(empDocs, location.name, weekId, weekDays);
+  }, [shiftsSource, location.name, weekId, weekDays, t]);
 
-  if (employeesLoading) {
+  const cantPublish = useMemo(() => {
+    const currentWeekNumberComparator = dayjsToComparator(weekDays[0]);
+    const realWeekNumberComparator = dayjsToComparator(dayjs());
+    const nextWeekNumberComparator = dayjsToComparator(dayjs().add(1, "week"));
+
+    if (currentWeekNumberComparator < realWeekNumberComparator) {
+      return "past_week";
+    }
+
+    if (updatesCount.total === 0) {
+      return "no_changes";
+    }
+
+    if (currentWeekNumberComparator > nextWeekNumberComparator) {
+      return "too_far";
+    }
+
+    return false;
+  }, [updatesCount.total, weekDays]);
+
+  if (loading) {
     return <LoadingPage />;
   }
 
-  if (employeesError) {
-    return <PageError error={employeesError} />;
+  if (error) {
+    return <ErrorPage error={new Error(error)} />;
   }
 
   return (
-    <ScheduleContext.Provider
-      value={{
-        editShift,
-        newShift,
-      }}
-    >
-      <Layout css={{ overflowX: "auto" }}>
-        <GrayPageHeader
-          title={t("Schedule")}
-          extra={[
+    <Layout css={{ overflowX: "auto" }}>
+      <GrayPageHeader
+        backIcon={<InfoCircleOutlined />}
+        onBack={ShowLegend}
+        title={t("Schedule")}
+        extra={[
+          <Button
+            key="projectedSales"
+            onClick={() => setProjectedSalesOpen(true)}
+            type="dashed"
+            icon={<FundProjectionScreenOutlined />}
+          >
+            {t("Projected Sales")}
+          </Button>,
+          <Button
+            onClick={generatePdf}
+            icon={<FilePdfOutlined />}
+            key="generatePdf"
+            type="dashed"
+          >
+            {t("Generate PDF")}
+          </Button>,
+          <Button
+            key="clone"
+            onClick={() => setCloneDialogOpen(true)}
+            type="dashed"
+            icon={<ScheduleOutlined />}
+          >
+            {t("Clone Schedule")}
+          </Button>,
+          <Button
+            key="2"
+            icon={<TeamOutlined />}
+            onClick={() => navigate("roster")}
+          >
+            {t("See Roster")}
+          </Button>,
+          role < RoleAccessLevels.MANAGER && (
             <Button
-              onClick={generatePdf}
-              icon={<FilePdfOutlined />}
-              key="generatePdf"
-              type="dashed"
+              key="settings"
+              icon={<SettingOutlined />}
+              onClick={openSettings}
             >
-              {t("Generate PDF")}
-            </Button>,
+              {t("Settings")}
+            </Button>
+          ),
+          <Tooltip
+            title={
+              cantPublish === "too_far"
+                ? t(
+                    "You can't publish schedules that are more than 2 weeks in advance"
+                  )
+                : cantPublish === "past_week"
+                ? t("You can't publish schedules for past weeks")
+                : cantPublish === "no_changes"
+                ? t("You can't publish schedules with no changes")
+                : ""
+            }
+            key="1"
+          >
             <Button
-              key="clone"
-              onClick={() => setCloneDialogOpen(true)}
-              type="dashed"
-              icon={<ScheduleOutlined />}
+              icon={<UploadOutlined />}
+              onClick={openPublish}
+              type="primary"
+              disabled={cantPublish !== false}
             >
-              {t("Clone Schedule")}
-            </Button>,
-            <Button
-              key="projectedSales"
-              onClick={() => setProjectedSalesOpen(true)}
-              type="dashed"
-              icon={<FundProjectionScreenOutlined />}
-            >
-              {t("Projected Sales")}
-            </Button>,
-            <Button
-              key="2"
-              icon={<TeamOutlined />}
-              onClick={() => navigate("roster")}
-            >
-              {t("See Roster")}
-            </Button>,
-            <Tooltip
-              title={
-                dayjs(weekDays[0]).isoWeek() >
-                  dayjs().add(1, "week").isoWeek() &&
-                t(
-                  "You can't publish schedules that are more than 2 weeks in advance"
-                )
-              }
-              key="1"
-            >
-              <Button
-                icon={<UploadOutlined />}
-                onClick={openPublish}
-                type="primary"
-                disabled={
-                  updates.total === 0 ||
-                  dayjs(weekDays[0]).isoWeek() >
-                    dayjs().add(1, "week").isoWeek()
-                }
-              >
-                {`${t("Publish")} (${updates.total})`}
-              </Button>
-            </Tooltip>,
-          ]}
-          tags={
-            dayjs().format(WEEKFORMAT) === weekId
-              ? [
-                  <Tag key="thisWeek" color="processing">
-                    {t("This Week")}
-                  </Tag>,
-                ]
-              : []
-          }
-        />
+              {`${t("Publish")} (${updatesCount.total})`}
+            </Button>
+          </Tooltip>,
+        ]}
+        tags={
+          dayjs().isSame(weekDays[0], "day")
+            ? [
+                <Tag key="thisWeek" color="processing">
+                  {t("This Week")}
+                </Tag>,
+              ]
+            : []
+        }
+      />
 
-        <Space
-          align="center"
-          wrap
-          css={{ justifyContent: "space-between", padding: 10 }}
-        >
-          <WeekNavigator onChange={setWeekId} currentWeekId={weekId} />
+      <div className="scheduler-toolbar">
+        <WeekNavigator onChange={setWeekId} currentWeekId={weekId} />
 
+        <div>
+          <Select
+            defaultValue="all"
+            onChange={setStatusFilter}
+            value={statusFilter}
+            options={[
+              {
+                label: t("All Employees"),
+                value: "all",
+              },
+              {
+                label: t("Staff Only"),
+                value: "staff_only",
+              },
+              {
+                label: t("Scheduled Only"),
+                value: "all_scheduled",
+              },
+              {
+                label: t("Changed"),
+                value: "changed",
+              },
+            ]}
+            className="scheduler-toolbar__sort-emp"
+          />
+          <PositionSelect
+            onSelect={(pos) => (pos ? setPosition(pos) : setPosition(""))}
+            positions={location.settings?.positions}
+          />
           <Input.Search
             placeholder={t("Search")}
             allowClear
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
             value={searchQuery}
-            css={{ width: 200 }}
+            className="scheduler-toolbar__search"
           />
-        </Space>
-        <ScheduleSummaryElement />
-        <Layout.Content css={{ minHeight: 100 }} ref={ref}>
-          {employees.length > 0 ? (
-            <Table
-              scroll={height ? { x: 1300, y: height - 39 * 3 } : { x: 1300 }}
-              css={{ height: "100%" }}
-              bordered
-              size="small"
-              components={{
-                body: {
-                  cell: ({ children, ...props }) => (
-                    <td {...props} className="shift-cell">
-                      {children}
-                    </td>
-                  ),
-                },
-              }}
-              columns={columns}
-              dataSource={shiftsSource}
-              summary={(pageData) => (
-                <Table.Summary fixed>
-                  <TableFooter data={pageData} />
-                </Table.Summary>
-              )}
-              pagination={false}
-              rowKey={(e) => e.employee.id}
-              rowClassName="scheduler-row"
-            />
-          ) : (
-            <Empty
-              description={t("No employees found")}
-              css={{
-                marginTop: 50,
-              }}
-            />
-          )}
-        </Layout.Content>
-        <ManageShiftDialog ref={manageShiftDialogRef} />
-        <ProjectedSalesDialog
-          visible={projectedSalesOpen}
-          onClose={() => setProjectedSalesOpen(false)}
-        />
-        <CloneSchedule
-          open={cloneDialogOpen}
-          onCancel={() => setCloneDialogOpen(false)}
-        />
-        <PublishDialog
-          open={publishDialogOpen}
-          onCancel={closePublish}
-          onAccept={closePublish}
-        />
-      </Layout>
-    </ScheduleContext.Provider>
+        </div>
+      </div>
+
+      <ScheduleSummaryElement />
+      <Layout.Content css={{ minHeight: 100 }}>
+        <div className="table-wrapper">
+          <table className="shift-table">
+            <thead>
+              <tr>
+                <th>{t("Employees")}</th>
+                {weekDays.map((weekday) => (
+                  <th key={Math.random()}>{weekday.format("dddd, MMM D")}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {shiftsSource.map(({ shifts, key, employee }) => (
+                <tr key={key}>
+                  <th>
+                    <EmpColumnCell
+                      employee={employee}
+                      empShifts={shifts}
+                      key={employee.id}
+                    />
+                  </th>
+                  {weekDays.map((weekday) => {
+                    return (
+                      <td key={Math.random()}>
+                        <ShiftCell
+                          key={`${employee.id}-${weekday.toISOString()}}`}
+                          employee={employee}
+                          allShifts={shifts || []}
+                          column={weekday}
+                          newShift={openNew}
+                          editShift={openEdit}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+            <TableFooter data={shiftsSource} />
+          </table>
+        </div>
+      </Layout.Content>
+
+      {ManageShiftDialog}
+      <ProjectedSalesDialog
+        visible={projectedSalesOpen}
+        onClose={() => setProjectedSalesOpen(false)}
+      />
+      <CloneSchedule
+        open={cloneDialogOpen}
+        onCancel={() => setCloneDialogOpen(false)}
+      />
+      <PublishDialog
+        open={publishDialogOpen}
+        onCancel={closePublish}
+        onAccept={closePublish}
+      />
+      {role < RoleAccessLevels.MANAGER && (
+        <ScheduleSettings open={isSettingsOpen} onClose={closeSettings} />
+      )}
+    </Layout>
   );
 }
-
-export const useScheduler = () => useContext(ScheduleContext);
 
 export default Scheduler;

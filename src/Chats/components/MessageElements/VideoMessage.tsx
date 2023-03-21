@@ -1,28 +1,16 @@
 /** @jsx jsx */
-
-import {
-  Message,
-  ReplyRecipient,
-} from "@cuttinboard-solutions/cuttinboard-library/chats";
 import { jsx } from "@emotion/react";
 import ReactPlayer from "react-player";
+import { BaseMediaProps } from "./BaseMediaProps";
 
-function VideoMessage({ message }: { message: Message | ReplyRecipient }) {
-  const getSrc = () => {
-    if (message.type === "mediaUri" || message.type === "youtube") {
-      return message.sourceUrl;
-    } else {
-      return message.attachment.uri;
-    }
-  };
-
+function VideoMessage({ src }: BaseMediaProps) {
   const handleOpen = () => {
-    window.open(getSrc(), "_blanc");
+    window.open(src, "_blanc");
   };
 
   return (
     <ReactPlayer
-      url={getSrc()}
+      url={src}
       controls
       width="100%"
       height="auto"

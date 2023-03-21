@@ -8,14 +8,14 @@ import axios from "axios";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { useSendEmailVerification } from "react-firebase-hooks/auth";
 import { Alert, Button, Modal, Typography } from "antd";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import mdiEmailSealOutline from "@mdi/svg/svg/email-seal-outline.svg";
 import Icon, { SendOutlined } from "@ant-design/icons";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   AUTH,
-  FIREBASE_CONFIG,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS, FIREBASE_CONFIG } from "../../firebase";
 
 const initialCounterTime = new Date();
 
@@ -52,7 +52,7 @@ function VerifyEmail() {
         ),
       });
       // Report to analytics
-      logEvent(getAnalytics(), "email_verification_sent");
+      logEvent(ANALYTICS, "email_verification_sent");
     } catch (error) {
       setError(error);
       recordError(error);
@@ -75,7 +75,7 @@ function VerifyEmail() {
       if (response.data?.users?.[0]?.emailVerified) {
         clearSentTime();
         // Report to analytics
-        logEvent(getAnalytics(), "email_verified", {
+        logEvent(ANALYTICS, "email_verified", {
           email: user?.email,
         });
         location.reload();

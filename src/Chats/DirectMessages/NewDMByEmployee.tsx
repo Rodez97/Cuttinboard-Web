@@ -1,32 +1,33 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Avatar, Button, List, Typography } from "antd";
+import { Button, List, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
-import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
-import { useDirectMessageChat } from "@cuttinboard-solutions/cuttinboard-library/chats";
+import { ArrowRightOutlined } from "@ant-design/icons";
 import {
-  Employee,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+  employeesSelectors,
+  useAppSelector,
+  useCuttinboard,
+  useDirectMessageChat,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import CuttinboardAvatar from "../../shared/atoms/Avatar";
+import { IEmployee } from "@cuttinboard-solutions/types-helpers";
 
-export default ({
-  onCreatingChange,
-  onClose,
-}: {
+type Props = {
   onCreatingChange: (status: boolean) => void;
   onClose: () => void;
-}) => {
+};
+
+export default function NewDMByEmployee({ onCreatingChange, onClose }: Props) {
   const { t } = useTranslation();
   const { startNewDirectMessageChat } = useDirectMessageChat();
-  const { getEmployees } = useEmployeesList();
+  const getEmployees = useAppSelector(employeesSelectors.selectAll);
   const { user } = useCuttinboard();
 
-  const startNewChat = async (selectedUser: Employee) => {
+  const startNewChat = (selectedUser: IEmployee) => {
     try {
       onCreatingChange(true);
-      await startNewDirectMessageChat(selectedUser);
+      startNewDirectMessageChat(selectedUser);
       onClose();
     } catch (error) {
       recordError(error);
@@ -55,7 +56,7 @@ export default ({
             css={{ backgroundColor: "#F7F7F7", padding: 10, marginBottom: 8 }}
           >
             <List.Item.Meta
-              avatar={<Avatar icon={<UserOutlined />} src={emp.avatar} />}
+              avatar={<CuttinboardAvatar userId={emp.id} src={emp.avatar} />}
               title={`${emp.name} ${emp.lastName}`}
               description={emp.email}
             />
@@ -64,4 +65,4 @@ export default ({
       />
     </div>
   );
-};
+}

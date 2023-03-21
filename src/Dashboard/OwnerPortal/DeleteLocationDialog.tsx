@@ -1,25 +1,27 @@
-import { DeleteOutlined, ShopOutlined, TeamOutlined } from "@ant-design/icons";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
-  Alert,
-  Button,
-  Divider,
-  Form,
-  Input,
-  List,
-  Modal,
-  Typography,
-} from "antd";
-import { getAnalytics, logEvent } from "firebase/analytics";
+  DeleteOutlined,
+  NumberOutlined,
+  ShopOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
+import { Alert, Button, Form, Input, List, Modal } from "antd";
+import { logEvent } from "firebase/analytics";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
-import { deleteDoc } from "firebase/firestore";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { deleteDoc, doc } from "firebase/firestore";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
+import {
+  FIRESTORE,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
+import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 export interface DeleteLocationDialogRef {
-  openDialog: (location: Location) => void;
+  openDialog: (location: ILocation) => void;
 }
 
 export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
@@ -28,7 +30,7 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
   const { user } = useCuttinboard();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [location, setLocation] = useState<Location>({} as Location);
+  const [location, setLocation] = useState<ILocation>({} as ILocation);
   const [error, setError] = useState<Error | null>(null);
 
   const deleteLocation = async ({ password }: { password: string }) => {
@@ -39,10 +41,9 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
       setDeleting(true);
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
-      await deleteDoc(location.docRef);
+      await deleteDoc(doc(FIRESTORE, location.refPath));
       // Report to analytics
-      const analytics = getAnalytics();
-      logEvent(analytics, "delete_location", {
+      logEvent(ANALYTICS, "delete_location", {
         location_id: location.id,
         location_name: location.name,
       });
@@ -55,7 +56,7 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
     }
   };
 
-  const openDialog = (location: Location) => {
+  const openDialog = (location: ILocation) => {
     setLocation(location);
     setOpen(true);
   };
@@ -63,7 +64,7 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
   const close = () => {
     setOpen(false);
     setDeleting(false);
-    setLocation({} as Location);
+    setLocation({} as ILocation);
   };
 
   useImperativeHandle(ref, () => ({
@@ -97,19 +98,33 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
         </Button>,
       ]}
     >
-      <List.Item.Meta avatar={<ShopOutlined />} title={location.name} />
-      <List.Item.Meta
-        avatar={<TeamOutlined />}
-        title={t("{{0}} member(s)", { 0: location.members?.length ?? 0 })}
-      />
-      <Divider />
-      <Typography>
-        {t(
-          "This action cannot be undone. This will permanently delete this location, data, and all information associated"
+      <List size="small" bordered>
+        <List.Item>
+          <List.Item.Meta avatar={<ShopOutlined />} title={location.name} />
+        </List.Item>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<TeamOutlined />}
+            title={t("{{0}} member(s)", { 0: location.members?.length ?? 0 })}
+          />
+        </List.Item>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<NumberOutlined />}
+            title={t("ID: {{0}}", { 0: location.intId ?? "---" })}
+          />
+        </List.Item>
+      </List>
+
+      <Alert
+        css={{ marginTop: 16 }}
+        message={t(
+          "This action will permanently delete this location and all associated data. It cannot be undone. Are you sure you want to proceed?"
         )}
-      </Typography>
-      <Divider />
+        type="warning"
+      />
       <Form
+        css={{ marginTop: 16 }}
         form={form}
         autoComplete="off"
         onFinish={deleteLocation}

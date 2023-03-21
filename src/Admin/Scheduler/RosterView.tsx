@@ -11,43 +11,51 @@ import {
   RightCircleOutlined,
 } from "@ant-design/icons";
 import "./RosterView.scss";
-import { capitalize, groupBy } from "lodash";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { groupBy, upperFirst } from "lodash";
 import { useNavigate } from "react-router-dom";
-import { generateRosterPdf } from "./generatePdf";
-import { GrayPageHeader } from "../../shared";
+import { GrayPageHeader, LoadingPage } from "../../shared";
 import {
-  Employee,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
-import {
-  minutesToTextDuration,
-  Shift,
+  employeesSelectors,
+  useAppSelector,
+  useCuttinboardLocation,
   useSchedule,
-  weekToDate,
-} from "@cuttinboard-solutions/cuttinboard-library/schedule";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+} from "@cuttinboard-solutions/cuttinboard-library";
+import isoWeek from "dayjs/plugin/isoWeek";
+import usePageTitle from "../../hooks/usePageTitle";
+import { generateRosterPdf } from "./NewPDF";
+import ErrorPage from "../../shared/molecules/PageError";
+import {
+  getEmployeeFullName,
+  getShiftDayjsDate,
+  getShiftDuration,
+  IEmployee,
+  IShift,
+  minutesToTextDuration,
+  parseWeekId,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/types-helpers";
+dayjs.extend(isoWeek);
 
 export type RosterData = {
-  employee: Employee;
-  shift: Shift;
+  employee: IEmployee;
+  shift: IShift;
 };
 
 function RosterView() {
+  usePageTitle("Scheduler - Roster View");
   const navigate = useNavigate();
-  const { employeeShiftsCollection, weekDays, weekId } = useSchedule();
+  const { employeeShifts, weekDays, weekId, loading, error } = useSchedule();
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const { t } = useTranslation();
-  const { getEmployees } = useEmployeesList();
+  const getEmployees = useAppSelector(employeesSelectors.selectAll);
   const { location } = useCuttinboardLocation();
+  const { wageData } = useSchedule();
 
   const employees = useMemo(() => {
     // Get all employees except the supervisor
-    const emp = getEmployees.filter(
-      (e) => e.locationRole !== RoleAccessLevels.ADMIN
-    );
+    const emp = getEmployees.filter((e) => e.role !== RoleAccessLevels.ADMIN);
     // Return the array sorted by locationRole
-    return emp.sort((a, b) => Number(a.locationRole) - Number(b.locationRole));
+    return emp.sort((a, b) => a.role - b.role);
   }, [getEmployees]);
 
   const columns = useMemo(
@@ -56,18 +64,18 @@ function RosterView() {
         title: t("Employee"),
         dataIndex: "employee",
         key: "employee",
-        render: (_, { employee }) => employee.fullName,
+        render: (_, { employee }) => getEmployeeFullName(employee),
         sorter: {
           compare: (a, b, order) => {
+            const aFullName = getEmployeeFullName(a.employee);
+            const bFullName = getEmployeeFullName(b.employee);
             if (order === "ascend") {
-              return a.employee.fullName.localeCompare(b.employee.fullName);
+              return aFullName.localeCompare(bFullName);
             }
             if (order === "descend") {
-              return b.employee.fullName.localeCompare(a.employee.fullName);
+              return bFullName.localeCompare(aFullName);
             }
-            return (
-              Number(a.employee.locationRole) - Number(b.employee.locationRole)
-            );
+            return a.employee.role - b.employee.role;
           },
         },
       },
@@ -86,68 +94,91 @@ function RosterView() {
         title: t("Start"),
         dataIndex: "start",
         key: "start",
-        render: (_, { shift }) => shift.getStartDayjsDate.format("h:mm a"),
+        render: (_, { shift }) =>
+          getShiftDayjsDate(shift, "start").format("h:mm a"),
       },
       {
         title: t("End"),
         dataIndex: "end",
         key: "end",
-        render: (_, { shift }) => shift.getEndDayjsDate.format("h:mm a"),
+        render: (_, { shift }) =>
+          getShiftDayjsDate(shift, "end").format("h:mm a"),
       },
       {
         title: t("Time"),
         dataIndex: "time",
         key: "time",
         render: (_, { shift }) => {
-          return minutesToTextDuration(shift.shiftDuration.totalMinutes);
+          return minutesToTextDuration(getShiftDuration(shift).totalMinutes);
         },
       },
       {
         title: t("Overtime"),
         dataIndex: "overtime",
         key: "overtime",
-        render: (_, { shift }) => {
-          return minutesToTextDuration(shift.wageData.overtimeHours * 60);
+        render: (_, { shift, employee }) => {
+          const shiftWageData = wageData?.[employee.id].shifts.get(
+            shift.id
+          )?.wageData;
+          const overtimeHours = shiftWageData ? shiftWageData.overtimeHours : 0;
+          return minutesToTextDuration(overtimeHours * 60);
         },
       },
       {
         title: t("Base pay"),
         dataIndex: "basePay",
         key: "basePay",
-        render: (_, { shift }) => {
-          return `$${shift.wageData.normalWage.toFixed(2)}`;
+        render: (_, { shift, employee }) => {
+          const shiftWageData = wageData?.[employee.id].shifts.get(
+            shift.id
+          )?.wageData;
+          const normalWage = shiftWageData ? shiftWageData.normalWage : 0;
+          return `$${normalWage.toFixed(2)}`;
         },
       },
       {
         title: t("Overtime pay"),
         dataIndex: "overtimePay",
         key: "overtimePay",
-        render: (_, { shift }) => {
-          return `$${shift.wageData.overtimeWage.toFixed(2)}`;
+        render: (_, { shift, employee }) => {
+          const shiftWageData = wageData?.[employee.id].shifts.get(
+            shift.id
+          )?.wageData;
+          const overtimeWage = shiftWageData ? shiftWageData.overtimeWage : 0;
+          return `$${overtimeWage.toFixed(2)}`;
         },
       },
       {
         title: t("Final wage"),
         dataIndex: "wage",
         key: "wage",
-        render: (_, { shift }) => {
-          return `$${shift.wageData.totalWage.toFixed(2)}`;
+        render: (_, { shift, employee }) => {
+          const shiftWageData = wageData?.[employee.id].shifts.get(
+            shift.id
+          )?.wageData;
+          const totalWage = shiftWageData ? shiftWageData.totalWage : 0;
+          return `$${totalWage.toFixed(2)}`;
         },
       },
     ],
-    [t]
+    [t, wageData]
   );
 
   const dataSource = useMemo(() => {
     const shiftsCollection: RosterData[] = [];
-    employeeShiftsCollection
-      .flatMap((sd) => ({
-        employeeId: sd.employeeId,
-        shiftsColl: sd.shiftsArray?.filter((shifts) =>
-          shifts.getStartDayjsDate.isSame(weekDays[selectedDateIndex], "day")
-        ),
+    employeeShifts
+      .map(({ employee, shifts }) => ({
+        employeeId: employee.id,
+        shiftsColl: shifts
+          ? shifts.filter((shift) =>
+              getShiftDayjsDate(shift, "start").isSame(
+                weekDays[selectedDateIndex],
+                "day"
+              )
+            )
+          : [],
       }))
-      ?.forEach((shiftsDoc) => {
+      .forEach((shiftsDoc) => {
         shiftsDoc.shiftsColl.forEach((shift) => {
           if (
             !shift.deleting // If the shift is not being deleted
@@ -167,16 +198,16 @@ function RosterView() {
       });
 
     return groupBy(shiftsCollection, ({ shift }) =>
-      shift.getStartDayjsDate.format("a")
+      getShiftDayjsDate(shift, "start").format("a")
     );
-  }, [employees, employeeShiftsCollection, weekDays, selectedDateIndex]);
+  }, [employees, employeeShifts, weekDays, selectedDateIndex]);
 
   const currentWeekText = useMemo(() => {
-    const year = Number.parseInt(weekId.split("-")[2]);
-    const weekNo = Number.parseInt(weekId.split("-")[1]);
-    const firstDayWeek = dayjs(weekToDate(year, weekNo, 1));
-    const lastDayWeek = firstDayWeek.add(6, "days");
-    return `${firstDayWeek.format("MMM DD")} - ${lastDayWeek.format("MMM DD")}`;
+    const { start, end } = parseWeekId(weekId);
+
+    const firstDayWeek = start.format("MMM DD");
+    const lastDayWeek = end.format("MMM DD");
+    return `${firstDayWeek} - ${lastDayWeek}`.toUpperCase();
   }, [weekId]);
 
   const generatePDF = () => {
@@ -190,6 +221,14 @@ function RosterView() {
       location.name
     );
   };
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={new Error(error)} />;
+  }
 
   return (
     <Layout css={{ overflowX: "auto" }}>
@@ -223,8 +262,8 @@ function RosterView() {
               type="text"
             />
             <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-              {capitalize(
-                dayjs(weekDays[selectedDateIndex]).format("dddd, MMMM DD, YYYY")
+              {upperFirst(
+                weekDays[selectedDateIndex].format("dddd, MMMM DD, YYYY")
               )}
             </Typography.Text>
             <Button

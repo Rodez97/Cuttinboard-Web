@@ -2,12 +2,19 @@
 import { jsx } from "@emotion/react";
 import { Button, Result } from "antd";
 import { FirebaseError } from "firebase/app";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { recordError } from "../../utils/utils";
 
 function ErrorPage({ error }: { error: FirebaseError | Error }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    recordError(error);
+  }, [error]);
+
   return (
     <Result
       css={{
