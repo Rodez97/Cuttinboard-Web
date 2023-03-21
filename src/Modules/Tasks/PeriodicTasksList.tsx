@@ -1,80 +1,100 @@
 /** @jsx jsx */
-import {
-  RecurringTask,
-  RecurringTaskDoc,
-} from "@cuttinboard-solutions/cuttinboard-library/checklist";
+import { useRecurringTasks } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Card, Empty, Layout } from "antd";
+import { Button, Card, Drawer, DrawerProps, Empty } from "antd";
 import dayjs from "dayjs";
-import { capitalize } from "lodash";
+import { useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+import {
+  extractRecurringTasksArray,
+  getNextOccurrence,
+  IRecurringTask,
+} from "@cuttinboard-solutions/types-helpers";
+import { PlusCircleOutlined } from "@ant-design/icons";
+import ManagePeriodicTask, {
+  ManagePeriodicTaskRef,
+} from "./ManagePeriodicTask";
+dayjs.extend(LocalizedFormat);
 
-export default ({
-  recurringTaskDoc,
-  onEditTask,
-  createTask,
-}: {
-  recurringTaskDoc: RecurringTaskDoc | undefined;
-  onEditTask: (task: [string, RecurringTask]) => void;
-  createTask: () => void;
-}) => {
+export default (props: DrawerProps) => {
   const { t } = useTranslation();
-  return (
-    <Layout.Content
-      css={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        overflow: "auto",
-      }}
-    >
-      <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
-        <div
-          css={{
-            minWidth: 300,
-            maxWidth: 900,
-            margin: "auto",
-            width: "100%",
-          }}
+  const { recurringTaskDoc } = useRecurringTasks();
+  const managePeriodicTaskRef = useRef<ManagePeriodicTaskRef>(null);
+
+  const recurringTasksArray = useMemo(() => {
+    if (!recurringTaskDoc) {
+      return [];
+    }
+    return extractRecurringTasksArray(recurringTaskDoc);
+  }, [recurringTaskDoc]);
+
+  const renderRR = useCallback(
+    ([id, task]: [string, IRecurringTask]): jsx.JSX.Element => {
+      const nextOccurrence = getNextOccurrence(task);
+      const nxtOcc = nextOccurrence.format("dddd, ll");
+
+      return (
+        <Card
+          size="small"
+          title={task.name}
+          key={id}
+          css={{ marginBottom: 8 }}
+          hoverable
+          onClick={() => managePeriodicTaskRef.current?.openEdit([id, task])}
         >
-          {recurringTaskDoc?.tasksArraySorted &&
-          recurringTaskDoc.tasksArraySorted.length > 0 ? (
-            recurringTaskDoc.tasksArraySorted?.map(([id, task]) => (
-              <Card
-                size="small"
-                title={task.name}
-                key={id}
-                css={{ marginBottom: 8 }}
-                hoverable
-                onClick={() => onEditTask([id, task])}
-              >
-                <Card.Meta
-                  title={capitalize(
-                    dayjs(task.nextOccurrence).format("dddd, MMMM D, YYYY")
-                  )}
-                  description={capitalize(task.recurrenceRule.toText())}
-                />
-              </Card>
-            ))
-          ) : (
-            <Empty
-              description={
-                <span>
-                  {t("No periodic tasks found")}.{" "}
-                  <a onClick={createTask}>Create one</a> or{" "}
-                  <a
-                    href="https://www.cuttinboard.com/help/tasks-app"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    learn more.
-                  </a>
-                </span>
-              }
-            />
-          )}
-        </div>
+          <Card.Meta title={t(`Next: {{0}}`, { 0: nxtOcc })} />
+        </Card>
+      );
+    },
+    [t]
+  );
+
+  return (
+    <Drawer
+      {...props}
+      title={t("Periodic Tasks")}
+      placement="right"
+      width={400}
+      extra={
+        <Button
+          type="primary"
+          onClick={() => managePeriodicTaskRef.current?.openNew()}
+          icon={<PlusCircleOutlined />}
+        >
+          {t("Create")}
+        </Button>
+      }
+    >
+      <div>
+        {recurringTasksArray.length > 0 ? (
+          recurringTasksArray.map(renderRR)
+        ) : (
+          <Empty
+            description={
+              <span>
+                {t("No periodic tasks found")}.{" "}
+                <a onClick={() => managePeriodicTaskRef.current?.openNew()}>
+                  {t("Create one")}
+                </a>{" "}
+                or{" "}
+                <a
+                  href="https://www.cuttinboard.com/help/tasks-app"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("learn more.")}
+                </a>
+              </span>
+            }
+          />
+        )}
+
+        <ManagePeriodicTask
+          ref={managePeriodicTaskRef}
+          recurringTaskDoc={recurringTaskDoc}
+        />
       </div>
-    </Layout.Content>
+    </Drawer>
   );
 };

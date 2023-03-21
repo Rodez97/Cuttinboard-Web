@@ -1,188 +1,300 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { createContext, useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import FinalStep from "./Steps/FinalStep";
-import LocationInfo from "./Steps/LocationInfo";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
-import { Button, Layout, message, Result, Space, Steps, Tooltip } from "antd";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Divider,
+  Form,
+  Input,
+  Layout,
+  message,
+  Space,
+  Typography,
+} from "antd";
+import {
+  FUNCTIONS,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { GMArgs } from "../../InitialForm/AddGM";
+import {
+  AddLocationContent,
+  AddLocationHeader,
+  AddLocationWrapper,
+} from "./StyledComponents";
+import { useNavigate } from "react-router-dom";
+import NewLocationSummary from "./NewLocationSummary";
+import { httpsCallable } from "firebase/functions";
+import { logEvent } from "firebase/analytics";
 import { recordError } from "../../../utils/utils";
-import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import { FUNCTIONS } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import * as yup from "yup";
+import { ANALYTICS } from "firebase";
+import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 
-interface AddLocationContextProps {
-  location: Partial<Location> | null;
-  setLocation: React.Dispatch<React.SetStateAction<Partial<Location>>>;
-  generalManager: {
-    email: string;
-    name: string;
-    lastName: string;
-  } | null;
-  setGeneralManager: React.Dispatch<
-    React.SetStateAction<{
-      email: string;
-      name: string;
-      lastName: string;
-    }>
-  >;
+const gmValidationSchema = yup.object().shape({
+  name: yup.string().required(),
+  lastName: yup.string().required(),
+  email: yup.string().email().required(),
+});
+
+type AddLocationFunctionArgs = {
+  location: ILocationInfo;
+  generalManager?: GMArgs;
+};
+
+type AddLocationFunctionResult =
+  | {
+      customerId: string;
+      subscriptionId: string;
+      organizationId: string;
+    }
+  | undefined
+  | null;
+
+export interface ILocationInfo {
+  name: string;
+  intId?: string;
+  address?: ILocationAddress;
 }
 
-const AddLocationContext = createContext<AddLocationContextProps>(
-  {} as AddLocationContextProps
-);
-
-const steps = [
-  {
-    title: "Location details",
-    content: <LocationInfo />,
-  },
-  {
-    title: "Add Location",
-    content: <FinalStep />,
-  },
-];
+interface locFormType extends ILocationInfo {
+  generalManager?: GMArgs;
+}
 
 function AddLocation() {
+  const { user } = useCuttinboard();
+  const [locationForm] = Form.useForm<locFormType>();
   const { t } = useTranslation();
-  const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
-  const [location, setLocation] = useState<Partial<Location> | null>(null);
-  const [generalManager, setGeneralManager] = useState<{
-    email: string;
-    name: string;
-    lastName: string;
-  } | null>(null);
-  const [addLocation, creating, error] = useHttpsCallable(
-    FUNCTIONS,
-    "http-locations-create"
-  );
+  const [addGM, setAddGM] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleNext = () => {
-    if (activeStep === 0 && location) {
-      setActiveStep(activeStep + 1);
-    }
-    if (activeStep === 1 && location) {
-      createLocation();
-    }
-  };
-
-  const getNextButtonDisabled = useMemo(() => {
-    if (activeStep <= 1 && location) {
-      return false;
-    }
-    return true;
-  }, [activeStep, location]);
-
-  const handleBack = () => {
-    if (activeStep === 0) {
-      navigate(-1);
-      return;
-    }
-    setActiveStep(activeStep - 1);
-  };
-
-  const createLocation = async () => {
-    if (!location) {
-      return;
-    }
+  const onFinish = async (values: locFormType) => {
+    const { generalManager, ...location } = values;
     try {
-      const hide = message.loading(t("Adding a new location..."), 0);
+      setIsLoading(true);
+      const addLocation = httpsCallable<
+        AddLocationFunctionArgs,
+        AddLocationFunctionResult
+      >(FUNCTIONS, "http-locations-create");
+      const isGMValid = await gmValidationSchema.isValid(generalManager);
       await addLocation({
         location,
-        generalManager,
+        generalManager: isGMValid ? generalManager : undefined,
       });
-      hide();
-      message.success(t("Location added successfully"));
       // Report to analytics
-      const analytics = getAnalytics();
-      logEvent(analytics, "location_added", {
-        locationId: location.id,
+      logEvent(ANALYTICS, "location_added", {
         locationName: location.name,
         withGeneralManager: !!generalManager,
       });
+      message.success(t("Location added successfully"));
       // Go back to the previous page
       navigate(-1);
     } catch (error) {
+      setError(error);
       recordError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (error) {
-    return (
-      <Result
-        status="error"
-        title={t(error.message)}
-        extra={
-          <Button type="primary" key="console" onClick={() => navigate(-1)}>
-            {t("Go back")}
-          </Button>
-        }
-      />
-    );
-  }
+  const handleCancel = () => {
+    navigate(-1);
+  };
 
   return (
-    <AddLocationContext.Provider
-      value={{
-        location,
-        setLocation,
-        generalManager,
-        setGeneralManager,
+    <Form<locFormType>
+      form={locationForm}
+      layout="vertical"
+      initialValues={{
+        ...location,
       }}
+      onFinish={onFinish}
+      size="small"
+      autoComplete="off"
+      css={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+      }}
+      disabled={isLoading}
     >
-      <Layout css={{ overflow: "auto", height: "100%", padding: 20 }}>
-        <Steps current={activeStep}>
-          {steps.map((item) => (
-            <Steps.Step key={item.title} title={item.title} />
-          ))}
-        </Steps>
+      <AddLocationWrapper>
+        <AddLocationHeader>
+          <Typography.Title level={4} css={{ marginTop: 0 }}>
+            {t("Add a new location to your account")}
+          </Typography.Title>
 
-        <Layout.Content
-          css={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-            paddingBottom: 30,
-            overflow: "auto",
-          }}
-        >
-          {steps[activeStep].content}
-        </Layout.Content>
+          <Typography.Paragraph>
+            {t(
+              "Define the location details and add a general manager if needed"
+            )}
+          </Typography.Paragraph>
+        </AddLocationHeader>
+
+        <AddLocationContent>
+          <div
+            css={{
+              display: "flex",
+              minWidth: 300,
+              flexDirection: "column",
+              paddingTop: 20,
+            }}
+          >
+            <Space
+              wrap
+              css={{
+                justifyContent: "space-evenly",
+                display: "flex",
+                alignItems: "flex-start",
+              }}
+            >
+              <Form.Item css={{ minWidth: 280 }}>
+                <Divider orientation="left">{t("Information")}</Divider>
+                <Input.Group size="small">
+                  <Form.Item
+                    required
+                    name="name"
+                    rules={[{ required: true, message: "" }]}
+                    label={t("Location Name")}
+                  >
+                    <Input maxLength={50} showCount />
+                  </Form.Item>
+                  <Form.Item name="intId" label={t("Internal ID")}>
+                    <Input maxLength={90} />
+                  </Form.Item>
+                </Input.Group>
+              </Form.Item>
+
+              <Form.Item css={{ minWidth: 280 }}>
+                <Divider orientation="left">{t("Address")}</Divider>
+                <Input.Group>
+                  <Form.Item
+                    name={["address", "addressLine"]}
+                    label={t("Address")}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={["address", "city"]} label={t("City")}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={["address", "state"]} label={t("State")}>
+                    <Input />
+                  </Form.Item>
+                  <Form.Item name={["address", "zip"]} label={t("Zip")}>
+                    <Input />
+                  </Form.Item>
+                </Input.Group>
+              </Form.Item>
+
+              <Form.Item css={{ minWidth: 280 }}>
+                <Divider orientation="left">{t("General Manager")}</Divider>
+                <Form.Item>
+                  <Checkbox
+                    checked={addGM}
+                    onChange={(e) => setAddGM(e.target.checked)}
+                  >
+                    {t("Add General Manager?")}
+                  </Checkbox>
+                </Form.Item>
+                <Input.Group
+                  css={{
+                    display: addGM ? "block" : "none",
+                    border: "1px dotted #00000025",
+                    padding: 5,
+                  }}
+                >
+                  <Form.Item
+                    name={["generalManager", "name"]}
+                    rules={[
+                      {
+                        validator(_, value) {
+                          if (!value && addGM) {
+                            return Promise.reject();
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                    label={t("Name")}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    name={["generalManager", "lastName"]}
+                    rules={[
+                      {
+                        validator(_, value) {
+                          if (!value && addGM) {
+                            return Promise.reject();
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                    label={t("Last Name")}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Form.Item
+                    name={["generalManager", "email"]}
+                    rules={[
+                      {
+                        validator(_, value) {
+                          if (!value && addGM) {
+                            return Promise.reject();
+                          }
+                          if (value && addGM && value === user.email) {
+                            return Promise.reject(
+                              new Error(t("You can't be the GM"))
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                      { type: "email", message: t("Must be a valid email") },
+                    ]}
+                    label={t("Email")}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Input.Group>
+              </Form.Item>
+            </Space>
+
+            {error && (
+              <Alert message={t(error.message)} type="error" showIcon />
+            )}
+          </div>
+        </AddLocationContent>
 
         <Layout.Footer>
-          <Space css={{ justifyContent: "center", display: "flex" }}>
-            <Button
-              disabled={activeStep < 0 || creating}
-              onClick={handleBack}
-              type="dashed"
+          <Space css={{ display: "flex", justifyContent: "space-between" }}>
+            <NewLocationSummary />
+            <Space
+              direction="vertical"
+              css={{ justifyContent: "center", display: "flex", width: 150 }}
             >
-              {t("Back")}
-            </Button>
-            <Tooltip
-              title={activeStep === 0 ? t("Save changes to continue") : ""}
-              placement="right"
-            >
-              <div>
-                <Button
-                  type="primary"
-                  onClick={handleNext}
-                  disabled={getNextButtonDisabled || creating}
-                >
-                  {activeStep === steps.length - 1
-                    ? t("Create Location")
-                    : t("Next")}
-                </Button>
-              </div>
-            </Tooltip>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={isLoading}
+              >
+                {t("Create Location")}
+              </Button>
+              <Button type="dashed" danger onClick={handleCancel} block>
+                {t("Take me back")}
+              </Button>
+            </Space>
           </Space>
         </Layout.Footer>
-      </Layout>
-    </AddLocationContext.Provider>
+      </AddLocationWrapper>
+    </Form>
   );
 }
-
-export const useAddLocation = () => useContext(AddLocationContext);
 
 export default AddLocation;

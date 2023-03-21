@@ -2,18 +2,30 @@
 import { jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import { recordError } from "../utils/utils";
+import { logEvent } from "firebase/analytics";
+import { recordError, TrimRule } from "../utils/utils";
 import { Alert, Button, Checkbox, Form, Input, Typography } from "antd";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useRegister } from "@cuttinboard-solutions/cuttinboard-library/account";
+import {
+  Colors,
+  useRegister,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { useMemo } from "react";
+import { AuthError } from "firebase/auth";
+import useSignUpLocalTracker from "../hooks/useSignUpLocalTracker";
+import { ANALYTICS } from "firebase";
 
 //= ==========================|| FIREBASE - REGISTER ||===========================//
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const authErrorTypeguard = (error: any): error is AuthError => {
+  return error.code !== undefined;
+};
 
 const FirebaseRegister = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { registerUser, submitting, error } = useRegister();
+  const { registerUser, isSubmitting, error } = useRegister();
+  const [, setNewUser] = useSignUpLocalTracker();
 
   const onFinish = async ({
     name,
@@ -34,14 +46,27 @@ const FirebaseRegister = () => {
         lastName,
         password,
       });
-      logEvent(getAnalytics(), "sign_up", {
+      // Store the newly created user in the local storage to be used in the first login event to show the onboarding flow
+      setNewUser(email);
+
+      logEvent(ANALYTICS, "sign_up", {
         method: "Email-Password",
         email,
       });
+
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       recordError(error);
     }
   };
+
+  const errorMessage = useMemo(() => {
+    if (error && authErrorTypeguard(error)) {
+      return t(error.code);
+    } else if (error) {
+      return t(error.message);
+    }
+  }, [error, t]);
 
   return (
     <div
@@ -53,7 +78,7 @@ const FirebaseRegister = () => {
         {t("Sign up")}
       </Typography.Title>
       <Form
-        disabled={submitting}
+        disabled={isSubmitting}
         onFinish={onFinish}
         initialValues={{ acceptTerms: false }}
       >
@@ -73,16 +98,7 @@ const FirebaseRegister = () => {
               whitespace: true,
               message: t("Name cannot be empty"),
             },
-            {
-              validator: async (_, value) => {
-                // Check if value dont hace tailing or leading spaces
-                if (value !== value.trim()) {
-                  return Promise.reject(
-                    new Error(t("Name cannot have leading or trailing spaces"))
-                  );
-                }
-              },
-            },
+            TrimRule,
           ]}
         >
           <Input placeholder={t("First Name")} maxLength={20} showCount />
@@ -105,7 +121,7 @@ const FirebaseRegister = () => {
             },
             {
               validator: async (_, value) => {
-                // Check if value dont hace tailing or leading spaces
+                // Check if value don't have tailing or leading spaces
                 if (value !== value.trim()) {
                   return Promise.reject(
                     new Error(t("Name cannot have leading or trailing spaces"))
@@ -199,7 +215,7 @@ const FirebaseRegister = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button block htmlType="submit" loading={submitting} type="primary">
+          <Button block htmlType="submit" loading={isSubmitting} type="primary">
             {t("Sign up")}
           </Button>
         </Form.Item>
@@ -216,10 +232,10 @@ const FirebaseRegister = () => {
           </Typography.Link>
         </Form.Item>
       </Form>
-      {error && (
+      {errorMessage && (
         <Alert
           message="Error"
-          description={t(error.message)}
+          description={errorMessage}
           type="error"
           showIcon
         />

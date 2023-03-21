@@ -1,19 +1,24 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Colors,
+  employeesSelectors,
+  useAppSelector,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UsergroupAddOutlined } from "@ant-design/icons";
-import {
-  Employee,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
 import UserInfoAvatar from "./UserInfoAvatar";
+import {
+  getEmployeeFullName,
+  IEmployee,
+} from "@cuttinboard-solutions/types-helpers";
+import { matchSorter } from "match-sorter";
 
 type EmployeeMultiSelectProps = {
-  onSelectedEmployees: (employees: Employee[]) => void;
-  initialSelected?: Employee[];
+  onSelectedEmployees: (employees: IEmployee[]) => void;
+  initialSelected?: IEmployee[];
   admins?: string[];
   onClose: () => void;
 } & ModalProps;
@@ -27,10 +32,10 @@ function EmployeeMultiSelect({
 }: EmployeeMultiSelectProps) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const { getEmployees } = useEmployeesList();
-  const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
+  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+  const [selectedEmployees, setSelectedEmployees] = useState<IEmployee[]>([]);
 
-  const handleToggle = (value: Employee) => () => {
+  const handleToggle = (value: IEmployee) => () => {
     const currentIndex = selectedEmployees.indexOf(value);
     const newChecked = [...selectedEmployees];
 
@@ -58,18 +63,16 @@ function EmployeeMultiSelect({
   // Calculate a list of employees based on certain conditions
   const employees = useMemo(() => {
     // Filter the list of employees based on the search text and other conditions
-    const filtered = getEmployees.filter((emp) => {
-      // Exclude employees who are admins or are already selected
-      if (
-        admins?.includes(emp.id) ||
-        initialSelected?.some((e) => e.id === emp.id)
-      ) {
-        return false;
-      }
-      // Include employees whose name includes the search text (case-insensitive)
-      return emp.name.toLowerCase().includes(searchText.toLowerCase());
-    });
-    return filtered;
+    const filtered = getEmployees.filter(
+      (emp) =>
+        !admins?.includes(emp.id) &&
+        !initialSelected?.some((e) => e.id === emp.id)
+    );
+    return searchText
+      ? matchSorter(filtered, searchText, {
+          keys: ["name", "lastName", "email"],
+        })
+      : filtered;
   }, [getEmployees, searchText, admins, initialSelected]);
 
   return (
@@ -106,7 +109,7 @@ function EmployeeMultiSelect({
               key={emp.id}
               css={{
                 backgroundColor: Colors.MainOnWhite,
-                padding: 10,
+                padding: "5px !important",
                 margin: 5,
               }}
               extra={
@@ -118,7 +121,7 @@ function EmployeeMultiSelect({
             >
               <List.Item.Meta
                 avatar={<UserInfoAvatar employee={emp} />}
-                title={emp.fullName}
+                title={getEmployeeFullName(emp)}
                 description={emp.email}
               />
             </List.Item>

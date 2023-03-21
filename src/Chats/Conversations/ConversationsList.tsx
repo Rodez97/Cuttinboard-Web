@@ -1,76 +1,78 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { orderBy } from "lodash";
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
-import Icon, { MessageOutlined, PlusOutlined } from "@ant-design/icons";
-import { Badge, Button, Input, Menu, Space, Typography } from "antd";
+import Icon from "@ant-design/icons";
+import { Input, Spin, Typography } from "antd";
 import { useTranslation } from "react-i18next";
-import ManageConvDialog, { useManageConvs } from "./ManageConvDialog";
 import Forum from "@mdi/svg/svg/forum.svg";
-import {
-  useCuttinboard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useConversations } from "@cuttinboard-solutions/cuttinboard-library/chats";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
+import ConversationListItem from "./ConversationListItem";
+import { useNavigate } from "react-router-dom";
+import { IConversation } from "@cuttinboard-solutions/types-helpers";
 
 export default () => {
-  const { locationAccessKey, location } = useCuttinboardLocation();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { allConversations, activeConversationId } = useConversations();
-  const { notifications } = useCuttinboard();
+  const { conversations, activeConversation, loading, error } =
+    useConversations();
   const [searchQuery, setSearchQuery] = useState("");
-  const { baseRef, newConv } = useManageConvs();
 
-  const menuItems = useMemo(() => {
-    if (!allConversations) {
+  const sortedConversations = useMemo(() => {
+    if (!conversations) {
       return [];
     }
-    const sorted = matchSorter(allConversations, searchQuery, {
-      keys: ["name"],
-    });
 
-    return orderBy(sorted, "createdAt", "desc")?.map((el) => {
-      const badges = notifications
-        ? notifications.getConversationBadges(
-            location.organizationId,
-            location.id,
-            el.id
-          )
-        : 0;
-      return {
-        label: el.name,
-        value: el.id,
-        icon: (
-          <Badge count={badges} size="small">
-            <MessageOutlined />
-          </Badge>
-        ),
-        key: el.id,
-      };
-    });
-  }, [
-    allConversations,
-    searchQuery,
-    notifications,
-    location.organizationId,
-    location.id,
-  ]);
+    const sorted = searchQuery
+      ? matchSorter(conversations, searchQuery, {
+          keys: ["name"],
+        })
+      : conversations;
+
+    return orderBy(sorted, (e) => e.recentMessage ?? e.createdAt, "desc");
+  }, [conversations, searchQuery]);
+
+  const selectActiveConversation = useCallback(
+    (conversation: IConversation) => {
+      navigate(conversation.id);
+    },
+    [navigate]
+  );
+
+  if (loading) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <Spin />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <div className="module-sider-error">
+          <h1>{t("Error")}</h1>
+          <p>{t(error)}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Space direction="vertical" className="module-sider-container">
-      <Space direction="vertical" className="module-sider-content">
-        <div
-          css={{
-            display: "flex",
-            alignItems: "center",
-            padding: "5px 10px",
-            justifyContent: "center",
-          }}
-        >
+    <div className="module-sider-container">
+      <div className="module-sider-content">
+        <div className="module-sider-header">
           <Icon
             component={Forum}
             css={{
@@ -85,27 +87,26 @@ export default () => {
               marginLeft: "10px",
             }}
           >
-            {t("Conversations")}
+            {t("My Conversations")}
           </Typography.Text>
         </div>
-        {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
-          <Button icon={<PlusOutlined />} block type="dashed" onClick={newConv}>
-            {t("Add")}
-          </Button>
-        )}
+
         <Input.Search
           placeholder={t("Search")}
           value={searchQuery}
           onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
         />
-      </Space>
-      <Menu
-        items={menuItems}
-        onSelect={({ key }) => navigate(key, { replace: true })}
-        selectedKeys={[activeConversationId]}
-        className="module-sider-menu"
-      />
-      <ManageConvDialog ref={baseRef} />
-    </Space>
+      </div>
+      <div className="module-sider-menu-container">
+        {sortedConversations.map((conversation) => (
+          <ConversationListItem
+            key={conversation.id}
+            conversation={conversation}
+            selected={activeConversation?.id === conversation.id}
+            onSelect={selectActiveConversation}
+          />
+        ))}
+      </div>
+    </div>
   );
 };

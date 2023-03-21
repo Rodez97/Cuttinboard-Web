@@ -1,44 +1,40 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
-import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
-import { Divider, Layout, Space, Spin, Typography } from "antd";
+import { Divider, Spin, Tag, Typography } from "antd";
 import DirectMessageBubble from "./DirectMessageBubble";
-import { LoadingPage } from "../../shared";
-import {
-  Message,
-  useMessages,
-} from "@cuttinboard-solutions/cuttinboard-library/chats";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useMessages } from "@cuttinboard-solutions/cuttinboard-library";
+import dayjs from "dayjs";
 
 interface ChatMainProps {
   type: "chats" | "conversations";
-  chatId: string;
   canUse?: boolean;
 }
 
-function ChatMain({ type, chatId, canUse }: ChatMainProps) {
+const ChatMain = ({ type, canUse }: ChatMainProps) => {
   const { t } = useTranslation();
-  const { fetchPreviousMessages, allMessages, hasNoMoreMessages, isLoading } =
-    useMessages();
-  const [replyTargetMessage, setReplyTargetMessage] = useState<Message | null>(
-    null
-  );
+  const { messages, noMoreMessages, fetchPreviousMessages } = useMessages();
+  const infiniteScrollRef = useRef<InfiniteScroll>(null);
 
-  useEffect(() => {
-    setReplyTargetMessage(null);
-  }, [chatId]);
-
-  if (isLoading) {
-    return <LoadingPage />;
-  }
+  const handleNewMessage = useCallback(() => {
+    // Scroll to the bottom of the chat
+    const scrollableTarget = infiniteScrollRef.current?.getScrollableTarget();
+    if (scrollableTarget) {
+      setTimeout(() => {
+        scrollableTarget.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }, 200);
+    }
+  }, []);
 
   return (
     <React.Fragment>
-      <Layout.Content
+      <div
         id="scrollableDiv"
         css={{
           height: "100%",
@@ -51,36 +47,34 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
       >
         {/*Put the scroll bar always on the bottom*/}
         <InfiniteScroll
-          dataLength={allMessages ? allMessages.length : 0}
+          ref={infiniteScrollRef}
+          dataLength={messages ? messages.length : 0}
           next={fetchPreviousMessages}
           css={{
             display: "flex",
             flexDirection: "column-reverse",
-            overflow: "hidden",
+            overflow: "hidden !important",
           }} //To put endMessage and loader to the top.
           inverse={true} //
-          hasMore={!hasNoMoreMessages}
+          hasMore={!noMoreMessages}
           loader={
-            allMessages &&
-            allMessages.length > 0 && (
-              <div
-                css={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 1,
-                }}
-              >
-                <Spin />
-              </div>
-            )
+            <div
+              css={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 1,
+              }}
+            >
+              <Spin />
+            </div>
           }
           scrollableTarget="scrollableDiv"
         >
-          {allMessages?.map((rm, index) =>
-            rm.type === "system" ? (
+          {messages?.map((rm, index) =>
+            rm.systemType === "start" ? (
               <div
-                key={rm.id}
+                key={rm._id}
                 css={{
                   display: "flex",
                   flexDirection: "column",
@@ -94,55 +88,47 @@ function ChatMain({ type, chatId, canUse }: ChatMainProps) {
                   {t("The conversation starts here 😉")}
                 </Typography.Text>
                 <Divider plain>
-                  {rm.createdAtDate.format("MM/DD/YYYY, h:mm a")}
+                  <Tag>{dayjs(rm.createdAt).format("MM/DD/YYYY h:mm A")}</Tag>
                 </Divider>
               </div>
-            ) : type === "chats" ? (
-              <DirectMessageBubble
-                key={rm.id}
-                prevMessage={allMessages[index + 1]}
-                currentMessage={rm}
-                i={index}
-                allMessagesLength={allMessages?.length}
-                onReply={setReplyTargetMessage}
-              />
             ) : (
-              <MessageBubble
-                key={rm.id}
-                prevMessage={allMessages[index + 1]}
+              <DirectMessageBubble
+                key={rm._id}
+                prevMessage={messages[index + 1]}
                 currentMessage={rm}
-                i={index}
-                allMessagesLength={allMessages?.length}
-                onReply={setReplyTargetMessage}
-                canUseApp={canUse}
+                canUse={canUse || type === "chats"}
               />
             )
           )}
         </InfiniteScroll>
-      </Layout.Content>
-      {canUse ? (
-        <ChatInput
-          onSendMessage={() => setReplyTargetMessage(null)}
-          replyTargetMessage={replyTargetMessage ?? undefined}
-          cancelReply={() => setReplyTargetMessage(null)}
-        />
-      ) : (
-        <Space
-          css={{
-            display: "flex",
-            justifyContent: "center",
-            backgroundColor: Colors.MainOnWhite,
-            padding: "20px",
-          }}
-        >
-          <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-            {t(
-              "You can't participate in this conversation because you are not a member 🤐"
-            )}
-          </Typography.Text>
-        </Space>
-      )}
+      </div>
+
+      <div
+        css={{
+          position: "relative",
+        }}
+      >
+        {canUse && <ChatInput onMessageSend={handleNewMessage} />}
+      </div>
     </React.Fragment>
   );
+};
+
+{
+  /* <Space
+  css={{
+    display: "flex",
+    justifyContent: "center",
+    backgroundColor: Colors.MainOnWhite,
+    padding: "20px",
+  }}
+>
+  <Typography.Text type="secondary" css={{ fontSize: 18 }}>
+    {t(
+      "You can't participate in this conversation because you are not a member 🤐"
+    )}
+  </Typography.Text>
+</Space>; */
 }
+
 export default ChatMain;

@@ -1,8 +1,15 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { ContainerOutlined, PlusOutlined } from "@ant-design/icons";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Input, Menu, MenuProps, Space } from "antd";
+import {
+  ContainerOutlined,
+  GlobalOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import {
+  useBoard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { Button, Input, Menu, MenuProps, Spin } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
@@ -12,14 +19,13 @@ import FilesCounter from "./FilesCounter";
 import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
-import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { RoleAccessLevels } from "@cuttinboard-solutions/types-helpers";
 
 export default () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { selectedBoard, boards } = useBoard();
-  const { locationAccessKey } = useCuttinboardLocation();
+  const { selectedBoard, boards, loading, error } = useBoard();
+  const { role } = useCuttinboardLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const { baseRef, newModule } = useManageModule();
 
@@ -28,52 +34,77 @@ export default () => {
       ? matchSorter(boards, searchQuery, { keys: ["name"] })
       : [];
 
-    return orderBy(sorted, "createdAt", "desc")?.map((el) => ({
+    return orderBy(sorted, ["global", "createdAt"], "asc")?.map((el) => ({
       label: el.name,
       value: el.id,
-      icon: <ContainerOutlined />,
+      icon: el.global ? <GlobalOutlined /> : <ContainerOutlined />,
       key: el.id,
-      onClick: () => navigate(el.id, { replace: true }),
     }));
-  }, [boards, navigate, searchQuery]);
+  }, [boards, searchQuery]);
+
+  if (loading) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <Spin />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <div className="module-sider-error">
+          <h1>{t("Error")}</h1>
+          <p>{t(error)}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Space
-      direction="vertical"
+    <div
       className="module-sider-container"
       css={{
-        height: "100%",
         justifyContent: "space-between",
       }}
     >
-      <Space direction="vertical" css={{ display: "flex" }}>
-        <Space direction="vertical" className="module-sider-content">
-          {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
-            <Button
-              icon={<PlusOutlined />}
-              block
-              type="dashed"
-              onClick={newModule}
-            >
-              {t("Add")}
-            </Button>
-          )}
-          <Input.Search
-            placeholder={t("Search")}
-            value={searchQuery}
-            onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
-          />
-        </Space>
+      <div className="module-sider-content">
+        {role <= RoleAccessLevels.GENERAL_MANAGER && (
+          <Button
+            icon={<PlusOutlined />}
+            block
+            type="dashed"
+            onClick={newModule}
+          >
+            {t("Add")}
+          </Button>
+        )}
+        <Input.Search
+          placeholder={t("Search")}
+          value={searchQuery}
+          onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
+        />
+      </div>
+      <div className="module-sider-menu-container">
         <Menu
           items={menuItems}
+          onSelect={({ key }) => navigate(key, { replace: true })}
           selectedKeys={selectedBoard ? [selectedBoard.id] : []}
           className="module-sider-menu"
         />
-
-        <ManageModuleDialog ref={baseRef} moduleName="Drawer" />
-      </Space>
-
+      </div>
+      <ManageModuleDialog ref={baseRef} moduleName="Drawer" />
       <FilesCounter />
-    </Space>
+    </div>
   );
 };

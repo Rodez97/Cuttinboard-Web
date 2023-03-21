@@ -1,21 +1,21 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Input, Layout, Table } from "antd";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
 import { useOwner } from "../OwnerPortal";
 import { differenceBy } from "lodash";
+import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 export default ({
   selectedLocations,
   onSelectionChange,
   alreadySelected,
 }: {
-  selectedLocations: Location[];
-  onSelectionChange: (locs: Location[]) => void;
-  alreadySelected: Location[];
+  selectedLocations: ILocation[];
+  onSelectionChange: (locs: ILocation[]) => void;
+  alreadySelected: ILocation[];
 }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,7 +50,7 @@ export default ({
       />
 
       <div css={{ overflow: "auto", flex: 1 }}>
-        <Table<Location>
+        <Table<ILocation>
           css={{ width: "100%" }}
           columns={[
             {
@@ -104,7 +104,7 @@ export default ({
             onChange: (_, selected) => {
               onSelectionChange(selected);
             },
-            getCheckboxProps: (record: Location) => ({
+            getCheckboxProps: (record: ILocation) => ({
               name: record.name,
               value: record.id,
             }),

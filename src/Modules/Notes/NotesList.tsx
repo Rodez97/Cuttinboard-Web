@@ -1,46 +1,78 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import Icon, { PlusOutlined } from "@ant-design/icons";
-import { RoleAccessLevels } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Button, Input, Menu, MenuProps, Space } from "antd";
+import Icon, { GlobalOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  useBoard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { Button, Input, Menu, MenuProps, Spin } from "antd";
 import { orderBy } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Note } from "./notesIcons";
+import { NoteIcon } from "./notesIcons";
 import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
-import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+import { RoleAccessLevels } from "@cuttinboard-solutions/types-helpers";
 
 export default () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { selectedBoard, boards } = useBoard();
-  const { locationAccessKey } = useCuttinboardLocation();
+  const { selectedBoard, boards, loading, error } = useBoard();
+  const { role } = useCuttinboardLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const { baseRef, newModule } = useManageModule();
 
   const menuItems = useMemo((): MenuProps["items"] => {
-    const sorted = boards
-      ? matchSorter(boards, searchQuery, { keys: ["name"] })
-      : [];
+    if (!boards) return [];
 
-    return orderBy(sorted, "createdAt", "desc")?.map((el) => ({
+    const sorted = searchQuery
+      ? matchSorter(boards, searchQuery, { keys: ["name"] })
+      : boards;
+
+    return orderBy(sorted, ["global", "createdAt"], "asc").map((el) => ({
       label: el.name,
       value: el.id,
-      icon: <Icon component={Note} />,
+      icon: el.global ? <GlobalOutlined /> : <Icon component={NoteIcon} />,
       key: el.id,
-      onClick: () => navigate(el.id, { replace: true }),
     }));
-  }, [boards, navigate, searchQuery]);
+  }, [boards, searchQuery]);
+
+  if (loading) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <Spin />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="module-sider-container"
+        css={{
+          justifyContent: "center",
+        }}
+      >
+        <div className="module-sider-error">
+          <h1>{t("Error")}</h1>
+          <p>{t(error)}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Space direction="vertical" className="module-sider-container">
-      <Space direction="vertical" className="module-sider-content">
-        {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
+    <div className="module-sider-container">
+      <div className="module-sider-content">
+        {role <= RoleAccessLevels.GENERAL_MANAGER && (
           <Button
             icon={<PlusOutlined />}
             block
@@ -55,13 +87,16 @@ export default () => {
           value={searchQuery}
           onChange={({ currentTarget: { value } }) => setSearchQuery(value)}
         />
-      </Space>
-      <Menu
-        items={menuItems}
-        selectedKeys={selectedBoard ? [selectedBoard.id] : []}
-        className="module-sider-menu"
-      />
+      </div>
+      <div className="module-sider-menu-container">
+        <Menu
+          items={menuItems}
+          onSelect={({ key }) => navigate(key, { replace: true })}
+          selectedKeys={selectedBoard ? [selectedBoard.id] : []}
+          className="module-sider-menu"
+        />
+      </div>
       <ManageModuleDialog ref={baseRef} moduleName="Notes Stack" />
-    </Space>
+    </div>
   );
 };

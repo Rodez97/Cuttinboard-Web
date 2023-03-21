@@ -1,6 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  SaveOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Checkbox,
@@ -10,49 +15,41 @@ import {
   Form,
   Input,
   InputNumber,
+  message,
   Modal,
   Radio,
   Row,
-  Space,
   Typography,
 } from "antd";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
-import moment from "moment";
-import dayjsRecur from "dayjs-recur";
 import dayjs from "dayjs";
-import { nanoid } from "nanoid";
-import { ByWeekday, Frequency, RRule } from "rrule";
 import { isEmpty } from "lodash";
 import {
-  RecurrenceObject,
-  RecurringTask,
-  RecurringTaskDoc,
-} from "@cuttinboard-solutions/cuttinboard-library/checklist";
-import {
-  useCuttinboard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import {
-  FIRESTORE,
   useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-dayjs.extend(dayjsRecur);
+  useRecurringTasks,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import {
+  IRecurringTask,
+  IRecurringTaskDoc,
+  RecurrenceObject,
+} from "@cuttinboard-solutions/types-helpers";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export interface ManagePeriodicTaskRef {
   openNew: () => void;
-  openEdit: (recurringTask: [string, RecurringTask]) => void;
+  openEdit: (recurringTask: [string, IRecurringTask]) => void;
 }
 
 type FormRecurrenceObject = {
-  every: number;
-  unit: Frequency;
-  startingOn?: moment.Moment;
-  weekDays?: ByWeekday[];
+  interval: number;
+  unit: "daily" | "weekly" | "monthly";
+  startingOn?: dayjs.Dayjs;
+  byWeekday?: (0 | 1 | 2 | 3 | 4 | 5 | 6)[];
   onDay?: number;
-  dailyType: "every" | "weekDays";
 };
 
 type FormDataType = {
@@ -62,41 +59,39 @@ type FormDataType = {
 };
 
 const defaultRecurrence: FormDataType["recurrence"] = {
-  every: 1,
-  unit: Frequency.DAILY,
-  startingOn: moment(),
-  weekDays: [RRule.MO],
+  interval: 1,
+  unit: "daily",
+  startingOn: dayjs(),
+  byWeekday: [1],
   onDay: 1,
-  dailyType: "every",
 };
 
 const WEEKDAYS = [
-  { label: "Monday", value: RRule.MO.weekday },
-  { label: "Tuesday", value: RRule.TU.weekday },
-  { label: "Wednesday", value: RRule.WE.weekday },
-  { label: "Thursday", value: RRule.TH.weekday },
-  { label: "Friday", value: RRule.FR.weekday },
-  { label: "Saturday", value: RRule.SA.weekday },
-  { label: "Sunday", value: RRule.SU.weekday },
+  { label: "Monday", value: 1 },
+  { label: "Tuesday", value: 2 },
+  { label: "Wednesday", value: 3 },
+  { label: "Thursday", value: 4 },
+  { label: "Friday", value: 5 },
+  { label: "Saturday", value: 6 },
+  { label: "Sunday", value: 0 },
 ];
 
 export default forwardRef<
   ManagePeriodicTaskRef,
   {
-    recurringTaskDoc?: RecurringTaskDoc;
+    recurringTaskDoc?: IRecurringTaskDoc;
   }
 >(({ recurringTaskDoc }, ref) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<FormDataType>();
-  const { user } = useCuttinboard();
-  const { location } = useCuttinboardLocation();
   const [isOpen, open, close] = useDisclose(false);
   const [title, setTitle] = useState("");
-  const [isSubmitting, startSubmit, endSubmit] = useDisclose();
   const [editing, startEditing, endEditing] = useDisclose();
   const [periodicTask, setPeriodicTask] = useState<
-    [string, RecurringTask] | null
+    [string, IRecurringTask] | null
   >(null);
+  const { addPeriodicTask, updatePeriodicTask, removePeriodicTask } =
+    useRecurringTasks();
 
   useImperativeHandle(ref, () => ({
     openNew,
@@ -111,20 +106,21 @@ export default forwardRef<
     open();
   };
 
-  const openEdit = (recurringTask: [string, RecurringTask]) => {
+  const openEdit = (recurringTask: [string, IRecurringTask]) => {
     setTitle("Edit Periodic Task");
     setPeriodicTask(recurringTask);
-    const recurrenceObject = RecurringTask.getRRuleObjectFromRule(
-      recurringTask[1].recurrenceRule
-    );
+    const { recurrence, name, description } = recurringTask[1];
+    const startingOn = recurrence.startingOn
+      ? dayjs.unix(recurrence.startingOn)
+      : dayjs();
 
     form.setFieldsValue({
-      name: recurringTask[1].name,
-      description: recurringTask[1].description,
+      name,
+      description,
       recurrence: {
         ...defaultRecurrence,
-        ...recurrenceObject,
-        startingOn: moment(recurrenceObject.startingOn),
+        ...recurrence,
+        startingOn,
       },
     });
     endEditing();
@@ -136,80 +132,68 @@ export default forwardRef<
   };
 
   const onFinish = async (values: FormDataType) => {
-    startSubmit();
-    // Convert recurrence startOn to a date
     const { recurrence } = values;
-    const { startingOn } = recurrence;
-    const newRecurrence: RecurrenceObject = {
-      ...recurrence,
-      startingOn: startingOn ? startingOn.toDate() : new Date(),
-    };
-    const newRRule = RecurringTask.getRRuleFromObject(newRecurrence);
-    const ruleString = newRRule.toString();
-
-    try {
-      if (periodicTask && recurringTaskDoc) {
-        // Update existing task
-        await recurringTaskDoc.updatePeriodicTask(
-          { ...values, recurrence: ruleString },
-          periodicTask[0]
-        );
-      } else if (recurringTaskDoc) {
-        await recurringTaskDoc.addPeriodicTask(
-          { ...values, recurrence: ruleString },
-          nanoid()
-        );
-      } else {
-        await setDoc(
-          doc(
-            FIRESTORE,
-            "Organizations",
-            location.organizationId,
-            "recurringTasks",
-            location.id
-          ),
-          {
-            tasks: {
-              [nanoid()]: {
-                ...values,
-                recurrence: ruleString,
-              },
-            },
-            createdAt: serverTimestamp(),
-            createdBy: user.uid,
-          },
-          { merge: true }
-        );
-      }
-
-      endSubmit();
-      handleClose();
-    } catch (error) {
-      recordError(error);
-      endSubmit();
+    const { startingOn, interval, byWeekday, onDay } = recurrence;
+    let newRecurrence: RecurrenceObject;
+    switch (recurrence.unit) {
+      case "daily":
+        {
+          newRecurrence = {
+            interval,
+            unit: "daily",
+            startingOn: startingOn ? startingOn.unix() : dayjs().unix(),
+          };
+        }
+        break;
+      case "weekly":
+        {
+          newRecurrence = {
+            unit: "weekly",
+            startingOn: startingOn ? startingOn.unix() : undefined,
+            byWeekday: byWeekday ?? [1],
+          };
+        }
+        break;
+      case "monthly":
+        {
+          newRecurrence = {
+            unit: "monthly",
+            startingOn: startingOn ? startingOn.unix() : undefined,
+            onDay: onDay ?? 1,
+          };
+        }
+        break;
+      default:
+        throw new Error("Invalid unit");
     }
+    if (periodicTask && recurringTaskDoc) {
+      // Update existing task
+      updatePeriodicTask(
+        { ...values, recurrence: newRecurrence },
+        periodicTask[0]
+      );
+    } else {
+      addPeriodicTask({ ...values, recurrence: newRecurrence });
+      message.success("Periodic Task Successfully Created");
+    }
+    handleClose();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!recurringTaskDoc || !periodicTask) {
       return;
     }
-    startSubmit();
-    const confirm = window.confirm(
-      "Are you sure you want to delete this task?"
-    );
-    if (confirm) {
-      try {
-        await recurringTaskDoc.removePeriodicTask(periodicTask[0]);
-        endSubmit();
+    Modal.confirm({
+      title: t("Are you sure you want to delete this task?"),
+      icon: <ExclamationCircleOutlined />,
+      okText: t("Yes"),
+      okType: "danger",
+      cancelText: "No",
+      onOk: () => {
+        removePeriodicTask(periodicTask[0]);
         handleClose();
-      } catch (error) {
-        recordError(error);
-        endSubmit();
-      }
-    } else {
-      endSubmit();
-    }
+      },
+    });
   };
 
   const handleCancel = () => {
@@ -237,9 +221,8 @@ export default forwardRef<
       open={isOpen}
       title={t(title)}
       onCancel={handleClose}
-      confirmLoading={isSubmitting}
       footer={[
-        <Button disabled={isSubmitting} onClick={handleCancel} key="cancel">
+        <Button onClick={handleCancel} key="cancel">
           {t("Cancel")}
         </Button>,
         !isEmpty(periodicTask) && (
@@ -247,7 +230,6 @@ export default forwardRef<
             type="primary"
             danger
             icon={<DeleteOutlined />}
-            loading={isSubmitting}
             onClick={handleDelete}
             key="delete"
           >
@@ -257,7 +239,6 @@ export default forwardRef<
         <Button
           type="primary"
           icon={editing ? <SaveOutlined /> : <EditOutlined />}
-          loading={isSubmitting}
           onClick={handleAccept}
           key="accept"
         >
@@ -268,7 +249,7 @@ export default forwardRef<
       <Form<FormDataType>
         form={form}
         onFinish={onFinish}
-        disabled={isSubmitting || !editing}
+        disabled={!editing}
         autoComplete="off"
         layout="vertical"
         size="small"
@@ -299,7 +280,7 @@ export default forwardRef<
             },
           ]}
         >
-          <Input maxLength={80} showCount />
+          <Input maxLength={80} showCount placeholder={t("Clean trash cans")} />
         </Form.Item>
         <Form.Item
           name="description"
@@ -339,9 +320,9 @@ export default forwardRef<
           ]}
         >
           <Radio.Group buttonStyle="outline" size="middle">
-            <Radio value={Frequency.DAILY}>{t("Daily")}</Radio>
-            <Radio value={Frequency.WEEKLY}>{t("Weekly")}</Radio>
-            <Radio value={Frequency.MONTHLY}>{t("Monthly")}</Radio>
+            <Radio value={"daily"}>{t("Daily")}</Radio>
+            <Radio value={"weekly"}>{t("Weekly")}</Radio>
+            <Radio value={"monthly"}>{t("Monthly")}</Radio>
           </Radio.Group>
         </Form.Item>
 
@@ -349,85 +330,58 @@ export default forwardRef<
           {() => {
             const { recurrence } = form.getFieldsValue();
 
-            if (recurrence?.unit === Frequency.WEEKLY) {
+            if (recurrence?.unit === "weekly") {
               return (
-                <React.Fragment>
-                  <div css={{ display: "flex", gap: 5 }}>
-                    <Typography.Text>{t("Repeat every")}</Typography.Text>
-                    <Form.Item
-                      name={["recurrence", "every"]}
-                      required
-                      rules={[
-                        {
-                          required: true,
-                          message: "",
-                        },
-                      ]}
-                    >
-                      <InputNumber min={1} max={4} css={{ width: 60 }} />
-                    </Form.Item>
-                    <Typography.Text>{t("week(s)")}</Typography.Text>
-                  </div>
-
-                  <Form.Item
-                    name={["recurrence", "weekDays"]}
-                    label={t("Week days")}
-                    required
-                    rules={[
-                      {
-                        required: true,
-                        message: "",
-                      },
-                    ]}
-                  >
-                    <Checkbox.Group>
-                      <Row>
-                        {WEEKDAYS.map((wd, i) => (
-                          <Col xs={12} sm={8} md={6} key={i}>
-                            <Checkbox value={wd.value}>{t(wd.label)}</Checkbox>
-                          </Col>
-                        ))}
-                      </Row>
-                    </Checkbox.Group>
-                  </Form.Item>
-                </React.Fragment>
+                <Form.Item
+                  name={["recurrence", "byWeekday"]}
+                  label={t("Repeat every week on:")}
+                  required
+                  rules={[
+                    {
+                      required: true,
+                      message: "",
+                    },
+                  ]}
+                >
+                  <Checkbox.Group>
+                    <Row>
+                      {WEEKDAYS.map((wd, i) => (
+                        <Col xs={12} sm={8} md={6} key={i}>
+                          <Checkbox value={wd.value}>{t(wd.label)}</Checkbox>
+                        </Col>
+                      ))}
+                    </Row>
+                  </Checkbox.Group>
+                </Form.Item>
               );
-            } else if (recurrence?.unit === Frequency.DAILY) {
+            } else if (recurrence?.unit === "daily") {
               return (
                 <React.Fragment>
-                  <Form.Item
-                    name={["recurrence", "dailyType"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "",
-                      },
-                    ]}
-                  >
-                    <Radio.Group size="middle">
-                      <Space direction="vertical">
-                        <Radio value="every">
-                          <div css={{ display: "flex", gap: 5 }}>
-                            <Typography.Text>
-                              {t("Repeat every")}
-                            </Typography.Text>
-                            <Form.Item
-                              name={["recurrence", "every"]}
-                              rules={[
-                                {
-                                  required: true,
-                                  message: "",
-                                },
-                              ]}
-                            >
-                              <InputNumber min={1} css={{ width: 60 }} />
-                            </Form.Item>
-                            <Typography.Text>{t("day(s)")}</Typography.Text>
-                          </div>
-                        </Radio>
-                        <Radio value="weekDays">{t("Every weekday")}</Radio>
-                      </Space>
-                    </Radio.Group>
+                  <Form.Item>
+                    <div
+                      css={{
+                        display: "flex",
+                        gap: 5,
+                        alignItems: "baseline",
+                      }}
+                    >
+                      <Typography.Text>{t("Repeat every")}</Typography.Text>
+                      <Form.Item
+                        name={["recurrence", "interval"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: "",
+                          },
+                        ]}
+                        css={{
+                          marginBottom: 0,
+                        }}
+                      >
+                        <InputNumber min={1} css={{ width: 60 }} />
+                      </Form.Item>
+                      <Typography.Text>{t("day(s)")}</Typography.Text>
+                    </div>
                   </Form.Item>
                   <Form.Item
                     name={["recurrence", "startingOn"]}
@@ -447,7 +401,7 @@ export default forwardRef<
                   </Form.Item>
                 </React.Fragment>
               );
-            } else if (recurrence?.unit === Frequency.MONTHLY) {
+            } else if (recurrence?.unit === "monthly") {
               return (
                 <div css={{ display: "flex", gap: 5 }}>
                   <Typography.Text>{t("On day")}</Typography.Text>
@@ -462,19 +416,7 @@ export default forwardRef<
                   >
                     <InputNumber min={1} max={28} css={{ width: 60 }} />
                   </Form.Item>
-                  <Typography.Text>{t("of every")}</Typography.Text>
-                  <Form.Item
-                    name={["recurrence", "every"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: "",
-                      },
-                    ]}
-                  >
-                    <InputNumber min={1} max={12} css={{ width: 60 }} />
-                  </Form.Item>
-                  <Typography.Text>{t("month(s)")}</Typography.Text>
+                  <Typography.Text>{t("of every month.")}</Typography.Text>
                 </div>
               );
             }

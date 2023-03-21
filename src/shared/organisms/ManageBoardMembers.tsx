@@ -19,23 +19,25 @@ import {
 import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import {
-  Employee,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
+  employeesSelectors,
+  useAppSelector,
+  useCuttinboardLocation,
+  useDisclose,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import {
+  checkEmployeePositions,
+  IEmployee,
   PrivacyLevel,
   RoleAccessLevels,
-  useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+} from "@cuttinboard-solutions/types-helpers";
 
 type ManageBoardMembersProps = {
   readonly?: boolean;
   members: string[];
-  removeMember: (employeeId: string) => void;
-  addMembers: (addedEmployees: Employee[]) => void;
-  setAppHost: (newHostUser: Employee) => void;
-  removeHost: (hostUser: Employee) => void;
+  removeMember: (employee: IEmployee) => void;
+  addMembers: (addedEmployees: IEmployee[]) => void;
+  setAppHost: (newHostUser: IEmployee) => void;
+  removeHost: (hostUser: IEmployee) => void;
   privacyLevel: PrivacyLevel;
   positions?: string[];
   admins?: string[];
@@ -54,16 +56,16 @@ function ManageBoardMembers({
   ...props
 }: ManageBoardMembersProps) {
   const { t } = useTranslation();
-  const { locationAccessKey } = useCuttinboardLocation();
-  const { getEmployees } = useEmployeesList();
+  const { role } = useCuttinboardLocation();
+  const getEmployees = useAppSelector(employeesSelectors.selectAll);
   const [addMembersOpen, openAddMembers, closeAddMembers] = useDisclose();
   const [selectHostOpen, openSelectHost, closeSelectHost] = useDisclose();
 
-  const handleAddMembers = (addedEmployees: Employee[]) => {
+  const handleAddMembers = (addedEmployees: IEmployee[]) => {
     addMembers(addedEmployees);
   };
 
-  const handleMemberRemove = async (employee: Employee) => {
+  const handleMemberRemove = async (employee: IEmployee) => {
     Modal.confirm({
       title: t("Are you sure you want to remove this user?"),
       icon: <ExclamationCircleOutlined />,
@@ -72,7 +74,7 @@ function ManageBoardMembers({
       cancelText: t("No"),
       onOk() {
         try {
-          removeMember(employee.id);
+          removeMember(employee);
         } catch (error) {
           recordError(error);
         }
@@ -82,7 +84,7 @@ function ManageBoardMembers({
 
   // Calculate a list of board members based on the privacy level and other conditions
   const getBoardMembers = useMemo(() => {
-    let membersList: Employee[] = [];
+    let membersList: IEmployee[] = [];
     if (privacyLevel === PrivacyLevel.PRIVATE) {
       // If the privacy level is private, only include employees who are members
       membersList = getEmployees.filter((emp) => indexOf(members, emp.id) > -1);
@@ -93,11 +95,13 @@ function ManageBoardMembers({
     }
     if (privacyLevel === PrivacyLevel.POSITIONS && positions) {
       // If the privacy level is based on positions and positions are specified, only include employees with the specified positions
-      membersList = getEmployees.filter((emp) => emp.hasAnyPosition(positions));
+      membersList = getEmployees.filter((emp) =>
+        checkEmployeePositions(emp, positions)
+      );
     }
     // Filter out any admins from the list of members
     return membersList.filter((m) => !admins?.includes(m.id));
-  }, [getEmployees, privacyLevel, members, positions, admins]);
+  }, [privacyLevel, positions, getEmployees, members, admins]);
 
   // Calculate a list of hosts (admins)
   const hostsList = useMemo(() => {
@@ -109,23 +113,12 @@ function ManageBoardMembers({
     return getEmployees.filter((e) => admins.indexOf(e.id) > -1);
   }, [getEmployees, admins]);
 
-  // Calculate a list of possible hosts (admins)
-  const getPossibleHosts = useMemo(() => {
-    // Return a list of employees who have manager-level access or higher and are not already admins
-    return getEmployees.filter(
-      (emp) =>
-        emp.locationRole &&
-        emp.locationRole <= RoleAccessLevels.MANAGER &&
-        !(admins && admins.includes(emp.id))
-    );
-  }, [getEmployees, admins]);
-
-  const handleSetHost = (newHost: Employee) => {
+  const handleSetHost = (newHost: IEmployee) => {
     closeSelectHost();
     setAppHost(newHost);
   };
 
-  const handleRemoveHost = async (admin: Employee) => {
+  const handleRemoveHost = async (admin: IEmployee) => {
     Modal.confirm({
       title: t("Are you sure you want to remove this admin?"),
       icon: <ExclamationCircleOutlined />,
@@ -147,11 +140,11 @@ function ManageBoardMembers({
       <Modal {...props} title={t("Add Members")} footer={null}>
         {/* 🛡 Admin */}
         {(Boolean(hostsList.length) ||
-          locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER) && (
+          role <= RoleAccessLevels.GENERAL_MANAGER) && (
           <Divider orientation="left">{t("Admin")}</Divider>
         )}
 
-        {locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && (
+        {role <= RoleAccessLevels.GENERAL_MANAGER && (
           <Button type="dashed" block onClick={openSelectHost}>
             {t("Add Admin")}
           </Button>
@@ -167,6 +160,7 @@ function ManageBoardMembers({
                 onRemove={handleRemoveHost}
                 admins={admins}
                 privacyLevel={privacyLevel}
+                readonly={role > RoleAccessLevels.GENERAL_MANAGER}
               />
             )}
           />
@@ -218,11 +212,12 @@ function ManageBoardMembers({
               employee={emp}
               onRemove={handleMemberRemove}
               privacyLevel={privacyLevel}
-              readonly={
+              admins={admins}
+              readonly={Boolean(
                 privacyLevel === PrivacyLevel.POSITIONS ||
-                privacyLevel === PrivacyLevel.PUBLIC ||
-                readonly
-              }
+                  privacyLevel === PrivacyLevel.PUBLIC ||
+                  readonly
+              )}
             />
           )}
         />
@@ -237,7 +232,7 @@ function ManageBoardMembers({
       />
       <EmployeeSelect
         onSelectedEmployee={handleSetHost}
-        employees={getPossibleHosts}
+        employees={getEmployees}
         onCancel={closeSelectHost}
         open={selectHostOpen}
         footer={null}

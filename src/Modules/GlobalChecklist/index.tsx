@@ -1,86 +1,85 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ClearOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { Button, Empty, Layout, Space } from "antd";
+import { Button, Layout, Space } from "antd";
 import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
-import {
-  GrayPageHeader,
-  PageError,
-  LoadingPage,
-  DraggableList,
-} from "../../shared";
+import { GrayPageHeader, DraggableList, LoadingPage } from "../../shared";
 import TaskBlock from "../Tasks/TaskBlock";
 import { nanoid } from "nanoid";
 import {
-  Checklist,
-  useDailyChecklist,
-} from "@cuttinboard-solutions/cuttinboard-library/checklist";
+  useChecklistsActions,
+  useCuttinboardLocation,
+  useDailyChecklistsData,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import usePageTitle from "../../hooks/usePageTitle";
+import ErrorPage from "../../shared/molecules/PageError";
+import {
+  getChecklistsSummary,
+  IChecklist,
+  RoleAccessLevels,
+} from "@cuttinboard-solutions/types-helpers";
+import EmptyExtended from "../../shared/molecules/EmptyExtended";
 
 export default () => {
+  usePageTitle("Daily Checklists");
   const { t } = useTranslation();
+  const { role } = useCuttinboardLocation();
   const {
-    checklistData,
-    loading,
-    error,
-    canWrite,
-    resetTasks,
+    checklistGroup,
     checklistsArray,
+    resetAllTasks,
     addChecklist,
-  } = useDailyChecklist();
+    reorderChecklists,
+    addChecklistTask,
+    removeChecklist,
+    updateChecklistTask,
+    changeChecklistTaskStatus,
+    removeChecklistTask,
+    updateChecklists,
+    reorderChecklistTask,
+  } = useChecklistsActions("dailyChecklists");
   const scrollBottomTarget = useRef<HTMLDivElement>(null);
 
-  const reset = async () => {
-    try {
-      await resetTasks();
-    } catch (error) {
-      recordError(error);
-    }
-  };
+  const { loading, error } = useDailyChecklistsData();
+
+  const canWrite = useMemo(() => role <= RoleAccessLevels.MANAGER, [role]);
 
   const getSummaryText = useMemo(() => {
-    if (!checklistData) {
+    if (!checklistGroup) {
       return "0/0 tasks completed";
     }
-    const total = checklistData.summary.total;
-    const completed = checklistData.summary.completed;
+    const summary = getChecklistsSummary(checklistGroup);
+    const total = summary.total;
+    const completed = summary.completed;
     return `${completed}/${total} ${t("tasks completed")}`;
-  }, [checklistData, t]);
+  }, [checklistGroup, t]);
 
-  const addBlock = async () => {
-    try {
-      await addChecklist(nanoid());
-      scrollBottomTarget.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    } catch (error) {
-      recordError(error);
-    }
+  const addBlock = () => {
+    addChecklist(nanoid());
+    scrollBottomTarget.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   };
 
   const reorderItem = async (
-    element: Checklist,
+    element: IChecklist,
     sourceIndex: number,
     targetIndex: number
   ) => {
-    if (!checklistData) {
+    if (!checklistGroup) {
       return;
     }
-    try {
-      await checklistData.reorderChecklists(element.id, targetIndex);
-    } catch (error) {
-      recordError(error);
-    }
+    reorderChecklists(element.id, targetIndex);
   };
-
-  if (error) {
-    return <PageError error={error} />;
-  }
 
   if (loading) {
     return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={new Error(error)} />;
   }
 
   return (
@@ -100,7 +99,7 @@ export default () => {
               >
                 {t("New Task List")}
               </Button>
-              <Button onClick={reset} icon={<ClearOutlined />} danger>
+              <Button onClick={resetAllTasks} icon={<ClearOutlined />} danger>
                 {t("Clear All")}
               </Button>
             </Space>
@@ -121,8 +120,8 @@ export default () => {
             }}
           >
             <Space direction="vertical" css={{ display: "flex" }}>
-              {checklistsArray.length > 0 && checklistData ? (
-                <DraggableList<Checklist>
+              {checklistsArray.length > 0 && checklistGroup ? (
+                <DraggableList<IChecklist>
                   dataSource={checklistsArray}
                   renderItem={(checklist, i, isDragging) => (
                     <TaskBlock
@@ -130,24 +129,36 @@ export default () => {
                       section={checklist}
                       sectionId={checklist.id}
                       canManage={canWrite}
-                      rootChecklist={checklistData}
                       isDragging={isDragging}
+                      onAddTask={addChecklistTask}
+                      onRemoveChecklist={removeChecklist}
+                      onRenameTask={updateChecklistTask}
+                      onTaskStatusChange={changeChecklistTaskStatus}
+                      onRemoveTask={removeChecklistTask}
+                      onRename={updateChecklists}
+                      onReorderTasks={reorderChecklistTask}
                     />
                   )}
                   onReorder={reorderItem}
                 />
               ) : (
-                <Empty
+                <EmptyExtended
+                  descriptions={[
+                    "Cultivate a strong culture by creating a systemic routine that all the team follows everyday",
+                    "Increase efficiency by streamlining processes and reducing the need for paper checklists",
+                    "Enhance overall customer experience by ensuring that standards are consistently met",
+                  ]}
                   description={
                     <span>
-                      {t("No tasks found")}.{" "}
-                      <a onClick={addBlock}>Create one</a> or{" "}
+                      {t("No tasks found")}
+                      {". "}
+                      <a onClick={addBlock}>{t("Create one")}</a> {t("or")}{" "}
                       <a
                         href="https://www.cuttinboard.com/help/tasks-app"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        learn more.
+                        {t("learn more")}
                       </a>
                     </span>
                   }

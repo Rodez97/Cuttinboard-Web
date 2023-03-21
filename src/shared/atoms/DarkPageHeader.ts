@@ -1,5 +1,5 @@
 import { PageHeader } from "@ant-design/pro-layout";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
 import styled from "@emotion/styled";
 
 const DarkPageHeader = styled(PageHeader)`

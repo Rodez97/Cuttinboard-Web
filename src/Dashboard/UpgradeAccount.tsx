@@ -23,17 +23,20 @@ import {
   GiftOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import { PageError, LoadingPage } from "../shared";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import {
   FIRESTORE,
   FUNCTIONS,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { httpsCallable } from "firebase/functions";
+import { ANALYTICS } from "firebase";
+import {
   STRIPE_PRICE_ID,
   STRIPE_PRODUCT_ID,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/types-helpers";
 
 const PlanCard = styled.div`
   background: #f7f7f7;
@@ -54,13 +57,11 @@ export default () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [agreeWithTerms, setAgreeWithTerms] = useState(false);
-  const [upgradeAccount, running, error] = useHttpsCallable<string, void>(
-    FUNCTIONS,
-    "stripe-upgradeOwner"
-  );
   const [price, loadingPrice, priceError] = useDocumentData(
     doc(FIRESTORE, "Products", STRIPE_PRODUCT_ID, "prices", STRIPE_PRICE_ID)
   );
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleUpgrade = async () => {
     if (agreeWithTerms) {
@@ -78,9 +79,14 @@ export default () => {
 
   const upgradeToBusiness = async () => {
     try {
+      setIsLoading(true);
+      const upgradeAccount = httpsCallable<string, void>(
+        FUNCTIONS,
+        "stripe-upgradeOwner"
+      );
       await upgradeAccount(STRIPE_PRICE_ID);
       // Report to analytics
-      logEvent(getAnalytics(), "upgrade_account", {
+      logEvent(ANALYTICS, "upgrade_account", {
         method: "stripe",
         price: STRIPE_PRICE_ID,
         uid: user.uid,
@@ -88,7 +94,11 @@ export default () => {
       // REdirect to dashboard
       navigate("/dashboard/owner-portal");
     } catch (error) {
+      console.log(error);
       recordError(error);
+      setError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -183,7 +193,7 @@ export default () => {
         <Checkbox
           checked={agreeWithTerms}
           onChange={handleCBChange}
-          disabled={running}
+          disabled={isLoading}
           css={{ marginTop: 16, display: "flex", justifyContent: "center" }}
         >
           {t("I agree with these terms")}
@@ -191,13 +201,13 @@ export default () => {
         <Button.Group
           css={{ marginTop: 16, display: "flex", justifyContent: "center" }}
         >
-          <Button onClick={handleBack} disabled={running}>
+          <Button onClick={handleBack} disabled={isLoading}>
             {t("Cancel")}
           </Button>
           <Button
             onClick={handleUpgrade}
             disabled={!agreeWithTerms}
-            loading={running}
+            loading={isLoading}
             type="primary"
           >
             {t("Upgrade")}

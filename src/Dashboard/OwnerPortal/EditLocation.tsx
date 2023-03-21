@@ -1,15 +1,20 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { Layout, message, Result } from "antd";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { useOwner } from ".";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import { PageHeader } from "@ant-design/pro-layout";
 import { LocationInfoForm } from "../../shared";
+import {
+  updateLocationThunk,
+  useAppThunkDispatch,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ILocationInfo } from "./AddLocation/AddLocation";
+import { ANALYTICS } from "firebase";
 
 export default () => {
   const navigate = useNavigate();
@@ -21,33 +26,26 @@ export default () => {
     () => locations?.find((loc) => loc.id === locationId),
     [locations, locationId]
   );
+  const locationThunkDispatch = useAppThunkDispatch();
 
-  const handleChange = async ({
-    name,
-    email,
-    description,
-    phoneNumber,
-    intId,
-    address,
-  }: Partial<Location>) => {
+  const handleChange = async ({ name, intId, address }: ILocationInfo) => {
     if (!getLocation) {
       throw new Error("Location not found");
     }
 
     setEditing(true);
     try {
-      await getLocation.updateLocation({
-        name,
-        email,
-        description,
-        phoneNumber,
-        intId,
-        address,
-      });
+      locationThunkDispatch(
+        updateLocationThunk(getLocation, {
+          name,
+          intId,
+          address,
+        })
+      );
       message.success(t("Changes saved"));
       setEditing(false);
       // Report location update from card to analytics
-      logEvent(getAnalytics(), "update_location", {
+      logEvent(ANALYTICS, "update_location", {
         location_id: getLocation.id,
         updated_from: "owner_portal",
       });

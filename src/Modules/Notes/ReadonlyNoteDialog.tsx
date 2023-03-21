@@ -4,64 +4,111 @@ import {
   DeleteFilled,
   EditFilled,
   EditOutlined,
+  ExclamationCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Button, Modal, Tag, Typography } from "antd";
 import Linkify from "linkify-react";
 import { useTranslation } from "react-i18next";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import dayjs from "dayjs";
 import {
-  Note,
-  useBoard,
-} from "@cuttinboard-solutions/cuttinboard-library/boards";
+  useDisclose,
+  useNotes,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { IBoard, INote } from "@cuttinboard-solutions/types-helpers";
 
-interface ReadonlyNoteDialogProps {
-  note: Note;
-  onClose: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  open: boolean;
+export const useReadonlyNote = () => {
+  const readonlyNoteDialogRef = useRef<ReadonlyNoteDialogRef>(null);
+
+  const open = (note: INote) => {
+    readonlyNoteDialogRef.current?.open(note);
+  };
+
+  return { open, readonlyNoteDialogRef };
+};
+
+interface ReadonlyNoteDialogRef {
+  open: (note: INote) => void;
 }
 
-export default ({
-  note,
-  onClose,
-  onEdit,
-  onDelete,
-  open,
-}: ReadonlyNoteDialogProps) => {
-  const { canManageBoard } = useBoard();
+interface ReadonlyNoteDialogProps {
+  onEdit: (note: INote) => void;
+  canManage: boolean;
+  selectedBoard: IBoard;
+}
+
+const ReadonlyNoteDialog = forwardRef<
+  ReadonlyNoteDialogRef,
+  ReadonlyNoteDialogProps
+>(({ onEdit, canManage, selectedBoard }, ref) => {
+  const [isOpen, openDialog, closeDialog] = useDisclose();
+  const [note, setNote] = useState<INote>();
   const { t } = useTranslation();
+  const { deleteNote } = useNotes(selectedBoard);
+
+  useImperativeHandle(ref, () => ({
+    open,
+  }));
+
+  const open = (note: INote) => {
+    setNote(note);
+    openDialog();
+  };
 
   const handleEdit = () => {
-    onClose();
-    onEdit();
+    if (!note) {
+      return;
+    }
+    onEdit(note);
+    closeDialog();
   };
+
+  const handleDelete = () => {
+    if (!note) {
+      return;
+    }
+    Modal.confirm({
+      title: t("Are you sure you want to delete this note?"),
+      icon: <ExclamationCircleOutlined />,
+      onOk() {
+        deleteNote(note);
+        closeDialog();
+      },
+    });
+  };
+
+  if (!note) {
+    return null;
+  }
 
   return (
     <Modal
-      open={open}
+      open={isOpen}
       title={note.title}
-      onCancel={onClose}
+      onCancel={closeDialog}
       footer={[
-        <Button
-          key="delete"
-          onClick={onDelete}
-          disabled={!canManageBoard}
-          danger
-          icon={<DeleteFilled />}
-        >
-          {t("Delete")}
-        </Button>,
-        <Button
-          key="edit"
-          onClick={handleEdit}
-          disabled={!canManageBoard}
-          icon={<EditFilled />}
-          type="dashed"
-        >
-          {t("Edit")}
-        </Button>,
-        <Button key="ok" onClick={onClose} type="primary">
+        canManage && (
+          <Button
+            key="delete"
+            onClick={handleDelete}
+            danger
+            icon={<DeleteFilled />}
+          >
+            {t("Delete")}
+          </Button>
+        ),
+        canManage && (
+          <Button
+            key="edit"
+            onClick={handleEdit}
+            icon={<EditFilled />}
+            type="dashed"
+          >
+            {t("Edit")}
+          </Button>
+        ),
+        <Button key="ok" onClick={closeDialog} type="primary">
           OK
         </Button>,
       ]}
@@ -84,14 +131,16 @@ export default ({
         </Linkify>
       </Typography.Paragraph>
       <Tag icon={<UserOutlined />}>
-        {t("Created by:")} {note.author.name}
+        {t("Created by:")} {note.createdBy.name}
       </Tag>
-      {note.updated && (
+      {note.updatedAt && note.updatedBy?.name && (
         <Tag icon={<EditOutlined />}>
-          {t("Last updated:")} {note.updated.at.toDate().toLocaleString()}{" "}
-          {t("by")} {note.updated.name}
+          {t("Last updated:")} {dayjs(note.updatedAt).toLocaleString()}{" "}
+          {t("by")} {note.updatedBy.name}
         </Tag>
       )}
     </Modal>
   );
-};
+});
+
+export default ReadonlyNoteDialog;

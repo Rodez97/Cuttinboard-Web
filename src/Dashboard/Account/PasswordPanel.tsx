@@ -7,8 +7,10 @@ import { useState } from "react";
 import { useUpdatePassword } from "react-firebase-hooks/auth";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { AUTH } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  AUTH,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
 
 function PasswordPanel() {
   const { t } = useTranslation();

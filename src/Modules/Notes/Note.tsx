@@ -1,51 +1,25 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useState } from "react";
-import ReadonlyNoteDialog from "./ReadonlyNoteDialog";
-import { useTranslation } from "react-i18next";
+import React from "react";
 import Linkify from "linkify-react";
-import { Card, Modal, Tooltip, Typography } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { recordError } from "../../utils/utils";
-import { Note } from "@cuttinboard-solutions/cuttinboard-library/boards";
+import { Card, Tooltip, Typography } from "antd";
 import { StickyNote } from "../../shared";
+import { INote } from "@cuttinboard-solutions/types-helpers";
 
-interface INoteCard {
-  note: Note;
-  onEdit: (note: Note) => void;
+interface NoteCardProps {
+  note: INote;
+  onSelect: (note: INote) => void;
 }
 
-export default ({ note, onEdit }: INoteCard) => {
-  const { t } = useTranslation();
-  const [readonlyNoteDialogOpen, setReadonlyNoteDialogOpen] = useState(false);
+const LinkProps = {
+  onClick: (event: MouseEvent) => {
+    event.preventDefault();
+  },
+};
 
-  const handleEditNote = () => {
-    onEdit(note);
-  };
-
-  const handleDeleteNote = () => {
-    Modal.confirm({
-      title: t("Are you sure you want to delete this note?"),
-      icon: <ExclamationCircleOutlined />,
-
-      async onOk() {
-        try {
-          await note.delete();
-        } catch (error) {
-          recordError(error);
-        }
-      },
-    });
-  };
-
+const NoteCard = ({ note, onSelect }: NoteCardProps) => {
   const handleClick = () => {
-    setReadonlyNoteDialogOpen(true);
-  };
-
-  const linkProps = {
-    onClick: (event: MouseEvent) => {
-      event.preventDefault();
-    },
+    onSelect(note);
   };
 
   return (
@@ -67,7 +41,7 @@ export default ({ note, onEdit }: INoteCard) => {
                     target: "_blank",
                     rel: "noreferrer noopener",
                     className: "linkifyInnerStyle",
-                    attributes: linkProps,
+                    attributes: LinkProps,
                   }}
                 >
                   {note.content}
@@ -77,13 +51,8 @@ export default ({ note, onEdit }: INoteCard) => {
           />
         </StickyNote>
       </Tooltip>
-      <ReadonlyNoteDialog
-        note={note}
-        open={readonlyNoteDialogOpen}
-        onClose={() => setReadonlyNoteDialogOpen(false)}
-        onEdit={handleEditNote}
-        onDelete={handleDeleteNote}
-      />
     </React.Fragment>
   );
 };
+
+export default NoteCard;

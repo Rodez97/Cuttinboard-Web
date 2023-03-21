@@ -1,26 +1,32 @@
 /** @jsx jsx */
-import { Location } from "@cuttinboard-solutions/cuttinboard-library";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  FIRESTORE,
+  locationConverter,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Divider, Space, Typography } from "antd";
+import { Divider, Space } from "antd";
 import { collection, query, where } from "firebase/firestore";
 import { groupBy } from "lodash";
 import React from "react";
 import { useMemo } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import usePageTitle from "../../hooks/usePageTitle";
 import { PageError, LoadingPage } from "../../shared";
 import LocationCard from "./LocationCard";
+import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 
 export default () => {
+  usePageTitle("Supervised Locations");
   const { t } = useTranslation();
   const { user } = useCuttinboard();
   const [myLocations, loading, error] = useCollectionData(
     query(
       collection(FIRESTORE, "Locations"),
       where("supervisors", "array-contains", user.uid)
-    ).withConverter(Location.firestoreConverter)
+    ).withConverter(locationConverter)
   );
 
   const groupedByOrganizations = useMemo(
@@ -51,17 +57,20 @@ export default () => {
           </React.Fragment>
         ))
       ) : (
-        <div
-          css={{
-            display: "flex",
-            justifyContent: "center",
-            paddingTop: "20px",
-          }}
-        >
-          <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-            {t("You are not supervising any location.")}
-          </Typography.Text>
-        </div>
+        <EmptyExtended
+          descriptions={[
+            "Keep an eye on all the activity happening in your assigned locations",
+            "Monitor your assigned locations and help them identify any issues or opportunities for improvement",
+            "Oversee your assigned locations and make sure that company standards are being met",
+          ]}
+          description={
+            <p>
+              {t("You are not supervising any location")}
+              {". "}
+              <Link to="#">{t("Learn more")}</Link>
+            </p>
+          }
+        />
       )}
     </div>
   );

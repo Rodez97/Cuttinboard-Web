@@ -41,3 +41,162 @@ table tfoot {
 .ant-table-thead .ant-table-cell {
   background-color: #fcfcfc !important;
 }
+
+.shift-element {
+  cursor: pointer;
+  min-width: 130px !important;
+  width: 100% !important;
+  height: 50px;
+  position: relative;
+  border-radius: 5px;
+  background-color: #2b7de9;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+
+  &.deleting {
+    background-color: #f33d61;
+  }
+  &.draft {
+    background-color: #505050;
+  }
+  &.has-top-margin {
+    margin-top: 1px;
+  }
+
+  // Create a hover effect for the shift element that uses the same color as the background
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  &__time {
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    color: inherit;
+  }
+  &__overtime {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    color: #fff;
+    cursor: help !important;
+  }
+  &__notes {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    color: #fff;
+    cursor: help !important;
+  }
+  &__tag {
+    max-width: 70%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0;
+  }
+}
+
+.shift-cell-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  &__add-shift {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    color: #00000050;
+    font-size: 20px;
+    font-weight: 700;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background-color: #e8e8e8;
+    }
+  }
+}
+
+.schedule-summary {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #fcfcfc;
+  padding: 5px 10px;
+  transition: all 0.2s ease-in-out;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.employee-cell {
+  background-color: #fff;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+
+  &__content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+    padding-left: 5px;
+    background-color: #fff;
+    width: 100%;
+
+    &__secondary {
+      margin-left: 5px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1;
+
+      &__name {
+        // Overflow ellipsis
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+.scheduler-toolbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e8e8e8;
+  flex-wrap: wrap;
+
+  &__search {
+    width: 200px !important;
+    margin-left: 3px;
+  }
+
+  &__sort-emp {
+    width: 200px !important;
+    margin-right: 3px;
+  }
+}
+
+.schedule-table {
+  height: 100%;
+
+  :first-child {
+    height: 100%;
+  }
+}

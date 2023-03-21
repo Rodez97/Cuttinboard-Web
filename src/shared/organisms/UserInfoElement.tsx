@@ -8,28 +8,30 @@ import {
   SendOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Button, List } from "antd";
+import { Button, List } from "antd";
 import { useTranslation } from "react-i18next";
+import CuttinboardAvatar from "../atoms/Avatar";
+import { ICuttinboardUser } from "@cuttinboard-solutions/types-helpers";
 
-function UserInfoElement({ employee }: { employee: Employee }) {
+function UserInfoElement({ employee }: { employee: ICuttinboardUser }) {
   const { t } = useTranslation();
 
   return (
     <List css={{ width: "100%" }}>
       <List.Item css={{ justifyContent: "center !important" }}>
-        <Avatar
+        <CuttinboardAvatar
           src={employee.avatar}
           size={60}
           alt={employee.name}
           icon={<UserOutlined />}
+          userId={employee.id}
         />
       </List.Item>
 
       <List.Item>
         <List.Item.Meta
           title={t("Name")}
-          description={employee.fullName}
+          description={`${employee.name} ${employee.lastName}`}
           avatar={<InfoCircleOutlined />}
         />
       </List.Item>

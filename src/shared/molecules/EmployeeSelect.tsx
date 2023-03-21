@@ -1,14 +1,20 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, List, Modal, ModalProps } from "antd";
+import { Button, Input, List, Modal, ModalProps } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
 import UserInfoAvatar from "../organisms/UserInfoAvatar";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { matchSorter } from "match-sorter";
+import {
+  getEmployeeFullName,
+  IEmployee,
+} from "@cuttinboard-solutions/types-helpers";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
 
 type EmployeeSelectProps = {
-  onSelectedEmployee: (employee: Employee) => void;
-  employees?: Employee[];
+  onSelectedEmployee: (employee: IEmployee) => void;
+  employees?: IEmployee[];
 } & ModalProps;
 
 function EmployeeSelect({
@@ -16,11 +22,32 @@ function EmployeeSelect({
   employees,
   ...props
 }: EmployeeSelectProps) {
+  const { t } = useTranslation();
+  const [searchText, setSearchText] = useState("");
+
+  // Calculate a list of employees based on certain conditions
+  const filteredEmployees = useMemo(() => {
+    if (!employees) return [];
+
+    return searchText
+      ? matchSorter(employees, searchText, {
+          keys: [(e) => getEmployeeFullName(e)],
+        })
+      : employees;
+  }, [employees, searchText]);
+
   return (
     <Modal {...props}>
+      <Input.Search
+        placeholder={t("Search")}
+        allowClear
+        onChange={({ currentTarget }) => setSearchText(currentTarget.value)}
+        value={searchText}
+        css={{ width: 200, marginBottom: 10 }}
+      />
       <List
         css={{ maxHeight: "80vh", overflowY: "auto" }}
-        dataSource={employees}
+        dataSource={filteredEmployees}
         renderItem={(emp) => {
           return (
             <List.Item

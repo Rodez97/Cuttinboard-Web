@@ -15,31 +15,26 @@ service cloud.firestore {
       return isAuthenticated() && ((request.auth.token.organizationKey != null && request.auth.token.organizationKey.orgId == orgId) || request.auth.uid == orgId);
     }
 
-    function locMember(orgId, locId){
-      return orgMember(orgId) && request.auth.token.organizationKey.locKeys[locId] != null;
+    function locMember(locId){
+      return isAuthenticated() && request.auth.token.organizationKey.locId == locId;
     }
 
     function isOwner(orgId){
       return isAuthenticated() && orgId == request.auth.uid;
     }
 
-    function isOwnerOrSupervisor(orgId){
-      return orgMember(orgId) && request.auth.token.organizationKey.role <= 1;
+    function isOwnerOrSupervisor(locId){
+      return locMember(locId) && request.auth.token.organizationKey.role <= 1;
     }
 
-    function isGM(orgId, locId){
-      return locMember(orgId, locId) && request.auth.token.organizationKey.locKeys[locId].role == 2;
+    function isGM(locId){
+      return locMember(locId) && request.auth.token.organizationKey.role == 2;
     }
 
-    function isManager(orgId, locId){
-      return locMember(orgId, locId) && request.auth.token.organizationKey.locKeys[locId].role == 3;
+    function isManager(locId){
+      return locMember(locId) && request.auth.token.organizationKey.role == 3;
     }
 
-    function compareRoles(orgId){
-      let employeeEditingLocation = request.resource.data.locations.keys()[0];
-      let employeeRole = resource.data.locations[employeeEditingLocation].role;
-      return isOwnerOrSupervisor(orgId) || (orgMember(orgId) && request.auth.token.organizationKey.locKeys[employeeEditingLocation].role < employeeRole);
-    }
 
     match /Users/{userId} {
       allow read: if isAuthenticated();
@@ -49,10 +44,6 @@ service cloud.firestore {
           allow read: if isUser(userId);
       }
     }
-
-    // match /Templates/{doc=**} {
-    //   allow read, write: if true;
-    // }
 
     match /Products/{id} {
       allow read: if true;
@@ -66,38 +57,128 @@ service cloud.firestore {
       }
     }
 
-    match /DirectMessages/{dmId} {
-      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.membersList;
-    	allow read: if isAuthenticated() && request.auth.uid in resource.data.membersList;
-      allow update: if isAuthenticated() && request.auth.uid in resource.data.membersList && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]);
-		}
+  
+
+    function updateLocation(locationId){
+      let updatingInfo = request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus","supervisors","members"]) == false
+                         && isOwner(resource.data.organizationId);  
+      let updatingSupervisors = isOwner(resource.data.organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisors"]);
+      let joiningLocation = request.resource.data.diff(resource.data).affectedKeys().hasOnly(["members"]) && isOwnerOrSupervisor(locationId);
+      let updatingSettings = request.resource.data.diff(resource.data).affectedKeys().hasOnly(["settings","schedule","positions"]) && (isOwnerOrSupervisor(locationId) || isGM(locationId));
+      return updatingInfo || updatingSupervisors || joiningLocation || updatingSettings; 
+    }
 
 		match /Locations/{locationId} {
 			allow read: if isAuthenticated();
-      allow create: if isOwner(resource.data.organizationId) && request.resource.data.keys().hasAll(["organizationId","subItemId","name"]);
-      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus","supervisors"]) == false
-                    && (isOwnerOrSupervisor(resource.data.organizationId) || isGM(resource.data.organizationId, locationId)))
-                    || (isOwner(resource.data.organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisors"]));
-      allow delete: if isOwner(resource.data.organizationId);      
+      allow update: if updateLocation(locationId);
+      allow delete: if isOwner(resource.data.organizationId);    
+
+      function canUpdateCL(){
+        let haveRole = request.auth.token.organizationKey.role <= 3;
+        let checklistId = request.resource.data.checklists.keys()[0];
+        let taskId = request.resource.data.checklists[checklistId].tasks.keys()[0];
+        let updatingStatus = request.resource.data.checklists[checklistId].tasks[taskId].diff(resource.data.checklists[checklistId].tasks[taskId]).affectedKeys().hasOnly(["status"]);
+        return locMember(locationId) && (haveRole || updatingStatus);
+      }
+
+      match /globals/dailyChecklists {
+    	  allow read: if locMember(locationId);
+        allow write: if canUpdateCL();
+      }
+
+      function canUpdateRT(){
+        let haveRole = request.auth.token.organizationKey.role <= 3;
+        let taskId = request.resource.data.tasks.keys()[0];
+        let updatingStatus = request.resource.data.tasks[taskId].diff(resource.data.tasks[taskId]).affectedKeys().hasOnly(["completed"]);
+        return locMember(locationId) && (haveRole || updatingStatus);
+      }
+
+      match /globals/recurringTasks {
+        allow read: if locMember(locationId);
+        allow write: if canUpdateRT();
+      }
+
+      match /globals/locationChecklists {
+        allow read: if locMember(locationId);
+        allow write: if canUpdateCL();
+      }
+
+      match /utensils/{document=**} {
+        allow write, read: if locMember(locationId) && request.auth.token.organizationKey.role <= 3;
+      }
+
+      function canWriteBoard(){
+        let highRole = request.auth.token.organizationKey.role <= 2;
+        return locMember(locationId) && (highRole || request.auth.uid in resource.data.hosts);
+      }
+
+      function canWriteBoardContent(collectionName, boardId){
+        let highRole = request.auth.token.organizationKey.role <= 2;
+        return locMember(locationId) && (highRole || request.auth.uid in get(/databases/$(database)/documents/Locations/$(locationId)/$(collectionName)/$(boardId)).data.hosts);
+      }
+
+      match /notes/{boardId} {
+        allow read: if locMember(locationId); 
+        allow write: if canWriteBoard();
+
+        match /content/{document=**} {
+          allow read: if locMember(locationId);
+          allow write: if canWriteBoardContent("notes", boardId);
+        }
+      }
+
+      match /files/{boardId} {
+        allow read: if locMember(locationId); 
+        allow write: if canWriteBoard();
+
+        match /content/{document=**} {
+          allow read: if locMember(locationId);
+          allow write: if canWriteBoardContent("files", boardId);
+        }
+      }
+
+      // Employees
+      match /employees/{document=**} {
+    	  allow read: if locMember(locationId);
+        allow update: if locMember(locationId) && request.auth.token.organizationKey.role < resource.data.role;
+        allow delete: if locMember(locationId) && request.auth.token.organizationKey.role <= 1;
+      }
 		}
+
+    function canManageConversation(locationId){
+      return request.auth.token.organizationKey != null && request.auth.token.organizationKey.locId == locationId && request.auth.token.organizationKey.role <= 2;
+    }
+
+    function updateConversation(){
+      let editing = canManageConversation(resource.data.locationId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["id", 'locationId', "privacyLevel", "position"]));
+      let muting = request.resource.data.diff(resource.data).affectedKeys().hasOnly(["members"]) && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid]);
+      return editing || muting;
+    }
+
+    match /conversations/{conversationId} {
+      allow create: if canManageConversation(request.resource.data.locationId) && request.resource.data.keys().hasAll(['name', 'locationId', "privacyLevel"]);
+      allow read: if resource.data.members[request.auth.uid] != null || canManageConversation(resource.data.locationId);
+      allow write: if updateConversation();   
+      allow delete: if canManageConversation(resource.data.locationId);  
+    }
+
+    match /directMessages/{dmId} {
+      allow create: if request.resource.data.members[request.auth.uid]._id == request.auth.uid;
+    	allow read: if resource.data.members[request.auth.uid]._id == request.auth.uid;
+      allow update: if resource.data.members[request.auth.uid]._id == request.auth.uid
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted","recentMessage"]);
+		}
+
+    match /{path=**}/notes/{boardId} {
+      allow read: if resource.data.parentId == request.auth.token.organizationKey.orgId || resource.data.parentId == request.auth.token.organizationKey.locId;
+    }
+
+    match /{path=**}/files/{boardId} {
+      allow read: if resource.data.parentId == request.auth.token.organizationKey.orgId || resource.data.parentId == request.auth.token.organizationKey.locId; 
+    }
 
     match /Organizations/{organizationId} {
       allow read: if isAuthenticated();
-
-      match /recurringTasks/{locId} {
-        allow read: if isOwnerOrSupervisor(organizationId) || locMember(organizationId, locId);
-        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, locId) || isManager(organizationId, locId);
-      }
-
-      match /tasks/{locId} {
-        allow read: if isOwnerOrSupervisor(organizationId) || locMember(organizationId, locId);
-        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, locId) || isManager(organizationId, locId);
-      }
-
-      match /settings/{settingId} {
-        allow read: if isAuthenticated() && orgMember(organizationId);
-        allow write: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, settingId.replace("schedule_",""));
-      }
       
       // Employees
       match /employees/{document=**} {
@@ -106,139 +187,19 @@ service cloud.firestore {
                       || (orgMember(organizationId)
                       && resource.data.locations.keys().size() == 1
                       && resource.data.role == "employee");
-        allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["locations"]) && compareRoles(organizationId))
+        allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(["locations","locationsList","conversationsAsAdmin","mutedConversations","conversationsAsMember"])
                       || (orgMember(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["preferredName","emergencyContact","contactComments"]))
                       || (isOwner(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisingLocations"]));
       }
 
-      match /locationChecklist/{document=**} {
-    	  allow read: if orgMember(organizationId);
-        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId) || isManager(organizationId, request.resource.data.locationId);
-        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
+      match /notes/{document=**} {
+        allow read: if orgMember(organizationId);   
+        allow write: if isOwner(organizationId);     
       }
 
-      match /utensils/{document=**} {
-        allow read: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
-        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId);
-        allow delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId);
-        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)
-                      || (isManager(organizationId, resource.data.locationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["changes","currentQuantity"]));
-      }
-
-      match /scheduleDocs/{document=**} {
-				allow read: if orgMember(organizationId);
-        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId) || isManager(organizationId, request.resource.data.locationId);
-        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
-			}
-
-      match /shifts/{document=**} {
-        allow read: if orgMember(organizationId);
-        allow create: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId) || isManager(organizationId, request.resource.data.locationId);
-        allow delete: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId);
-        allow update: if isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId) || isManager(organizationId, resource.data.locationId)
-                      || resource.data.employeeId == request.auth.uid;
-			}
-
-      function accessContentHost(hosts){
-        return request.auth.uid in hosts;
-      }
-
-      function getTags(locationId, accessTags){
-        let baseTags = [request.auth.uid, "hostId_" + request.auth.uid, "pl_public"];
-        let userPositions = request.auth.token.organizationKey.locKeys[locationId].pos;
-        return accessTags.hasAny(baseTags) || baseTags.hasAny(userPositions);
-      }
-
-      function moduleContentWrite(moduleName,boardId){
-        let data = get(/databases/$(database)/documents/Organizations/$(organizationId)/$(moduleName)/$(boardId)).data;
-        return isOwnerOrSupervisor(organizationId) 
-            || isGM(organizationId, data.locationId) 
-            || (locMember(organizationId, data.locationId) && accessContentHost(data.hosts));
-      }
-
-      function readContentModule(moduleName,boardId){
-        let data = get(/databases/$(database)/documents/Organizations/$(organizationId)/$(moduleName)/$(boardId)).data;
-        return isOwnerOrSupervisor(organizationId) 
-            || isGM(organizationId, data.locationId) 
-            || (locMember(organizationId, data.locationId) && getTags(data.locationId,data.accessTags));
-      }
-
-      // Module Functions
-      function readModule(){
-        return isOwnerOrSupervisor(organizationId) 
-            || locMember(organizationId, resource.data.locationId);
-      }
-
-      function updateModule(){
-        return (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name","description","accessTags","hosts"]) && (isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)))
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["accessTags"]) && request.auth.uid in resource.data.hosts)
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]));
-      }
-
-      function updateConversation(){
-        return (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name","description","position","hosts","members"]) && (isOwnerOrSupervisor(organizationId) || isGM(organizationId, resource.data.locationId)))
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["position","members"]) && request.auth.uid in resource.data.hosts)
-            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted"]));
-      }
-
-      function deleteModule(){
-        return isOwnerOrSupervisor(organizationId) 
-            || isGM(organizationId, resource.data.locationId);
-      }
-
-      function createModule(){
-        return (isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId))
-            && ((request.resource.data.privacyLevel != 0 && request.resource.data.keys().hasAll(["name","accessTags","privacyLevel","locationId"])) ||
-                (request.resource.data.privacyLevel == 0 && request.resource.data.keys().hasAll(["name","privacyLevel","locationId"])));
-      }
-
-      function createConversation(){
-        return (isOwnerOrSupervisor(organizationId) || isGM(organizationId, request.resource.data.locationId))
-            && ((request.resource.data.privacyLevel == 1 && request.resource.data.keys().hasAll(["name","position","privacyLevel","locationId"])) ||
-                (request.resource.data.privacyLevel != 1 && request.resource.data.keys().hasAll(["name","privacyLevel","locationId"])));
-      }
-      
-      match /conversations/{conversationId} {
-          allow read: if readModule();
-          allow update: if updateConversation();
-          allow create: if createConversation(); 
-          allow delete: if deleteModule();     
-      }
-
-      match /notes/{boardId} {
-          allow read: if readModule();
-          allow update: if updateModule();
-          allow create: if createModule(); 
-          allow delete: if deleteModule();  
-
-          match /content/{contentId} {
-            allow read: if readContentModule("notes",boardId);
-            allow write: if moduleContentWrite("notes",boardId);
-          }      
-      }
-
-      match /todo/{boardId} {
-          allow read: if readModule();
-          allow update: if updateModule();
-          allow create: if createModule(); 
-          allow delete: if deleteModule();  
-
-          match /content/{contentId} {
-            allow read: if readContentModule("todo",boardId);
-            allow write: if moduleContentWrite("todo",boardId);
-          }      
-      }
-
-      match /storage/{boardId} {
-          allow read: if readModule();
-          allow update: if updateModule();
-          allow create: if createModule(); 
-          allow delete: if deleteModule();  
-
-          match /content/{contentId} {
-            allow read: if readContentModule("storage",boardId);
-            allow write: if moduleContentWrite("storage",boardId);
-          }      
+      match /files/{document=**} {
+        allow read: if orgMember(organizationId);   
+        allow write: if isOwner(organizationId); 
       }
     }
   }

@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import Icon, { MinusOutlined } from "@ant-design/icons";
-import { Task } from "@cuttinboard-solutions/cuttinboard-library/checklist";
 import { Button, Checkbox, Typography } from "antd";
 import { useState } from "react";
 import mdiDrag from "@mdi/svg/svg/drag.svg";
@@ -13,15 +12,16 @@ import {
   Droppable,
   DropResult,
 } from "react-beautiful-dnd";
+import { ITask } from "@cuttinboard-solutions/types-helpers";
 
 interface SimpleTodoProps {
-  tasks: Task[];
-  onChange: (task: Task, newStatus: boolean) => void;
+  tasks: ITask[];
+  onChange: (task: ITask, newStatus: boolean) => void;
   canRemove?: boolean;
-  onRemove?: (task: Task) => void;
-  onTaskNameChange?: (task: Task, newName: string) => void;
+  onRemove?: (task: ITask) => void;
+  onTaskNameChange?: (task: ITask, newName: string) => void;
   onReorder: (
-    element: Task,
+    element: ITask,
     sourceIndex: number,
     targetIndex: number
   ) => void | Promise<void>;
@@ -35,7 +35,7 @@ function Tasklist({
   onTaskNameChange,
   onReorder,
 }: SimpleTodoProps) {
-  const [items, setItems] = useState<Task[] | null>(null);
+  const [items, setItems] = useState<ITask[] | null>(null);
 
   async function onDragEnd(result: DropResult) {
     // dropped outside the list
@@ -94,15 +94,22 @@ function Tasklist({
                       css={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
                         width: "100%",
                       }}
                     >
-                      <Checkbox
-                        checked={task.status}
-                        onChange={(e) => onChange(task, e.target.checked)}
+                      <div
+                        css={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                          gap: 10,
+                        }}
                       >
-                        <Typography.Text
+                        <Checkbox
+                          checked={task.status}
+                          onChange={(e) => onChange(task, e.target.checked)}
+                        />
+                        <Typography.Paragraph
                           delete={task.status}
                           editable={
                             canRemove &&
@@ -111,10 +118,16 @@ function Tasklist({
                                 onTaskNameChange(task, newName),
                             }
                           }
+                          css={{
+                            color: task.status ? "#00000050" : "#000000",
+                            width: "100%",
+                            margin: "0 !important",
+                            padding: "0 !important",
+                          }}
                         >
                           {task.name}
-                        </Typography.Text>
-                      </Checkbox>
+                        </Typography.Paragraph>
+                      </div>
 
                       {canRemove && onRemove && (
                         <Button

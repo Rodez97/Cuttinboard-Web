@@ -1,22 +1,24 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { orderBy } from "lodash";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useCollectionData } from "react-firebase-hooks/firestore";
-import ManageNoteDialog, { ManageNoteDialogRef } from "./ManageNoteDialog";
+import { useLayoutEffect, useMemo, useState } from "react";
+import ManageNoteDialog, { useManageNote } from "./ManageNoteDialog";
 import NoteCard from "./Note";
 import { useTranslation } from "react-i18next";
 import ToolBar from "../ToolBar";
-import { Button, Layout, Space } from "antd";
-import Icon, { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
+import { Button, Layout, Space, Tag } from "antd";
+import Icon, {
+  GlobalOutlined,
+  InfoCircleOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import { NotePlus } from "./notesIcons";
 import { matchSorter } from "match-sorter";
 import {
   GrayPageHeader,
-  PageError,
-  LoadingPage,
   NotFound,
   EmptyBoard,
+  LoadingPage,
 } from "../../shared";
 import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
 import ManageModuleDialog, {
@@ -25,32 +27,51 @@ import ManageModuleDialog, {
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 import { useParams } from "react-router-dom";
 import {
-  Note,
   useBoard,
-} from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
+  useDisclose,
+  useNotes,
+  useNotesData,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import ReadonlyNoteDialog, { useReadonlyNote } from "./ReadonlyNoteDialog";
+import ErrorPage from "../../shared/molecules/PageError";
+import NoItems from "../../shared/atoms/NoItems";
 
-export default () => {
+export default function NotesMain() {
   const { boardId } = useParams();
-  const { selectedBoard, selectBoard } = useBoard();
+  if (!boardId) {
+    throw new Error("No board id");
+  }
+  const { selectedBoard, selectActiveBoard, loading, error } = useBoard();
 
   useLayoutEffect(() => {
     if (boardId) {
-      selectBoard(boardId);
+      selectActiveBoard(boardId);
     }
     return () => {
-      selectBoard("");
+      selectActiveBoard();
     };
-  }, [boardId, selectBoard]);
+  }, [boardId, selectActiveBoard]);
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={new Error(error)} />;
+  }
 
   if (!selectedBoard) {
     return <NotFound />;
   }
 
   return <Main />;
-};
+}
 
 function Main() {
+  const { selectedBoard, canManageBoard } = useBoard();
+  if (!selectedBoard) {
+    throw new Error("No board selected");
+  }
   const { t } = useTranslation();
   const [{ order, index, searchQuery }, setOrderData] = useState<{
     index: number;
@@ -58,23 +79,18 @@ function Main() {
     searchQuery?: string;
   }>({
     index: 0,
-    order: "asc",
+    order: "desc",
     searchQuery: "",
   });
-  const { selectedBoard, canManageBoard } = useBoard();
-  const manageNoteDialogRef = useRef<ManageNoteDialogRef>(null);
-  const [notes, loading, error] = useCollectionData<Note>(
-    selectedBoard &&
-      selectedBoard.contentRef.withConverter(Note.firestoreConverter)
-  );
+  const { openNew, openEdit, manageNoteDialogRef } = useManageNote();
+  const { open, readonlyNoteDialogRef } = useReadonlyNote();
+  const { notes, loading, error } = useNotes(selectedBoard);
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const [manageMembersOpen, openManageMembers, closeManageMembers] =
     useDisclose();
   const { baseRef, editModule } = useManageModule();
 
-  const handleCreateNote = () => {
-    manageNoteDialogRef.current?.openNew();
-  };
+  useNotesData(selectedBoard);
 
   // Define a function to filter, sort, and memoize the list of notes
   const getOrderedNotes = useMemo(() => {
@@ -94,7 +110,7 @@ function Main() {
     // Sort the list of notes based on the index and order parameters
     switch (index) {
       case 0:
-        return orderBy(filtered, (e) => e.author.at?.toDate(), order);
+        return orderBy(filtered, (e) => e.createdAt ?? e.updatedAt, order);
       case 1:
         return orderBy(filtered, "title", order);
       default:
@@ -102,16 +118,12 @@ function Main() {
     }
   }, [notes, index, order, searchQuery]);
 
-  if (loading) {
-    return <LoadingPage />;
+  if (!selectedBoard) {
+    return <EmptyBoard />;
   }
 
   if (error) {
-    return <PageError error={error} />;
-  }
-
-  if (!selectedBoard) {
-    return <EmptyBoard />;
+    return <ErrorPage error={new Error(error)} />;
   }
 
   return (
@@ -123,25 +135,34 @@ function Main() {
         onBack={openInfo}
         title={selectedBoard.name}
         subTitle={`(${notes ? notes.length : 0})`}
-        extra={[
-          <Button
-            key="newNote"
-            disabled={!canManageBoard}
-            onClick={handleCreateNote}
-            icon={<Icon component={NotePlus} />}
-            type="dashed"
-          >
-            {t("Add note")}
-          </Button>,
-          <Button
-            key="members"
-            type="primary"
-            onClick={openManageMembers}
-            icon={<TeamOutlined />}
-          >
-            {t("Members")}
-          </Button>,
-        ]}
+        extra={
+          selectedBoard.global ? (
+            <Tag color="processing" icon={<GlobalOutlined />}>
+              {t("Global Board")}
+            </Tag>
+          ) : (
+            [
+              !selectedBoard.global && canManageBoard && (
+                <Button
+                  key="newNote"
+                  onClick={openNew}
+                  icon={<Icon component={NotePlus} />}
+                  type="dashed"
+                >
+                  {t("Add note")}
+                </Button>
+              ),
+              <Button
+                key="members"
+                type="primary"
+                onClick={openManageMembers}
+                icon={<TeamOutlined />}
+              >
+                {t("Members")}
+              </Button>,
+            ]
+          )
+        }
       />
       <ToolBar
         options={["Creation", "Name"]}
@@ -154,34 +175,50 @@ function Main() {
           setOrderData((prev) => ({ ...prev, searchQuery: sq }))
         }
       />
-      {getOrderedNotes.length > 0 ? (
+
+      {loading ? (
+        <LoadingPage />
+      ) : getOrderedNotes.length > 0 ? (
         <Space wrap css={{ padding: 20, overflow: "auto" }}>
           {getOrderedNotes?.map((note) => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              onEdit={() => manageNoteDialogRef.current?.openEdit(note)}
-            />
+            <NoteCard key={note.id} note={note} onSelect={open} />
           ))}
         </Space>
-      ) : (
+      ) : notes.length === 0 ? (
         <EmptyBoard
           description={
             <span>
-              No notes. <a onClick={handleCreateNote}>Create one</a> or{" "}
+              {t("No notes")}
+              {". "}
+              {!selectedBoard.global && canManageBoard && (
+                <span>
+                  <a onClick={openNew}>{t("Create one")}</a> {t("or")}{" "}
+                </span>
+              )}
               <a
                 href="https://www.cuttinboard.com/help/understanding-the-notes-app"
                 target="_blank"
                 rel="noreferrer"
               >
-                learn more.
+                {t("learn more")}
               </a>
             </span>
           }
         />
+      ) : (
+        <NoItems />
       )}
 
-      <ManageNoteDialog ref={manageNoteDialogRef} />
+      <ManageNoteDialog
+        ref={manageNoteDialogRef}
+        selectedBoard={selectedBoard}
+      />
+      <ReadonlyNoteDialog
+        ref={readonlyNoteDialogRef}
+        selectedBoard={selectedBoard}
+        canManage={Boolean(canManageBoard && !selectedBoard.global)}
+        onEdit={openEdit}
+      />
       <ManageModuleDialog ref={baseRef} moduleName="Notes Stack" />
       <ModuleInfoDialog
         open={infoOpen}

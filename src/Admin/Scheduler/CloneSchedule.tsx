@@ -1,32 +1,53 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Avatar, Checkbox, List, Modal } from "antd";
+import { Alert, Checkbox, Modal, Typography } from "antd";
 import dayjs from "dayjs";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import WeekNavigator from "./WeekNavigator";
-import { UserOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
-import { WEEKFORMAT } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import {
+  employeesSelectors,
+  useAppSelector,
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { logEvent } from "firebase/analytics";
+import CuttinboardAvatar from "../../shared/atoms/Avatar";
+import { ANALYTICS } from "firebase";
+import {
+  getEmployeeFullName,
+  RoleAccessLevels,
+  WEEKFORMAT,
+} from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
 
 function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
+  // 2. Get the translation function from the useTranslation hook.
   const { t } = useTranslation();
-  const { getEmployees } = useEmployeesList();
-  const { cloneWeek, weekId, weekSummary } = useSchedule();
+
+  // 3. Get the employees using the useAppSelector hook.
+  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+
+  // 4. Get the data needed for the cloneWeek function using the useSchedule hook.
+  const { cloneWeek, weekId, weekSummary, weekDays } = useSchedule();
+
+  // 5. Create state variables using the useState hook.
   const [isCloning, setIsCloning] = useState(false);
-  const [selectedWeek, setSelectedWeek] = useState(dayjs().format(WEEKFORMAT));
+  const [selectedWeek, setSelectedWeek] = useState(
+    weekDays[0].subtract(1, "week").format(WEEKFORMAT)
+  );
   const [selectedEmployees, setSelectedEmployees] = useState(
     getEmployees.map((e) => e.id)
   );
+
+  useEffect(() => {
+    setSelectedWeek(weekDays[0].subtract(1, "week").format(WEEKFORMAT));
+  }, [weekDays]);
 
   const handleSelectedEmpChange = useCallback(
     (empId: string) => {
@@ -45,10 +66,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
       await cloneWeek(selectedWeek, selectedEmployees);
       props.onCancel();
       // Report to analytics
-      const analytics = getAnalytics();
-      logEvent(analytics, "clone_schedule", {
-        noOfEmployees: selectedEmployees.length,
-      });
+      logEvent(ANALYTICS, "clone_schedule");
     } catch (error) {
       recordError(error);
     } finally {
@@ -90,6 +108,14 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
       confirmLoading={isCloning}
       okButtonProps={{ disabled: !canClone }}
     >
+      <Typography.Paragraph
+        type="secondary"
+        css={{
+          textAlign: "center",
+        }}
+      >
+        {t("Select the week you wish to clone:")}
+      </Typography.Paragraph>
       <div css={{ display: "flex", justifyContent: "center", margin: 10 }}>
         <WeekNavigator
           currentWeekId={selectedWeek}
@@ -112,27 +138,46 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
           message={t("Cannot clone a week with shifts")}
         />
       )}
-      <List
-        css={{ maxHeight: "50vh", overflowY: "auto", marginTop: 10 }}
-        dataSource={getEmployees}
-        renderItem={(emp) => (
-          <List.Item
-            key={emp.id}
-            extra={
+      <div
+        css={{
+          maxHeight: "50vh",
+          overflowY: "auto",
+          marginTop: 10,
+          width: "100%",
+        }}
+      >
+        {getEmployees
+          .filter((e) => e.role !== RoleAccessLevels.ADMIN)
+          .map((emp) => (
+            <div
+              key={emp.id}
+              css={{
+                display: "flex",
+                alignItems: "center",
+                padding: 10,
+                borderBottom: "1px solid #e8e8e8",
+              }}
+            >
+              <CuttinboardAvatar src={emp.avatar} userId={emp.id} />
+
+              <Typography.Text
+                ellipsis
+                css={{
+                  marginLeft: 10,
+                  marginRight: 10,
+                  flex: 1,
+                }}
+              >
+                {getEmployeeFullName(emp)}
+              </Typography.Text>
               <Checkbox
                 checked={selectedEmployees.includes(emp.id)}
                 onChange={() => handleSelectedEmpChange(emp.id)}
                 disabled={!canClone}
               />
-            }
-          >
-            <List.Item.Meta
-              avatar={<Avatar icon={<UserOutlined />} src={emp.avatar} />}
-              title={emp.fullName}
-            />
-          </List.Item>
-        )}
-      />
+            </div>
+          ))}
+      </div>
     </Modal>
   );
 }

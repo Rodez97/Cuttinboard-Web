@@ -5,17 +5,21 @@ import LangSelect from "./LangSelect";
 import PasswordPanel from "./PasswordPanel";
 import ContactDetails from "./ContactDetails";
 import ProfilePanel from "./ProfilePanel";
-import { Button, Layout, Typography } from "antd";
+import { Button, Layout } from "antd";
 import { UserDeleteOutlined } from "@ant-design/icons";
 import React from "react";
 import DeleteAccountDialog from "./DeleteAccountDialog";
+import usePageTitle from "../../hooks/usePageTitle";
+import { GrayPageHeader } from "../../shared";
 
 function Account() {
   const { t } = useTranslation();
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+  usePageTitle("Account");
 
   return (
     <Layout>
+      <GrayPageHeader title={t("Account Details")} />
       <Layout.Content
         css={{
           display: "flex",
@@ -24,10 +28,6 @@ function Account() {
           padding: 20,
         }}
       >
-        <Typography.Title>{t("Account Details")}</Typography.Title>
-        <Typography.Title level={5} type="secondary">
-          {t("Manage your account details and security")}
-        </Typography.Title>
         {/* Basic Info 🙎  */}
         <ProfilePanel />
         {/* Phone Number 📱  */}

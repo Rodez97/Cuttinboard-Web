@@ -1,10 +1,7 @@
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import React, { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import VerifyEmail from "../shared/organisms/VerifyEmail";
 import { LoadingPage } from "../shared";
 import { useDashboard } from "./DashboardProvider";
-import UpgradeAccount from "./UpgradeAccount";
 
 const Locations = lazy(() => import("./Locations"));
 const Account = lazy(() => import("./Account/Account"));
@@ -12,83 +9,63 @@ const MyDocuments = lazy(() => import("./MyDocuments"));
 const Subscription = lazy(() => import("./Subscription"));
 const OwnerPortal = lazy(() => import("./OwnerPortal"));
 const DirectMessages = lazy(() => import("../Chats/DirectMessages"));
+const Conversations = lazy(() => import("../Chats/Conversations"));
+const GNotes = lazy(() => import("./GNotes"));
+const GFiles = lazy(() => import("./GFiles"));
+const UpgradeAccount = lazy(() => import("./UpgradeAccount"));
+const MyShifts = lazy(() => import("../Modules/MyShifts"));
 
 function DashboardRouter() {
-  const { userDocument } = useDashboard();
-  const { user } = useCuttinboard();
+  const { userDocument, organization } = useDashboard();
 
   return (
-    <Routes>
-      <Route path="/">
-        <Route
-          path="locations/*"
-          element={
-            <Suspense fallback={<LoadingPage />}>
-              <Locations />
-            </Suspense>
-          }
-        />
-        <Route
-          path="owner-portal/*"
-          element={
-            <Suspense fallback={<LoadingPage />}>
-              <OwnerPortal />
-            </Suspense>
-          }
-        />
-        <Route path="directMessages/*" element={<DirectMessages />} />
-        <Route
-          path="account"
-          element={
-            <Suspense fallback={<LoadingPage />}>
-              <Account />
-            </Suspense>
-          }
-        />
-        <Route
-          path="my-documents"
-          element={
-            <Suspense fallback={<LoadingPage />}>
-              <MyDocuments />
-            </Suspense>
-          }
-        />
-        {userDocument.subscriptionId && (
+    <Suspense fallback={<LoadingPage />}>
+      <Routes>
+        <Route path="/">
+          <Route path="locations/*" element={<Locations />} />
+
+          <Route path="owner-portal/*" element={<OwnerPortal />} />
+
+          {Boolean(organization?.hadMultipleLocations) && (
+            <Route path="global-notes/*" element={<GNotes />} />
+          )}
+
+          {Boolean(organization?.hadMultipleLocations) && (
+            <Route path="global-files/*" element={<GFiles />} />
+          )}
+
+          <Route path="directMessages/*" element={<DirectMessages />} />
+          <Route path="conversations/*" element={<Conversations />} />
+          <Route path="my-shifts" element={<MyShifts />} />
+          <Route path="account" element={<Account />} />
+          <Route path="my-documents" element={<MyDocuments />} />
+          {userDocument.subscriptionId && (
+            <Route path="subscription" element={<Subscription />} />
+          )}
+
+          {!userDocument?.subscriptionId && (
+            <Route path="upgrade" element={<UpgradeAccount />} />
+          )}
+
           <Route
-            path="subscription"
+            index
             element={
-              <Suspense fallback={<LoadingPage />}>
-                <Subscription />
-              </Suspense>
+              <Navigate
+                to={userDocument.subscriptionId ? "owner-portal" : "locations"}
+              />
             }
           />
-        )}
-
-        {!userDocument?.subscriptionId && (
           <Route
-            path="upgrade"
-            element={user.emailVerified ? <UpgradeAccount /> : <VerifyEmail />}
+            path="*"
+            element={
+              <Navigate
+                to={userDocument.subscriptionId ? "owner-portal" : "locations"}
+              />
+            }
           />
-        )}
-
-        <Route
-          index
-          element={
-            <Navigate
-              to={userDocument.subscriptionId ? "owner-portal" : "locations"}
-            />
-          }
-        />
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to={userDocument.subscriptionId ? "owner-portal" : "locations"}
-            />
-          }
-        />
-      </Route>
-    </Routes>
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }
 

@@ -1,77 +1,97 @@
 /** @jsx jsx */
 import { MinusCircleOutlined } from "@ant-design/icons";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { POSITIONS } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { POSITIONS } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
 import {
   Button,
   Divider,
   Drawer,
   DrawerProps,
+  Form,
   Input,
   List,
   Typography,
 } from "antd";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { compact } from "lodash";
 import { matchSorter } from "match-sorter";
-import { useState } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
 
 function ManagePositions(props: DrawerProps) {
   const { t } = useTranslation();
-  const { location } = useCuttinboardLocation();
-  const [addingPosition, setAddingPosition] = useState(false);
-  const [fieldValue, setFieldValue] = useState("");
+  const [form] = Form.useForm<{ position: string }>();
+  const { location, addPosition, removePosition } = useCuttinboardLocation();
 
-  const addPosition = async (position: string) => {
-    if (!position) {
-      return;
-    }
-    try {
-      setAddingPosition(true);
-      await location.addPosition(position);
-      setFieldValue("");
-      // Report to analytics
-      const analytics = getAnalytics();
-      logEvent(analytics, "add_position", {
-        position,
-      });
-    } catch (error) {
-      recordError(error);
-    } finally {
-      setAddingPosition(false);
-    }
-  };
-
-  const removePosition = async (position: string) => {
-    try {
-      await location.removePosition(position);
-    } catch (error) {
-      recordError(error);
-    }
-  };
+  const handleAddPosition = useCallback(
+    ({ position }: { position: string }) => {
+      addPosition(position);
+      form.resetFields();
+    },
+    [addPosition, form]
+  );
 
   return (
     <Drawer {...props} title={t("Manage Positions")} placement="right">
-      <Input.Search
-        placeholder={t("New Position")}
-        value={fieldValue}
-        onChange={(e) => setFieldValue(e.target.value)}
-        allowClear
-        enterButton={t("Add")}
-        size="large"
-        onSearch={addPosition}
-        loading={addingPosition}
-        disabled={location.positions?.length >= 20}
-        maxLength={40}
-        showCount
-      />
+      <Form
+        initialValues={{ position: "" }}
+        onFinish={handleAddPosition}
+        autoComplete="off"
+        form={form}
+      >
+        <Form.Item
+          name="position"
+          rules={[
+            {
+              required: true,
+              message: t("Please enter a position"),
+            },
+            {
+              // Verify that the position is not already in the list
+              validator: async (_, value: string) => {
+                if (
+                  value &&
+                  compact([
+                    ...(location.settings?.positions ?? []),
+                    ...POSITIONS,
+                  ]).some((pos) => {
+                    return pos.toLowerCase() === value.toLowerCase();
+                  })
+                ) {
+                  return Promise.reject(
+                    new Error(t("Position already exists"))
+                  );
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+          validateTrigger="onSubmit"
+        >
+          <Input.Search
+            placeholder={t("New Position")}
+            allowClear
+            enterButton={t("Add")}
+            size="large"
+            onSearch={form.submit}
+            disabled={
+              location.settings?.positions &&
+              location.settings.positions?.length >= 20
+            }
+            maxLength={40}
+            showCount
+          />
+        </Form.Item>
+      </Form>
 
       <Divider orientation="left">{t("Custom Positions")}</Divider>
       <List
         size="small"
-        dataSource={matchSorter(location.positions, "")}
+        dataSource={
+          location.settings?.positions
+            ? matchSorter(location.settings.positions, "")
+            : []
+        }
         renderItem={(pos) => (
           <List.Item
             key={pos}

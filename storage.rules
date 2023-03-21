@@ -1,0 +1,66 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+  
+  match /users/{userId} {
+    match /avatar {
+     	allow write: if request.auth.uid == userId;
+     	allow read: if true;
+    }
+    match /documents/{document=**} {
+     	allow write: if request.auth.uid == userId;
+     	allow read: if request.auth != null;
+  	}
+  }
+    
+  match /directMessages/{dmId}/{attachment=**} {
+   	allow create: if dmId.matches("[^$]*"+request.auth.uid+"[^$]*") && request.resource.size < 8 * 1024 * 1024;
+    allow read: if request.auth != null;
+  }
+    
+  match /conversations/{chatId}/{attachment=**} {
+    allow create: if request.auth != null && request.resource.size < 8 * 1024 * 1024;
+  	allow read: if request.auth != null;
+  }
+    
+  match /organizations/{organizationId} {
+   	match /files/{drawerId}/{attachment=**} {
+     	allow create: if request.auth.uid == organizationId
+                    && request.resource.size < 50 * 1024 * 1024;
+     	allow read: if request.auth.token.organizationKey.orgId == organizationId;
+   	}
+    
+    match /employees/{employeeId} {
+      allow create: if request.auth.token.organizationKey.orgId == organizationId
+         						&& request.auth.token.organizationKey.role <= 3
+               		  && request.resource.size < 8 * 1024 * 1024;
+      allow delete: if request.auth.token.organizationKey.orgId == organizationId
+         						&& request.auth.token.organizationKey.role <= 3;
+   		allow read: if (request.auth.token.organizationKey.orgId == organizationId
+         					    && request.auth.token.organizationKey.role <= 3)
+                  || request.auth.uid == employeeId;
+    }
+  }
+      
+  match /locations/{locationId} {
+    match /files/{drawerId}/{attachment=**} {
+     	allow create: if request.auth.token.organizationKey.locId == locationId
+                    && request.resource.size < 50 * 1024 * 1024;
+     	allow read: if request.auth.token.organizationKey.locId == locationId;
+   	}
+    
+    match /employees/{employeeId}/{attachment=**} {
+      allow create: if request.auth.token.organizationKey.locId == locationId
+           					&& request.auth.token.organizationKey.role <= 3
+                 		&& request.resource.size < 8 * 1024 * 1024;
+      allow delete: if request.auth.token.organizationKey.locId == locationId
+           					&& request.auth.token.organizationKey.role <= 3;
+     	allow read: if (request.auth.token.organizationKey.locId == locationId
+           					  && request.auth.token.organizationKey.role <= 3)
+                  || request.auth.uid == employeeId;
+   	}
+  }
+  
+ }
+}
+

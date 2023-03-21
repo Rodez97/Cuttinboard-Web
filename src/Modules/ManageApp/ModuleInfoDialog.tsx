@@ -15,23 +15,29 @@ import {
   TagsOutlined,
 } from "@ant-design/icons";
 import {
+  employeesSelectors,
+  useAppSelector,
+  useBoard,
+  useCuttinboardLocation,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { useNavigate } from "react-router-dom";
+import {
+  getBoardPosition,
+  getEmployeeFullName,
   PrivacyLevel,
   privacyLevelToString,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { recordError } from "../../utils/utils";
-import { useBoard } from "@cuttinboard-solutions/cuttinboard-library/boards";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
+} from "@cuttinboard-solutions/types-helpers";
 
 function ModuleInfoDialog({
   onEdit,
   ...props
 }: ModalProps & { onEdit: () => void }) {
-  const { selectedBoard, canManageBoard } = useBoard();
-  const { locationAccessKey } = useCuttinboardLocation();
+  const { selectedBoard, canManageBoard, deleteBoard } = useBoard();
+  const { role } = useCuttinboardLocation();
   const { t } = useTranslation();
-  const { getEmployees } = useEmployeesList();
+  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+  const navigate = useNavigate();
 
   const admins = useMemo(() => {
     if (!selectedBoard || !selectedBoard.hosts || !selectedBoard.hosts.length) {
@@ -41,7 +47,7 @@ function ModuleInfoDialog({
     return getEmployees.filter((e) => admins.includes(e.id));
   }, [getEmployees, selectedBoard]);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!canManageBoard || !selectedBoard) {
       return;
     }
@@ -52,15 +58,23 @@ function ModuleInfoDialog({
       okText: t("Delete"),
       okType: "danger",
       cancelText: t("Cancel"),
-      onOk: async () => {
-        try {
-          await selectedBoard.delete();
-        } catch (error) {
-          recordError(error);
-        }
+      onOk: () => {
+        navigate("../");
+        deleteBoard(selectedBoard);
       },
     });
   };
+
+  const canEditOrDelete = useMemo(() => {
+    if (!selectedBoard || selectedBoard.global) {
+      return false;
+    }
+    if (selectedBoard.global) {
+      return role === RoleAccessLevels.OWNER;
+    } else {
+      return role <= RoleAccessLevels.GENERAL_MANAGER;
+    }
+  }, [role, selectedBoard]);
 
   if (!selectedBoard) {
     return null;
@@ -71,7 +85,7 @@ function ModuleInfoDialog({
       {...props}
       title={t("Details")}
       footer={
-        locationAccessKey.role <= RoleAccessLevels.GENERAL_MANAGER && [
+        canEditOrDelete && [
           <Button
             icon={<EditOutlined />}
             type="dashed"
@@ -111,8 +125,12 @@ function ModuleInfoDialog({
                 <GlobalOutlined />
               )
             }
-            title={t("Privacy Level")}
-            description={t(privacyLevelToString(selectedBoard.privacyLevel))}
+            title={t("Membership Type")}
+            description={
+              selectedBoard.global
+                ? t("Available across all locations.")
+                : t(privacyLevelToString(selectedBoard.privacyLevel))
+            }
           />
         </List.Item>
         {Boolean(admins.length) && (
@@ -121,7 +139,7 @@ function ModuleInfoDialog({
               avatar={<CrownOutlined />}
               title={t("Admins")}
               description={admins.map((admin) => (
-                <p key={admin.id}>{admin.fullName}</p>
+                <p key={admin.id}>{getEmployeeFullName(admin)}</p>
               ))}
             />
           </List.Item>
@@ -136,12 +154,12 @@ function ModuleInfoDialog({
           />
         </List.Item>
         {selectedBoard.privacyLevel === PrivacyLevel.POSITIONS &&
-          Boolean(selectedBoard.position) && (
+          Boolean(getBoardPosition(selectedBoard)) && (
             <List.Item>
               <List.Item.Meta
                 avatar={<TagOutlined />}
                 title={t("Position")}
-                description={selectedBoard.position}
+                description={getBoardPosition(selectedBoard)}
               />
             </List.Item>
           )}

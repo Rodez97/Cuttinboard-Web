@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import { IEmployee } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
 import { Divider, List, Modal, ModalProps, Typography } from "antd";
 import { useTranslation } from "react-i18next";
@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 export default ({
   employee,
   ...props
-}: { employee: Employee } & ModalProps) => {
+}: { employee: IEmployee } & ModalProps) => {
   const { t } = useTranslation();
 
   return (

@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -5,19 +7,21 @@ import {
   HistoryOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import { Utensil } from "@cuttinboard-solutions/cuttinboard-library/utensils";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  Colors,
+  useUtensils,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import styled from "@emotion/styled";
-import { Button, Dropdown, List, Modal, Progress } from "antd";
-import React, { useMemo, useState } from "react";
+import { Button, Dropdown, Modal, Progress, Typography } from "antd";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
 import ChangesDialog from "./ChangesDialog";
 import ReportChangeDialog from "./ReportChangeDialog";
+import { IUtensil } from "@cuttinboard-solutions/types-helpers";
 
 interface IUtensilCard {
-  utensil: Utensil;
-  onClick: (utensil: Utensil) => void;
+  utensil: IUtensil;
+  onClick: (utensil: IUtensil) => void;
 }
 
 const CardContainer = styled.div`
@@ -30,6 +34,7 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
   const { t } = useTranslation();
   const [reportChangeDialogOpen, setReportChangeDialogOpen] = useState(false);
   const [changesDialogOpen, setChangesDialogOpen] = useState(false);
+  const { deleteUtensil } = useUtensils();
 
   const getScaleColor = useMemo(() => {
     if (utensil.percent <= 33.33) {
@@ -51,24 +56,35 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
     setReportChangeDialogOpen(false);
   };
 
-  const handleDelete = () => {
-    try {
-      Modal.confirm({
-        title: t("utensils.deleteUtensil"),
-        content: t("utensils.deleteUtensilDescription"),
-        onOk: async () => {
-          await utensil.delete();
-        },
-      });
-    } catch (error) {
-      recordError(error);
-    }
-  };
+  const handleDelete = () =>
+    Modal.confirm({
+      title: t("utensils.deleteUtensil"),
+      content: t("utensils.deleteUtensilDescription"),
+      onOk: () => deleteUtensil(utensil),
+    });
 
   return (
     <CardContainer>
-      <List.Item
-        extra={
+      <div
+        css={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography.Text>{utensil.name}</Typography.Text>
+
+        <div
+          css={{
+            display: "flex",
+            alignItems: "center",
+            gap: "15px",
+          }}
+        >
+          <Typography.Text strong type="secondary">
+            {utensil.currentQuantity}/{utensil.optimalQuantity}
+          </Typography.Text>
+
           <Dropdown
             menu={{
               items: [
@@ -101,22 +117,11 @@ function UtensilCard({ utensil, onClick }: IUtensilCard) {
             }}
             trigger={["click"]}
           >
-            <Button type="text" icon={<MoreOutlined />} />
+            <Button type="dashed" icon={<MoreOutlined />} />
           </Dropdown>
-        }
-      >
-        <List.Item.Meta
-          title={utensil.name}
-          description={
-            <>
-              {`${t("Amount")}: `}
-              <b>
-                {utensil.currentQuantity}/{utensil.optimalQuantity}
-              </b>
-            </>
-          }
-        />
-      </List.Item>
+        </div>
+      </div>
+
       <Progress
         strokeColor={getScaleColor}
         percent={utensil.percent}

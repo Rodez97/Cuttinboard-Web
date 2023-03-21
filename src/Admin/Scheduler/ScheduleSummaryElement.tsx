@@ -1,12 +1,11 @@
-/** @jsx jsx */
-import { jsx } from "@emotion/react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { Divider, Space, Statistic } from "antd";
+import { Statistic } from "antd";
 import {
-  minutesToTextDuration,
+  Colors,
   useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library/schedule";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { minutesToTextDuration } from "@cuttinboard-solutions/types-helpers";
 
 function ScheduleSummaryElement() {
   const { t } = useTranslation();
@@ -24,12 +23,7 @@ function ScheduleSummaryElement() {
   } = useSchedule();
 
   return (
-    <Space
-      size="large"
-      wrap
-      split={<Divider type="vertical" />}
-      css={{ backgroundColor: "#FCFCFC", padding: "5px 10px" }}
-    >
+    <div className="schedule-summary">
       <Statistic
         title={t("Est. Wages")}
         value={totalWage}
@@ -57,7 +51,7 @@ function ScheduleSummaryElement() {
           color: projectedSales <= 0 ? Colors.Error.errorMain : "initial",
         }}
       />
-    </Space>
+    </div>
   );
 }
 

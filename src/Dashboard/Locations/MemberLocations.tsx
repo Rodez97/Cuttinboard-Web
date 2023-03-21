@@ -1,23 +1,27 @@
 /** @jsx jsx */
-import { Location } from "@cuttinboard-solutions/cuttinboard-library";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library/utils";
+import {
+  FIRESTORE,
+  locationConverter,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Space, Typography } from "antd";
 import { collection, query, where } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
+import usePageTitle from "../../hooks/usePageTitle";
 import { PageError, LoadingPage } from "../../shared";
 import LocationCard from "./LocationCard";
 
 export default () => {
+  usePageTitle("My Locations");
   const { t } = useTranslation();
   const { user } = useCuttinboard();
   const [myLocations, loading, error] = useCollectionData(
     query(
       collection(FIRESTORE, "Locations"),
       where("members", "array-contains", user.uid)
-    ).withConverter(Location.firestoreConverter)
+    ).withConverter(locationConverter)
   );
 
   if (loading) {
@@ -32,7 +36,7 @@ export default () => {
       {myLocations && myLocations.length > 0 ? (
         <Space wrap size="large">
           {myLocations.map((loc) => (
-            <LocationCard key={loc.id} location={loc} />
+            <LocationCard key={loc.id} location={loc} showBadge />
           ))}
         </Space>
       ) : (

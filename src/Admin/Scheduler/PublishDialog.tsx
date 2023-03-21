@@ -1,40 +1,36 @@
 /** @jsx jsx */
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import {
   Descriptions,
   message,
   Modal,
   ModalProps,
-  Select,
+  Radio,
   Space,
   Typography,
 } from "antd";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { ANALYTICS } from "firebase";
+import { logEvent } from "firebase/analytics";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../../utils/utils";
 
 export default (props: ModalProps & { onAccept: () => void }) => {
   const { t } = useTranslation();
-  const { publish, updates, weekSummary } = useSchedule();
+  const { publish, updatesCount, weekSummary } = useSchedule();
   const [notifyTo, setNotifyTo] = useState<
     "all" | "all_scheduled" | "changed" | "none"
   >("changed");
 
-  const handlePublish = async () => {
-    try {
-      await publish(notifyTo ?? "changed");
-      message.success(t("Changes Published"));
-      // Report to analytics
-      logEvent(getAnalytics(), "publish_schedule", {
-        notifyTo: notifyTo,
-        ...weekSummary,
-      });
-      props.onAccept();
-    } catch (error) {
-      recordError(error);
-    }
+  const handlePublish = () => {
+    publish(notifyTo);
+    message.success(t("Changes Published"));
+    // Report to analytics
+    logEvent(ANALYTICS, "publish_schedule", {
+      notifyTo: notifyTo,
+      ...weekSummary,
+    });
+    props.onAccept();
   };
 
   return (
@@ -46,39 +42,44 @@ export default (props: ModalProps & { onAccept: () => void }) => {
       <Space direction="vertical" css={{ display: "flex" }}>
         <Descriptions bordered column={1} size="small">
           <Descriptions.Item label={t("New or Draft:")}>
-            {updates.newOrDraft}
+            {updatesCount.newOrDraft}
           </Descriptions.Item>
 
           <Descriptions.Item label={t("Shift Updates:")}>
-            {updates.pendingUpdates}
+            {updatesCount.pendingUpdates}
           </Descriptions.Item>
 
           <Descriptions.Item label={t("Deleted Shifts:")}>
-            {updates.deleted}
+            {updatesCount.deleted}
           </Descriptions.Item>
 
           <Descriptions.Item label={t("Total Changes:")}>
-            {updates.total}
+            {updatesCount.total}
           </Descriptions.Item>
         </Descriptions>
 
         <Typography.Title level={5}>{t("Notify to:")}</Typography.Title>
 
-        <Select
-          onChange={(e: "all" | "all_scheduled" | "changed" | "none") => {
-            setNotifyTo(e);
-          }}
+        <Radio.Group
           value={notifyTo}
-          defaultValue="changed"
+          onChange={(e) => {
+            setNotifyTo(e.target.value);
+          }}
           css={{ width: "100%" }}
         >
-          <Select.Option value="all">{t("All")}</Select.Option>
-          <Select.Option value="all_scheduled">
-            {t("all_scheduled")}
-          </Select.Option>
-          <Select.Option value="changed">{t("changed")}</Select.Option>
-          <Select.Option value="none">{t("None")}</Select.Option>
-        </Select>
+          <Space direction="vertical">
+            <Radio value="all">{t("Notify all employees")}</Radio>
+            <Radio value="all_scheduled">
+              {t("Notify only employees with scheduled shifts")}
+            </Radio>
+            <Radio value="changed">
+              {t("Notify only employees whose shifts have changed")}
+            </Radio>
+            <Radio value="none">
+              {t("Do not notify anyone about shift changes")}
+            </Radio>
+          </Space>
+        </Radio.Group>
       </Space>
     </Modal>
   );

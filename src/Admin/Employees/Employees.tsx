@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EmployeeCard from "./EmployeeCard";
-import { matchSorter } from "match-sorter";
 import {
   Button,
   Divider,
@@ -11,8 +10,6 @@ import {
   Layout,
   List,
   Modal,
-  Select,
-  Skeleton,
   Space,
   Tooltip,
 } from "antd";
@@ -23,50 +20,58 @@ import {
 } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import ManagePositions from "./ManagePositions";
-import { groupBy, orderBy } from "lodash";
 import CreateEmployee from "./CreateEmployee";
 import { GrayPageHeader } from "../../shared";
+import { PositionSelect } from "../../shared/molecules/PositionSelect";
 import {
-  Employee,
-  useEmployeesList,
-} from "@cuttinboard-solutions/cuttinboard-library/employee";
-import {
+  employeesSelectors,
+  joinLocation,
+  leaveLocation,
+  useAppSelector,
   useCuttinboard,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
+  useDisclose,
+  useEmployees,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import {
-  POSITIONS,
+  getLocationUsage,
   RoleAccessLevels,
   roleToString,
-  useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
+} from "@cuttinboard-solutions/types-helpers";
+import EmptyExtended from "./../../shared/molecules/EmptyExtended";
+import NoItems from "../../shared/atoms/NoItems";
 
 function Employees() {
-  const { getEmployees, loading } = useEmployeesList();
+  const { location, role } = useCuttinboardLocation();
+  const { getEmployeesByRole } = useEmployees();
+  const employees = useAppSelector(employeesSelectors.selectAll);
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>("");
   const { user } = useCuttinboard();
   const [managePositionsOpen, setManagePositionsOpen] = useState(false);
-  const { isOwner, isAdmin, location } = useCuttinboardLocation();
   const [isCreateEmployeeOpen, openCreateEmployee, closeCreateEmployee] =
     useDisclose(false);
+  const [joiningLocation, setJoiningLocation] = useState(false);
 
-  const addPrimaryOwner = async () => {
+  const joinToLocation = async () => {
     try {
-      await location.ownerJoin(true);
+      setJoiningLocation(true);
+      await joinLocation(location);
     } catch (error) {
       recordError(error);
+    } finally {
+      setJoiningLocation(false);
     }
   };
 
-  const removePrimaryOwner = () => {
+  const leaveFromLocation = () => {
     Modal.confirm({
       title: t("Are you sure you want to leave this location?"),
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
-          await location.ownerJoin();
+          await leaveLocation(location);
         } catch (error) {
           recordError(error);
         }
@@ -74,81 +79,33 @@ function Employees() {
     });
   };
 
-  const getEmployeeByRole = useMemo(() => {
-    const groupedByRole = groupBy(getEmployees, (e) => e.locationRole);
+  const usage = useMemo(() => getLocationUsage(location), [location]);
 
-    const finalAfterQuery = Object.entries(groupedByRole).reduce<
-      Record<RoleAccessLevels, Employee[]>
-    >(
-      (acc, [role, employees]) => {
-        // Filter by name by searchText
-        const filtered = searchText
-          ? matchSorter(employees, searchText, {
-              keys: [(e) => e.fullName],
-            })
-          : employees;
-        const byPos = selectedTag
-          ? matchSorter(filtered, selectedTag, {
-              keys: [(e) => e.positions],
-            })
-          : filtered;
-        const parsedRole: RoleAccessLevels = parseInt(role);
-        acc[parsedRole] = orderBy(byPos, ["locationRole", "fullName"]);
-
-        return acc;
-      },
-      {
-        [RoleAccessLevels.OWNER]: [],
-        [RoleAccessLevels.ADMIN]: [],
-        [RoleAccessLevels.GENERAL_MANAGER]: [],
-        [RoleAccessLevels.MANAGER]: [],
-        [RoleAccessLevels.STAFF]: [],
-      }
-    );
-
-    return Object.entries(finalAfterQuery);
-  }, [searchText, selectedTag, getEmployees]);
-
-  const joinSupervisor = async () => {
-    try {
-      await location.supervisorJoin(true);
-    } catch (error) {
-      recordError(error);
-    }
-  };
-
-  const leaveSupervisor = async () => {
-    Modal.confirm({
-      title: t("Are you sure you want to leave this location?"),
-      icon: <ExclamationCircleOutlined />,
-      async onOk() {
-        try {
-          await location.supervisorJoin();
-        } catch (error) {
-          recordError(error);
-        }
-      },
-    });
-  };
+  const employeesByRole = useMemo(
+    () => getEmployeesByRole(searchText, selectedTag),
+    [getEmployeesByRole, searchText, selectedTag]
+  );
 
   return (
     <Layout>
       <GrayPageHeader
         title={t("Employees")}
-        subTitle={`${location.usage.employeesCount} / ${location.usage.employeesLimit}`}
+        subTitle={`${usage.employeesCount} / ${usage.employeesLimit}`}
         extra={[
-          <Button
-            key="ManagePositions"
-            icon={<TagOutlined />}
-            onClick={() => setManagePositionsOpen(true)}
-            type="primary"
-          >
-            {t("Manage Positions")}
-          </Button>,
+          role < RoleAccessLevels.MANAGER && (
+            <Button
+              key="ManagePositions"
+              icon={<TagOutlined />}
+              onClick={() => setManagePositionsOpen(true)}
+              type="primary"
+            >
+              {t("Manage Positions")}
+            </Button>
+          ),
           <Tooltip
             key="1"
             title={
-              location.usage.employeesCount === location.usage.employeesLimit &&
+              usage.employeesCount === usage.employeesLimit &&
               t("Limit Reached")
             }
           >
@@ -156,9 +113,7 @@ function Employees() {
               icon={<UserAddOutlined />}
               onClick={openCreateEmployee}
               type="primary"
-              disabled={
-                location.usage.employeesCount === location.usage.employeesLimit
-              }
+              disabled={usage.employeesCount === usage.employeesLimit}
             >
               {t("Add Employee")}
             </Button>
@@ -178,32 +133,10 @@ function Employees() {
           css={{ width: 200 }}
         />
 
-        <Select
-          showSearch
-          style={{ width: 200 }}
+        <PositionSelect
           onSelect={setSelectedTag}
-          onClear={() => setSelectedTag(null)}
-          placeholder={t("Filter by position")}
-          allowClear
-        >
-          {location.settings?.positions?.length && (
-            <Select.OptGroup label={t("Custom")}>
-              {location.settings.positions.map((pos) => (
-                <Select.Option value={pos} key={pos}>
-                  {pos}
-                </Select.Option>
-              ))}
-            </Select.OptGroup>
-          )}
-
-          <Select.OptGroup label={t("Default")}>
-            {POSITIONS.map((pos) => (
-              <Select.Option value={pos} key={pos}>
-                {pos}
-              </Select.Option>
-            ))}
-          </Select.OptGroup>
-        </Select>
+          positions={location.settings?.positions}
+        />
       </Space>
       <Layout.Content>
         <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
@@ -215,34 +148,51 @@ function Employees() {
               width: "100%",
             }}
           >
-            {loading ? (
-              <Skeleton active />
-            ) : (
-              <List>
-                {(isOwner || isAdmin) &&
-                  !getEmployees.some((e) => e.id === user.uid) && (
-                    <Button
-                      type="dashed"
-                      onClick={isOwner ? addPrimaryOwner : joinSupervisor}
-                      block
-                    >
-                      {t("Join this location")}
-                    </Button>
-                  )}
+            <List>
+              {role <= RoleAccessLevels.ADMIN &&
+                !employees.some((e) => e.id === user.uid) && (
+                  <Button
+                    type="dashed"
+                    onClick={joinToLocation}
+                    block
+                    loading={joiningLocation}
+                  >
+                    {t("Join this location")}
+                  </Button>
+                )}
 
-                {(isOwner || isAdmin) &&
-                  getEmployees.some((e) => e.id === user.uid) && (
-                    <Button
-                      type="dashed"
-                      danger
-                      onClick={isOwner ? removePrimaryOwner : leaveSupervisor}
-                      block
-                    >
-                      {t("Leave this location")}
-                    </Button>
-                  )}
+              {role <= RoleAccessLevels.ADMIN &&
+                employees.some((e) => e.id === user.uid) && (
+                  <Button
+                    type="dashed"
+                    danger
+                    onClick={leaveFromLocation}
+                    block
+                  >
+                    {t("Leave this location")}
+                  </Button>
+                )}
 
-                {getEmployeeByRole.map(([role, employees]) => {
+              {employees.length === 0 ? (
+                <EmptyExtended
+                  descriptions={[
+                    "Add employees",
+                    "Manage employee wages, positions and roles",
+                    "See employee contact information",
+                    "Access employee documents",
+                  ]}
+                  description={
+                    <span>
+                      {t("No employees in this location")}
+                      {". "}
+                      <a onClick={openCreateEmployee}>{t("Add Employee")}</a>
+                    </span>
+                  }
+                />
+              ) : employeesByRole.every(([, emps]) => emps.length === 0) ? (
+                <NoItems css={{ marginTop: 50 }} />
+              ) : (
+                employeesByRole.map(([role, employees]) => {
                   if (employees.length > 0) {
                     return (
                       <React.Fragment key={role}>
@@ -256,9 +206,9 @@ function Employees() {
                     );
                   }
                   return null;
-                })}
-              </List>
-            )}
+                })
+              )}
+            </List>
           </div>
         </div>
       </Layout.Content>

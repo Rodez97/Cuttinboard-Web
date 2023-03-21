@@ -1,5 +1,4 @@
 /** @jsx jsx */
-import { Location } from "@cuttinboard-solutions/cuttinboard-library/models";
 import { jsx } from "@emotion/react";
 import {
   Alert,
@@ -17,14 +16,17 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import LocationsPicker from "./LocationsPicker";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
+import { recordError } from "../../utils/utils";
+import { logEvent } from "firebase/analytics";
 import {
   FUNCTIONS,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { recordError } from "../../utils/utils";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
-import { Employee } from "@cuttinboard-solutions/cuttinboard-library/employee";
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ANALYTICS } from "firebase";
+import {
+  ILocation,
+  IOrganizationEmployee,
+} from "@cuttinboard-solutions/types-helpers";
 
 const { Step } = Steps;
 
@@ -32,19 +34,20 @@ type Supervisor = {
   name: string;
   lastName: string;
   email: string;
+  supervisingLocations?: string[];
 };
 
-export default ({ supervisors }: { supervisors: Employee[] }) => {
+export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
   const { user } = useCuttinboard();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
-  const [executeCallable, loading, error] = useHttpsCallable(
+  const [executeCallable, loading, error] = useHttpsCallable<Supervisor, void>(
     FUNCTIONS,
-    "http-employees-create"
+    "http-employees-createSupervisor"
   );
   const [supervisorData, setSupervisorData] = useState<Supervisor | null>(null);
-  const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<ILocation[]>([]);
 
   const getStatusText = (stp: number) => {
     if (stp === step) {
@@ -72,15 +75,18 @@ export default ({ supervisors }: { supervisors: Employee[] }) => {
   };
 
   const createSupervisor = async () => {
+    if (!supervisorData) {
+      return;
+    }
+
     try {
       await executeCallable({
         ...supervisorData,
-        role: RoleAccessLevels.ADMIN,
         supervisingLocations: selectedLocations.map((sl) => sl.id),
       });
       message.success(t("Supervisor created successfully"));
       // Report to analytics
-      logEvent(getAnalytics(), "create_supervisor", {
+      logEvent(ANALYTICS, "create_supervisor", {
         method: "email",
         locations: selectedLocations.length,
       });

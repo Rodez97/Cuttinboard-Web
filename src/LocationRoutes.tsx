@@ -1,88 +1,83 @@
-import { EmployeesProvider } from "@cuttinboard-solutions/cuttinboard-library/employee";
+import React, { lazy, Suspense, useLayoutEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { LoadingPage, PageError } from "./shared";
 import {
   LocationProvider,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library/services";
-import { useDisclose } from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { Result } from "antd";
-import { getAnalytics, logEvent } from "firebase/analytics";
-import React, { useLayoutEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
-import { PageError, RootLoading } from "./shared";
-import { useSelectedLocation } from "./hooks";
-import LocationContainer from "./LocationContainer";
+} from "@cuttinboard-solutions/cuttinboard-library";
+
+const RootLoading = lazy(() => import("./shared/molecules/RootLoading"));
+const LocationContainer = lazy(() => import("./LocationContainer"));
 
 function LocationRoutes() {
-  const { t } = useTranslation();
   const { organizationId, locationId } = useParams();
-  const { organizationKey, selectOrganizationLocation } = useCuttinboard();
-  const { selectedLocation, selectLocation: selectLocId } =
-    useSelectedLocation();
-  const [loading, , endLoading] = useDisclose(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { organizationKey, selectLocationKey, refreshingUser } =
+    useCuttinboard();
+  const [loadingKey, selLoadingKey] = useState(true);
+  const [selectingLocError, setError] = useState<Error | null>(null);
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useLayoutEffect(() => {
-    if (
-      organizationId &&
-      locationId &&
-      organizationId !== organizationKey?.orgId
-    ) {
-      // The user has selected a different organization, so we need to select the new organization
-      selectOrganizationLocation(organizationId)
-        .then(() => {
-          selectLocId(locationId);
-          logEvent(getAnalytics(), "select_location", {
-            locationId,
-          });
-        })
-        .catch((err) => {
-          setError(err);
-        })
-        .finally(() => {
-          endLoading();
-        });
-    } else if (locationId && locationId !== selectedLocation) {
-      // The user has selected a different location, so we need to select the new location
-      selectLocId(locationId);
-      endLoading();
-    } else {
-      // The user has selected the same location and we don't need to do anything
-      endLoading();
+    const sameKey =
+      organizationKey?.orgId === organizationId &&
+      organizationKey?.locId === locationId;
+    if (sameKey) {
+      selLoadingKey(false);
+      return;
     }
-  }, [
-    locationId,
-    selectedLocation,
-    organizationKey,
-    organizationId,
-    selectOrganizationLocation,
-    selectLocId,
-    endLoading,
-  ]);
+    if (organizationId && locationId) {
+      selectLocationKey(organizationId, locationId)
+        .catch(setError)
+        .finally(() => {
+          selLoadingKey(false);
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationId, organizationId, selectLocationKey]);
 
-  if (loading) {
+  // React to organizationKey changes while in the same route
+  useLayoutEffect(() => {
+    if (loadingKey || !organizationKey || refreshingUser) {
+      return;
+    }
+    const sameRoute = pathname.startsWith(
+      `/l/${organizationKey.orgId}/${organizationKey.locId}`
+    );
+    if (!sameRoute) {
+      navigate(`/dashboard`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organizationKey]);
+
+  if (loadingKey || refreshingUser) {
     return <RootLoading />;
   }
 
-  if (error) {
+  if (selectingLocError) {
+    return <PageError error={selectingLocError} />;
+  }
+
+  if (!organizationKey) {
+    const error = new Error("Organization not found");
     return <PageError error={error} />;
   }
 
-  if (!organizationKey || !locationId || !organizationId) {
-    return <Result status="error" title={t("Not Found")} />;
-  }
-
   return (
-    <LocationProvider
-      organizationKey={organizationKey}
-      locationId={locationId}
-      LoadingComponent={() => <RootLoading />}
-      ErrorComponent={(e) => <PageError error={e} />}
-    >
-      <EmployeesProvider ErrorRender={(e) => <PageError error={e} />}>
-        <LocationContainer />
-      </EmployeesProvider>
-    </LocationProvider>
+    <Suspense fallback={<LoadingPage />}>
+      <LocationProvider>
+        {({ loading, error }) => {
+          if (loading) {
+            return <RootLoading />;
+          }
+          if (error) {
+            return <PageError error={new Error(error)} />;
+          }
+
+          return <LocationContainer />;
+        }}
+      </LocationProvider>
+    </Suspense>
   );
 }
 

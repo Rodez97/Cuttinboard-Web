@@ -17,13 +17,22 @@ import Icon, {
   CreditCardOutlined,
   DashboardOutlined,
   FolderOpenOutlined,
+  GlobalOutlined,
   ShopOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import mdiMessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import { DarkPageHeader, OwnerGoldTag, UserMenu } from "../shared";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library/services";
 import relativeTime from "dayjs/plugin/relativeTime";
+import mdiNotes from "@mdi/svg/svg/note-multiple-outline.svg";
+import mdiFiles from "@mdi/svg/svg/folder-home-outline.svg";
+import mdiMyShifts from "@mdi/svg/svg/account-clock.svg";
+import Forum from "@mdi/svg/svg/forum.svg";
+import {
+  useCuttinboard,
+  useNotifications,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import VerifyEmailBanner from "../shared/organisms/VerifyEmailBanner";
 dayjs.extend(relativeTime);
 
 const { Content, Sider } = Layout;
@@ -59,6 +68,24 @@ const OwnerRoute = {
   icon: <DashboardOutlined />,
 };
 
+const GlobalBoardRoute = {
+  label: "Global Boards",
+  key: "global-boards",
+  icon: <GlobalOutlined />,
+  children: [
+    {
+      label: "Global Notes",
+      key: "global-notes",
+      icon: <Icon component={mdiNotes} />,
+    },
+    {
+      label: "Global Files",
+      key: "global-files",
+      icon: <Icon component={mdiFiles} />,
+    },
+  ],
+};
+
 const BillingRoute = {
   label: "Manage Billing",
   key: "subscription",
@@ -68,9 +95,14 @@ const BillingRoute = {
 export default () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { user } = useCuttinboard();
   const { pathname } = useRouterLocation();
-  const { userDocument, subscriptionDocument } = useDashboard();
-  const { notifications } = useCuttinboard();
+  const { userDocument, subscriptionDocument, organization } = useDashboard();
+  const {
+    getTotalDMBadges,
+    getTotalBadgesForConversations,
+    getTotalScheduleBadges,
+  } = useNotifications();
   const [collapsed, setCollapsed] = useState(false);
 
   const getTrialDays = useMemo(() => {
@@ -84,8 +116,20 @@ export default () => {
     return dayjs().to(trialEnd, true);
   }, [userDocument, subscriptionDocument]);
 
+  const routes = useMemo(() => {
+    if (!userDocument?.subscriptionId) {
+      return OptionsRoutes;
+    }
+    const fullRoutes = [OwnerRoute];
+    if (organization?.hadMultipleLocations) {
+      fullRoutes.push(GlobalBoardRoute);
+    }
+    return [...fullRoutes, ...OptionsRoutes, BillingRoute];
+  }, [organization?.hadMultipleLocations, userDocument?.subscriptionId]);
+
   return (
     <Layout>
+      {!user.emailVerified && <VerifyEmailBanner />}
       <DarkPageHeader
         title={
           <AllWhiteLogo
@@ -113,8 +157,36 @@ export default () => {
         }
         extra={[
           <Badge
+            key="my-shifts"
+            count={getTotalScheduleBadges}
+            size="small"
+            offset={[-20, 5]}
+          >
+            <Button
+              icon={<Icon component={mdiMyShifts} />}
+              type={pathname.split("/")[2] === "my-shifts" ? "primary" : "text"}
+              shape="circle"
+              onClick={() => navigate("my-shifts")}
+            />
+          </Badge>,
+          <Badge
+            key="conversations"
+            count={getTotalBadgesForConversations}
+            size="small"
+            offset={[-20, 5]}
+          >
+            <Button
+              icon={<Icon component={Forum} />}
+              type={
+                pathname.split("/")[2] === "conversations" ? "primary" : "text"
+              }
+              shape="circle"
+              onClick={() => navigate("conversations")}
+            />
+          </Badge>,
+          <Badge
             key="directMessages"
-            count={notifications?.allDMBadges}
+            count={getTotalDMBadges}
             size="small"
             offset={[-20, 5]}
           >
@@ -128,6 +200,7 @@ export default () => {
               css={{ marginRight: 15 }}
             />
           </Badge>,
+
           <UserMenu key="userMenu" />,
         ]}
       />
@@ -142,11 +215,7 @@ export default () => {
             theme="dark"
             mode="inline"
             selectedKeys={[pathname.split("/")[2]]}
-            items={
-              userDocument?.subscriptionId
-                ? [OwnerRoute, ...OptionsRoutes, BillingRoute]
-                : OptionsRoutes
-            }
+            items={routes}
             onSelect={({ key }) => navigate(key, { replace: true })}
             css={{ backgroundColor: "#121432" }}
           />

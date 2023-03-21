@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { setDoc } from "firebase/firestore";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import {
@@ -23,37 +22,44 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { compact } from "lodash";
-import { getAnalytics, logEvent } from "firebase/analytics";
+import { logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrayPageHeader } from "../../shared";
 import {
+  employeesSelectors,
+  useAppSelector,
+  useCuttinboardLocation,
+  useEmployees,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { Timestamp } from "firebase/firestore";
+import { ANALYTICS } from "firebase";
+import {
+  EmployeeLocationInfo,
+  getEmployeeFullName,
+  getEmployeeHourlyWage,
   POSITIONS,
   RoleAccessLevels,
   roleToString,
-} from "@cuttinboard-solutions/cuttinboard-library/utils";
-import { useEmployeesList } from "@cuttinboard-solutions/cuttinboard-library/employee";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library/services";
+} from "@cuttinboard-solutions/types-helpers";
 
 type EmployeeRoleData = {
   positions?: { position: string; wage: number }[];
   role: RoleAccessLevels;
-  mainPosition?: string;
   employeeDataComments?: string;
 };
 
 export default () => {
   const { id } = useParams();
+  if (!id) throw new Error("No id provided");
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { getEmployeeById } = useEmployeesList();
   const [form] = Form.useForm<EmployeeRoleData>();
-  const { availablePositions, location } = useCuttinboardLocation();
+  const { location, role } = useCuttinboardLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const employee = useMemo(
-    () => (id ? getEmployeeById(id) : null),
-    [getEmployeeById, id]
+  const employee = useAppSelector((state) =>
+    employeesSelectors.selectById(state, id)
   );
+  const { updateEmployee } = useEmployees();
 
   const cancel = () => {
     navigate(-1);
@@ -66,28 +72,22 @@ export default () => {
     }
     try {
       setIsSubmitting(true);
-      const dataToAdd = {
+      const dataToAdd: EmployeeLocationInfo = {
         ...values,
-        pos: positions ? positions.map((pos) => pos.position) : [],
+        positions: positions ? positions.map((pos) => pos.position) : [],
         wagePerPosition: positions
           ? positions.reduce(
               (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
               {}
             )
           : {},
+        mainPosition: "",
+        startDate: Timestamp.now().toMillis(),
       };
-      await setDoc(
-        employee.docRef,
-        {
-          locations: {
-            [location.id]: dataToAdd,
-          },
-        },
-        { merge: true }
-      );
+      updateEmployee(employee, dataToAdd);
       message.success(t("Changes saved"));
       // Report to analytics
-      logEvent(getAnalytics(), "employee_role_wage_updated", {
+      logEvent(ANALYTICS, "employee_role_wage_updated", {
         employeeId: employee.id,
         locationId: location.id,
       });
@@ -105,7 +105,7 @@ export default () => {
     return employee.positions?.map((pos) => {
       return {
         position: pos,
-        wage: employee.getHourlyWage(pos),
+        wage: getEmployeeHourlyWage(employee, pos),
       };
     });
   };
@@ -118,12 +118,12 @@ export default () => {
     <Layout>
       <GrayPageHeader
         onBack={cancel}
-        title={employee.fullName}
+        title={getEmployeeFullName(employee)}
         subTitle={t("Role, Positions & Hourly Wages")}
         avatar={{
           src: employee.avatar,
           icon: <UserOutlined />,
-          alt: employee.fullName,
+          alt: employee.name,
         }}
       />
       <Layout.Content
@@ -146,10 +146,9 @@ export default () => {
             layout="vertical"
             form={form}
             initialValues={{
-              role: employee.locationRole,
+              role: employee.role,
               positions: getPositions(),
-              employeeDataComments: employee.locationData?.employeeDataComments,
-              mainPosition: employee.locationData?.mainPosition,
+              employeeDataComments: employee.employeeDataComments,
             }}
             disabled={isSubmitting}
             onFinish={onFinish}
@@ -162,9 +161,9 @@ export default () => {
             >
               <Select
                 defaultValue={RoleAccessLevels.STAFF}
-                options={availablePositions
-                  .filter((p) => p !== RoleAccessLevels.ADMIN)
-                  .map((role) => ({
+                options={Object.values(RoleAccessLevels)
+                  .filter((p) => p > role && p !== RoleAccessLevels.ADMIN)
+                  .map((role: RoleAccessLevels) => ({
                     label: t(roleToString(role)),
                     value: role,
                   }))}
@@ -293,32 +292,6 @@ export default () => {
                 </React.Fragment>
               )}
             </Form.List>
-            <Form.Item
-              shouldUpdate={(prevValues, currentValues) =>
-                prevValues.positions !== currentValues.positions
-              }
-            >
-              {({ getFieldValue }) => {
-                const positions: EmployeeRoleData["positions"] =
-                  getFieldValue("positions");
-
-                const compactPositions = positions ? compact(positions) : [];
-
-                if (compactPositions.length === 0) {
-                  return null;
-                }
-                return (
-                  <Form.Item label={t("Main Position")} name="mainPosition">
-                    <Select
-                      options={compactPositions.map(({ position }) => ({
-                        label: position,
-                        value: position,
-                      }))}
-                    />
-                  </Form.Item>
-                );
-              }}
-            </Form.Item>
             <Form.Item label={t("Comments")} name="employeeDataComments">
               <Input.TextArea rows={2} maxLength={255} showCount />
             </Form.Item>

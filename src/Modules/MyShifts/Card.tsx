@@ -1,23 +1,26 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
-import { Button, Modal, Tag } from "antd";
+import { Button, Modal, Tag, Typography } from "antd";
 import Icon from "@ant-design/icons";
-import { Note } from "../Notes/notesIcons";
+import { NoteIcon } from "../Notes/notesIcons";
 import { GrayPageHeader } from "../../shared";
-import { Shift } from "@cuttinboard-solutions/cuttinboard-library/schedule";
+import { useMemo } from "react";
+import { getShiftBaseData, IShift } from "@cuttinboard-solutions/types-helpers";
 
 interface ShiftCardProps {
-  shift: Shift;
+  shift: IShift;
 }
 
 export default ({ shift }: ShiftCardProps) => {
   const { t } = useTranslation();
 
+  const originalData = useMemo(() => getShiftBaseData(shift), [shift]);
+
   const showNotes = () => {
     Modal.info({
       title: t("Shift Notes"),
-      content: shift.origData.notes,
+      content: originalData.notes,
     });
   };
 
@@ -26,29 +29,31 @@ export default ({ shift }: ShiftCardProps) => {
       css={{
         marginBottom: 5,
       }}
-      subTitle={`${shift.origData.start.format(
+      subTitle={`${originalData.start.format(
         "h:mm A"
-      )} - ${shift.origData.end.format("h:mm A")}`}
+      )} - ${originalData.end.format("h:mm A")}`}
       extra={
-        shift.origData.notes && (
+        originalData.notes && (
           <Button
             key="notes"
             onClick={showNotes}
-            icon={<Icon component={Note} />}
+            icon={<Icon component={NoteIcon} />}
             type="link"
             shape="circle"
           />
         )
       }
       tags={
-        shift.origData.position
+        originalData.position
           ? [
               <Tag color="processing" key="pos">
-                {shift.origData.position}
+                {originalData.position}
               </Tag>,
             ]
           : []
       }
-    />
+    >
+      <Typography.Text>{shift.locationName}</Typography.Text>
+    </GrayPageHeader>
   );
 };

@@ -1,61 +1,38 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Space, Typography } from "antd";
-import AudioMessage from "./MessageElements/AudioMessage";
-import FileMessage from "./MessageElements/FileMessage";
-import ImageMessage from "./MessageElements/ImageMessage";
-import VideoMessage from "./MessageElements/VideoMessage";
+import { Typography } from "antd";
 import Linkify from "linkify-react";
-import {
-  Message,
-  ReplyRecipient,
-} from "@cuttinboard-solutions/cuttinboard-library/chats";
 
-interface MessageElementProps {
-  targetMsg: Message | ReplyRecipient;
+function isEmojiOnly(text: string) {
+  return /^[\uD800-\uDFFF]+$/.test(text);
 }
 
-const defaultMessages = [
-  "🖼️ Image Message",
-  "🎞️ Video Message",
-  "📁 File Message",
-];
-
-function MessageElement({ targetMsg }: MessageElementProps) {
-  const AuxElement = () => {
-    if (targetMsg.type === "attachment" || targetMsg.type === "mediaUri") {
-      const { contentType } = targetMsg;
-      switch (contentType) {
-        case "image":
-          return <ImageMessage message={targetMsg} />;
-        case "video":
-          return <VideoMessage message={targetMsg} />;
-        case "audio":
-          return <AudioMessage message={targetMsg} />;
-        case "file":
-          return <FileMessage message={targetMsg} />;
-
-        default:
-          return null;
-      }
-    }
-
-    if (targetMsg.type === "youtube") {
-      return <VideoMessage message={targetMsg} />;
-    }
+function MessageElement({ message }: { message?: string }) {
+  if (!message) {
     return null;
-  };
+  }
 
   return (
-    <Space direction="vertical">
-      <AuxElement />
-      {targetMsg.message && !defaultMessages.includes(targetMsg.message) && (
+    <div css={{ width: "100%" }}>
+      {message && isEmojiOnly(message) ? (
         <Typography.Paragraph
           css={{
             color: "inherit",
             whiteSpace: "pre-line",
             wordBreak: "break-word",
-            fontSize: 14,
+            fontSize: "2.5rem",
+            marginBottom: "0px !important",
+          }}
+        >
+          {message}
+        </Typography.Paragraph>
+      ) : (
+        <Typography.Paragraph
+          css={{
+            color: "inherit",
+            whiteSpace: "pre-line",
+            wordBreak: "break-word",
+            fontSize: "0.85rem",
             marginBottom: "0px !important",
           }}
         >
@@ -66,11 +43,11 @@ function MessageElement({ targetMsg }: MessageElementProps) {
               className: "linkifyInnerStyle",
             }}
           >
-            {targetMsg.message}
+            {message}
           </Linkify>
         </Typography.Paragraph>
       )}
-    </Space>
+    </div>
   );
 }
 
