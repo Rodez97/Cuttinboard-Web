@@ -10,8 +10,7 @@ import WeekNavigator from "./WeekNavigator";
 import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 import {
-  employeesSelectors,
-  useAppSelector,
+  useEmployees,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { logEvent } from "firebase/analytics";
@@ -31,7 +30,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
   const { t } = useTranslation();
 
   // 3. Get the employees using the useAppSelector hook.
-  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+  const { employees } = useEmployees();
 
   // 4. Get the data needed for the cloneWeek function using the useSchedule hook.
   const { cloneWeek, weekId, weekSummary, weekDays } = useSchedule();
@@ -42,7 +41,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     weekDays[0].subtract(1, "week").format(WEEKFORMAT)
   );
   const [selectedEmployees, setSelectedEmployees] = useState(
-    getEmployees.map((e) => e.id)
+    employees.map((e) => e.id)
   );
 
   useEffect(() => {
@@ -105,6 +104,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
       title={t("Clone Schedule")}
       {...props}
       onOk={clone}
+      cancelText={t("Cancel")}
       confirmLoading={isCloning}
       okButtonProps={{ disabled: !canClone }}
     >
@@ -146,7 +146,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
           width: "100%",
         }}
       >
-        {getEmployees
+        {employees
           .filter((e) => e.role !== RoleAccessLevels.ADMIN)
           .map((emp) => (
             <div

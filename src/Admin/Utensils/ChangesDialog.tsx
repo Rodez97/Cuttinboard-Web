@@ -6,10 +6,11 @@ import {
   MinusOutlined,
 } from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Button, Empty, List, Modal, Space, Typography } from "antd";
+import { Avatar, Drawer, Empty, List, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
+import { orderBy } from "lodash";
 
 interface ChangesDialogProps {
   open: boolean;
@@ -20,19 +21,23 @@ interface ChangesDialogProps {
 function ChangesDialog({ open, onClose, utensil }: ChangesDialogProps) {
   const { t } = useTranslation();
   return (
-    <Modal
+    <Drawer
       open={open}
-      title={t("Changes")}
-      onCancel={onClose}
-      footer={[
-        <Button type="primary" onClick={onClose} key="close">
-          OK
-        </Button>,
-      ]}
+      title={
+        <div>
+          <Typography.Text strong>{utensil.name}</Typography.Text>
+          <Typography.Text type="secondary">
+            {" "}
+            - {t("Latest changes")}
+          </Typography.Text>
+        </div>
+      }
+      onClose={onClose}
+      width={500}
     >
       {utensil.changes && utensil.changes.length > 0 ? (
         <List
-          dataSource={utensil.changes}
+          dataSource={orderBy(utensil.changes, ["date"], ["desc"])}
           renderItem={(ut, index) => (
             <List.Item
               key={index}
@@ -45,6 +50,11 @@ function ChangesDialog({ open, onClose, utensil }: ChangesDialogProps) {
             >
               <List.Item.Meta
                 title={ut.reason ?? "---"}
+                css={{
+                  "& .ant-list-item-meta-title": {
+                    paddingRight: 15,
+                  },
+                }}
                 description={ut.user.userName}
                 avatar={
                   <Space direction="vertical" align="center">
@@ -76,7 +86,7 @@ function ChangesDialog({ open, onClose, utensil }: ChangesDialogProps) {
       ) : (
         <Empty description={t("No recent changes")} />
       )}
-    </Modal>
+    </Drawer>
   );
 }
 

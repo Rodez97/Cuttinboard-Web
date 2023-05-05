@@ -2,13 +2,17 @@
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import { Space, Tag, Tooltip, Typography } from "antd";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  useLocationPermissions,
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import currency from "currency.js";
 import {
   getEmployeeShiftsSummary,
   IShift,
   minutesToTextDuration,
 } from "@cuttinboard-solutions/types-helpers";
+import { useTranslation } from "react-i18next";
 
 const EmployeeSecondaryElement = ({
   employeeId,
@@ -17,10 +21,16 @@ const EmployeeSecondaryElement = ({
   employeeId: string;
   empShifts?: IShift[];
 }) => {
+  const { t } = useTranslation();
+  const checkPermission = useLocationPermissions();
   const { wageData } = useSchedule();
   const summaryText = useMemo(() => {
     if (!empShifts || !wageData) {
-      return `${0}h ${0}min - ${currency(0).format()}`;
+      if (!checkPermission("seeWages")) {
+        return `0h 0min`;
+      } else {
+        return `0h 0min - ${currency(0).format()}`;
+      }
     }
 
     const weekData = wageData[employeeId]?.summary;
@@ -31,10 +41,14 @@ const EmployeeSecondaryElement = ({
       ? minutesToTextDuration(weekSummary.totalHours * 60)
       : "0h 0min";
 
+    if (!checkPermission("seeWages")) {
+      return totalTime;
+    }
+
     const totalWage = weekSummary?.totalWage ?? 0;
 
     return `${totalTime} - ${currency(totalWage).format()}`;
-  }, [empShifts, employeeId, wageData]);
+  }, [checkPermission, empShifts, employeeId, wageData]);
 
   const overtime = useMemo(() => {
     if (!empShifts || !wageData) {
@@ -69,9 +83,13 @@ const EmployeeSecondaryElement = ({
             <Typography.Text
               css={{ color: "inherit" }}
             >{`OT: ${overtime.overtimeText}`}</Typography.Text>
-            <Typography.Text css={{ color: "inherit" }}>{`OT pay: ${currency(
-              overtime.overtimeWage
-            ).format()}`}</Typography.Text>
+            {checkPermission("seeWages") && (
+              <Typography.Text css={{ color: "inherit" }}>
+                {t(`OT pay: {{0}}`, {
+                  0: currency(overtime.overtimeWage).format(),
+                })}
+              </Typography.Text>
+            )}
           </Space>
         }
       >

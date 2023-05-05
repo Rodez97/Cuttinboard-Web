@@ -1,4 +1,7 @@
-import { useCuttinboardRaw } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  AUTH,
+  useCuttinboardRaw,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import React, { lazy, Suspense } from "react";
 import { PageError } from "./shared";
 import useTrackPageAnalytics from "./utils/TrackPageAnalytics";
@@ -16,10 +19,10 @@ function App() {
   }
 
   if (error) {
-    return <PageError error={new Error(error)} />;
+    return <PageError error={error} />;
   }
 
-  if (!user) {
+  if (!user || !AUTH.currentUser) {
     return (
       <Suspense fallback={<RootLoading />}>
         <AuthWrapper />

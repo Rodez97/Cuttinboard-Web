@@ -1,64 +1,77 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import { UserOutlined } from "@ant-design/icons";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import ChatMain from "../components/ChatMain";
 import DMDetails from "./DMDetails";
 import {
   MessagesProvider,
-  useCuttinboard,
   useDisclose,
   useNotifications,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader } from "../../shared";
-import { PageLoading } from "@ant-design/pro-layout";
-import {
-  getDmRecipient,
-  ICuttinboardUser,
-  IDirectMessage,
-  IEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
+import { Alert } from "antd";
+import { useTranslation } from "react-i18next";
+import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";
 
 export default ({
-  employee,
+  recipientUser,
   selectedDirectMessage,
 }: {
-  employee: IEmployee | ICuttinboardUser | undefined;
+  recipientUser: Sender;
   selectedDirectMessage: IDirectMessage;
 }) => {
-  const { user } = useCuttinboard();
+  const { t } = useTranslation();
   const { removeDMBadge } = useNotifications();
   const [infoOpen, openInfo, closeInfo] = useDisclose();
 
   useEffect(() => {
     removeDMBadge(selectedDirectMessage.id);
-  }, [removeDMBadge, selectedDirectMessage.id]);
+
+    return () => {
+      removeDMBadge(selectedDirectMessage.id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDirectMessage.id]);
 
   return (
     <MessagesProvider
-      LoadingRenderer={<PageLoading />}
       messagingType={{
         type: "dm",
         chatId: selectedDirectMessage.id,
       }}
-      batchSize={20}
-      initialLoadSize={50}
+      batchSize={BATCH_SIZE}
+      initialLoadSize={INITIAL_LOAD_SIZE}
     >
       <GrayPageHeader
         backIcon={false}
-        avatar={{
-          icon: <UserOutlined />,
-          src:
-            employee && employee.avatar
-              ? employee.avatar
-              : employee &&
-                `https://api.dicebear.com/5.x/shapes/svg?seed=${employee.id}&background=%23ffffff&radius=50`,
-          onClick: openInfo,
-          style: { cursor: "pointer" },
-        }}
-        title={getDmRecipient(selectedDirectMessage, user.uid).name}
+        avatar={
+          recipientUser._id === "deleted"
+            ? { icon: <UserOutlined /> }
+            : {
+                src: recipientUser.avatar
+                  ? recipientUser.avatar
+                  : `https://api.dicebear.com/5.x/shapes/svg?seed=${recipientUser._id}&background=%23ffffff&radius=50`,
+                onClick: openInfo,
+                style: { cursor: "pointer" },
+              }
+        }
+        title={recipientUser.name}
       />
-      <ChatMain type="chats" canUse />
+      {recipientUser._id === "deleted" && (
+        <Alert
+          message={t("DM_DELETED_USER_WARNING")}
+          banner
+          css={{
+            marginBottom: "1rem",
+          }}
+        />
+      )}
 
-      <DMDetails open={infoOpen} onCancel={closeInfo} employee={employee} />
+      <ChatMain canUse={recipientUser._id !== "deleted"} />
+
+      <DMDetails open={infoOpen} onCancel={closeInfo} />
     </MessagesProvider>
   );
 };

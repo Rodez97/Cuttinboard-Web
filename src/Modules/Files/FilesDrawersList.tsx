@@ -65,7 +65,7 @@ export default () => {
       >
         <div className="module-sider-error">
           <h1>{t("Error")}</h1>
-          <p>{t(error)}</p>
+          <p>{t(error.message)}</p>
         </div>
       </div>
     );

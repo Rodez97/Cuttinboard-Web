@@ -9,7 +9,13 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": { "project": ["./tsconfig.json"] },
   "plugins": ["@typescript-eslint"],
-  "ignorePatterns": ["src/**/*.test.ts", "build/*"],
+  "ignorePatterns": [
+    "src/**/*.test.ts",
+    "build/*",
+    "fetch-google-spreadsheet.js",
+    "push-google-spreadsheet.js",
+    "environment.d.ts"
+  ],
   "rules": {
     "react/no-unknown-property": ["error", { "ignore": ["css"] }],
     "react/display-name": "off",

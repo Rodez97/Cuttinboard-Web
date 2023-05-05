@@ -30,7 +30,7 @@ function WeekNavigator({ onChange, currentWeekId }: IWeekNavigator) {
     const { start, end } = parseWeekId(currentWeekId);
 
     const firstDayWeek = upperFirst(start.format("MMMM DD"));
-    const lastDayWeek = upperFirst(end.format("MMMM DD"));
+    const lastDayWeek = upperFirst(end.format("MMMM DD, YYYY"));
     return `${firstDayWeek} - ${lastDayWeek}`;
   }, [currentWeekId]);
 

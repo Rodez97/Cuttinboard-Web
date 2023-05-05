@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import isoWeek from "dayjs/plugin/isoWeek";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import isToday from "dayjs/plugin/isToday";
 import { useTranslation } from "react-i18next";
 import { matchSorter } from "match-sorter";
 import ProjectedSalesDialog from "./ProjectedSalesDialog";
@@ -32,6 +33,7 @@ import PublishDialog from "./PublishDialog";
 import {
   useCuttinboardLocation,
   useDisclose,
+  useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import ShowLegend from "./ShowLegend";
@@ -50,15 +52,13 @@ import {
 } from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
+dayjs.extend(isToday);
 
 export interface ShiftsTable {
   key: string;
   employee: IEmployee;
   shifts: IShift[] | undefined;
 }
-
-const dayjsToComparator = (date: dayjs.Dayjs) =>
-  date.year() + date.isoWeek() / 100;
 
 function Scheduler() {
   usePageTitle("Scheduler");
@@ -74,6 +74,7 @@ function Scheduler() {
     position,
     loading,
     error,
+    wageData,
   } = useSchedule();
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const navigate = useNavigate();
@@ -84,6 +85,7 @@ function Scheduler() {
   const { openNew, openEdit, ManageShiftDialog } = useManageShiftDialog();
   const [statusFilter, setStatusFilter] = useState("all");
   const [isSettingsOpen, openSettings, closeSettings] = useDisclose(false);
+  const checkPermission = useLocationPermissions();
 
   const columnFilter = useCallback((value: string, record: ShiftsTable) => {
     if (value === "all_scheduled") {
@@ -96,6 +98,10 @@ function Scheduler() {
 
     if (value === "staff_only") {
       return Boolean(record.employee.role === RoleAccessLevels.STAFF);
+    }
+
+    if (value === "managers_only") {
+      return Boolean(record.employee.role === RoleAccessLevels.MANAGER);
     }
 
     return false;
@@ -130,35 +136,21 @@ function Scheduler() {
     if (empDocs.length === 0) {
       return message.error(t("There are no employees scheduled"));
     }
-    await generateSchedulePdf(empDocs, location.name, weekId, weekDays);
-  }, [shiftsSource, location.name, weekId, weekDays, t]);
-
-  const cantPublish = useMemo(() => {
-    const currentWeekNumberComparator = dayjsToComparator(weekDays[0]);
-    const realWeekNumberComparator = dayjsToComparator(dayjs());
-    const nextWeekNumberComparator = dayjsToComparator(dayjs().add(1, "week"));
-
-    if (currentWeekNumberComparator < realWeekNumberComparator) {
-      return "past_week";
-    }
-
-    if (updatesCount.total === 0) {
-      return "no_changes";
-    }
-
-    if (currentWeekNumberComparator > nextWeekNumberComparator) {
-      return "too_far";
-    }
-
-    return false;
-  }, [updatesCount.total, weekDays]);
+    await generateSchedulePdf(
+      empDocs,
+      location.name,
+      weekId,
+      weekDays,
+      wageData
+    );
+  }, [shiftsSource, location.name, weekId, weekDays, wageData, t]);
 
   if (loading) {
     return <LoadingPage />;
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   return (
@@ -199,7 +191,7 @@ function Scheduler() {
           >
             {t("See Roster")}
           </Button>,
-          role < RoleAccessLevels.MANAGER && (
+          checkPermission("manageScheduleSettings") && (
             <Button
               key="settings"
               icon={<SettingOutlined />}
@@ -210,13 +202,7 @@ function Scheduler() {
           ),
           <Tooltip
             title={
-              cantPublish === "too_far"
-                ? t(
-                    "You can't publish schedules that are more than 2 weeks in advance"
-                  )
-                : cantPublish === "past_week"
-                ? t("You can't publish schedules for past weeks")
-                : cantPublish === "no_changes"
+              updatesCount.total === 0
                 ? t("You can't publish schedules with no changes")
                 : ""
             }
@@ -226,17 +212,17 @@ function Scheduler() {
               icon={<UploadOutlined />}
               onClick={openPublish}
               type="primary"
-              disabled={cantPublish !== false}
+              disabled={updatesCount.total === 0}
             >
               {`${t("Publish")} (${updatesCount.total})`}
             </Button>
           </Tooltip>,
         ]}
         tags={
-          dayjs().isSame(weekDays[0], "day")
+          dayjs().isSame(weekDays[0], "week")
             ? [
                 <Tag key="thisWeek" color="processing">
-                  {t("This Week")}
+                  {t("This week")}
                 </Tag>,
               ]
             : []
@@ -255,6 +241,10 @@ function Scheduler() {
               {
                 label: t("All Employees"),
                 value: "all",
+              },
+              {
+                label: t("Managers Only"),
+                value: "managers_only",
               },
               {
                 label: t("Staff Only"),
@@ -293,7 +283,12 @@ function Scheduler() {
               <tr>
                 <th>{t("Employees")}</th>
                 {weekDays.map((weekday) => (
-                  <th key={Math.random()}>{weekday.format("dddd, MMM D")}</th>
+                  <th
+                    key={weekday.unix()}
+                    className={weekday.isToday() ? "shift-th-today" : ""}
+                  >
+                    {weekday.format("dddd, MMM D")}
+                  </th>
                 ))}
               </tr>
             </thead>

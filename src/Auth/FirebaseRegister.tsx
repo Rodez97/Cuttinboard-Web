@@ -75,7 +75,7 @@ const FirebaseRegister = () => {
       }}
     >
       <Typography.Title level={4} css={{ marginBottom: "20px !important" }}>
-        {t("Sign up")}
+        {t("Sign Up")}
       </Typography.Title>
       <Form
         disabled={isSubmitting}
@@ -216,7 +216,7 @@ const FirebaseRegister = () => {
 
         <Form.Item>
           <Button block htmlType="submit" loading={isSubmitting} type="primary">
-            {t("Sign up")}
+            {t("Sign Up")}
           </Button>
         </Form.Item>
 

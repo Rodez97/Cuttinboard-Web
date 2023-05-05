@@ -58,14 +58,14 @@ function ShiftElement({
       title: t("Are you sure to delete this shift?"),
       icon: <ExclamationCircleOutlined />,
       onOk() {
-        deleteShift(shift, employee.id);
+        deleteShift(shift);
       },
     });
-  }, [deleteShift, employee, shift, t]);
+  }, [deleteShift, shift, t]);
 
   const handleRestoreShift = useCallback(() => {
-    restoreShift(shift, employee.id);
-  }, [employee.id, restoreShift, shift]);
+    restoreShift(shift);
+  }, [restoreShift, shift]);
 
   const cancelPendingUpdate = useCallback(() => {
     Modal.confirm({
@@ -73,10 +73,10 @@ function ShiftElement({
       content: t("The shift will be restored to the previous state"),
       icon: <ExclamationCircleOutlined />,
       onOk() {
-        cancelShiftUpdate(shift, employee.id);
+        cancelShiftUpdate(shift);
       },
     });
-  }, [cancelShiftUpdate, employee.id, shift, t]);
+  }, [cancelShiftUpdate, shift, t]);
 
   const handleOvertimeClick = useCallback((e: MouseEvent) => {
     e.stopPropagation();
@@ -122,7 +122,7 @@ function ShiftElement({
             onClick: handleOnEditShift,
           },
           {
-            label: t("New Shift"),
+            label: t("Add Shift"),
             key: "new-shift",
             icon: <PlusOutlined />,
             onClick: handleOnAddShift,

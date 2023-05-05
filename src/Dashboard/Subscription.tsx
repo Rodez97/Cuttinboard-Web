@@ -26,7 +26,7 @@ function Subscription() {
       Modal.error({
         title: t("Email not verified"),
         content: t(
-          "To manage your subscription, please verify your email first."
+          "To manage your subscription, please verify your email first"
         ),
       });
       return;
@@ -111,12 +111,9 @@ function Subscription() {
 
         {organization.subscriptionStatus === "canceled" ? (
           <Alert
-            message={t(
-              "Your plan was cancelled on {{0}}, all your locations will be deleted after 15 days.",
-              {
-                0: dayjs(organization.cancellationDate).format("MM/DD/YYYY"),
-              }
-            )}
+            message={t("Your plan was cancelled on {{0}}", {
+              0: dayjs(organization.cancellationDate).format("MM/DD/YYYY"),
+            })}
             type="error"
             showIcon
           />
@@ -124,7 +121,7 @@ function Subscription() {
           subscriptionDocument?.cancel_at_period_end && (
             <Alert
               message={t(
-                "This plan will be cancelled on {{0}}, all your locations will be deleted 15 days after the cancellation.",
+                "This plan will be cancelled on {{0}}, all your locations will be deleted that day",
                 {
                   0: dayjs(subscriptionDocument?.cancel_at?.toDate()).format(
                     "MM/DD/YYYY"
@@ -144,7 +141,7 @@ function Subscription() {
               <Alert
                 message={t("No payment method saved")}
                 description={t(
-                  "Declare a payment method to keep accessing the Owner plan."
+                  "Declare a payment method to keep accessing the Owner plan"
                 )}
                 type="warning"
                 showIcon

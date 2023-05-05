@@ -43,12 +43,12 @@ const ManageBoard = forwardRef<ManageBoardRef, ManageBoardProps>(
     }));
 
     const openNew = () => {
-      setTitle(t("New ") + moduleName);
+      setTitle(t("New " + moduleName));
       open();
     };
 
     const openEdit = (module: IBoard) => {
-      setTitle(t("Edit ") + moduleName);
+      setTitle(t("Edit " + moduleName));
       setBaseModule(module);
       open();
     };

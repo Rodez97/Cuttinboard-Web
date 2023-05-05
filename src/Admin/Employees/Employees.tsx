@@ -24,10 +24,8 @@ import CreateEmployee from "./CreateEmployee";
 import { GrayPageHeader } from "../../shared";
 import { PositionSelect } from "../../shared/molecules/PositionSelect";
 import {
-  employeesSelectors,
   joinLocation,
   leaveLocation,
-  useAppSelector,
   useCuttinboard,
   useCuttinboardLocation,
   useDisclose,
@@ -43,8 +41,7 @@ import NoItems from "../../shared/atoms/NoItems";
 
 function Employees() {
   const { location, role } = useCuttinboardLocation();
-  const { getEmployeesByRole } = useEmployees();
-  const employees = useAppSelector(employeesSelectors.selectAll);
+  const { getEmployeesByRole, employees } = useEmployees();
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>("");

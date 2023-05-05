@@ -61,7 +61,7 @@ export function useSummaryData(): SummaryDataHook {
   useEffect(() => {
     setLoading(true);
     const weekId = dayjs().format(WEEKFORMAT);
-    const scheduleRef = ref(DATABASE, `schedule/${weekId}/${location.id}`);
+    const scheduleRef = ref(DATABASE, `schedule/${location.id}/${weekId}`);
     const recurringTaskDocRef = doc(
       FIRESTORE,
       "Locations",
@@ -78,7 +78,7 @@ export function useSummaryData(): SummaryDataHook {
       map(({ snapshot }) => {
         const scheduleData: IScheduleDoc | null = snapshot.val();
         const isoWeekDay = dayjs().isoWeekday();
-        if (scheduleData?.scheduleSummary.byDay[isoWeekDay]) {
+        if (scheduleData?.scheduleSummary?.byDay[isoWeekDay]) {
           const data = scheduleData.scheduleSummary.byDay[isoWeekDay];
           const projectedSales =
             scheduleData.projectedSalesByDay?.[isoWeekDay] ?? 0;
@@ -111,10 +111,10 @@ export function useSummaryData(): SummaryDataHook {
     ]);
 
     const subscription = combined$.subscribe(
-      ([scheduleDocument, employeeShiftsCollection, utensils]) => {
+      ([scheduleDocument, recurringTasks, utensils]) => {
         setLoading(false);
         setScheduleTodaySummary(scheduleDocument);
-        setRecurringTasksSummary(employeeShiftsCollection);
+        setRecurringTasksSummary(recurringTasks);
         setUtensils(utensils);
       }
     );

@@ -33,10 +33,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { httpsCallable } from "firebase/functions";
 import { ANALYTICS } from "firebase";
-import {
-  STRIPE_PRICE_ID,
-  STRIPE_PRODUCT_ID,
-} from "@cuttinboard-solutions/types-helpers";
 
 const PlanCard = styled.div`
   background: #f7f7f7;
@@ -58,7 +54,13 @@ export default () => {
   const navigate = useNavigate();
   const [agreeWithTerms, setAgreeWithTerms] = useState(false);
   const [price, loadingPrice, priceError] = useDocumentData(
-    doc(FIRESTORE, "Products", STRIPE_PRODUCT_ID, "prices", STRIPE_PRICE_ID)
+    doc(
+      FIRESTORE,
+      "Products",
+      process.env.STRIPE_PRODUCT_ID,
+      "prices",
+      process.env.STRIPE_PRICE_ID
+    )
   );
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,21 +82,19 @@ export default () => {
   const upgradeToBusiness = async () => {
     try {
       setIsLoading(true);
-      const upgradeAccount = httpsCallable<string, void>(
+      const upgradeAccount = httpsCallable<undefined, void>(
         FUNCTIONS,
         "stripe-upgradeOwner"
       );
-      await upgradeAccount(STRIPE_PRICE_ID);
+      await upgradeAccount();
       // Report to analytics
       logEvent(ANALYTICS, "upgrade_account", {
         method: "stripe",
-        price: STRIPE_PRICE_ID,
         uid: user.uid,
       });
       // REdirect to dashboard
       navigate("/dashboard/owner-portal");
     } catch (error) {
-      console.log(error);
       recordError(error);
       setError(error);
     } finally {

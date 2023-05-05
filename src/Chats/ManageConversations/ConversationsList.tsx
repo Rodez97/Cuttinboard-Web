@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
 import { PlusOutlined } from "@ant-design/icons";
 import {
+  Alert,
   Button,
   Input,
   Layout,
@@ -97,7 +98,7 @@ export default () => {
         sorter: (a, b) => a.privacyLevel - b.privacyLevel,
       },
       {
-        title: "Date of Creation",
+        title: t("Date of Creation"),
         dataIndex: "createdAt",
         key: "createdAt",
         render: (_, { createdAt }) => (
@@ -149,7 +150,7 @@ export default () => {
       >
         <div className="module-sider-error">
           <h1>{t("Error")}</h1>
-          <p>{t(error)}</p>
+          <p>{t(error.message)}</p>
         </div>
       </div>
     );
@@ -159,7 +160,22 @@ export default () => {
     <Layout.Content
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
-      <GrayPageHeader title={t("Manage Conversations")} />
+      <GrayPageHeader title={t("Message Boards")} />
+
+      <Alert
+        type="info"
+        message={t("MANAGE_CONVERSATIONS_ALERT")}
+        banner
+        action={
+          <Button
+            type="link"
+            size="small"
+            onClick={() => navigate("../my-message-boards", { replace: true })}
+          >
+            {t("Go to My Message Boards")}
+          </Button>
+        }
+      />
 
       <Space
         size="large"
@@ -175,7 +191,7 @@ export default () => {
           onClick={newConversation}
           icon={<PlusOutlined />}
         >
-          {t("Add new conversation")}
+          {t("New Message Board")}
         </Button>
 
         <Input.Search
@@ -214,15 +230,23 @@ export default () => {
         <EmptyExtended
           description={
             <p>
-              {t("No conversations in this location")}
+              {t("No Message Boards in this location")}
               {". "}
-              <a>{t("Add Conversation")}</a> {t("or")} <a>{t("learn more")}</a>
+              <a onClick={newConversation}>{t("Add Message Board")}</a>{" "}
+              {t("or")}{" "}
+              <a
+                href="http://www.cuttinboard.com/help/message-boards"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("Learn more")}
+              </a>
             </p>
           }
           descriptions={[
-            "Define the Conversations that need to be happening at your location",
+            "Define the Message Boards that need to be happening at your location",
             "Improve communication and team effectiveness",
-            "Manage and supervise conversations",
+            "Manage and supervise Message Boards",
           ]}
         />
       )}

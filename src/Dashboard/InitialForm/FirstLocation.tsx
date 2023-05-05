@@ -30,7 +30,7 @@ function FirstLocation({ onChanged }: { onChanged: (name: string) => void }) {
             marginBottom: "0 !important",
           }}
         >
-          {t("Let’s create your first location. You can add more later.")}
+          {t("Let's create your first location. You can add more later")}
         </Typography.Title>
       </SectionHeader>
 
@@ -66,10 +66,10 @@ function FirstLocation({ onChanged }: { onChanged: (name: string) => void }) {
               TrimRule,
             ]}
             label={t("What is the name of your location?")}
-            extra={t("You can edit or add more details later.")}
+            extra={t("You can edit or add more details later")}
           >
             <Input
-              placeholder={t('ex. "The Garden Cafe"')}
+              placeholder={t('e.g. "The Garden Cafe"')}
               maxLength={40}
               showCount
             />

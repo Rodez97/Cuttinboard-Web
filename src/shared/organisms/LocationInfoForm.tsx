@@ -73,7 +73,7 @@ function LocationInfoForm({
                 <Form.Item name={["address", "state"]} label={t("State")}>
                   <Input />
                 </Form.Item>
-                <Form.Item name={["address", "zip"]} label={t("Zip")}>
+                <Form.Item name={["address", "zip"]} label={t("Zip Code")}>
                   <Input />
                 </Form.Item>
               </Input.Group>

@@ -65,6 +65,8 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
     setOpen(false);
     setDeleting(false);
     setLocation({} as ILocation);
+    setError(null);
+    form.resetFields();
   };
 
   useImperativeHandle(ref, () => ({
@@ -105,7 +107,7 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
         <List.Item>
           <List.Item.Meta
             avatar={<TeamOutlined />}
-            title={t("{{0}} member(s)", { 0: location.members?.length ?? 0 })}
+            title={t("{{0}} Member(s)", { 0: location.members?.length ?? 0 })}
           />
         </List.Item>
         <List.Item>
@@ -137,7 +139,7 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
           name="password"
           rules={[{ required: true, message: "" }]}
         >
-          <Input.Password />
+          <Input.Password autoComplete="none" />
         </Form.Item>
       </Form>
       {error && <Alert type="error" showIcon message={t(error.message)} />}

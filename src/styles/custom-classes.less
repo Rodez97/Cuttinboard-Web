@@ -125,6 +125,7 @@ body {
   align-items: center;
   gap: 10px;
   padding-left: 10px;
+  padding-right: 10px;
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.2s ease-in-out;
@@ -132,8 +133,18 @@ body {
     background-color: #f1f1f0;
   }
 
+  &__active {
+    background-color: #f1f1f0;
+  }
+
+  &__with-avatar {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
   &__container {
     gap: 0;
+    width: 100%;
   }
 
   &__text {
@@ -191,4 +202,13 @@ body {
     margin: 0 10px 0 15px !important;
     padding: 0 !important;
   }
+}
+
+.sidebar-icon {
+  font-size: 18px !important;
+}
+
+.user-menu-icon {
+  font-size: 16px !important;
+  color: #72706e !important;
 }

@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
-import { Button, Form, Input, InputNumber, Modal } from "antd";
+import { Button, Drawer, Form, Input, InputNumber } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,7 +10,7 @@ import {
   useUtensils,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { nanoid } from "nanoid";
-import { doc } from "firebase/firestore";
+import { Timestamp, doc } from "firebase/firestore";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
 
 interface IManageUtensilDialogRef {
@@ -67,6 +67,7 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           ...values,
           id: newId,
           refPath: reference.path,
+          createdAt: Timestamp.now().toMillis(),
         };
         createUtensil(newUtensil);
       }
@@ -74,15 +75,12 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
     };
 
     return (
-      <Modal
+      <Drawer
         open={open}
         title={t(title)}
         maskClosable={false}
-        onCancel={handleClose}
-        footer={[
-          <Button onClick={handleClose} key="cancel">
-            {t("Cancel")}
-          </Button>,
+        onClose={handleClose}
+        extra={
           <Button
             type="primary"
             onClick={form.submit}
@@ -90,8 +88,8 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
             icon={<SaveFilled />}
           >
             {t("Save")}
-          </Button>,
-        ]}
+          </Button>
+        }
       >
         <Form
           form={form}
@@ -157,7 +155,7 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
             <Input.TextArea rows={3} maxLength={250} showCount />
           </Form.Item>
         </Form>
-      </Modal>
+      </Drawer>
     );
   }
 );

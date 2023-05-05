@@ -38,6 +38,7 @@ export default (props: ModalProps & { onAccept: () => void }) => {
       {...props}
       title={t("Publish schedule changes")}
       onOk={handlePublish}
+      cancelText={t("Cancel")}
     >
       <Space direction="vertical" css={{ display: "flex" }}>
         <Descriptions bordered column={1} size="small">

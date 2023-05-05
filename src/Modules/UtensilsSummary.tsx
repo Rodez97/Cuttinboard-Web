@@ -30,11 +30,11 @@ export default function UtensilsSummary({
             <Alert
               key={utensil.id}
               message={t(
-                "“{{name}}” is running low. You currently have {{currentQuantity}} and the optimal amount is {{optimalQuantity}}",
+                "“{{0}}” is running low. You currently have {{1}} and the optimal amount is {{2}}",
                 {
-                  name: utensil.name,
-                  currentQuantity: utensil.currentQuantity,
-                  optimalQuantity: utensil.optimalQuantity,
+                  0: utensil.name,
+                  1: utensil.currentQuantity,
+                  2: utensil.optimalQuantity,
                 }
               )}
               type="error"

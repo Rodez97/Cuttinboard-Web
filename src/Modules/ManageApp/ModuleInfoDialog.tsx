@@ -15,8 +15,6 @@ import {
   TagsOutlined,
 } from "@ant-design/icons";
 import {
-  employeesSelectors,
-  useAppSelector,
   useBoard,
   useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -34,9 +32,8 @@ function ModuleInfoDialog({
   ...props
 }: ModalProps & { onEdit: () => void }) {
   const { selectedBoard, canManageBoard, deleteBoard } = useBoard();
-  const { role } = useCuttinboardLocation();
+  const { role, employees } = useCuttinboardLocation();
   const { t } = useTranslation();
-  const getEmployees = useAppSelector(employeesSelectors.selectAll);
   const navigate = useNavigate();
 
   const admins = useMemo(() => {
@@ -44,8 +41,8 @@ function ModuleInfoDialog({
       return [];
     }
     const admins = selectedBoard.hosts;
-    return getEmployees.filter((e) => admins.includes(e.id));
-  }, [getEmployees, selectedBoard]);
+    return employees.filter((e) => admins.includes(e.id));
+  }, [employees, selectedBoard]);
 
   const handleDelete = () => {
     if (!canManageBoard || !selectedBoard) {
@@ -92,7 +89,7 @@ function ModuleInfoDialog({
             onClick={onEdit}
             key="edit"
           >
-            {t("Edit Board")}
+            {t("Edit")}
           </Button>,
           <Button
             icon={<DeleteOutlined />}
@@ -128,7 +125,7 @@ function ModuleInfoDialog({
             title={t("Membership Type")}
             description={
               selectedBoard.global
-                ? t("Available across all locations.")
+                ? t("Available across all locations")
                 : t(privacyLevelToString(selectedBoard.privacyLevel))
             }
           />

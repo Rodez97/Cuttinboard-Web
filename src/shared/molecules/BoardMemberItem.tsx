@@ -62,7 +62,7 @@ function BoardMemberItem({
     <List.Item
       css={{
         backgroundColor: Colors.MainOnWhite,
-        padding: 10,
+        padding: "10px !important",
         margin: 5,
       }}
       actions={

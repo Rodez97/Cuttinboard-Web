@@ -1,22 +1,15 @@
-import React, { lazy, Suspense, useLayoutEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { LoadingPage, PageError } from "./shared";
-import {
-  LocationProvider,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import React, { lazy, useLayoutEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
+import { PageError } from "./shared";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 
 const RootLoading = lazy(() => import("./shared/molecules/RootLoading"));
-const LocationContainer = lazy(() => import("./LocationContainer"));
 
 function LocationRoutes() {
   const { organizationId, locationId } = useParams();
-  const { organizationKey, selectLocationKey, refreshingUser } =
-    useCuttinboard();
+  const { organizationKey, selectLocationKey, loading } = useCuttinboard();
   const [loadingKey, selLoadingKey] = useState(true);
   const [selectingLocError, setError] = useState<Error | null>(null);
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
 
   useLayoutEffect(() => {
     const sameKey =
@@ -36,21 +29,7 @@ function LocationRoutes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationId, organizationId, selectLocationKey]);
 
-  // React to organizationKey changes while in the same route
-  useLayoutEffect(() => {
-    if (loadingKey || !organizationKey || refreshingUser) {
-      return;
-    }
-    const sameRoute = pathname.startsWith(
-      `/l/${organizationKey.orgId}/${organizationKey.locId}`
-    );
-    if (!sameRoute) {
-      navigate(`/dashboard`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organizationKey]);
-
-  if (loadingKey || refreshingUser) {
+  if (loadingKey || loading) {
     return <RootLoading />;
   }
 
@@ -63,22 +42,7 @@ function LocationRoutes() {
     return <PageError error={error} />;
   }
 
-  return (
-    <Suspense fallback={<LoadingPage />}>
-      <LocationProvider>
-        {({ loading, error }) => {
-          if (loading) {
-            return <RootLoading />;
-          }
-          if (error) {
-            return <PageError error={new Error(error)} />;
-          }
-
-          return <LocationContainer />;
-        }}
-      </LocationProvider>
-    </Suspense>
-  );
+  return <Navigate to="/location" />;
 }
 
 export default LocationRoutes;

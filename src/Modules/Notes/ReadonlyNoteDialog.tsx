@@ -16,7 +16,7 @@ import {
   useDisclose,
   useNotes,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { IBoard, INote } from "@cuttinboard-solutions/types-helpers";
+import { INote } from "@cuttinboard-solutions/types-helpers";
 
 export const useReadonlyNote = () => {
   const readonlyNoteDialogRef = useRef<ReadonlyNoteDialogRef>(null);
@@ -35,17 +35,16 @@ interface ReadonlyNoteDialogRef {
 interface ReadonlyNoteDialogProps {
   onEdit: (note: INote) => void;
   canManage: boolean;
-  selectedBoard: IBoard;
 }
 
 const ReadonlyNoteDialog = forwardRef<
   ReadonlyNoteDialogRef,
   ReadonlyNoteDialogProps
->(({ onEdit, canManage, selectedBoard }, ref) => {
+>(({ onEdit, canManage }, ref) => {
   const [isOpen, openDialog, closeDialog] = useDisclose();
   const [note, setNote] = useState<INote>();
   const { t } = useTranslation();
-  const { deleteNote } = useNotes(selectedBoard);
+  const { deleteNote } = useNotes();
 
   useImperativeHandle(ref, () => ({
     open,
@@ -131,7 +130,7 @@ const ReadonlyNoteDialog = forwardRef<
         </Linkify>
       </Typography.Paragraph>
       <Tag icon={<UserOutlined />}>
-        {t("Created by:")} {note.createdBy.name}
+        {t("Created by: {{0}}", { 0: note.createdBy.name })}
       </Tag>
       {note.updatedAt && note.updatedBy?.name && (
         <Tag icon={<EditOutlined />}>

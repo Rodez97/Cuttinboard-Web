@@ -133,6 +133,12 @@ function ChatInput({ onMessageSend }: ChatInputProps) {
 
   const handleBeforeFileUpload = useCallback(
     async (file: File) => {
+      // Return false if file is not an image
+      if (file.type.indexOf("image") === -1) {
+        message.error(t("Please select an image file."));
+        return false;
+      }
+
       // Return false if file size exceeds 8 MB
       if (file.size > 8e6) {
         message.error(t("Your file surpasses the 8mb limit."));
@@ -148,32 +154,9 @@ function ChatInput({ onMessageSend }: ChatInputProps) {
         mimeType: file.type,
         dataURL: dataURL as string,
       });
-      setMessageTxt("");
       return false;
     },
     [t]
-  );
-
-  const handleEnterKeyPress = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
-      switch (e.key) {
-        case "Enter":
-          // Prevent default behavior for Enter key press
-          e.preventDefault();
-          // If shift key is not pressed, send the message
-          if (!e.shiftKey) {
-            throttledSend();
-          }
-          // If shift key is pressed, add a new line to the message
-          else {
-            setMessageTxt(messageTxt + "\r\n");
-          }
-          break;
-        default:
-          break;
-      }
-    },
-    [throttledSend, messageTxt]
   );
 
   const handlePasteIntoInput = useCallback(
@@ -204,7 +187,17 @@ function ChatInput({ onMessageSend }: ChatInputProps) {
   );
 
   return (
-    <React.Fragment>
+    <div
+      css={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        maxWidth: 600,
+        width: "100%",
+        margin: "0 auto",
+        padding: "5px",
+      }}
+    >
       {selectedFile && (
         <InputAttachmentElement
           selectedFile={selectedFile}
@@ -213,33 +206,15 @@ function ChatInput({ onMessageSend }: ChatInputProps) {
       )}
       <div
         css={{
-          padding: "20px 10px",
-          backgroundColor: Colors.MainOnWhite,
+          padding: "10px",
           display: "flex",
-          gap: 16,
+          flexDirection: "column",
+          gap: 20,
         }}
       >
-        <Upload
-          name="file"
-          beforeUpload={handleBeforeFileUpload}
-          multiple={false}
-          maxCount={1}
-          fileList={[]}
-          accept="image/*"
-        >
-          <Button
-            icon={
-              <FileImageOutlined css={{ color: "#74726E", fontSize: 20 }} />
-            }
-            type="text"
-          />
-        </Upload>
-
-        <EmojiPicker onSelect={handleEmojiSelected} />
-
         <Input.TextArea
           maxLength={2000}
-          autoSize={{ minRows: 1, maxRows: 10 }}
+          autoSize={{ minRows: 2, maxRows: 10 }}
           showCount
           placeholder={t("Type a message...")}
           css={{
@@ -249,17 +224,53 @@ function ChatInput({ onMessageSend }: ChatInputProps) {
           value={messageTxt}
           onChange={(e) => setMessageTxt(e.target.value)}
           ref={inputRef}
-          onKeyDown={handleEnterKeyPress}
           onPaste={handlePasteIntoInput}
         />
-        <Button
-          icon={<SendOutlined css={{ color: Colors.MainBlue, fontSize: 20 }} />}
-          onClick={throttledSend}
-          type="text"
-          loading={sendingMessage}
-        />
+
+        <div
+          css={{
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div
+            css={{
+              display: "flex",
+              gap: 5,
+            }}
+          >
+            <Upload
+              name="file"
+              beforeUpload={handleBeforeFileUpload}
+              multiple={false}
+              maxCount={1}
+              fileList={[]}
+              accept="image/*"
+            >
+              <Button
+                icon={
+                  <FileImageOutlined css={{ color: "#74726E", fontSize: 20 }} />
+                }
+                type="text"
+              />
+            </Upload>
+
+            <EmojiPicker onSelect={handleEmojiSelected} />
+          </div>
+
+          <Button
+            icon={
+              <SendOutlined css={{ color: Colors.MainBlue, fontSize: 20 }} />
+            }
+            onClick={throttledSend}
+            type="text"
+            loading={sendingMessage}
+          />
+        </div>
       </div>
-    </React.Fragment>
+    </div>
   );
 }
 

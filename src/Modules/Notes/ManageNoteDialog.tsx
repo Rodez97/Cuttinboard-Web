@@ -32,7 +32,7 @@ export default forwardRef<ManageNoteDialogRef, ManageNoteDialogProps>(
     const [isOpen, open, close] = useDisclose(false);
     const [title, setTitle] = useState("");
     const [baseNote, setBaseNote] = useState<INote>();
-    const { updateNote, addNote } = useNotes(selectedBoard);
+    const { updateNote, addNote } = useNotes();
 
     useImperativeHandle(ref, () => ({
       openNew,

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../DashboardProvider";
 import { Layout, Tabs } from "antd";
-import { CrownOutlined } from "@ant-design/icons";
+import { ShopOutlined } from "@ant-design/icons";
 import { PageHeader } from "@ant-design/pro-layout";
 import { GoldButton, LoadingPage } from "../../shared";
 import { lazy, Suspense } from "react";
@@ -29,10 +29,10 @@ export default (): JSX.Element => {
             <GoldButton
               key="1"
               type="text"
-              icon={<CrownOutlined />}
-              onClick={() => navigate("/dashboard/upgrade")}
+              icon={<ShopOutlined />}
+              onClick={() => navigate("/dashboard/upgrade-create")}
             >
-              {t("Upgrade to Owner")}
+              {t("Create Location")}
             </GoldButton>,
           ]
         }

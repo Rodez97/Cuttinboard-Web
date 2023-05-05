@@ -40,7 +40,14 @@ export default () => {
                     ]}
                     description={
                       <p>
-                        {t("Welcome to Files")}. <a>{t("Learn More")}</a>
+                        {t("Welcome to Files")}.{" "}
+                        <a
+                          href="http://www.cuttinboard.com/help/files"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {t("Learn more")}
+                        </a>
                       </p>
                     }
                     image={filesImage}

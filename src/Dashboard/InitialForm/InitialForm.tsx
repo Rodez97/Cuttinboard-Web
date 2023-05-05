@@ -30,10 +30,13 @@ function InitialForm() {
           <StepLayout
             image={Step1}
             text={t(
-              "\"With Cuttinboard’s scheduling tool, I can easily manage my staff's schedules, and the app's push notifications keep everyone on track. It's been a lifesaver! I can’t believe I get all of this for only $30 a month.\""
+              "\"With Cuttinboard's scheduling tool, I can easily manage my staff's schedules, and the app's push notifications keep everyone on track. It's been a lifesaver! I can't believe I get all of this for only {{0}} a month.\"",
+              {
+                0: "$30",
+              }
             )}
             author="Mark Williamson"
-            role="General Manager | Melville Steakhouse"
+            role={t("GENERAL_MANAGER") + " | Melville Steakhouse"}
           >
             <UserTypeSelector />
           </StepLayout>
@@ -46,7 +49,7 @@ function InitialForm() {
               '"Thanks to this software, we can now spend less time on administrative tasks and more time focusing on providing great service to our customers. It has truly revolutionized the way we do business."'
             )}
             author="Olivia Lee"
-            role="Owner | Slurp Noodle Bar"
+            role={t("OWNER") + " | Slurp Noodle Bar"}
           >
             <FirstLocation onChanged={setLocationName} />
           </StepLayout>
@@ -56,10 +59,10 @@ function InitialForm() {
           <StepLayout
             image={Step3}
             text={t(
-              '"Since using Cuttinboard’s messaging software, our restaurant has become more efficient and communication between the team has improved significantly."'
+              '"Since using Cuttinboard\'s messaging software, our restaurant has become more efficient and communication between the team has improved significantly."'
             )}
             author="Isabella Rodriguez"
-            role="Owner | The Guac Spot"
+            role={t("OWNER") + " | The Guac Spot"}
           >
             <AddGM locationName={locationName} />
           </StepLayout>

@@ -10,10 +10,7 @@ import {
   getFileUrl,
   useFiles,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  IBoard,
-  ICuttinboard_File,
-} from "@cuttinboard-solutions/types-helpers";
+import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
 import { Button, Dropdown, message, Modal } from "antd";
 import axios from "axios";
 import fileDownload from "js-file-download";
@@ -25,12 +22,11 @@ interface FilesMenuProps {
   file: ICuttinboard_File;
   onRename: (file: ICuttinboard_File) => void;
   canManage: boolean;
-  board: IBoard;
 }
 
-export default ({ file, onRename, canManage, board }: FilesMenuProps) => {
+export default ({ file, onRename, canManage }: FilesMenuProps) => {
   const { t } = useTranslation();
-  const { deleteFile } = useFiles(board);
+  const { deleteFile } = useFiles();
 
   const handleDelete = async () => {
     Modal.confirm({

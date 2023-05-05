@@ -29,12 +29,10 @@ import {
   TimePicker,
   Typography,
 } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { capitalize, isEmpty } from "lodash";
 import {
-  selectLocationScheduleSettings,
-  useAppSelector,
   useCuttinboardLocation,
+  useLocationPermissions,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
@@ -95,11 +93,10 @@ type State = {
 
 const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
   (_, ref) => {
-    const scheduleSettings = useAppSelector(selectLocationScheduleSettings);
-    const { location } = useCuttinboardLocation();
+    const checkPermission = useLocationPermissions();
+    const { location, scheduleSettings } = useCuttinboardLocation();
     const [form] = Form.useForm<FormDataType>();
-    const { createShift, weekDays, updateShift, cancelShiftUpdate, shifts } =
-      useSchedule();
+    const { createShift, weekDays, updateShift, shifts } = useSchedule();
     const { t } = useTranslation();
     const [state, setState] = useState<State>({
       open: false,
@@ -199,10 +196,14 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
             locationName: location.name,
             locationId: location.id,
             employeeId: state.employee.id,
+            locationQuery: "",
+            employeeQuery: "",
+            employeeLocationQuery: "",
+            weekOrderFactor: 0,
           };
-          createShift(newShift, weekDays, applyTo, state.employee.id);
+          createShift(newShift, weekDays, applyTo);
         } else {
-          updateShift(state.shift, state.employee.id, shiftToSaveBase);
+          updateShift(state.shift, shiftToSaveBase);
         }
         handleClose();
       },
@@ -218,20 +219,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
         weekDays,
       ]
     );
-
-    const cancelPendingUpdate = useCallback(() => {
-      Modal.confirm({
-        title: t("Are you sure to cancel this update?"),
-        content: t("The shift will be restored to the previous state"),
-        icon: <ExclamationCircleOutlined />,
-        onOk() {
-          if (!state.shift) {
-            return;
-          }
-          cancelShiftUpdate(state.shift, state.employee.id);
-        },
-      });
-    }, [t, state.shift, state.employee.id, cancelShiftUpdate]);
 
     // Get Employee shifts
     const employeeShiftsArray = useMemo(() => {
@@ -310,12 +297,8 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
       ) => {
         // If end time is before start time, add a day to the end time
         if (all?.timeRange?.end?.isBefore(value)) {
-          console.log("all.timeRange.end", all.timeRange.end);
-
           // Add a day to the end time
           const end = all.timeRange.end.add(1, "day");
-
-          console.log("end", end);
 
           form.setFieldValue(["timeRange", "end"], end);
         }
@@ -346,16 +329,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
         onCancel={handleClose}
         title={t(!state.shift ? "Add Shift" : "Edit Shift")}
         footer={[
-          state.shift?.pendingUpdate && (
-            <Button
-              key="reset"
-              danger
-              type="dashed"
-              onClick={cancelPendingUpdate}
-            >
-              {t("Cancel Update")}
-            </Button>
-          ),
           <Button key="back" onClick={handleClose}>
             {t("Cancel")}
           </Button>,
@@ -549,7 +522,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
             <React.Fragment>
               <Form.Item name="position">
                 <Select placeholder={t("Select Position")}>
-                  <Select.Option value="">{t("No Position")}</Select.Option>
+                  <Select.Option value="">{t("No position")}</Select.Option>
                   {state.employee.positions?.map((position) => {
                     const isMainPos = state.employee.mainPosition === position;
                     return (
@@ -566,44 +539,46 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
                   })}
                 </Select>
               </Form.Item>
-              <Form.Item
-                shouldUpdate={(
-                  prevValues: FormDataType,
-                  curValues: FormDataType
-                ) =>
-                  // Only update if the position changes
-                  prevValues.position !== curValues.position
-                }
-              >
-                {() => {
-                  const position: FormDataType["position"] = form.getFieldValue(
-                    ["position"]
-                  );
-                  const hWage = position
-                    ? getEmployeeHourlyWage(state.employee, position)
-                    : 0;
-                  return (
-                    <div
-                      css={{
-                        display: "flex",
-                        flexDirection: "row",
-                        gap: 8,
-                        width: "100%",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Typography.Text>{t("Hourly Wage")}:</Typography.Text>
-                      <Tag color={hWage > 0 ? "processing" : "error"}>
-                        {hWage.toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        }) + "/hr"}
-                      </Tag>
-                    </div>
-                  );
-                }}
-              </Form.Item>
+
+              {checkPermission("seeWages") && (
+                <Form.Item
+                  shouldUpdate={(
+                    prevValues: FormDataType,
+                    curValues: FormDataType
+                  ) =>
+                    // Only update if the position changes
+                    prevValues.position !== curValues.position
+                  }
+                >
+                  {() => {
+                    const position: FormDataType["position"] =
+                      form.getFieldValue(["position"]);
+                    const hWage = position
+                      ? getEmployeeHourlyWage(state.employee, position)
+                      : 0;
+                    return (
+                      <div
+                        css={{
+                          display: "flex",
+                          flexDirection: "row",
+                          gap: 8,
+                          width: "100%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Typography.Text>{t("Hourly Wage")}:</Typography.Text>
+                        <Tag color={hWage > 0 ? "processing" : "error"}>
+                          {hWage.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          }) + "/hr"}
+                        </Tag>
+                      </div>
+                    );
+                  }}
+                </Form.Item>
+              )}
 
               <Divider />
             </React.Fragment>
@@ -611,7 +586,7 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
 
           <Form.Item name="notes">
             <Input.TextArea
-              placeholder={t("Notes")}
+              placeholder={t("Notes for employee")}
               showCount
               maxLength={500}
               rows={2}

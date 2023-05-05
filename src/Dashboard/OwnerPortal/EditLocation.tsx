@@ -10,14 +10,25 @@ import { logEvent } from "firebase/analytics";
 import { PageHeader } from "@ant-design/pro-layout";
 import { LocationInfoForm } from "../../shared";
 import {
-  updateLocationThunk,
-  useAppThunkDispatch,
+  conversationsConverter,
+  FIRESTORE,
+  locationConverter,
+  useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ILocationInfo } from "./AddLocation/AddLocation";
 import { ANALYTICS } from "firebase";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 
 export default () => {
   const navigate = useNavigate();
+  const { user } = useCuttinboard();
   const { t } = useTranslation();
   const { locations } = useOwner();
   const { locationId } = useParams();
@@ -26,7 +37,6 @@ export default () => {
     () => locations?.find((loc) => loc.id === locationId),
     [locations, locationId]
   );
-  const locationThunkDispatch = useAppThunkDispatch();
 
   const handleChange = async ({ name, intId, address }: ILocationInfo) => {
     if (!getLocation) {
@@ -35,13 +45,42 @@ export default () => {
 
     setEditing(true);
     try {
-      locationThunkDispatch(
-        updateLocationThunk(getLocation, {
+      const batch = writeBatch(FIRESTORE);
+
+      // Get the conversations for this location
+      const conversations = await getDocs(
+        query(
+          collection(FIRESTORE, "conversations"),
+          where("locationId", "==", getLocation.id),
+          where("organizationId", "==", user.uid)
+        ).withConverter(conversationsConverter)
+      );
+
+      // Update the location name in each conversation
+      conversations.forEach((conversation) => {
+        batch.update(conversation.ref, {
+          locationName: name,
+        });
+      });
+
+      const docRef = doc(FIRESTORE, getLocation.refPath).withConverter(
+        locationConverter
+      );
+
+      // Update the location name in the location document
+      batch.set(
+        docRef,
+        {
           name,
           intId,
           address,
-        })
+        },
+        { merge: true }
       );
+
+      // Commit the batch
+      await batch.commit();
+
       message.success(t("Changes saved"));
       setEditing(false);
       // Report location update from card to analytics
@@ -61,7 +100,7 @@ export default () => {
       <Result
         status="404"
         title="404"
-        subTitle="Sorry, the location was not found."
+        subTitle="Sorry, the location was not found"
       />
     );
   }

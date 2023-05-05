@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import {
-  Alert,
   Button,
   Drawer,
   DrawerProps,
@@ -27,10 +26,12 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ANALYTICS } from "firebase";
 import {
+  ManagerPermissions,
   POSITIONS,
   RoleAccessLevels,
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
+import PermissionsChecker from "./PermissionsChecker";
 
 type EmployeeData = {
   name: string;
@@ -41,6 +42,7 @@ type EmployeeData = {
     | RoleAccessLevels.GENERAL_MANAGER
     | RoleAccessLevels.MANAGER
     | RoleAccessLevels.STAFF;
+  permissions?: ManagerPermissions;
 };
 
 /**
@@ -52,7 +54,6 @@ function CreateEmployee(props: DrawerProps) {
   const { t } = useTranslation();
   const addEmployee = useAddEmployee();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
 
   const onFinish = async ({ positions, ...values }: EmployeeData) => {
     const employeeToAdd = {
@@ -76,7 +77,6 @@ function CreateEmployee(props: DrawerProps) {
       form.resetFields();
     } catch (error) {
       message.error(t(error.message));
-      setError(error);
       recordError(error);
     } finally {
       setLoading(false);
@@ -96,6 +96,7 @@ function CreateEmployee(props: DrawerProps) {
           email: "",
           role: RoleAccessLevels.STAFF,
           positions: [],
+          permissions: {},
         }}
         disabled={loading}
         autoComplete="off"
@@ -194,13 +195,34 @@ function CreateEmployee(props: DrawerProps) {
           <Select
             defaultValue={RoleAccessLevels.STAFF}
             options={Object.values(RoleAccessLevels)
-              .filter((p) => p > role && p !== RoleAccessLevels.ADMIN)
+              .filter((p: number) => p > role && p !== RoleAccessLevels.ADMIN)
               .map((role: RoleAccessLevels) => ({
                 label: t(roleToString(role)),
                 value: role,
               }))}
           />
         </Form.Item>
+
+        <Form.Item
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.role !== currentValues.role
+          }
+        >
+          {({ getFieldValue }) => {
+            const role = getFieldValue("role");
+
+            if (role !== RoleAccessLevels.MANAGER) {
+              return null;
+            }
+
+            return (
+              <Form.Item name="permissions">
+                <PermissionsChecker />
+              </Form.Item>
+            );
+          }}
+        </Form.Item>
+
         <Form.List
           name="positions"
           rules={[
@@ -330,8 +352,6 @@ function CreateEmployee(props: DrawerProps) {
             {t("Save")}
           </Button>
         </Form.Item>
-
-        {error && <Alert message={error?.message} type="error" showIcon />}
       </Form>
     </Drawer>
   );

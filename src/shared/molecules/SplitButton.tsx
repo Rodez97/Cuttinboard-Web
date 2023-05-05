@@ -5,6 +5,7 @@ import {
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
 
 interface SplitButtonProps {
   options: string[];
@@ -21,6 +22,7 @@ export default function SplitButton({
   onChangeOrder,
   order = "asc",
 }: SplitButtonProps) {
+  const { t } = useTranslation();
   const handleClick = () => {
     onChangeOrder(order === "asc" ? "desc" : "asc");
   };
@@ -31,7 +33,7 @@ export default function SplitButton({
         onClick={handleClick}
         menu={{
           items: options.map((opt, i) => ({
-            label: opt,
+            label: t(opt),
             key: i,
             onClick: () => onChange(i),
           })),
@@ -59,7 +61,7 @@ export default function SplitButton({
           }),
         ]}
       >
-        {options[selectedIndex]}
+        {t(options[selectedIndex])}
       </Dropdown.Button>
     </React.Fragment>
   );

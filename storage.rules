@@ -3,7 +3,7 @@ service firebase.storage {
   match /b/{bucket}/o {
   
   match /users/{userId} {
-    match /avatar {
+    match /avatar/{avatarFile} {
      	allow write: if request.auth.uid == userId;
      	allow read: if true;
     }

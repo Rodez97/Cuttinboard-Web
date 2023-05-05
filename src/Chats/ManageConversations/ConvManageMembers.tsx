@@ -2,13 +2,17 @@
 import { jsx } from "@emotion/react";
 import { UserAddOutlined } from "@ant-design/icons";
 import {
-  employeesSelectors,
-  useAppSelector,
   useConversations,
+  useCuttinboardLocation,
   useDisclose,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, Divider, List, Modal, Tag, Typography } from "antd";
-import React, { useImperativeHandle, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { BoardMemberItem, EmployeeMultiSelect } from "../../shared";
 import { IEmployee, PrivacyLevel } from "@cuttinboard-solutions/types-helpers";
@@ -20,13 +24,12 @@ export interface ConvManageMembersDialogRef {
 const ConvManageMembers = React.forwardRef<ConvManageMembersDialogRef, unknown>(
   (_, ref) => {
     const { t } = useTranslation();
-    const getEmployees = useAppSelector(employeesSelectors.selectAll);
+    const { employees } = useCuttinboardLocation();
     const [isOpen, open, close] = useDisclose();
     const [addMembersOpen, openAddMembers, closeAddMembers] = useDisclose();
     const [activeConversationId, setActiveConversationId] =
       useState<string>("");
-    const { removeConversationMember, addConversationMembers, conversations } =
-      useConversations();
+    const { removeMembers, addMembers, conversations } = useConversations();
 
     useImperativeHandle(ref, () => ({
       openDialog: (conversationId: string) => {
@@ -46,31 +49,38 @@ const ConvManageMembers = React.forwardRef<ConvManageMembersDialogRef, unknown>(
       if (!activeConversation) {
         return;
       }
-      removeConversationMember(activeConversation, [employee]);
+      removeMembers(activeConversation, [employee]);
     };
 
     const handleAddMembers = (addedEmployees: IEmployee[]) => {
       if (!activeConversation) {
         return;
       }
-      addConversationMembers(activeConversation, addedEmployees);
+      addMembers(activeConversation, addedEmployees);
     };
 
-    // Calculate a list of board members based on the privacy level and other conditions
-    const getMembers = useMemo(() => {
+    // Get a list of board members based on the privacy level and other conditions
+    const getMembers = useMemo<{
+      members: IEmployee[];
+      guests: IEmployee[];
+    }>(() => {
       if (!activeConversation) {
-        return [];
+        return {
+          members: [],
+          guests: [],
+        };
       }
       let membersList: IEmployee[] = [];
+      let guestsList: IEmployee[] = [];
       if (activeConversation.privacyLevel === PrivacyLevel.PRIVATE) {
         // If the privacy level is private, only include employees who are members
-        membersList = getEmployees.filter(
+        membersList = employees.filter(
           (emp) => activeConversation.members[emp.id] !== undefined
         );
       }
       if (activeConversation.privacyLevel === PrivacyLevel.PUBLIC) {
         // If the privacy level is public, include all employees
-        membersList = getEmployees;
+        membersList = employees;
       }
       if (
         activeConversation.privacyLevel === PrivacyLevel.POSITIONS &&
@@ -78,13 +88,39 @@ const ConvManageMembers = React.forwardRef<ConvManageMembersDialogRef, unknown>(
       ) {
         const position = activeConversation.position;
         // If the privacy level is based on positions and positions are specified, only include employees with the specified positions
-        membersList = getEmployees.filter((emp) =>
+        membersList = employees.filter((emp) =>
           emp.positions?.includes(position)
+        );
+        guestsList = employees.filter(
+          (emp) =>
+            activeConversation.members[emp.id] !== undefined &&
+            !emp.positions?.includes(position)
         );
       }
       // Filter out any admins from the list of members
-      return membersList;
-    }, [activeConversation, getEmployees]);
+      return {
+        members: membersList,
+        guests: guestsList,
+      };
+    }, [activeConversation, employees]);
+
+    const canDeleteMember = useCallback(
+      (employee: IEmployee) => {
+        if (!activeConversation) {
+          return false;
+        }
+        if (activeConversation.privacyLevel === PrivacyLevel.PUBLIC) {
+          return false;
+        }
+        if (activeConversation.privacyLevel === PrivacyLevel.POSITIONS) {
+          const position = activeConversation.position;
+          // Allow deleting members if the employee is not in the position
+          return position && !employee.positions?.includes(position);
+        }
+        return true;
+      },
+      [activeConversation]
+    );
 
     if (!activeConversation) {
       return null;
@@ -98,6 +134,36 @@ const ConvManageMembers = React.forwardRef<ConvManageMembersDialogRef, unknown>(
           open={isOpen}
           onCancel={close}
         >
+          {activeConversation.privacyLevel === PrivacyLevel.POSITIONS && (
+            <React.Fragment>
+              <Divider orientation="left">{t("Guests")}</Divider>
+
+              <Button
+                icon={<UserAddOutlined />}
+                onClick={openAddMembers}
+                type="dashed"
+                block
+                css={{
+                  marginBottom: 5,
+                }}
+              >
+                {t("Add Guests")}
+              </Button>
+
+              <List
+                dataSource={getMembers.guests}
+                renderItem={(emp) => (
+                  <BoardMemberItem
+                    key={emp.id}
+                    employee={emp}
+                    onRemove={handleRemoveMember}
+                    privacyLevel={activeConversation.privacyLevel}
+                  />
+                )}
+              />
+            </React.Fragment>
+          )}
+
           {/* Members */}
           <Divider orientation="left">{t("Members")}</Divider>
 
@@ -107,6 +173,9 @@ const ConvManageMembers = React.forwardRef<ConvManageMembersDialogRef, unknown>(
               onClick={openAddMembers}
               type="dashed"
               block
+              css={{
+                marginBottom: 5,
+              }}
             >
               {t("Add Members")}
             </Button>
@@ -131,24 +200,21 @@ const ConvManageMembers = React.forwardRef<ConvManageMembersDialogRef, unknown>(
             )}
 
           <List
-            dataSource={getMembers}
+            dataSource={getMembers.members}
             renderItem={(emp) => (
               <BoardMemberItem
                 key={emp.id}
                 employee={emp}
                 onRemove={handleRemoveMember}
                 privacyLevel={activeConversation.privacyLevel}
-                readonly={Boolean(
-                  activeConversation.privacyLevel === PrivacyLevel.POSITIONS ||
-                    activeConversation.privacyLevel === PrivacyLevel.PUBLIC
-                )}
+                readonly={!canDeleteMember(emp)}
               />
             )}
           />
         </Modal>
         <EmployeeMultiSelect
           onSelectedEmployees={handleAddMembers}
-          initialSelected={getMembers}
+          initialSelected={[...getMembers.members, ...getMembers.guests]}
           onClose={closeAddMembers}
           onCancel={closeAddMembers}
           open={addMembersOpen}

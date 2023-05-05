@@ -8,17 +8,13 @@ import {
   pdf,
   Image,
 } from "@react-pdf/renderer";
-import {
-  Colors,
-  makeSelectWageData,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { groupBy, upperFirst } from "lodash";
+import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { Dictionary, groupBy, upperFirst } from "lodash";
 import dayjs from "dayjs";
 import i18n from "../../i18n";
 import AllWhiteLogo from "../../assets/images/Color-on-light-backgrounds.png";
 import fileDownload from "js-file-download";
 import { RosterData } from "./RosterView";
-import store from "../../Redux/store";
 import {
   getEmployeeFullName,
   getEmployeeShiftsSummary,
@@ -28,6 +24,8 @@ import {
   IShift,
   minutesToTextDuration,
   parseWeekId,
+  ShiftWage,
+  WageDataByDay,
 } from "@cuttinboard-solutions/types-helpers";
 
 const styles = StyleSheet.create({
@@ -91,11 +89,20 @@ const SchedulePDF = (
   }[],
   locationName: string,
   weekId: string,
-  weekDays: dayjs.Dayjs[]
+  weekDays: dayjs.Dayjs[],
+  wageData: Dictionary<{
+    summary: WageDataByDay;
+    shifts: Map<
+      string,
+      {
+        wageData: ShiftWage;
+        isoWeekDay: number;
+      }
+    >;
+  }>
 ) => {
   // Get Week number and text
   const { start, end, week } = parseWeekId(weekId);
-  const wageData = makeSelectWageData(weekId)(store.getState());
 
   const firstDayWeek = start.format("MMMM D");
   const lastDayWeek = end.format("MMMM D");
@@ -503,10 +510,20 @@ export const generateSchedulePdf = async (
   }[],
   locationName: string,
   weekId: string,
-  weekDays: dayjs.Dayjs[]
+  weekDays: dayjs.Dayjs[],
+  wageData: Dictionary<{
+    summary: WageDataByDay;
+    shifts: Map<
+      string,
+      {
+        wageData: ShiftWage;
+        isoWeekDay: number;
+      }
+    >;
+  }>
 ) => {
   const blob = await pdf(
-    SchedulePDF(empDocs, locationName, weekId, weekDays)
+    SchedulePDF(empDocs, locationName, weekId, weekDays, wageData)
   ).toBlob();
 
   fileDownload(blob, "Schedule " + weekId + ".pdf", "application/pdf");

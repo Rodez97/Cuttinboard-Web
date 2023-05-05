@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import {
-  employeesSelectors,
-  useAppSelector,
+  Colors,
   useCuttinboard,
+  useCuttinboardLocation,
   useDirectMessageChat,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
@@ -21,7 +21,7 @@ type Props = {
 export default function NewDMByEmployee({ onCreatingChange, onClose }: Props) {
   const { t } = useTranslation();
   const { startNewDirectMessageChat } = useDirectMessageChat();
-  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+  const { employees } = useCuttinboardLocation();
   const { user } = useCuttinboard();
 
   const startNewChat = (selectedUser: IEmployee) => {
@@ -42,7 +42,7 @@ export default function NewDMByEmployee({ onCreatingChange, onClose }: Props) {
       </Typography.Text>
       <List
         css={{ marginTop: 10 }}
-        dataSource={getEmployees.filter(({ id }) => id !== user.uid)}
+        dataSource={employees.filter(({ id }) => id !== user.uid)}
         renderItem={(emp) => (
           <List.Item
             key={emp.id}
@@ -53,7 +53,11 @@ export default function NewDMByEmployee({ onCreatingChange, onClose }: Props) {
                 onClick={() => startNewChat(emp)}
               />
             }
-            css={{ backgroundColor: "#F7F7F7", padding: 10, marginBottom: 8 }}
+            css={{
+              backgroundColor: Colors.MainOnWhite,
+              padding: "10px !important",
+              margin: 5,
+            }}
           >
             <List.Item.Meta
               avatar={<CuttinboardAvatar userId={emp.id} src={emp.avatar} />}

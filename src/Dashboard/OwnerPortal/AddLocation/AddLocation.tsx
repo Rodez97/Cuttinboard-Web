@@ -15,6 +15,7 @@ import {
   Typography,
 } from "antd";
 import {
+  FIRESTORE,
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -32,6 +33,7 @@ import { recordError } from "../../../utils/utils";
 import * as yup from "yup";
 import { ANALYTICS } from "firebase";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const gmValidationSchema = yup.object().shape({
   name: yup.string().required(),
@@ -81,6 +83,20 @@ function AddLocation() {
         AddLocationFunctionResult
       >(FUNCTIONS, "http-locations-create");
       const isGMValid = await gmValidationSchema.isValid(generalManager);
+
+      if (isGMValid) {
+        // Check if the new employee is already an organization level employee
+        const checkForSupervisor = await getDocs(
+          query(
+            collection(FIRESTORE, "Organizations", user.uid, "employees"),
+            where("email", "==", generalManager?.email.toLowerCase())
+          )
+        );
+        if (checkForSupervisor.size === 1) {
+          throw new Error("Employee is already an organization level employee");
+        }
+      }
+
       await addLocation({
         location,
         generalManager: isGMValid ? generalManager : undefined,
@@ -184,7 +200,7 @@ function AddLocation() {
                   <Form.Item name={["address", "state"]} label={t("State")}>
                     <Input />
                   </Form.Item>
-                  <Form.Item name={["address", "zip"]} label={t("Zip")}>
+                  <Form.Item name={["address", "zip"]} label={t("Zip Code")}>
                     <Input />
                   </Form.Item>
                 </Input.Group>

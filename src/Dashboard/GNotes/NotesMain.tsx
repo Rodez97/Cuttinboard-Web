@@ -25,10 +25,10 @@ import ReadonlyNoteDialog, {
 import { NotePlus } from "../../Modules/Notes/notesIcons";
 import NoteCard from "../../Modules/Notes/Note";
 import {
+  NotesProvider,
   useDisclose,
   useGBoard,
   useNotes,
-  useNotesData,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import ErrorPage from "../../shared/molecules/PageError";
 import NoItems from "../../shared/atoms/NoItems";
@@ -38,30 +38,34 @@ export default function NotesMain() {
   if (!boardId) {
     throw new Error("No board id");
   }
-  const { selectedBoard, selectActiveBoard, loading, error } = useGBoard();
+  const { selectedBoard, selectBoardId, loading, error } = useGBoard();
 
   useLayoutEffect(() => {
     if (boardId) {
-      selectActiveBoard(boardId);
+      selectBoardId(boardId);
     }
     return () => {
-      selectActiveBoard();
+      selectBoardId();
     };
-  }, [boardId, selectActiveBoard]);
+  }, [boardId, selectBoardId]);
 
   if (loading) {
     return <LoadingPage />;
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   if (!selectedBoard) {
     return <NotFound />;
   }
 
-  return <Main />;
+  return (
+    <NotesProvider selectedBoard={selectedBoard}>
+      <Main />
+    </NotesProvider>
+  );
 }
 
 function Main() {
@@ -81,11 +85,9 @@ function Main() {
   });
   const { openNew, openEdit, manageNoteDialogRef } = useManageNote();
   const { open, readonlyNoteDialogRef } = useReadonlyNote();
-  const { notes } = useNotes(selectedBoard);
+  const { notes } = useNotes();
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const { baseRef, editBoard } = useManageBoard();
-
-  useNotesData(selectedBoard);
 
   // Define a function to filter, sort, and memoize the list of notes
   const getOrderedNotes = useMemo(() => {
@@ -112,10 +114,6 @@ function Main() {
         return filtered;
     }
   }, [notes, index, order, searchQuery]);
-
-  if (!selectedBoard) {
-    return <EmptyBoard />;
-  }
 
   return (
     <Layout.Content
@@ -161,11 +159,11 @@ function Main() {
               {t("No notes")}. <a onClick={openNew}>{t("Create one")}</a>{" "}
               {t("or")}{" "}
               <a
-                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
+                href="http://www.cuttinboard.com/help/global-notes"
                 target="_blank"
                 rel="noreferrer"
               >
-                {t("learn more")}
+                {t("Learn more")}
               </a>
             </span>
           }
@@ -180,7 +178,6 @@ function Main() {
       />
       <ReadonlyNoteDialog
         ref={readonlyNoteDialogRef}
-        selectedBoard={selectedBoard}
         canManage={true}
         onEdit={openEdit}
       />

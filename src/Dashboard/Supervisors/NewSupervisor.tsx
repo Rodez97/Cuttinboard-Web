@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import LocationsPicker from "./LocationsPicker";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import { recordError } from "../../utils/utils";
+import { recordError, trimObject } from "../../utils/utils";
 import { logEvent } from "firebase/analytics";
 import {
   FUNCTIONS,
@@ -70,7 +70,8 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
   };
 
   const onSupervisorFormFinish = (values: Supervisor) => {
-    setSupervisorData(values);
+    const newData = trimObject<Supervisor>(values);
+    setSupervisorData(newData);
     setStep(2);
   };
 
@@ -130,7 +131,7 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
             message={
               <Typography.Text>
                 {t(
-                  "Supervisors will be deleted from the locations they belong to."
+                  "Supervisors will be deleted from the locations they belong to"
                 )}{" "}
                 <a
                   href="https://www.cuttinboard.com/help/supervisors"
@@ -164,18 +165,6 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
                   whitespace: true,
                   message: t("Name cannot be empty"),
                 },
-                {
-                  validator: async (_, value) => {
-                    // Check if value don't have tailing or leading spaces
-                    if (value && value !== value.trim()) {
-                      return Promise.reject(
-                        new Error(
-                          t("Name cannot have leading or trailing spaces")
-                        )
-                      );
-                    }
-                  },
-                },
               ]}
             >
               <Input placeholder={t("Name")} maxLength={20} showCount />
@@ -195,16 +184,6 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
                 {
                   whitespace: true,
                   message: t("Cannot be empty"),
-                },
-                {
-                  validator: async (_, value) => {
-                    // Check if value don't have tailing or leading spaces
-                    if (value && value !== value.trim()) {
-                      return Promise.reject(
-                        new Error(t("Cannot have leading or trailing spaces"))
-                      );
-                    }
-                  },
                 },
               ]}
             >

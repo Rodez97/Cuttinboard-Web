@@ -8,7 +8,7 @@ import {
   StorageReference,
   uploadBytes,
 } from "firebase/storage";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Avatar,
@@ -28,20 +28,22 @@ import {
   ExclamationCircleOutlined,
   FileFilled,
   InboxOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import { recordError } from "../../utils/utils";
+import { getAvatarObject, recordError } from "../../utils/utils";
 import { logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrayPageHeader } from "../../shared";
 import {
   Colors,
-  employeesSelectors,
   STORAGE,
-  useAppSelector,
   useCuttinboardLocation,
+  useEmployees,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ANALYTICS } from "firebase";
+import {
+  getEmployeeFullName,
+  roleToString,
+} from "@cuttinboard-solutions/types-helpers";
 
 const { Dragger } = Upload;
 
@@ -55,9 +57,9 @@ export default () => {
   const [userFiles, setUserFiles] = useState<StorageReference[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const employee = useAppSelector((state) =>
-    employeesSelectors.selectById(state, id)
-  );
+  const { getEmployeeById } = useEmployees();
+
+  const employee = useMemo(() => getEmployeeById(id), [getEmployeeById, id]);
 
   if (!location) {
     throw new Error("No location found");
@@ -158,12 +160,28 @@ export default () => {
 
   const props: UploadProps = {
     beforeUpload: async (file) => {
+      // Return false if the file is not a PDF
+      if (file.type !== "application/pdf") {
+        message.error(t("Only PDF files are allowed"));
+        return false;
+      }
+
+      // Return false if file size exceeds 8 MB
+      if (file.size > 8e6) {
+        message.error(t("Your file surpasses the 8mb limit"));
+        return false;
+      }
+
       message.loading(t("Uploading File"));
       await handleChange(file);
       message.destroy();
       return false;
     },
     fileList: [],
+    multiple: false,
+    maxCount: 1,
+    // Allow only PDF files
+    accept: ".pdf",
   };
 
   if (!employee) {
@@ -186,13 +204,9 @@ export default () => {
     <Layout>
       <GrayPageHeader
         onBack={() => navigate(-1)}
-        title={employee.name}
-        subTitle={employee.lastName}
-        avatar={{
-          src: employee.avatar,
-          icon: <UserOutlined />,
-          alt: employee.name,
-        }}
+        title={getEmployeeFullName(employee)}
+        subTitle={roleToString(employee.role)}
+        avatar={getAvatarObject(employee)}
       />
       <Layout.Content
         css={{
@@ -213,7 +227,7 @@ export default () => {
             gap: 16,
           }}
         >
-          <Card title={t("Employee Documents")}>
+          <Card title={t("Documents")}>
             <Dragger {...props}>
               <p className="ant-upload-drag-icon">
                 <InboxOutlined />

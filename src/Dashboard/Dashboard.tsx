@@ -12,27 +12,26 @@ import {
 import styled from "@emotion/styled";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-import Icon, {
-  ClockCircleOutlined,
-  CreditCardOutlined,
-  DashboardOutlined,
-  FolderOpenOutlined,
-  GlobalOutlined,
-  ShopOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import Icon, { ClockCircleOutlined } from "@ant-design/icons";
 import mdiMessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import { DarkPageHeader, OwnerGoldTag, UserMenu } from "../shared";
 import relativeTime from "dayjs/plugin/relativeTime";
-import mdiNotes from "@mdi/svg/svg/note-multiple-outline.svg";
-import mdiFiles from "@mdi/svg/svg/folder-home-outline.svg";
+import mdiNotes from "@mdi/svg/svg/note-multiple.svg";
+import mdiFiles from "@mdi/svg/svg/folder-home.svg";
 import mdiMyShifts from "@mdi/svg/svg/account-clock.svg";
+import mdiDashboard from "@mdi/svg/svg/view-dashboard.svg";
+import mdiPublic from "@mdi/svg/svg/earth.svg";
+import mdiLocations from "@mdi/svg/svg/home-group.svg";
+import mdiAccount from "@mdi/svg/svg/account-cog.svg";
+import mdiMyDocuments from "@mdi/svg/svg/folder-account.svg";
+import mdiBilling from "@mdi/svg/svg/account-credit-card.svg";
 import Forum from "@mdi/svg/svg/forum.svg";
 import {
   useCuttinboard,
   useNotifications,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import VerifyEmailBanner from "../shared/organisms/VerifyEmailBanner";
+import i18next from "../i18n";
 dayjs.extend(relativeTime);
 
 const { Content, Sider } = Layout;
@@ -46,50 +45,50 @@ const StyledContent = styled(Content)`
 
 const OptionsRoutes: MenuProps["items"] = [
   {
-    label: "Locations",
+    label: i18next.t("Locations") as string,
     key: "locations",
-    icon: <ShopOutlined />,
+    icon: <Icon component={mdiLocations} className="sidebar-icon" />,
   },
   {
-    label: "Account",
+    label: i18next.t("Account") as string,
     key: "account",
-    icon: <UserOutlined />,
+    icon: <Icon component={mdiAccount} className="sidebar-icon" />,
   },
   {
-    label: "My Documents",
+    label: i18next.t("My Documents") as string,
     key: "my-documents",
-    icon: <FolderOpenOutlined />,
+    icon: <Icon component={mdiMyDocuments} className="sidebar-icon" />,
   },
 ];
 
 const OwnerRoute = {
-  label: "Owner Portal",
+  label: i18next.t("Owner Portal") as string,
   key: "owner-portal",
-  icon: <DashboardOutlined />,
+  icon: <Icon component={mdiDashboard} className="sidebar-icon" />,
 };
 
 const GlobalBoardRoute = {
-  label: "Global Boards",
+  label: i18next.t("Global Boards") as string,
   key: "global-boards",
-  icon: <GlobalOutlined />,
+  icon: <Icon component={mdiPublic} className="sidebar-icon" />,
   children: [
     {
-      label: "Global Notes",
+      label: i18next.t("Global Notes") as string,
       key: "global-notes",
-      icon: <Icon component={mdiNotes} />,
+      icon: <Icon component={mdiNotes} className="sidebar-icon" />,
     },
     {
-      label: "Global Files",
+      label: i18next.t("Global Files") as string,
       key: "global-files",
-      icon: <Icon component={mdiFiles} />,
+      icon: <Icon component={mdiFiles} className="sidebar-icon" />,
     },
   ],
 };
 
 const BillingRoute = {
-  label: "Manage Billing",
+  label: i18next.t("Manage Billing") as string,
   key: "subscription",
-  icon: <CreditCardOutlined />,
+  icon: <Icon component={mdiBilling} className="sidebar-icon" />,
 };
 
 export default () => {

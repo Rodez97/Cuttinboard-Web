@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import CompressionPlugin from "compression-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import Dotenv from "dotenv-webpack";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -67,7 +68,11 @@ const webpackConfig = () => {
     },
 
     resolve: {
-      alias: { "@": "/src" },
+      alias: {
+        "@": "/src",
+        "react-firebase-hooks/auth$":
+          "react-firebase-hooks/auth/dist/index.cjs.js",
+      },
       extensions: [".ts", ".tsx", ".js", ".jsx"],
       plugins: [new TsconfigPathsPlugin({ configFile: "./tsconfig.json" })],
       fallback: {
@@ -203,10 +208,6 @@ const webpackConfig = () => {
           minifyURLs: true,
         },
       }),
-      // DefinePlugin allows you to create global constants which can be configured at compile time
-      new webpack.DefinePlugin({
-        "process.env": process.env.production || !process.env.development,
-      }),
       new ForkTsCheckerWebpackPlugin(),
       new CopyWebpackPlugin({
         patterns: [{ from: "src/assets/images", to: "images/" }, "public"],
@@ -221,6 +222,7 @@ const webpackConfig = () => {
         threshold: 10240,
         minRatio: 0.8,
       }),
+      new Dotenv(),
     ],
   };
 };

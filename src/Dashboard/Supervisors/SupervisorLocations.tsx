@@ -9,7 +9,6 @@ import {
   DeleteOutlined,
   ExclamationCircleOutlined,
   PlusSquareOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { deleteDoc, doc } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
@@ -40,7 +39,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
 
   const deleteSupervisor = () => {
     Modal.confirm({
-      title: "Do you want to remove this supervisor?",
+      title: t("Do you want to remove this supervisor?"),
       icon: <ExclamationCircleOutlined />,
       async onOk() {
         try {
@@ -62,10 +61,11 @@ export default ({ locations, onUnassign, supervisor }: props) => {
       <GrayPageHeader
         onBack={() => navigate(-1)}
         avatar={{
-          src: supervisor.avatar,
+          src: supervisor.avatar
+            ? supervisor.avatar
+            : `https://api.dicebear.com/5.x/shapes/svg?seed=${supervisor.id}&background=%23ffffff&radius=50`,
           onClick: handleAvatarClick,
           style: { cursor: "pointer" },
-          icon: <UserOutlined />,
         }}
         title={`${supervisor.name} ${supervisor.lastName}`}
         subTitle={
@@ -100,7 +100,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
           css={{ width: "100%", padding: 15 }}
           columns={[
             {
-              title: "Name",
+              title: t("Name"),
               dataIndex: "name",
               key: "name",
               filterMode: "menu",
@@ -111,7 +111,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
               defaultSortOrder: "ascend",
             },
             {
-              title: "State",
+              title: t("State"),
               dataIndex: ["address", "state"],
               key: "state",
               sorter: (a, b) => {
@@ -121,7 +121,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
               },
             },
             {
-              title: "City",
+              title: t("City"),
               dataIndex: ["address", "city"],
               key: "city",
               sorter: (a, b) => {
@@ -144,7 +144,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
               title: "",
               key: "action",
               render: (_, record) => (
-                <a onClick={() => onUnassign(record)}>Unassign</a>
+                <a onClick={() => onUnassign(record)}>{t("Unassign")}</a>
               ),
               width: 100,
               align: "center",

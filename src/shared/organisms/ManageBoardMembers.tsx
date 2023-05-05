@@ -19,8 +19,6 @@ import {
 import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import {
-  employeesSelectors,
-  useAppSelector,
   useCuttinboardLocation,
   useDisclose,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -56,8 +54,7 @@ function ManageBoardMembers({
   ...props
 }: ManageBoardMembersProps) {
   const { t } = useTranslation();
-  const { role } = useCuttinboardLocation();
-  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+  const { role, employees } = useCuttinboardLocation();
   const [addMembersOpen, openAddMembers, closeAddMembers] = useDisclose();
   const [selectHostOpen, openSelectHost, closeSelectHost] = useDisclose();
 
@@ -87,21 +84,21 @@ function ManageBoardMembers({
     let membersList: IEmployee[] = [];
     if (privacyLevel === PrivacyLevel.PRIVATE) {
       // If the privacy level is private, only include employees who are members
-      membersList = getEmployees.filter((emp) => indexOf(members, emp.id) > -1);
+      membersList = employees.filter((emp) => indexOf(members, emp.id) > -1);
     }
     if (privacyLevel === PrivacyLevel.PUBLIC) {
       // If the privacy level is public, include all employees
-      membersList = getEmployees;
+      membersList = employees;
     }
     if (privacyLevel === PrivacyLevel.POSITIONS && positions) {
       // If the privacy level is based on positions and positions are specified, only include employees with the specified positions
-      membersList = getEmployees.filter((emp) =>
+      membersList = employees.filter((emp) =>
         checkEmployeePositions(emp, positions)
       );
     }
     // Filter out any admins from the list of members
     return membersList.filter((m) => !admins?.includes(m.id));
-  }, [privacyLevel, positions, getEmployees, members, admins]);
+  }, [privacyLevel, positions, employees, members, admins]);
 
   // Calculate a list of hosts (admins)
   const hostsList = useMemo(() => {
@@ -110,8 +107,8 @@ function ManageBoardMembers({
       return [];
     }
     // Otherwise, return a list of employees who are admins
-    return getEmployees.filter((e) => admins.indexOf(e.id) > -1);
-  }, [getEmployees, admins]);
+    return employees.filter((e) => admins.indexOf(e.id) > -1);
+  }, [employees, admins]);
 
   const handleSetHost = (newHost: IEmployee) => {
     closeSelectHost();
@@ -137,7 +134,7 @@ function ManageBoardMembers({
 
   return (
     <React.Fragment>
-      <Modal {...props} title={t("Add Members")} footer={null}>
+      <Modal {...props} footer={null}>
         {/* 🛡 Admin */}
         {(Boolean(hostsList.length) ||
           role <= RoleAccessLevels.GENERAL_MANAGER) && (
@@ -232,7 +229,7 @@ function ManageBoardMembers({
       />
       <EmployeeSelect
         onSelectedEmployee={handleSetHost}
-        employees={getEmployees}
+        employees={employees}
         onCancel={closeSelectHost}
         open={selectHostOpen}
         footer={null}

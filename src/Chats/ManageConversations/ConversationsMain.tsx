@@ -4,9 +4,10 @@ import { memo } from "react";
 import ChatMain from "../components/ChatMain";
 import { Layout } from "antd";
 import { MessagesProvider } from "@cuttinboard-solutions/cuttinboard-library";
-import { GrayPageHeader, LoadingPage } from "../../shared";
+import { GrayPageHeader } from "../../shared";
 import { useNavigate } from "react-router-dom";
 import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";
 
 function ConversationsMain({
   activeConversation,
@@ -20,20 +21,19 @@ function ConversationsMain({
       css={{ display: "flex", flexDirection: "column", height: "100%" }}
     >
       <MessagesProvider
-        LoadingRenderer={<LoadingPage />}
         messagingType={{
           type: "conversation",
           chatId: activeConversation.id,
         }}
-        batchSize={20}
-        initialLoadSize={50}
+        batchSize={BATCH_SIZE}
+        initialLoadSize={INITIAL_LOAD_SIZE}
       >
         <GrayPageHeader
           onBack={() => navigate("../")}
           title={activeConversation.name}
           subTitle={activeConversation.locationName}
         />
-        <ChatMain type="conversations" canUse={false} />
+        <ChatMain canUse={false} />
       </MessagesProvider>
     </Layout.Content>
   );

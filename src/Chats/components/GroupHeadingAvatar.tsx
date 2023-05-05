@@ -1,29 +1,27 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
+import { Typography } from "antd";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 
 export function GroupHeadingAvatar({
-  showAvatar,
   avatar,
   userId,
+  name,
 }: {
-  showAvatar?: boolean;
   avatar?: string;
   userId: string;
+  name: string;
 }) {
   return (
     <div
       css={{
-        width: 40,
-        alignSelf: "flex-start",
-        justifyContent: "flex-end",
         display: "flex",
-        marginTop: 2,
+        alignItems: "center",
+        gap: 8,
       }}
     >
-      {showAvatar && (
-        <CuttinboardAvatar size={40} src={avatar} userId={userId} />
-      )}
+      <CuttinboardAvatar size={30} src={avatar} userId={userId} />
+      <Typography>{name}</Typography>
     </div>
   );
 }

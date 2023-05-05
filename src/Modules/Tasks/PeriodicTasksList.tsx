@@ -53,7 +53,7 @@ export default (props: DrawerProps) => {
   return (
     <Drawer
       {...props}
-      title={t("Periodic Tasks")}
+      title={t("Recurring Tasks")}
       placement="right"
       width={400}
       extra={
@@ -73,17 +73,18 @@ export default (props: DrawerProps) => {
           <Empty
             description={
               <span>
-                {t("No periodic tasks found")}.{" "}
+                {t("No recurring tasks found")}
+                {". "}
                 <a onClick={() => managePeriodicTaskRef.current?.openNew()}>
                   {t("Create one")}
                 </a>{" "}
-                or{" "}
+                {t("or")}{" "}
                 <a
-                  href="https://www.cuttinboard.com/help/tasks-app"
+                  href="http://www.cuttinboard.com/help/recurring-tasks"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {t("learn more.")}
+                  {t("Learn more")}
                 </a>
               </span>
             }

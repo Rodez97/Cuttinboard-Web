@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import {
@@ -19,15 +19,12 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
-  UserOutlined,
 } from "@ant-design/icons";
 import { compact } from "lodash";
 import { logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrayPageHeader } from "../../shared";
 import {
-  employeesSelectors,
-  useAppSelector,
   useCuttinboardLocation,
   useEmployees,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -37,15 +34,18 @@ import {
   EmployeeLocationInfo,
   getEmployeeFullName,
   getEmployeeHourlyWage,
+  ManagerPermissions,
   POSITIONS,
   RoleAccessLevels,
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
+import PermissionsChecker from "./PermissionsChecker";
 
 type EmployeeRoleData = {
   positions?: { position: string; wage: number }[];
   role: RoleAccessLevels;
   employeeDataComments?: string;
+  permissions?: ManagerPermissions;
 };
 
 export default () => {
@@ -56,10 +56,10 @@ export default () => {
   const [form] = Form.useForm<EmployeeRoleData>();
   const { location, role } = useCuttinboardLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const employee = useAppSelector((state) =>
-    employeesSelectors.selectById(state, id)
-  );
-  const { updateEmployee } = useEmployees();
+
+  const { updateEmployee, getEmployeeById } = useEmployees();
+
+  const employee = useMemo(() => getEmployeeById(id), [getEmployeeById, id]);
 
   const cancel = () => {
     navigate(-1);
@@ -119,11 +119,11 @@ export default () => {
       <GrayPageHeader
         onBack={cancel}
         title={getEmployeeFullName(employee)}
-        subTitle={t("Role, Positions & Hourly Wages")}
+        subTitle={t("Employee settings")}
         avatar={{
-          src: employee.avatar,
-          icon: <UserOutlined />,
-          alt: employee.name,
+          src: employee.avatar
+            ? employee.avatar
+            : `https://api.dicebear.com/5.x/shapes/svg?seed=${employee.id}&background=%23ffffff&radius=50`,
         }}
       />
       <Layout.Content
@@ -149,6 +149,7 @@ export default () => {
               role: employee.role,
               positions: getPositions(),
               employeeDataComments: employee.employeeDataComments,
+              permissions: employee.permissions ?? {},
             }}
             disabled={isSubmitting}
             onFinish={onFinish}
@@ -162,13 +163,35 @@ export default () => {
               <Select
                 defaultValue={RoleAccessLevels.STAFF}
                 options={Object.values(RoleAccessLevels)
-                  .filter((p) => p > role && p !== RoleAccessLevels.ADMIN)
+                  .filter(
+                    (p: number) => p > role && p !== RoleAccessLevels.ADMIN
+                  )
                   .map((role: RoleAccessLevels) => ({
                     label: t(roleToString(role)),
                     value: role,
                   }))}
               />
             </Form.Item>
+            <Form.Item
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.role !== currentValues.role
+              }
+            >
+              {({ getFieldValue }) => {
+                const role = getFieldValue("role");
+
+                if (role !== RoleAccessLevels.MANAGER) {
+                  return null;
+                }
+
+                return (
+                  <Form.Item name="permissions">
+                    <PermissionsChecker />
+                  </Form.Item>
+                );
+              }}
+            </Form.Item>
+
             <Divider>
               <Typography.Text type="secondary" style={{ fontSize: "14px" }}>
                 {t("Position/Wage")}

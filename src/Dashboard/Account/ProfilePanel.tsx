@@ -13,6 +13,7 @@ import {
   useCuttinboard,
   useUpdateAccount,
 } from "@cuttinboard-solutions/cuttinboard-library";
+import { nanoid } from "nanoid";
 
 function ProfilePanel() {
   const [form] = Form.useForm();
@@ -34,7 +35,12 @@ function ProfilePanel() {
       setIsSubmitting(true);
       let photoURL: string = user.photoURL ?? "";
       if (avatar?.file) {
-        const profilePictureRef = ref(STORAGE, `users/${user.uid}/avatar`);
+        const fileExt = (avatar.file as File).name.split(".").pop();
+        const newFileName = `${user.uid}_${nanoid()}.${fileExt}`;
+        const profilePictureRef = ref(
+          STORAGE,
+          `users/${user.uid}/avatar/${newFileName}`
+        );
         const uploadTask = await uploadBytes(profilePictureRef, avatar.file);
         photoURL = await getDownloadURL(uploadTask.ref);
       }

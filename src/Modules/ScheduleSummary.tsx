@@ -4,6 +4,8 @@ import { jsx } from "@emotion/react";
 import { Alert, Card, Divider, Skeleton, Space, Statistic } from "antd";
 import { useTranslation } from "react-i18next";
 import { ScheduleTodaySummary } from "./useSummaryData";
+import { useLocationPermissions } from "@cuttinboard-solutions/cuttinboard-library";
+import React from "react";
 
 export default function ScheduleSummary({
   scheduleTodaySummary,
@@ -13,6 +15,7 @@ export default function ScheduleSummary({
   loading: boolean;
 }) {
   const { t } = useTranslation();
+  const checkPermission = useLocationPermissions();
 
   return (
     <Space
@@ -38,31 +41,44 @@ export default function ScheduleSummary({
         )}
 
         <Space size="small" wrap css={{ padding: "5px 10px" }}>
-          <Card>
-            <Statistic
-              title={t("Est. Wages (Total)")}
-              value={scheduleTodaySummary.totalWage}
-              prefix="$"
-              precision={2}
-            />
-          </Card>
+          {checkPermission("seeWages") && (
+            <React.Fragment>
+              <Card>
+                <Statistic
+                  title={t("Est. Wages (Total)")}
+                  value={scheduleTodaySummary.totalWage}
+                  prefix="$"
+                  precision={2}
+                />
+              </Card>
+              <Card>
+                <Statistic
+                  title={t("OT Wages")}
+                  value={scheduleTodaySummary.overtimeWage}
+                  valueStyle={{
+                    color:
+                      scheduleTodaySummary.overtimeWage > 0
+                        ? "#cf1322"
+                        : "#3f8600",
+                  }}
+                  prefix="$"
+                  precision={2}
+                />
+              </Card>
+              <Card>
+                <Statistic
+                  title={t("Est. Labor %")}
+                  value={scheduleTodaySummary.percent}
+                  suffix="%"
+                  precision={2}
+                />
+              </Card>
+            </React.Fragment>
+          )}
 
           <Card>
             <Statistic
-              title={t("OT Wages")}
-              value={scheduleTodaySummary.overtimeWage}
-              valueStyle={{
-                color:
-                  scheduleTodaySummary.overtimeWage > 0 ? "#cf1322" : "#3f8600",
-              }}
-              prefix="$"
-              precision={2}
-            />
-          </Card>
-
-          <Card>
-            <Statistic
-              title={t("Scheduled hours")}
+              title={t("Scheduled Hours")}
               value={minutesToTextDuration(
                 scheduleTodaySummary.totalHours * 60
               )}
@@ -95,15 +111,6 @@ export default function ScheduleSummary({
             <Statistic
               title={t("Shifts")}
               value={scheduleTodaySummary.totalShifts}
-            />
-          </Card>
-
-          <Card>
-            <Statistic
-              title={t("Est. Labor %")}
-              value={scheduleTodaySummary.percent}
-              suffix="%"
-              precision={2}
             />
           </Card>
 

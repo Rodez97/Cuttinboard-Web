@@ -9,7 +9,7 @@ import {
   useUtensils,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
-import { Button, Form, Input, InputNumber, Modal } from "antd";
+import { Button, Drawer, Form, Input, InputNumber, Typography } from "antd";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -48,15 +48,20 @@ function ReportChangeDialog({
   };
 
   return (
-    <Modal
+    <Drawer
       open={open}
       maskClosable={false}
-      title={t("Report change")}
-      onCancel={handleClose}
-      footer={[
-        <Button key="cancel" onClick={handleClose}>
-          {t("Cancel")}
-        </Button>,
+      title={
+        <div>
+          <Typography.Text strong>{utensil.name}</Typography.Text>
+          <Typography.Text type="secondary">
+            {" "}
+            - {t("Report change")}
+          </Typography.Text>
+        </div>
+      }
+      onClose={handleClose}
+      extra={
         <Button
           key="ok"
           onClick={form.submit}
@@ -64,8 +69,8 @@ function ReportChangeDialog({
           icon={<SaveFilled />}
         >
           {t("Save")}
-        </Button>,
-      ]}
+        </Button>
+      }
     >
       <Form
         initialValues={{
@@ -76,7 +81,7 @@ function ReportChangeDialog({
         form={form}
         onFinish={saveChanges}
       >
-        <Form.Item label={t("Change quantity")} shouldUpdate name="changeQty">
+        <Form.Item label={t("Change Quantity")} shouldUpdate name="changeQty">
           <InputNumber<number>
             controls={true}
             addonBefore={
@@ -106,7 +111,7 @@ function ReportChangeDialog({
           <Input.TextArea rows={3} maxLength={250} showCount />
         </Form.Item>
       </Form>
-    </Modal>
+    </Drawer>
   );
 }
 

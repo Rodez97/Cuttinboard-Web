@@ -22,11 +22,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import { compact, isEqual } from "lodash";
-import {
-  selectLocationScheduleSettings,
-  useAppSelector,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
 
 type ScheduleFormData = {
   ot_week: {
@@ -79,8 +75,7 @@ const ShakeCss = css`
 function ScheduleSettings(props: DrawerProps) {
   const { t } = useTranslation();
   const [form] = Form.useForm<ScheduleFormData>();
-  const { updateScheduleSettings } = useCuttinboardLocation();
-  const scheduleSettings = useAppSelector(selectLocationScheduleSettings);
+  const { updateScheduleSettings, scheduleSettings } = useCuttinboardLocation();
 
   const onFinish = async (values: ScheduleFormData) => {
     // Convert presetTimes to strings
@@ -114,7 +109,7 @@ function ScheduleSettings(props: DrawerProps) {
 
         <Button
           type="link"
-          href="https://www.cuttinboard.com/help/how-overtime-works"
+          href="http://www.cuttinboard.com/help/overtime"
           target="_blank"
           icon={<QuestionCircleOutlined />}
           css={{ marginBottom: 8 }}
@@ -162,10 +157,10 @@ function ScheduleSettings(props: DrawerProps) {
             <InputNumber
               min={0}
               max={60}
-              formatter={(value) => `${value} hours`}
+              formatter={(value) => t(`{{0}} hours`, { 0: value })}
               parser={(value) => {
                 if (!value) return 0;
-                const hours = value.replace(" hours", "");
+                const hours = value.split(" ")[0];
                 return parseInt(hours) as any;
               }}
             />
@@ -315,7 +310,7 @@ function ScheduleSettings(props: DrawerProps) {
                     {...field}
                     name={[field.name, "start"]}
                     key="start"
-                    rules={[{ required: true, message: "Missing start" }]}
+                    rules={[{ required: true, message: t("Missing start") }]}
                     trigger="onSelect"
                   >
                     <TimePicker
@@ -329,7 +324,7 @@ function ScheduleSettings(props: DrawerProps) {
                     {...field}
                     name={[field.name, "end"]}
                     key="end"
-                    rules={[{ required: true, message: "Missing end" }]}
+                    rules={[{ required: true, message: t("Missing end") }]}
                     trigger="onSelect"
                   >
                     <TimePicker

@@ -1,37 +1,30 @@
 /** @jsx jsx */
-import {
-  FIRESTORE,
-  locationConverter,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Divider, Space } from "antd";
-import { collection, query, where } from "firebase/firestore";
+import { where } from "firebase/firestore";
 import { groupBy } from "lodash";
 import React from "react";
 import { useMemo } from "react";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import usePageTitle from "../../hooks/usePageTitle";
 import { PageError, LoadingPage } from "../../shared";
 import LocationCard from "./LocationCard";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
+import useLocationsQuery from "./useLocationsQuery";
 
 export default () => {
   usePageTitle("Supervised Locations");
   const { t } = useTranslation();
   const { user } = useCuttinboard();
-  const [myLocations, loading, error] = useCollectionData(
-    query(
-      collection(FIRESTORE, "Locations"),
-      where("supervisors", "array-contains", user.uid)
-    ).withConverter(locationConverter)
+  const { locations, loading, error } = useLocationsQuery(
+    where("supervisors", "array-contains", user.uid)
   );
 
   const groupedByOrganizations = useMemo(
-    () => Object.entries(groupBy(myLocations, "organizationId")),
-    [myLocations]
+    () => Object.entries(groupBy(locations, "organizationId")),
+    [locations]
   );
 
   if (loading) {
@@ -67,7 +60,13 @@ export default () => {
             <p>
               {t("You are not supervising any location")}
               {". "}
-              <Link to="#">{t("Learn more")}</Link>
+              <Link
+                to="https://www.cuttinboard.com/help/supervisors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("Learn more")}
+              </Link>
             </p>
           }
         />

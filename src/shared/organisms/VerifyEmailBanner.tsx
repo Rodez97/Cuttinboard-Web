@@ -77,7 +77,7 @@ function VerifyEmailBanner() {
   return (
     <Alert
       message={t(
-        "Verify Your Email Address, click the link in the email we sent you."
+        "Verify Your Email Address, click the link in the email we sent you"
       )}
       type="info"
       action={

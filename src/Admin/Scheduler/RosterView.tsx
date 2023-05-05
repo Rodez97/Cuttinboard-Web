@@ -15,9 +15,8 @@ import { groupBy, upperFirst } from "lodash";
 import { useNavigate } from "react-router-dom";
 import { GrayPageHeader, LoadingPage } from "../../shared";
 import {
-  employeesSelectors,
-  useAppSelector,
   useCuttinboardLocation,
+  useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -47,9 +46,9 @@ function RosterView() {
   const { employeeShifts, weekDays, weekId, loading, error } = useSchedule();
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const { t } = useTranslation();
-  const getEmployees = useAppSelector(employeesSelectors.selectAll);
-  const { location } = useCuttinboardLocation();
+  const { location, employees: getEmployees } = useCuttinboardLocation();
   const { wageData } = useSchedule();
+  const checkPermission = useLocationPermissions();
 
   const employees = useMemo(() => {
     // Get all employees except the supervisor
@@ -124,44 +123,50 @@ function RosterView() {
           return minutesToTextDuration(overtimeHours * 60);
         },
       },
-      {
-        title: t("Base pay"),
-        dataIndex: "basePay",
-        key: "basePay",
-        render: (_, { shift, employee }) => {
-          const shiftWageData = wageData?.[employee.id].shifts.get(
-            shift.id
-          )?.wageData;
-          const normalWage = shiftWageData ? shiftWageData.normalWage : 0;
-          return `$${normalWage.toFixed(2)}`;
-        },
-      },
-      {
-        title: t("Overtime pay"),
-        dataIndex: "overtimePay",
-        key: "overtimePay",
-        render: (_, { shift, employee }) => {
-          const shiftWageData = wageData?.[employee.id].shifts.get(
-            shift.id
-          )?.wageData;
-          const overtimeWage = shiftWageData ? shiftWageData.overtimeWage : 0;
-          return `$${overtimeWage.toFixed(2)}`;
-        },
-      },
-      {
-        title: t("Final wage"),
-        dataIndex: "wage",
-        key: "wage",
-        render: (_, { shift, employee }) => {
-          const shiftWageData = wageData?.[employee.id].shifts.get(
-            shift.id
-          )?.wageData;
-          const totalWage = shiftWageData ? shiftWageData.totalWage : 0;
-          return `$${totalWage.toFixed(2)}`;
-        },
-      },
+      ...(checkPermission("seeWages")
+        ? [
+            {
+              title: t("Base pay"),
+              dataIndex: "basePay",
+              key: "basePay",
+              render: (_, { shift, employee }) => {
+                const shiftWageData = wageData?.[employee.id].shifts.get(
+                  shift.id
+                )?.wageData;
+                const normalWage = shiftWageData ? shiftWageData.normalWage : 0;
+                return `$${normalWage.toFixed(2)}`;
+              },
+            },
+            {
+              title: t("Overtime pay"),
+              dataIndex: "overtimePay",
+              key: "overtimePay",
+              render: (_, { shift, employee }) => {
+                const shiftWageData = wageData?.[employee.id].shifts.get(
+                  shift.id
+                )?.wageData;
+                const overtimeWage = shiftWageData
+                  ? shiftWageData.overtimeWage
+                  : 0;
+                return `$${overtimeWage.toFixed(2)}`;
+              },
+            },
+            {
+              title: t("Final wage"),
+              dataIndex: "wage",
+              key: "wage",
+              render: (_, { shift, employee }) => {
+                const shiftWageData = wageData?.[employee.id].shifts.get(
+                  shift.id
+                )?.wageData;
+                const totalWage = shiftWageData ? shiftWageData.totalWage : 0;
+                return `$${totalWage.toFixed(2)}`;
+              },
+            },
+          ]
+        : []),
     ],
-    [t, wageData]
+    [checkPermission, t, wageData]
   );
 
   const dataSource = useMemo(() => {
@@ -227,14 +232,14 @@ function RosterView() {
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   return (
     <Layout css={{ overflowX: "auto" }}>
       <GrayPageHeader
         onBack={() => navigate(-1)}
-        title={t("Roster view")}
+        title={t("Roster")}
         subTitle={currentWeekText}
         extra={
           <Button
@@ -287,6 +292,7 @@ function RosterView() {
             dataSource={dataSource["am"]}
             pagination={false}
             rowKey={(e) => e.shift.id}
+            tableLayout="fixed"
           />
 
           <Divider>{t("PM Shifts")}</Divider>
@@ -299,6 +305,7 @@ function RosterView() {
             dataSource={dataSource["pm"]}
             pagination={false}
             rowKey={(e) => e.shift.id}
+            tableLayout="fixed"
           />
         </div>
       </Layout.Content>
