@@ -1,6 +1,7 @@
 import { getAnalytics } from "firebase/analytics";
 import { FirebaseOptions, initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
+import { getPerformance } from "firebase/performance";
 
 // Firebase configuration object
 export const FIREBASE_CONFIG: FirebaseOptions = {
@@ -24,3 +25,5 @@ initializeFirestore(APP, {
 });
 
 export const ANALYTICS = getAnalytics(APP);
+
+export const PERF = getPerformance(APP);

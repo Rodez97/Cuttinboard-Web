@@ -41,6 +41,7 @@ import ModuleInfoDialog from "../ManageApp/ModuleInfoDialog";
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 import { useRenameFile } from "./RenameFile";
 import {
+  FilesProvider,
   getFileUrl,
   STORAGE,
   useBoard,
@@ -52,36 +53,42 @@ import {
 import dayjs from "dayjs";
 import ErrorPage from "../../shared/molecules/PageError";
 import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+dayjs.extend(LocalizedFormat);
 
 export default function FilesMain() {
   const { boardId } = useParams();
   if (!boardId) {
     throw new Error("No board id");
   }
-  const { selectedBoard, selectActiveBoard, loading, error } = useBoard();
+  const { selectedBoard, selectBoardId, loading, error } = useBoard();
 
   useLayoutEffect(() => {
     if (boardId) {
-      selectActiveBoard(boardId);
+      selectBoardId(boardId);
     }
     return () => {
-      selectActiveBoard();
+      selectBoardId();
     };
-  }, [boardId, selectActiveBoard]);
+  }, [boardId, selectBoardId]);
 
   if (loading) {
     return <LoadingPage />;
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   if (!selectedBoard) {
     return <NotFound />;
   }
 
-  return <Main />;
+  return (
+    <FilesProvider selectedBoard={selectedBoard}>
+      <Main />
+    </FilesProvider>
+  );
 }
 
 function Main() {
@@ -98,8 +105,8 @@ function Main() {
   const [manageMembersOpen, openManageMembers, closeManageMembers] =
     useDisclose();
   const { baseRef, editModule } = useManageModule();
-  const { renameCuttinboardFile, RenameFile } = useRenameFile(selectedBoard);
-  const { files, loading, error } = useFiles(selectedBoard);
+  const { renameCuttinboardFile, RenameFile } = useRenameFile();
+  const { files, loading, error } = useFiles();
   const storagePathRef = useMemo(
     () => ref(STORAGE, `locations/${location.id}/files/${selectedBoard.id}`),
     [location, selectedBoard]
@@ -154,7 +161,6 @@ function Main() {
         },
         width: "61%",
         sorter: (a, b) => a.name.localeCompare(b.name),
-
         sortDirections: ["ascend", "descend", "ascend"],
       },
       {
@@ -169,11 +175,11 @@ function Main() {
         sorter: (a, b) => a.size - b.size,
       },
       {
-        title: "Created",
+        title: t("Created"),
         dataIndex: "createdAt",
         key: "createdAt",
         render: (_, { createdAt }) => (
-          <Typography.Text>{dayjs(createdAt).toLocaleString()}</Typography.Text>
+          <Typography.Text>{dayjs(createdAt).format("lll")}</Typography.Text>
         ),
         width: "20%",
         sorter: (a, b) => a.createdAt - b.createdAt,
@@ -189,7 +195,6 @@ function Main() {
             file={file}
             onRename={renameCuttinboardFile}
             canManage={!selectedBoard?.global && canManageBoard}
-            board={selectedBoard}
           />
         ),
         width: "7%",
@@ -217,7 +222,7 @@ function Main() {
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   return (
@@ -286,11 +291,11 @@ function Main() {
                 </span>
               )}
               <a
-                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
+                href="http://www.cuttinboard.com/help/files"
                 target="_blank"
                 rel="noreferrer"
               >
-                {t("learn more")}
+                {t("Learn more")}
               </a>
             </span>
           }
@@ -342,7 +347,7 @@ function Main() {
       {RenameFile}
       <PickFile
         maxSize={5e7}
-        maxFiles={3}
+        // 200MB
         baseStorageRef={storagePathRef}
         open={pickFileOpen}
         onClose={closePickFile}

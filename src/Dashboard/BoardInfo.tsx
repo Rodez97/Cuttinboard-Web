@@ -50,7 +50,7 @@ function BoardInfo({ onEdit, ...props }: ModalProps & { onEdit: () => void }) {
           onClick={onEdit}
           key="edit"
         >
-          {t("Edit Board")}
+          {t("Edit")}
         </Button>,
         <Button
           icon={<DeleteOutlined />}
@@ -84,7 +84,7 @@ function BoardInfo({ onEdit, ...props }: ModalProps & { onEdit: () => void }) {
           <List.Item.Meta
             avatar={<GlobalOutlined />}
             title={t("Membership Type")}
-            description={t("Available across all locations.")}
+            description={t("Available across all locations")}
           />
         </List.Item>
       </List>

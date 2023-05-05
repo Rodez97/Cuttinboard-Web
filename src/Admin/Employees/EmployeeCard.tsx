@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -19,6 +19,7 @@ import {
   useCuttinboardLocation,
   useDisclose,
   useEmployees,
+  useLocationPermissions,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import AvatarPlaceholder from "../../shared/atoms/AvatarPlaceholder";
 import {
@@ -38,6 +39,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
   const { role } = useCuttinboardLocation();
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const { deleteEmployee } = useEmployees();
+  const checkPermission = useLocationPermissions();
 
   const handleRemoveEmployee = async () => {
     Modal.confirm({
@@ -67,16 +69,16 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
     },
   ];
 
-  const manageItems: MenuProps["items"] = [
+  const manageItems = [
     {
       type: "divider",
     },
     {
-      label: <Link to={`s/${employee.id}`}>{t("Role and Positions")}</Link>,
+      label: <Link to={`s/${employee.id}`}>{t("Employee settings")}</Link>,
       key: "es",
       icon: <TagOutlined />,
     },
-    {
+    checkPermission("manageStaffDocuments") && {
       label: <Link to={`d/${employee.id}`}>{t("Documents")}</Link>,
       key: "ed",
       icon: <FileTextOutlined />,
@@ -88,7 +90,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
       onClick: handleRemoveEmployee,
       icon: <MinusOutlined />,
     },
-  ];
+  ].filter(Boolean) as MenuProps["items"];
 
   const handleAvatarClick = () => {
     Modal.info({
@@ -118,9 +120,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
     <React.Fragment>
       <Skeleton loading={!employee} active>
         <GrayPageHeader
-          css={{
-            marginBottom: 4,
-          }}
+          css={cardStyle}
           avatar={{
             src: employee.avatar,
             onClick: handleAvatarClick,
@@ -133,7 +133,7 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
               menu={{
                 items: [
                   ...items,
-                  ...(employee.id !== user.uid && compareRoles
+                  ...(employee.id !== user.uid && compareRoles && manageItems
                     ? manageItems
                     : []),
                 ],
@@ -163,5 +163,12 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
     </React.Fragment>
   );
 }
+
+const cardStyle = css`
+  margin-bottom: 4px;
+  .ant-page-header-footer {
+    margin-top: 0;
+  }
+`;
 
 export default EmployeeCard;

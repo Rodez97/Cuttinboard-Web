@@ -51,7 +51,7 @@ export default () => {
           className="module-sider-menu"
         />
       </div>
-      <ManageBoard ref={baseRef} moduleName="Notes Stack" />
+      <ManageBoard ref={baseRef} moduleName="Notes Board" />
     </div>
   );
 };

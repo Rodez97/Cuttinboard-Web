@@ -52,7 +52,7 @@ function FirebaseRecover() {
       }}
     >
       <Typography.Title level={4} css={{ marginBottom: "20px !important" }}>
-        {t("Recover your password")};
+        {t("Recover your password")}
       </Typography.Title>
       <Form disabled={Boolean(count) || sending} onFinish={onFinish}>
         <Form.Item
@@ -76,7 +76,7 @@ function FirebaseRecover() {
               float: "right",
             }}
           >
-            {t("Back to login")}
+            {t("Back to Login")}
           </Typography.Link>
         </Form.Item>
 

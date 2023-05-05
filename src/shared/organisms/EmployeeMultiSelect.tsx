@@ -2,8 +2,7 @@
 import { jsx } from "@emotion/react";
 import {
   Colors,
-  employeesSelectors,
-  useAppSelector,
+  useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd";
 import { useMemo, useState } from "react";
@@ -32,7 +31,7 @@ function EmployeeMultiSelect({
 }: EmployeeMultiSelectProps) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const getEmployees = useAppSelector(employeesSelectors.selectAll);
+  const { employees: getEmployees } = useCuttinboardLocation();
   const [selectedEmployees, setSelectedEmployees] = useState<IEmployee[]>([]);
 
   const handleToggle = (value: IEmployee) => () => {
@@ -89,7 +88,7 @@ function EmployeeMultiSelect({
           onClick={handleAccept}
           key="add"
         >
-          {t("Add Member(s)")}
+          {t("Add Members")}
         </Button>,
       ]}
     >

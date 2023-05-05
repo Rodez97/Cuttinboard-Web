@@ -9,10 +9,7 @@ import dayjs from "dayjs";
 import TasksSummary from "./TasksSummary";
 import { useSummaryData } from "./useSummaryData";
 import usePageTitle from "../hooks/usePageTitle";
-import {
-  employeesSelectors,
-  useAppSelector,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
 import { useNavigate } from "react-router-dom";
 
 export default function Summary() {
@@ -20,7 +17,7 @@ export default function Summary() {
   const { t } = useTranslation();
   const [scheduleTodaySummary, recurringTasksSummary, utensils, loading] =
     useSummaryData();
-  const employees = useAppSelector(employeesSelectors.selectAll);
+  const { employees } = useCuttinboardLocation();
   const navigate = useNavigate();
 
   return (
@@ -48,9 +45,10 @@ export default function Summary() {
         <Empty
           description={
             <span>
-              {t("No employees in this location.")}{" "}
+              {t("No employees in this location")}
+              {". "}
               <a onClick={() => navigate("../employees", { replace: true })}>
-                {t("Add Employee.")}
+                {t("Add Employee")}
               </a>
             </span>
           }

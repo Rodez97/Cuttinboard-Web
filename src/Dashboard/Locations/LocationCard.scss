@@ -4,3 +4,16 @@
 .ant-card-meta-description {
   color: inherit;
 }
+.card-base {
+  width: 270px;
+  height: 120px;
+  background-color: #fff;
+  color: #000;
+}
+.card-actions {
+  height: 180px;
+}
+.card-deleting {
+  background: repeating-linear-gradient(-45deg, #f33d61, #f33d61 10px, #e76e8a 10px, #e76e8a 20px);
+  color: #fff !important;
+}

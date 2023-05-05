@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { ReactElement, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -13,65 +13,74 @@ import {
   Typography,
 } from "antd";
 import {
-  useChecklistsActions,
+  useChecklist,
   useCuttinboardLocation,
+  useDisclose,
   useRecurringTasks,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import TaskBlock from "./TaskBlock";
-import { ClearOutlined } from "@ant-design/icons";
+import {
+  ClearOutlined,
+  ClockCircleOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
 import RecurringTaskItem from "./RecurringTaskItem";
-import { DraggableList } from "../../shared";
-import { orderBy } from "lodash";
+import { DraggableList, GrayPageHeader, LoadingPage } from "../../shared";
+import { orderBy, upperFirst } from "lodash";
 import {
   getChecklistsSummary,
   extractRecurringTasksArray,
   IChecklist,
-  IChecklistGroup,
-  IRecurringTaskDoc,
   recurringTaskIsToday,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
+import ErrorPage from "../../shared/molecules/PageError";
+import dayjs from "dayjs";
+import { nanoid } from "nanoid";
+import PeriodicTasksList from "./PeriodicTasksList";
 
-export default ({
-  tasksDocument,
-  recurringTaskDoc,
-  createTask,
-  bottomElement,
-}: {
-  tasksDocument: IChecklistGroup | undefined;
-  recurringTaskDoc: IRecurringTaskDoc | undefined;
-  createTask: () => void;
-  bottomElement: ReactElement;
-}) => {
+export default function TasksMain() {
   const { t } = useTranslation();
+  const scrollBottomTarget = useRef<HTMLDivElement>(null);
+  const [isPeriodicTasksOpen, openPeriodicTasks, closePeriodicTasks] =
+    useDisclose(false);
   const [searchText, setSearchText] = useState("");
   const { role } = useCuttinboardLocation();
   const {
     deleteAllChecklists,
-    reorderChecklists,
-    addChecklistTask,
-    removeChecklist,
+    reorderChecklistsPosition,
+    addTaskToChecklist,
+    deleteChecklist,
     updateChecklistTask,
     changeChecklistTaskStatus,
-    removeChecklistTask,
-    reorderChecklistTask,
-    updateChecklists,
+    removeTaskFromChecklist,
+    reorderTaskPositions,
+    updateChecklistsData,
+    addNewChecklist,
     checklistsArray,
-  } = useChecklistsActions("locationChecklists");
-  const { completeRecurringTask } = useRecurringTasks();
+    checklistGroup,
+    loading,
+    error,
+  } = useChecklist();
+  const {
+    completeRecurringTask,
+    recurringTaskDoc,
+    loading: rtLoading,
+    error: rtError,
+  } = useRecurringTasks();
 
   const canUse = useMemo(() => role <= RoleAccessLevels.MANAGER, [role]);
 
   const getSummaryText = useMemo(() => {
-    if (!tasksDocument) {
-      return `0/0 ${t("task(s) completed")}`;
+    if (!checklistGroup) {
+      return t("{{0}} task(s) completed", { 0: "0/0" });
     }
-    const { total, completed } = getChecklistsSummary(tasksDocument);
-    return `${completed}/${total} ${t("task(s) completed")}`;
-  }, [t, tasksDocument]);
+    const { total, completed } = getChecklistsSummary(checklistGroup);
+    return t("{{0}} task(s) completed", { 0: `${completed}/${total}` });
+  }, [t, checklistGroup]);
 
   const sectionsOrderedByTagAndCreationDate = useMemo(() => {
     if (!checklistsArray) {
@@ -103,27 +112,65 @@ export default ({
     Modal.confirm({
       title: t("Are you sure you want to start a new shift?"),
       content: t(
-        "All tasks will be deleted and you will not be able to undo this action."
+        "All tasks will be deleted and you will not be able to undo this action"
       ),
       okText: t("Start New Shift"),
       cancelText: t("Cancel"),
       onOk: () => {
-        if (tasksDocument) {
+        if (checklistGroup) {
           deleteAllChecklists();
         }
       },
     });
-  }, [deleteAllChecklists, t, tasksDocument]);
+  }, [deleteAllChecklists, t, checklistGroup]);
 
   const reorderItem = (element: IChecklist, _: number, targetIndex: number) => {
-    if (!tasksDocument) {
+    if (!checklistGroup) {
       return;
     }
-    reorderChecklists(element.id, targetIndex);
+    reorderChecklistsPosition(element.id, targetIndex);
   };
 
+  const addBlock = () => {
+    addNewChecklist(nanoid());
+    scrollBottomTarget.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  };
+
+  if (loading || rtLoading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
+
+  if (rtError) {
+    return <ErrorPage error={rtError} />;
+  }
+
   return (
-    <React.Fragment>
+    <Layout>
+      <GrayPageHeader
+        title={upperFirst(dayjs().format("dddd, MMMM D YYYY"))}
+        extra={
+          role <= RoleAccessLevels.MANAGER && (
+            <Space>
+              <Button icon={<PlusCircleOutlined />} onClick={addBlock}>
+                {t("New Task List")}
+              </Button>
+              <Button
+                icon={<ClockCircleOutlined />}
+                onClick={openPeriodicTasks}
+              >
+                {t("Recurring Tasks")}
+              </Button>
+            </Space>
+          )
+        }
+      />
       <Space css={{ marginBottom: 20, padding: "10px 20px" }}>
         <Input.Search
           placeholder={t("Search")}
@@ -208,13 +255,13 @@ export default ({
                     <span>
                       {t("No tasks found")}
                       {". "}
-                      <a onClick={createTask}>{t("Create one")}</a> {t("or")}{" "}
+                      <a onClick={addBlock}>{t("Create one")}</a> {t("or")}{" "}
                       <a
-                        href="https://www.cuttinboard.com/help/tasks-app"
+                        href="http://www.cuttinboard.com/help/tasks"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {t("learn more")}
+                        {t("Learn more")}
                       </a>
                     </span>
                   }
@@ -235,13 +282,13 @@ export default ({
                       sectionId={checklist.id}
                       canManage={canUse}
                       isDragging={isDragging}
-                      onAddTask={addChecklistTask}
-                      onRemoveChecklist={removeChecklist}
+                      onAddTask={addTaskToChecklist}
+                      onRemoveChecklist={deleteChecklist}
                       onRenameTask={updateChecklistTask}
                       onTaskStatusChange={changeChecklistTaskStatus}
-                      onRemoveTask={removeChecklistTask}
-                      onRename={updateChecklists}
-                      onReorderTasks={reorderChecklistTask}
+                      onRemoveTask={removeTaskFromChecklist}
+                      onRename={updateChecklistsData}
+                      onReorderTasks={reorderTaskPositions}
                     />
                   )}
                   onReorder={reorderItem}
@@ -251,9 +298,16 @@ export default ({
               )}
             </Space>
           </div>
-          {bottomElement}
+          <div ref={scrollBottomTarget} css={{ height: 50 }} />
         </div>
       </Layout.Content>
-    </React.Fragment>
+
+      {role <= RoleAccessLevels.MANAGER && (
+        <PeriodicTasksList
+          open={isPeriodicTasksOpen}
+          onClose={closePeriodicTasks}
+        />
+      )}
+    </Layout>
   );
-};
+}

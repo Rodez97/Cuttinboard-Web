@@ -21,8 +21,6 @@ import { useTranslation } from "react-i18next";
 import { TrimRule } from "../../utils/utils";
 import { isEmpty } from "lodash";
 import {
-  employeesSelectors,
-  useAppSelector,
   useConversations,
   useCuttinboardLocation,
   useDisclose,
@@ -55,11 +53,10 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
   const { addConversation, updateConversation } = useConversations();
   const [isOpen, open, close] = useDisclose(false);
   const [title, setTitle] = useState("");
-  const { location } = useCuttinboardLocation();
+  const { location, employees } = useCuttinboardLocation();
   const [baseConversation, setBaseConversation] =
     useState<IConversation | null>(null);
   const isEditing = !isEmpty(baseConversation);
-  const employees = useAppSelector(employeesSelectors.selectAll);
   const [addMembersOpen, openAddMembers, closeAddMembers] = useDisclose();
 
   useImperativeHandle(ref, () => ({
@@ -68,7 +65,7 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
   }));
 
   const openNew = () => {
-    setTitle("New Conversation");
+    setTitle("New Message Board");
     form.setFieldsValue({
       privacyLevel: PrivacyLevel.PUBLIC,
     });
@@ -76,7 +73,7 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
   };
 
   const openEdit = (conversation: IConversation) => {
-    setTitle("Edit Conversation");
+    setTitle("Edit Message Board");
     setBaseConversation(conversation);
     form.setFieldsValue({
       name: conversation.name,
@@ -196,7 +193,7 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
             const privacyLevel = getFieldValue("privacyLevel");
 
             switch (privacyLevel) {
-              case PrivacyLevel.PRIVATE:
+              case PrivacyLevel.PUBLIC:
                 return (
                   <Typography.Text type="secondary">
                     {t("PUBLIC_DESCRIPTION")}
@@ -208,7 +205,7 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
                     {t("POSITIONS_DESCRIPTION")}
                   </Typography.Text>
                 );
-              case PrivacyLevel.PUBLIC:
+              case PrivacyLevel.PRIVATE:
                 return (
                   <Typography.Text type="secondary">
                     {t("PRIVATE_DESCRIPTION")}
@@ -285,7 +282,10 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
 
               return (
                 privacyLevel === PrivacyLevel.PRIVATE && (
-                  <Form.Item label={t("Select Members")}>
+                  <Form.Item
+                    label={t("Select Members")}
+                    name="initialPrivateMembers"
+                  >
                     <React.Fragment>
                       <Button
                         type="primary"

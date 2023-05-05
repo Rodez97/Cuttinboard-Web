@@ -86,6 +86,13 @@ function EditableAvatar({
   const props: UploadProps = {
     name: "file",
     beforeUpload: async (file) => {
+      // Return false if file is not an image
+      if (file.type.indexOf("image") === -1) {
+        message.error(t("Please select an image file."));
+        return false;
+      }
+
+      // Return false if file is larger than 8mb
       if (file.size > 8_000_000) {
         message.error(t("Your file surpasses the 8mb limit."));
         return false;
@@ -97,6 +104,7 @@ function EditableAvatar({
     },
     multiple: false,
     fileList: [],
+    accept: "image/*",
   };
 
   return (
@@ -106,6 +114,7 @@ function EditableAvatar({
           alignSelf: "center",
           justifySelf: "center",
           cursor: disabled ? "initial" : "pointer",
+          opacity: disabled ? 0.3 : 1,
         }}
         size={100}
         icon={<EditOutlined />}
@@ -144,7 +153,7 @@ function EditableAvatar({
           />
           <Typography.Text>{t("Max 8MB")}</Typography.Text>
           <Upload {...props}>
-            <Button icon={<PaperClipOutlined />}>{t("Select image")}</Button>
+            <Button icon={<PaperClipOutlined />}>{t("Select Image")}</Button>
           </Upload>
 
           <div css={{ width: "100%" }}>

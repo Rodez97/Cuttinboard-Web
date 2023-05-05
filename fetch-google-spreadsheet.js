@@ -1,7 +1,10 @@
-const { GoogleSpreadsheet } = require("google-spreadsheet");
-const secret = require("./.cuttinboard-translations-SA.json");
+import { GoogleSpreadsheet } from "google-spreadsheet";
+import sa from "./.cuttinboard-translations-SA.json" assert { type: "json" };
 
-const fs = require("fs");
+import { writeFile } from "fs";
+
+const _client_email = sa.client_email;
+const _private_key = sa.private_key;
 
 //# Initialize the sheet
 const doc = new GoogleSpreadsheet(
@@ -11,8 +14,8 @@ const doc = new GoogleSpreadsheet(
 //# Initialize Auth
 const init = async () => {
   await doc.useServiceAccountAuth({
-    client_email: secret.client_email,
-    private_key: secret.private_key,
+    client_email: _client_email,
+    private_key: _private_key,
   });
 };
 
@@ -44,12 +47,14 @@ const read = async () => {
 const write = (data) => {
   Object.keys(data).forEach((key) => {
     const tempObject = data[key];
-    fs.writeFile(
+    writeFile(
       `./public/locales/${key}/translation.json`,
       JSON.stringify(tempObject, null, 2),
       (err) => {
         if (err) {
           console.error(err);
+        } else {
+          console.log(`File ${key} has been created`);
         }
       }
     );

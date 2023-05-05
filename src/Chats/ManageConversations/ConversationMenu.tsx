@@ -30,8 +30,8 @@ export default ({
 
   const handleDelete = async () => {
     Modal.confirm({
-      title: t("Delete Conversation"),
-      content: t("Are you sure you want to delete this conversation?"),
+      title: t("Delete Message Board"),
+      content: t("Are you sure you want to delete this message board?"),
       okText: t("Delete"),
       okType: "danger",
       cancelText: t("Cancel"),

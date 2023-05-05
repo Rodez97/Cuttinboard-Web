@@ -22,7 +22,7 @@ import {
 function ConvDetails(props: ModalProps) {
   const { activeConversation } = useConversations();
   if (!activeConversation) {
-    throw new Error("No active conversation");
+    throw new Error("No active message board");
   }
   const { t } = useTranslation();
 

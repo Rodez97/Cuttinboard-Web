@@ -6,13 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { ReactNode, useCallback, useMemo } from "react";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
-import styled from "@emotion/styled";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
 import { logEvent } from "firebase/analytics";
 import {
-  Colors,
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -20,27 +18,6 @@ import { ANALYTICS } from "firebase";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 const { Meta } = Card;
-
-const MainCard = styled(Card)<{
-  draftOrEdited?: boolean;
-  deleting: boolean;
-  haveActions?: boolean;
-}>`
-  cursor: pointer;
-  width: 270px;
-  height: ${(props) => (props.haveActions ? 170 : 120)};
-  background: ${(props) =>
-    props.deleting &&
-    `repeating-linear-gradient(-45deg, #f33d61, #f33d61 10px, #e76e8a 10px, #e76e8a 20px)`};
-  background-color: ${(props) => !props.deleting && "#fff"};
-  color: ${(props) => {
-    if (props.deleting) {
-      return Colors.CalculateContrast("#f33d61");
-    } else {
-      return Colors.CalculateContrast("#fff");
-    }
-  }} !important;
-`;
 
 interface LocationCardProps {
   location: ILocation;
@@ -63,7 +40,7 @@ export default ({ location, actions }: LocationCardProps) => {
     Modal.confirm({
       title: t("Inactive Location"),
       content: t(
-        "This location is suspended due to non-payment or failure to renew subscription. Provide a valid payment method in order to activate it."
+        "This location is suspended due to non-payment or failure to renew subscription. Provide a valid payment method in order to activate it"
       ),
       // When the user confirms the modal, create a billing session and redirect
       // to the Stripe billing portal
@@ -116,7 +93,7 @@ export default ({ location, actions }: LocationCardProps) => {
       // Otherwise, show error message
       return message.error(
         t(
-          "This location is currently Inactive. Wait for the Location Owner to activate it again."
+          "This location is currently Inactive. Wait for the Location Owner to activate it again"
         )
       );
     }
@@ -188,12 +165,10 @@ export default ({ location, actions }: LocationCardProps) => {
   );
 
   return (
-    <MainCard
+    <Card
       hoverable
       onClick={handleSelectLocation}
       actions={actions}
-      haveActions={Boolean(actions?.length)}
-      deleting={Boolean(location.subscriptionStatus === "canceled")}
       extra={
         <Button
           type="text"
@@ -206,13 +181,16 @@ export default ({ location, actions }: LocationCardProps) => {
         />
       }
       title={location.name}
+      className={`card-base ${Boolean(actions?.length) && "card-actions"} ${
+        Boolean(location.subscriptionStatus === "canceled") && "card-deleting"
+      }`}
     >
       <Meta
         css={{ color: "inherit" }}
-        description={`${
-          location.members ? location.members.length : 0
-        } Member(s)`}
+        description={t(`{{0}} Member(s)`, {
+          0: location.members ? location.members.length : 0,
+        })}
       />
-    </MainCard>
+    </Card>
   );
 };

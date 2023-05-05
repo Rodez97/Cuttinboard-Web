@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 
 export default () => {
-  usePageTitle("Conversations");
+  usePageTitle("My Message Boards");
   const { t } = useTranslation();
 
   return (
@@ -39,14 +39,22 @@ export default () => {
                 <EmptyExtended
                   description={
                     <p>
-                      {t("Welcome to Conversations.")} <a>{t("Learn More")}</a>
+                      {t("Welcome to My Message Boards")}
+                      {". "}
+                      <a
+                        href="http://www.cuttinboard.com/help/message-boards"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("Learn more")}
+                      </a>
                     </p>
                   }
                   image={convImage}
                   descriptions={[
                     "Communicate with your team",
-                    "Participate in the conversations you are a member of",
-                    "See all the conversations you belong to across multiple locations",
+                    "Participate in the Message Boards you are a member of",
+                    "See all the Message Boards you belong to across multiple locations",
                   ]}
                 />
               }
@@ -62,24 +70,32 @@ export default () => {
 const Main = () => {
   const { t } = useTranslation();
   const { conversationId } = useParams();
-  const { activeConversation, selectConversation } = useConversations();
+  const { activeConversation, selectConversationId } = useConversations();
 
   useEffect(() => {
     if (conversationId) {
-      selectConversation(conversationId);
+      selectConversationId(conversationId);
     }
 
     return () => {
-      selectConversation("");
+      selectConversationId("");
     };
-  }, [conversationId, selectConversation]);
+  }, [conversationId, selectConversationId]);
 
   if (!activeConversation) {
     return (
       <EmptyBoard
         description={
           <p>
-            {t("Welcome to Conversations.")} <a>{t("Learn More")}</a>
+            {t("Welcome to My Message Boards")}
+            {". "}
+            <a
+              href="http://www.cuttinboard.com/help/message-boards"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("Learn more")}
+            </a>
           </p>
         }
         image={convImage}

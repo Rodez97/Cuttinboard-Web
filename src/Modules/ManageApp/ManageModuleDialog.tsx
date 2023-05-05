@@ -33,6 +33,7 @@ import {
   PrivacyLevel,
   privacyLevelToString,
 } from "@cuttinboard-solutions/types-helpers";
+import { trimObject } from "../../utils/utils";
 
 export interface ManageModuleDialogRef {
   openNew: () => void;
@@ -129,12 +130,9 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
       form.resetFields();
     };
 
-    const onFinish = async ({
-      privacyLevel,
-      position,
-      ...values
-    }: FormType) => {
-      console.log("values", values);
+    const onFinish = async (rawValues: FormType) => {
+      const { privacyLevel, position, ...values } =
+        trimObject<FormType>(rawValues);
 
       if (!canManageBoard) {
         return;
@@ -213,16 +211,6 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
                 whitespace: true,
                 message: t("Cannot be empty"),
               },
-              {
-                validator: async (_, value) => {
-                  // Check if value don't have tailing or leading spaces
-                  if (value && value !== value.trim()) {
-                    return Promise.reject(
-                      new Error(t("Cannot have leading or trailing spaces"))
-                    );
-                  }
-                },
-              },
             ]}
           >
             <Input maxLength={80} showCount />
@@ -259,7 +247,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
               const privacyLevel = getFieldValue("privacyLevel");
 
               switch (privacyLevel) {
-                case PrivacyLevel.PRIVATE:
+                case PrivacyLevel.PUBLIC:
                   return (
                     <Typography.Text type="secondary">
                       {t("PUBLIC_DESCRIPTION")}
@@ -271,7 +259,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
                       {t("POSITIONS_DESCRIPTION")}
                     </Typography.Text>
                   );
-                case PrivacyLevel.PUBLIC:
+                case PrivacyLevel.PRIVATE:
                   return (
                     <Typography.Text type="secondary">
                       {t("PRIVATE_DESCRIPTION")}

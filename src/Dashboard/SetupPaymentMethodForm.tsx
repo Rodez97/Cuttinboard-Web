@@ -9,6 +9,7 @@ import SetupForm from "./SetupForm";
 import { Button, Modal, Result, Spin } from "antd";
 import { useDashboard } from "./DashboardProvider";
 import { httpsCallable } from "firebase/functions";
+import { useTranslation } from "react-i18next";
 
 const stripePromise = loadStripe(
   "pk_live_51KZnSWCYVoOESVglKcMEB4amoGeOkMeSkqgfcEVW7wQLGVmYL8YJFmx4nB70ZLa3pNvEoOzsz6Dl9qeuQkebAXJq00ZxWrYzFj"
@@ -20,6 +21,7 @@ export interface SetupPMDialogRef {
 
 const SetupPaymentMethodForm = forwardRef<SetupPMDialogRef, unknown>(
   (_, ref) => {
+    const { t } = useTranslation();
     const { organization } = useDashboard();
     const [isOpen, open, close] = useDisclose(false);
     const [clientSecret, setClientSecret] = useState("");
@@ -73,9 +75,9 @@ const SetupPaymentMethodForm = forwardRef<SetupPMDialogRef, unknown>(
         <Modal open={isOpen} closable={false} footer={null}>
           <Result
             status="info"
-            title="Processing"
-            subTitle="Please wait while we process your request."
-            extra={<Spin size="large" tip="Processing..." />}
+            title={t("Processing")}
+            subTitle={t("Please wait while we process your request")}
+            extra={<Spin size="large" tip={t("Processing...")} />}
           />
         </Modal>
       );
@@ -90,7 +92,7 @@ const SetupPaymentMethodForm = forwardRef<SetupPMDialogRef, unknown>(
             subTitle={errorMessage}
             extra={
               <Button type="primary" onClick={closeDialog}>
-                Close
+                {t("Close")}
               </Button>
             }
           />

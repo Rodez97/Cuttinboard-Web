@@ -26,37 +26,24 @@ function isM(locId){
   return locMember(locId) && auth.token.organizationKey.role == 3;
 }
 
-path /users/{uid} {
-  read() { isUser(uid) };
-  write() { isUser(uid) };
-}
-
-path /scheduleData/{organizationId} {
-  read() { isOwnerOrSupervisor(organizationId) };
-  write() { isOwnerOrSupervisor(organizationId) };
-
-  /{locationId} {
-    read() { isGM(locationId) || isM(locationId) };
-    write() { isGM(locationId) || isM(locationId) };
-
-    /{weekId}/shifts/{employeeId} {
-      read() { auth != null && employeeId == auth.uid };
-      write() { auth != null && employeeId == auth.uid };
-      index() { ["status"] }
-    }
+path /users {
+  index() { ["metadata/deleteAccount"] };
+  path /{uid} {
+    read() { isUser(uid) };
+    write() { isUser(uid) };
   }
 }
 
-path /shifts/{weekId} {
-    index() { ["locationId", "employeeId"] };
-    read() { auth.uid != null && ((query.orderByChild == "locationId" && query.equalTo == auth.token.organizationKey.locId) || (query.orderByChild == "employeeId" && query.equalTo == auth.uid)) };
+path /shifts {
+    index() { ["locationId", "employeeId", "locationQuery", "employeeQuery"] };
+    read() { auth.uid != null && ((query.orderByChild == "locationQuery" && query.equalTo.includes(auth.token.organizationKey.locId)) || (query.orderByChild == "employeeQuery" && query.equalTo.includes(auth.uid))) };
     /{shiftId} {
       read() { locMember(this.locationId) && auth.token.organizationKey.role <= 3 || this.employeeId == auth.uid };
       write() { (locMember(data.child("locationId").val()) || locMember(newData.child("locationId").val())) && auth.token.organizationKey.role <= 3 };
     }
 }
 
-path /schedule/{weekId}/{locationId} {
+path /schedule/{locationId}/{weekId} {
   read() { locMember(locationId) && auth.token.organizationKey.role <= 3 };
   write() { locMember(locationId) && auth.token.organizationKey.role <= 3 };
 }

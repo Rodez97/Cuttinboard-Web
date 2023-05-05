@@ -17,12 +17,13 @@ import UtensilCard from "./UtensilCard";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
 import useSorter from "../../hooks/useSorter";
+import ErrorPage from "../../shared/molecules/PageError";
 
 export default function Utensils() {
   const { t } = useTranslation();
   const { ManageUtensilDialog, openEdit, openNew } = useManageUtensilDialog();
   const { role } = useCuttinboardLocation();
-  const { utensils, isLoading } = useUtensils();
+  const { utensils, loading, error } = useUtensils();
   const {
     order,
     index,
@@ -42,13 +43,17 @@ export default function Utensils() {
     queryAttr: ["name"],
     initialState: {
       index: 0,
-      order: "desc",
+      order: "asc",
       searchQuery: "",
     },
   });
 
-  if (isLoading) {
+  if (loading) {
     return <LoadingPage />;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
   }
 
   return (
@@ -58,7 +63,7 @@ export default function Utensils() {
         subTitle={
           <Button
             type="link"
-            href="https://www.cuttinboard.com/help/understanding-the-utensils-tool"
+            href="http://www.cuttinboard.com/help/utensils"
             target="_blank"
             icon={<QuestionCircleOutlined />}
           >

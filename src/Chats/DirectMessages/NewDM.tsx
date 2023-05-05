@@ -1,18 +1,17 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Modal, ModalProps } from "antd";
+import { Modal, ModalProps, Typography } from "antd";
 import { useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import NewDMByEmployee from "./NewDMByEmployee";
 import NewDMByEmail, { NewDMByEmailRef } from "./NewDMByEmail";
 import { useTranslation } from "react-i18next";
 
 export default ({
   onClose,
+  locationId,
   ...props
-}: ModalProps & { onClose: () => void }) => {
+}: ModalProps & { onClose: () => void; locationId?: string }) => {
   const { t } = useTranslation();
-  const { locationId } = useParams();
   const [loading, setLoading] = useState(false);
   const newDMByEmailRef = useRef<NewDMByEmailRef>(null);
 
@@ -25,7 +24,7 @@ export default ({
     <Modal
       {...props}
       onCancel={handleClose}
-      title={t("Start a Chat")}
+      title={t("Start a Direct Message")}
       footer={null}
       confirmLoading={loading}
     >
@@ -35,8 +34,21 @@ export default ({
         ref={newDMByEmailRef}
       />
 
-      {locationId && (
+      {locationId ? (
         <NewDMByEmployee onCreatingChange={setLoading} onClose={handleClose} />
+      ) : (
+        <Typography.Text
+          type="secondary"
+          css={{
+            textAlign: "center",
+            width: "100%",
+            display: "block",
+          }}
+        >
+          {t(
+            "Don't know the email? Log into a location to message your coworkers directly"
+          )}
+        </Typography.Text>
       )}
     </Modal>
   );

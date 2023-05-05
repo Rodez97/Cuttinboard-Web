@@ -2,15 +2,12 @@ import {
   useDisclose,
   useFiles,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  IBoard,
-  ICuttinboard_File,
-} from "@cuttinboard-solutions/types-helpers";
+import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
 import { Form, Input, Modal } from "antd";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export const useRenameFile = (board: IBoard) => {
+export const useRenameFile = () => {
   const renameFileRef = React.useRef<RenameFileRef>(null);
 
   const renameCuttinboardFile = (file: ICuttinboard_File) => {
@@ -19,7 +16,7 @@ export const useRenameFile = (board: IBoard) => {
 
   return {
     renameCuttinboardFile,
-    RenameFile: <RenameFile ref={renameFileRef} board={board} />,
+    RenameFile: <RenameFile ref={renameFileRef} />,
   };
 };
 
@@ -31,17 +28,12 @@ type FormType = {
   name: string;
 };
 
-const RenameFile = forwardRef<
-  RenameFileRef,
-  {
-    board: IBoard;
-  }
->(({ board }, ref) => {
+const RenameFile = forwardRef<RenameFileRef, unknown>((_, ref) => {
   const { t } = useTranslation();
   const [form] = Form.useForm<FormType>();
   const [baseFile, setBaseFile] = useState<ICuttinboard_File | null>(null);
   const [isOpen, open, close] = useDisclose();
-  const { renameFile } = useFiles(board);
+  const { renameFile } = useFiles();
 
   useImperativeHandle(ref, () => ({
     renameCuttinboardFile,

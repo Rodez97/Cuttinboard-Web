@@ -3,18 +3,14 @@ import { jsx } from "@emotion/react";
 import { Button, Form, Input, message, Typography } from "antd";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { collection, getDocs, query, where } from "firebase/firestore";
 import { recordError } from "../../utils/utils";
 import { useParams } from "react-router-dom";
-import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined } from "@ant-design/icons";
 import { GrayPageHeader } from "../../shared";
 import {
-  cuttinboardUserConverter,
-  employeesSelectors,
-  FIRESTORE,
-  useAppSelector,
   useCuttinboard,
   useDirectMessageChat,
+  useFindDMRecipient,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import {
   ICuttinboardUser,
@@ -39,9 +35,9 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
     const [targetUser, setTargetUser] = useState<
       ICuttinboardUser | IEmployee | null
     >(null);
-    const getEmployees = useAppSelector(employeesSelectors.selectAll);
     const { startNewDirectMessageChat } = useDirectMessageChat();
     const [messageApi, contextHolder] = message.useMessage();
+    const findRecipient = useFindDMRecipient();
 
     useImperativeHandle(ref, () => ({
       reset,
@@ -53,39 +49,18 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
     };
 
     const searchUser = async ({ email }: { email: string }) => {
-      onCreatingChange(true);
       try {
-        if (locationId) {
-          // Check if the user is an employee
-          const employee = getEmployees.find((e) => e.email === email);
-
-          if (employee) {
-            setTargetUser(employee);
-            onCreatingChange(false);
-            return;
-          }
+        onCreatingChange(true);
+        const employee = await findRecipient(email, locationId);
+        if (employee) {
+          setTargetUser(employee);
         }
-
-        const recipientDocument = await getDocs<ICuttinboardUser>(
-          query(
-            collection(FIRESTORE, "Users"),
-            where("email", "==", email)
-          ).withConverter(cuttinboardUserConverter)
-        );
-
-        if (recipientDocument.size !== 1) {
-          messageApi.open({
-            type: "warning",
-            content: t("There is no eligible user associated with this email."),
-          });
-          setTargetUser(null);
-          onCreatingChange(false);
-          return;
-        }
-
-        const recipient = recipientDocument.docs[0].data();
-        setTargetUser(recipient);
       } catch (error) {
+        messageApi.open({
+          type: "error",
+          content: t(error.message),
+        });
+        setTargetUser(null);
         recordError(error);
       } finally {
         onCreatingChange(false);
@@ -122,7 +97,7 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
             normalize={(value: string) => value?.toLowerCase()}
             label={
               <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-                {t("Start a chat with someone by email")}
+                {t("With someone in your organizations")}
               </Typography.Text>
             }
             rules={[
@@ -151,7 +126,11 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
           <React.Fragment>
             <Typography>{t("Eligible User:")}</Typography>
             <GrayPageHeader
-              avatar={{ src: targetUser.avatar, icon: <UserOutlined /> }}
+              avatar={{
+                src: targetUser.avatar
+                  ? targetUser.avatar
+                  : `https://api.dicebear.com/5.x/shapes/svg?seed=${targetUser.id}&background=%23ffffff&radius=50`,
+              }}
               title={`${targetUser.name} ${targetUser.lastName}`}
               extra={
                 <Button

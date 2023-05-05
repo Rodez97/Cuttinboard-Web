@@ -22,7 +22,7 @@ export default function TasksSummary({
         display: "flex",
       }}
     >
-      <Divider orientation="left">{t("Tasks Summary")}</Divider>
+      <Divider orientation="left">{t("Shift Tasks Summary")}</Divider>
 
       <Skeleton loading={loading}>
         {recurringTasksSummary.length > 0 ? (
@@ -36,7 +36,7 @@ export default function TasksSummary({
               }}
               type="secondary"
             >
-              {t("Periodic tasks due today")}
+              {t("Recurring tasks due today")}
             </Typography.Title>
             {recurringTasksSummary.map(([id, task]) => (
               <Alert key={id} message={task.name} className="default-alert" />
@@ -44,7 +44,7 @@ export default function TasksSummary({
           </Space>
         ) : (
           <Alert
-            message={t("No periodic tasks due today")}
+            message={t("No recurring tasks due today")}
             type="success"
             showIcon
             className="default-alert"

@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import {
+  FIRESTORE,
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { STRIPE_PRICE_ID } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
 import { Alert, Button, Form, Input, Typography } from "antd";
 import { ANALYTICS } from "firebase";
@@ -21,6 +21,8 @@ import {
   SectionHeader,
   SectionWrapper,
 } from "./SectionWrapper";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 
 export interface GMArgs {
   name: string;
@@ -32,9 +34,10 @@ type AddGMProps = {
   locationName: string;
 };
 
-type IUpgradeOwnerData = {
-  price: string;
+export type IUpgradeOwnerData = {
   locationName: string;
+  intId?: string;
+  address?: ILocationAddress;
   gm: GMArgs | null;
 };
 
@@ -51,22 +54,34 @@ function AddGM({ locationName }: AddGMProps) {
   const confirmCreation = async (gm: GMArgs | null) => {
     try {
       setIsLoading(true);
+
+      if (gm?.email) {
+        // Check if the new employee is already an organization level employee
+        const checkForSupervisor = await getDocs(
+          query(
+            collection(FIRESTORE, "Organizations", user.uid, "employees"),
+            where("email", "==", gm.email.toLowerCase())
+          )
+        );
+        if (checkForSupervisor.size === 1) {
+          throw new Error("Employee is already an organization level employee");
+        }
+      }
+
       const upgradeAccount = httpsCallable<IUpgradeOwnerData, void>(
         FUNCTIONS,
         "http-locations-upgradeCreate"
       );
       await upgradeAccount({
-        price: STRIPE_PRICE_ID,
         locationName,
         gm,
       });
       // Report to analytics
       logEvent(ANALYTICS, "upgrade-create-location", {
         method: "stripe",
-        price: STRIPE_PRICE_ID,
         uid: user.uid,
       });
-      // REdirect to dashboard
+      // Redirect to dashboard
       navigate("/dashboard/owner-portal");
       // Remove new user
       removeNewUser();

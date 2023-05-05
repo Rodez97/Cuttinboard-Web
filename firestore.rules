@@ -31,10 +31,6 @@ service cloud.firestore {
       return locMember(locId) && request.auth.token.organizationKey.role == 2;
     }
 
-    function isManager(locId){
-      return locMember(locId) && request.auth.token.organizationKey.role == 3;
-    }
-
 
     match /Users/{userId} {
       allow read: if isAuthenticated();
@@ -59,10 +55,10 @@ service cloud.firestore {
 
   
 
-    function updateLocation(locationId){
+    function updateLocation(locationId, organizationId){
       let updatingInfo = request.resource.data.diff(resource.data).affectedKeys().hasAny(["organizationId","subItemId","limits","storageUsed","subscriptionStatus","supervisors","members"]) == false
-                         && isOwner(resource.data.organizationId);  
-      let updatingSupervisors = isOwner(resource.data.organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisors"]);
+                         && isOwner(organizationId);  
+      let updatingSupervisors = isOwner(organizationId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["supervisors"]);
       let joiningLocation = request.resource.data.diff(resource.data).affectedKeys().hasOnly(["members"]) && isOwnerOrSupervisor(locationId);
       let updatingSettings = request.resource.data.diff(resource.data).affectedKeys().hasOnly(["settings","schedule","positions"]) && (isOwnerOrSupervisor(locationId) || isGM(locationId));
       return updatingInfo || updatingSupervisors || joiningLocation || updatingSettings; 
@@ -70,7 +66,7 @@ service cloud.firestore {
 
 		match /Locations/{locationId} {
 			allow read: if isAuthenticated();
-      allow update: if updateLocation(locationId);
+      allow update: if updateLocation(locationId, resource.data.organizationId);
       allow delete: if isOwner(resource.data.organizationId);    
 
       function canUpdateCL(){
@@ -137,12 +133,28 @@ service cloud.firestore {
         }
       }
 
-      // Employees
-      match /employees/{document=**} {
-    	  allow read: if locMember(locationId);
-        allow update: if locMember(locationId) && request.auth.token.organizationKey.role < resource.data.role;
-        allow delete: if locMember(locationId) && request.auth.token.organizationKey.role <= 1;
+      function updatingAvailability(){
+        return locMember(locationId);
       }
+
+      function updatingEmployeeSettings(){
+        return locMember(locationId) && request.auth.token.organizationKey.role < resource.data.employees[request.resource.data.employees.keys()[0]].role;
+      }
+
+      function deletingEmployee(){
+        return locMember(locationId) && request.auth.token.organizationKey.role <= 3;
+      }
+
+      function JoiningLeavingLocation(){
+        return locMember(locationId) && request.resource.data.employees.diff(resource.data.employees).affectedKeys().hasOnly([request.auth.uid]) && request.auth.token.organizationKey.role <= 1;
+      }
+
+      // Employees
+      match /employees/employeesDocument {
+        allow read: if locMember(locationId);
+        allow update: if updatingAvailability() || updatingEmployeeSettings() || JoiningLeavingLocation() || deletingEmployee();
+      }
+
 		}
 
     function canManageConversation(locationId){
@@ -150,24 +162,41 @@ service cloud.firestore {
     }
 
     function updateConversation(){
-      let editing = canManageConversation(resource.data.locationId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["id", 'locationId', "privacyLevel", "position"]));
+      let editing = (isOwner(resource.data.organizationId) || canManageConversation(resource.data.locationId)) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(["id", 'locationId', "privacyLevel", "position"]));
       let muting = request.resource.data.diff(resource.data).affectedKeys().hasOnly(["members"]) && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([request.auth.uid]);
       return editing || muting;
     }
 
     match /conversations/{conversationId} {
+      function isMemberOfConversation(conversationId) {
+        return get(/databases/$(database)/documents/conversations/$(conversationId)).data.members.keys().hasAny([request.auth.uid]);
+      }
+
       allow create: if canManageConversation(request.resource.data.locationId) && request.resource.data.keys().hasAll(['name', 'locationId', "privacyLevel"]);
-      allow read: if resource.data.members[request.auth.uid] != null || canManageConversation(resource.data.locationId);
-      allow write: if updateConversation();   
+      allow read: if isOwner(resource.data.organizationId) || resource.data.members[request.auth.uid] != null || canManageConversation(resource.data.locationId);
+      allow update: if updateConversation();   
       allow delete: if canManageConversation(resource.data.locationId);  
+
+      match /messages/{document=**} {
+    	  allow read, write: if isMemberOfConversation(conversationId) || canManageConversation(get(/databases/$(database)/documents/conversations/$(conversationId)).data.locationId);
+      }
     }
 
     match /directMessages/{dmId} {
+      function isMemberOfDM(dmId) {
+        return get(/databases/$(database)/documents/directMessages/$(dmId)).data.members.keys().hasAny([request.auth.uid]);
+      }
+
       allow create: if request.resource.data.members[request.auth.uid]._id == request.auth.uid;
-    	allow read: if resource.data.members[request.auth.uid]._id == request.auth.uid;
+      allow read: if resource.data.members[request.auth.uid]._id == request.auth.uid;
       allow update: if resource.data.members[request.auth.uid]._id == request.auth.uid
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["muted","recentMessage"]);
-		}
+
+      match /messages/{document=**} {
+        allow read, write: if isMemberOfDM(dmId);
+      }
+    }
+
 
     match /{path=**}/notes/{boardId} {
       allow read: if resource.data.parentId == request.auth.token.organizationKey.orgId || resource.data.parentId == request.auth.token.organizationKey.locId;
@@ -175,6 +204,10 @@ service cloud.firestore {
 
     match /{path=**}/files/{boardId} {
       allow read: if resource.data.parentId == request.auth.token.organizationKey.orgId || resource.data.parentId == request.auth.token.organizationKey.locId; 
+    }
+
+    match /{path=**}/employees/{employeeId} {
+      allow read: if isAuthenticated();
     }
 
     match /Organizations/{organizationId} {

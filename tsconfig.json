@@ -20,7 +20,8 @@
     "noImplicitThis": true,
     "outDir": "build",
     "strict": false,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "strictFunctionTypes": false
   },
   "include": ["src", "webpack.config.js", "__tests__/Login.test.ts"]
 }

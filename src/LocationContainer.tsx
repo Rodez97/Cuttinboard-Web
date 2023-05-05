@@ -7,27 +7,26 @@ import {
   Routes,
   useNavigate,
   useLocation as useRouterLocation,
-  useParams,
 } from "react-router-dom";
 import { Badge, Button, Layout, Menu, MenuProps } from "antd";
 import { useTranslation } from "react-i18next";
 import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
 import Forum from "@mdi/svg/svg/forum.svg";
-import mdiMessageCogOutline from "@mdi/svg/svg/message-cog-outline.svg";
+import mdiMessageCogOutline from "@mdi/svg/svg/message-cog.svg";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
 import { DarkPageHeader, LoadingPage, UserMenu } from "./shared";
-import mdiViewDashboard from "@mdi/svg/svg/view-dashboard.svg";
+import mdiChartBox from "@mdi/svg/svg/chart-box.svg";
 import mdiMyShifts from "@mdi/svg/svg/account-clock.svg";
-import mdiNotes from "@mdi/svg/svg/note-multiple-outline.svg";
-import mdiTasks from "@mdi/svg/svg/checkbox-marked-circle-plus-outline.svg";
-import mdiFiles from "@mdi/svg/svg/folder-home-outline.svg";
-import mdiChecklist from "@mdi/svg/svg/clipboard-list-outline.svg";
-import mdiEmployees from "@mdi/svg/svg/account-group-outline.svg";
-import mdiSchedule from "@mdi/svg/svg/store-clock-outline.svg";
-import mdiUtensils from "@mdi/svg/svg/silverware-fork-knife.svg";
+import mdiNotes from "@mdi/svg/svg/note-multiple.svg";
+import mdiTasks from "@mdi/svg/svg/checkbox-marked-circle.svg";
+import mdiFiles from "@mdi/svg/svg/folder-home.svg";
+import mdiChecklist from "@mdi/svg/svg/clipboard-list.svg";
+import mdiEmployees from "@mdi/svg/svg/account-group.svg";
+import mdiSchedule from "@mdi/svg/svg/store-clock.svg";
+import mdiUtensils from "@mdi/svg/svg/blender.svg";
 import {
-  useCuttinboard,
   useCuttinboardLocation,
+  useLocationPermissions,
   useNotifications,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import {
@@ -41,7 +40,7 @@ const Tasks = lazy(() => import("./Modules/Tasks"));
 const Notes = lazy(() => import("./Modules/Notes"));
 const Shifts = lazy(() => import("./Modules/MyShifts"));
 const Storage = lazy(() => import("./Modules/Files"));
-const GlobalChecklist = lazy(() => import("./Modules/GlobalChecklist"));
+const GlobalChecklist = lazy(() => import("./Modules/DailyChecklists"));
 const ManageConversations = lazy(() => import("./Chats/ManageConversations"));
 const Employees = lazy(() => import("./Admin/Employees"));
 const Scheduler = lazy(() => import("./Admin/Scheduler"));
@@ -49,17 +48,9 @@ const Utensils = lazy(() => import("./Admin/Utensils"));
 const Summary = lazy(() => import("./Modules/Summary"));
 
 export default () => {
-  const { locationId } = useParams();
-  if (!locationId) {
-    throw new Error("No locationId found");
-  }
   const { pathname } = useRouterLocation();
   const navigate = useNavigate();
   const { role, location } = useCuttinboardLocation();
-  const { organizationKey } = useCuttinboard();
-  if (!organizationKey || !location) {
-    throw new Error("No organization key found");
-  }
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const {
@@ -67,12 +58,13 @@ export default () => {
     getTotalDMBadges,
     getTotalScheduleBadges,
   } = useNotifications();
+  const checkPermission = useLocationPermissions();
 
   const sidebarItems = useMemo(() => {
-    const adminItems: MenuProps["items"] = [
+    const adminItems = [
       {
         key: "home",
-        icon: <Icon component={mdiViewDashboard} />,
+        icon: <Icon component={mdiChartBox} className="sidebar-icon" />,
         label: t("Summary"),
       },
       {
@@ -80,60 +72,62 @@ export default () => {
         type: "divider",
         style: { borderColor: "#fbfbfa25", borderWidth: 0.2 },
       },
-      {
+      checkPermission("manageStaff") && {
         key: "employees",
         label: t("Employees"),
-        icon: <Icon component={mdiEmployees} />,
+        icon: <Icon component={mdiEmployees} className="sidebar-icon" />,
       },
-      {
+      checkPermission("manageSchedule") && {
         key: "schedule",
         label: t("Schedule"),
-        icon: <Icon component={mdiSchedule} />,
+        icon: <Icon component={mdiSchedule} className="sidebar-icon" />,
       },
-      {
-        key: "manage-conversations",
-        label: t("Conversations"),
-        icon: <Icon component={mdiMessageCogOutline} />,
+      checkPermission("manageMessageBoard") && {
+        key: "message-boards",
+        label: t("Message Boards"),
+        icon: (
+          <Icon component={mdiMessageCogOutline} className="sidebar-icon" />
+        ),
       },
       {
         key: "utensils",
         label: t("Utensils"),
-        icon: <Icon component={mdiUtensils} />,
+        icon: <Icon component={mdiUtensils} className="sidebar-icon" />,
       },
       {
         key: "divider-2",
         type: "divider",
         style: { borderColor: "#fbfbfa25", borderWidth: 0.2 },
       },
-    ];
+    ].filter(Boolean) as MenuProps["items"];
 
     const navItems: MenuProps["items"] = [
       {
         key: "notes",
         label: t("Notes"),
-        icon: <Icon component={mdiNotes} />,
+        icon: <Icon component={mdiNotes} className="sidebar-icon" />,
       },
       {
         key: "tasks",
-        label: t("Tasks"),
-        icon: <Icon component={mdiTasks} />,
+        label: t("Shift Tasks"),
+        icon: <Icon component={mdiTasks} className="sidebar-icon" />,
       },
       {
         key: "files",
         label: t("Files"),
-        icon: <Icon component={mdiFiles} />,
+        icon: <Icon component={mdiFiles} className="sidebar-icon" />,
       },
       {
         key: "checklist",
         label: t("Daily Checklists"),
-        icon: <Icon component={mdiChecklist} />,
+        icon: <Icon component={mdiChecklist} className="sidebar-icon" />,
       },
     ];
 
-    return role <= RoleAccessLevels.MANAGER
+    return role <= RoleAccessLevels.MANAGER && adminItems
       ? [...adminItems, ...navItems]
       : navItems;
-  }, [role, t]);
+  }, [checkPermission, role, t]);
 
   return (
     <Layout>
@@ -151,13 +145,13 @@ export default () => {
           >
             <Button
               icon={<Icon component={mdiMyShifts} />}
-              type={pathname.split("/")[4] === "my-shifts" ? "primary" : "text"}
+              type={pathname.split("/")[2] === "my-shifts" ? "primary" : "text"}
               shape="circle"
               onClick={() => navigate("my-shifts", { replace: true })}
             />
           </Badge>,
           <Badge
-            key="conversations"
+            key="my-message-boards"
             count={getTotalBadgesForConversations}
             size="small"
             offset={[-20, 5]}
@@ -165,10 +159,12 @@ export default () => {
             <Button
               icon={<Icon component={Forum} />}
               type={
-                pathname.split("/")[4] === "conversations" ? "primary" : "text"
+                pathname.split("/")[2] === "my-message-boards"
+                  ? "primary"
+                  : "text"
               }
               shape="circle"
-              onClick={() => navigate("conversations", { replace: true })}
+              onClick={() => navigate("my-message-boards", { replace: true })}
             />
           </Badge>,
           <Badge
@@ -179,7 +175,7 @@ export default () => {
           >
             <Button
               icon={<Icon component={MessageTextLock} />}
-              type={pathname.split("/")[4] === "chats" ? "primary" : "text"}
+              type={pathname.split("/")[2] === "chats" ? "primary" : "text"}
               shape="circle"
               onClick={() => navigate("chats", { replace: true })}
             />
@@ -201,7 +197,7 @@ export default () => {
             onSelect={({ key }) => {
               navigate(key, { replace: true });
             }}
-            selectedKeys={[pathname.split("/")[4]]}
+            selectedKeys={[pathname.split("/")[2]]}
             theme="dark"
             css={{ backgroundColor: "#121432" }}
           />
@@ -216,26 +212,37 @@ export default () => {
                   path={`employees/*`}
                   element={<Employees />}
                 />,
-                <Route key="sch" path={`schedule/*`} element={<Scheduler />} />,
+                checkPermission("manageSchedule") && (
+                  <Route
+                    key="sch"
+                    path={`schedule/*`}
+                    element={<Scheduler />}
+                  />
+                ),
+                checkPermission("manageMessageBoard") && (
+                  <Route
+                    key="mdg-conv"
+                    path={`message-boards/*`}
+                    element={<ManageConversations />}
+                  />
+                ),
                 <Route key="uts" path={`utensils/*`} element={<Utensils />} />,
-                <Route
-                  key="mdg-conv"
-                  path={`manage-conversations/*`}
-                  element={<ManageConversations />}
-                />,
               ]}
 
               <Route
                 path={`my-shifts`}
-                element={<Shifts locationId={locationId} />}
+                element={<Shifts locationId={location.id} />}
               />
               <Route path={`notes/*`} element={<Notes />} />
               <Route path={`tasks/*`} element={<Tasks />} />
               <Route path={`files/*`} element={<Storage />} />
               <Route path={`checklist/*`} element={<GlobalChecklist />} />
 
-              <Route path={`conversations/*`} element={<Conversations />} />
-              <Route path={`chats/*`} element={<DM />} />
+              <Route path={`my-message-boards/*`} element={<Conversations />} />
+              <Route
+                path={`chats/*`}
+                element={<DM locationId={location.id} />}
+              />
               <Route
                 path="*"
                 element={

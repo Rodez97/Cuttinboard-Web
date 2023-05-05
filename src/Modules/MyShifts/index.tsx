@@ -4,40 +4,114 @@ import ShiftCard from "./Card";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { useTranslation } from "react-i18next";
-import { Checkbox, Divider, Empty, Layout, Space, Spin, Tag } from "antd";
+import {
+  Alert,
+  Checkbox,
+  Divider,
+  Empty,
+  Layout,
+  Space,
+  Spin,
+  Tag,
+} from "antd";
 import {
   Colors,
+  MyShiftsProvider,
   useMyShifts,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader, PageError } from "../../shared";
 import usePageTitle from "../../hooks/usePageTitle";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
-import { getShiftDayjsDate } from "@cuttinboard-solutions/types-helpers";
+import { WEEKFORMAT } from "@cuttinboard-solutions/types-helpers";
+import MyAvailability from "./MyAvailability";
+import React, { ReactNode, useState } from "react";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import WeekNavigator from "../../Admin/Scheduler/WeekNavigator";
 dayjs.extend(isoWeek);
+dayjs.extend(advancedFormat);
 
 export default function MyShifts({ locationId }: { locationId?: string }) {
   usePageTitle("My Shifts");
   const { t } = useTranslation();
+  const [weekId, setWeekId] = useState(dayjs().format(WEEKFORMAT));
+
+  return (
+    <MyShiftsProvider locationId={locationId} weekId={weekId}>
+      <Layout.Content
+        css={{ display: "flex", flexDirection: "column", height: "100%" }}
+      >
+        <GrayPageHeader
+          title={t("My Shifts")}
+          extra={locationId && <MyAvailability />}
+        />
+        {!locationId && (
+          <Alert
+            type="info"
+            message={t("AVAILABILITY_IN_LOCATION_ALERT")}
+            banner
+          />
+        )}
+
+        <MyShiftsContent
+          locationId={locationId}
+          weekSelectorElement={
+            <div
+              css={{
+                minWidth: 270,
+                maxWidth: 700,
+                margin: "auto",
+                width: "100%",
+                padding: 20,
+                flexDirection: "row",
+                marginTop: 10,
+              }}
+            >
+              <WeekNavigator onChange={setWeekId} currentWeekId={weekId} />
+              {dayjs().format(WEEKFORMAT) === weekId && (
+                <Tag
+                  key="thisWeek"
+                  color="processing"
+                  css={{
+                    marginLeft: 10,
+                  }}
+                >
+                  {t("This week")}
+                </Tag>
+              )}
+            </div>
+          }
+        />
+      </Layout.Content>
+    </MyShiftsProvider>
+  );
+}
+
+export function MyShiftsContent({
+  locationId,
+  weekSelectorElement,
+}: {
+  locationId?: string;
+  weekSelectorElement: ReactNode;
+}) {
+  usePageTitle("My Shifts");
+  const { t } = useTranslation();
   const { loading, error, groupedByDay, setOnlyLocation, onlyLocation } =
-    useMyShifts(locationId);
+    useMyShifts();
 
   const onChange = (e: CheckboxChangeEvent) => {
     setOnlyLocation(e.target.checked);
   };
 
   return (
-    <Layout.Content
-      css={{ display: "flex", flexDirection: "column", height: "100%" }}
-    >
-      <GrayPageHeader title={t("My Shifts")} />
-
-      {locationId && groupedByDay.length > 0 && (
+    <React.Fragment>
+      {locationId && (
         <div
           css={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             padding: 10,
+            marginTop: 20,
           }}
         >
           <Checkbox onChange={onChange} checked={onlyLocation}>
@@ -46,8 +120,10 @@ export default function MyShifts({ locationId }: { locationId?: string }) {
         </div>
       )}
 
+      {weekSelectorElement}
+
       {error ? (
-        <PageError error={new Error(error)} />
+        <PageError error={error} />
       ) : (
         <Layout.Content
           css={{ display: "flex", flexDirection: "column", height: "100%" }}
@@ -70,10 +146,9 @@ export default function MyShifts({ locationId }: { locationId?: string }) {
                     direction="vertical"
                   >
                     {groupedByDay.map(([day, shifts], index) => {
-                      const isToday = getShiftDayjsDate(
-                        shifts[0],
-                        "start"
-                      ).isSame(dayjs(), "day");
+                      const date = dayjs(day);
+                      const dateText = date.format("dddd, MMMM DD, YYYY");
+                      const isToday = date.isSame(dayjs(), "day");
                       return (
                         <div
                           key={index}
@@ -85,7 +160,7 @@ export default function MyShifts({ locationId }: { locationId?: string }) {
                           }}
                         >
                           <Divider orientation="left">
-                            {day}
+                            {dateText}
                             {isToday && (
                               <Tag
                                 color={Colors.MainBlue}
@@ -111,6 +186,6 @@ export default function MyShifts({ locationId }: { locationId?: string }) {
           </Spin>
         </Layout.Content>
       )}
-    </Layout.Content>
+    </React.Fragment>
   );
 }

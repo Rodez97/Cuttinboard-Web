@@ -15,7 +15,7 @@ import { Route, Routes, useParams } from "react-router-dom";
 import { useEffect } from "react";
 
 export default () => {
-  usePageTitle("Conversations Settings");
+  usePageTitle("Message Boards");
   const { location } = useCuttinboardLocation();
 
   return (
@@ -35,23 +35,23 @@ export default () => {
 const Main = () => {
   const { conversationId } = useParams();
   const { t } = useTranslation();
-  const { activeConversation, selectConversation } = useConversations();
+  const { activeConversation, selectConversationId } = useConversations();
 
   useEffect(() => {
     if (conversationId) {
-      selectConversation(conversationId);
+      selectConversationId(conversationId);
     }
 
     return () => {
-      selectConversation("");
+      selectConversationId("");
     };
-  }, [conversationId, selectConversation]);
+  }, [conversationId, selectConversationId]);
 
   if (!activeConversation) {
     return (
       <EmptyBoard
         description={t(
-          "The conversation you are looking for does not exist or has been deleted."
+          "The Message Board you are looking for does not exist or has been deleted"
         )}
       />
     );

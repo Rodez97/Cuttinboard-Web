@@ -27,10 +27,10 @@ import ManageModuleDialog, {
 import ModuleManageMembers from "../ManageApp/ModuleManageMembers";
 import { useParams } from "react-router-dom";
 import {
+  NotesProvider,
   useBoard,
   useDisclose,
   useNotes,
-  useNotesData,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import ReadonlyNoteDialog, { useReadonlyNote } from "./ReadonlyNoteDialog";
 import ErrorPage from "../../shared/molecules/PageError";
@@ -41,30 +41,34 @@ export default function NotesMain() {
   if (!boardId) {
     throw new Error("No board id");
   }
-  const { selectedBoard, selectActiveBoard, loading, error } = useBoard();
+  const { selectedBoard, selectBoardId, loading, error } = useBoard();
 
   useLayoutEffect(() => {
     if (boardId) {
-      selectActiveBoard(boardId);
+      selectBoardId(boardId);
     }
     return () => {
-      selectActiveBoard();
+      selectBoardId();
     };
-  }, [boardId, selectActiveBoard]);
+  }, [boardId, selectBoardId]);
 
   if (loading) {
     return <LoadingPage />;
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   if (!selectedBoard) {
     return <NotFound />;
   }
 
-  return <Main />;
+  return (
+    <NotesProvider selectedBoard={selectedBoard}>
+      <Main />
+    </NotesProvider>
+  );
 }
 
 function Main() {
@@ -84,13 +88,11 @@ function Main() {
   });
   const { openNew, openEdit, manageNoteDialogRef } = useManageNote();
   const { open, readonlyNoteDialogRef } = useReadonlyNote();
-  const { notes, loading, error } = useNotes(selectedBoard);
+  const { notes, loading, error } = useNotes();
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const [manageMembersOpen, openManageMembers, closeManageMembers] =
     useDisclose();
   const { baseRef, editModule } = useManageModule();
-
-  useNotesData(selectedBoard);
 
   // Define a function to filter, sort, and memoize the list of notes
   const getOrderedNotes = useMemo(() => {
@@ -123,7 +125,7 @@ function Main() {
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   return (
@@ -196,11 +198,11 @@ function Main() {
                 </span>
               )}
               <a
-                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
+                href="http://www.cuttinboard.com/help/notes"
                 target="_blank"
                 rel="noreferrer"
               >
-                {t("learn more")}
+                {t("Learn more")}
               </a>
             </span>
           }
@@ -215,7 +217,6 @@ function Main() {
       />
       <ReadonlyNoteDialog
         ref={readonlyNoteDialogRef}
-        selectedBoard={selectedBoard}
         canManage={Boolean(canManageBoard && !selectedBoard.global)}
         onEdit={openEdit}
       />

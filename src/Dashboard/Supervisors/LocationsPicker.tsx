@@ -54,7 +54,7 @@ export default ({
           css={{ width: "100%" }}
           columns={[
             {
-              title: "Name",
+              title: t("Name"),
               dataIndex: "name",
               key: "name",
               filterMode: "menu",
@@ -65,7 +65,7 @@ export default ({
               defaultSortOrder: "ascend",
             },
             {
-              title: "State",
+              title: t("State"),
               dataIndex: ["address", "state"],
               key: "state",
               sorter: (a, b) => {
@@ -75,7 +75,7 @@ export default ({
               },
             },
             {
-              title: "City",
+              title: t("City"),
               dataIndex: ["address", "city"],
               key: "city",
               sorter: (a, b) => {

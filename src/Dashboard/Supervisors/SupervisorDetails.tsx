@@ -47,8 +47,9 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
       throw new Error("Supervisor not found");
     }
     Modal.confirm({
-      title: "Do you want to unassign this location?",
+      title: t("Do you want to unassign this location?"),
       icon: <ExclamationCircleOutlined />,
+      cancelText: t("Cancel"),
       async onOk() {
         const batch = writeBatch(FIRESTORE);
         batch.update(doc(FIRESTORE, "Locations", location.id), {

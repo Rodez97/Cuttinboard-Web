@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { useCallback, useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
-import { Badge, Button, Input, Spin, Typography } from "antd";
+import { Avatar, Badge, Button, Input, Spin, Typography } from "antd";
 import { useTranslation } from "react-i18next";
 import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
@@ -12,22 +12,19 @@ import {
   useNotifications,
   useDisclose,
   useCuttinboard,
+  getDirectMessageRecipient,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import { orderBy } from "lodash";
 import { useNavigate } from "react-router-dom";
-import {
-  getDmRecipient,
-  IDirectMessage,
-  Sender,
-} from "@cuttinboard-solutions/types-helpers";
+import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
 
 interface IDMItem {
   chat: IDirectMessage;
   recipient: Sender;
 }
 
-export default () => {
+export default ({ locationId }: { locationId?: string }) => {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
   const { directMessages, loading, error } = useDirectMessageChat();
@@ -42,7 +39,7 @@ export default () => {
     const ordered = directMessages.map((chat) => {
       return {
         chat,
-        recipient: getDmRecipient(chat, user.uid),
+        recipient: getDirectMessageRecipient(chat, user.uid),
       };
     });
 
@@ -60,7 +57,7 @@ export default () => {
   }, [directMessages, searchQuery, user.uid]);
 
   const renderChatItem = useCallback(
-    (chat: IDMItem) => <DMListItem {...chat} />,
+    (chat: IDMItem) => <DMListItem {...chat} key={chat.chat.id} />,
     []
   );
 
@@ -87,7 +84,7 @@ export default () => {
       >
         <div className="module-sider-error">
           <h1>{t("Error")}</h1>
-          <p>{t(error)}</p>
+          <p>{t(error.message)}</p>
         </div>
       </div>
     );
@@ -111,7 +108,7 @@ export default () => {
               marginLeft: "10px",
             }}
           >
-            {t("My Chats")}
+            {t("Direct Messages")}
           </Typography.Text>
         </div>
         <Button icon={<PlusOutlined />} block type="dashed" onClick={openNewDm}>
@@ -126,7 +123,12 @@ export default () => {
       <div className="module-sider-menu-container">
         {getChats.map(renderChatItem)}
       </div>
-      <NewDM open={newDmOpen} onCancel={closeNewDm} onClose={closeNewDm} />
+      <NewDM
+        open={newDmOpen}
+        onCancel={closeNewDm}
+        onClose={closeNewDm}
+        locationId={locationId}
+      />
     </div>
   );
 };
@@ -150,22 +152,22 @@ const DMListItem = ({ chat, recipient }: IDMItem) => {
 
   return (
     <div
-      className={`dm-list-item`}
+      className={`dm-list-item ${
+        selectedDirectMessage?.id === chat.id ? "dm-list-item__active" : ""
+      } dm-list-item__with-avatar`}
       onClick={selectActiveDM(chat.id)}
-      style={
-        selectedDirectMessage?.id === chat.id
-          ? {
-              backgroundColor: "#f1f1f0",
-            }
-          : {}
-      }
     >
-      <CuttinboardAvatar
-        src={recipient.avatar || undefined}
-        userId={recipient._id}
-        icon={<UserOutlined />}
-        className="dm-list-item__avatar"
-      />
+      {recipient._id === "deleted" ? (
+        <Avatar icon={<UserOutlined />} />
+      ) : (
+        <CuttinboardAvatar
+          src={recipient.avatar || undefined}
+          userId={recipient._id}
+          icon={<UserOutlined />}
+          className="dm-list-item__avatar"
+        />
+      )}
+
       <p className="dm-list-item__text">{recipient.name}</p>
       <Badge count={badges} size="small" />
     </div>

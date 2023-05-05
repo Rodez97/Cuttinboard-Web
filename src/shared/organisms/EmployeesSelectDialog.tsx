@@ -56,7 +56,7 @@ const EmployeesSelectDialog = ({
     <Modal
       {...props}
       open={open}
-      title={t("Select Employees")}
+      title={t("Select employees")}
       footer={[
         <Button
           icon={<UsergroupAddOutlined />}

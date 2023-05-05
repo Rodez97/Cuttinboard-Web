@@ -92,7 +92,7 @@ export default () => {
         {subscriptionDocument?.cancel_at_period_end ? (
           <Alert
             message={t(
-              "This plan will be cancelled on {{0}}, all your locations will be deleted 15 days after the cancellation.",
+              "This plan will be cancelled on {{0}}, all your locations will be deleted that day",
               {
                 0: dayjs(subscriptionDocument?.cancel_at?.toDate()).format(
                   "MM/DD/YYYY"
@@ -108,7 +108,7 @@ export default () => {
             userDocument?.paymentMethods.length < 1) && (
             <Alert
               message={t(
-                "No payment method saved. Declare a payment method to keep accessing the Owner plan."
+                "No payment method saved. Declare a payment method to keep accessing the Owner plan"
               )}
               type="warning"
               showIcon

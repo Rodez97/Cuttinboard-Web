@@ -41,7 +41,15 @@ export default () => {
                     ]}
                     description={
                       <p>
-                        {t("Welcome to Notes")}. <a>{t("Learn More")}</a>
+                        {t("Welcome to Global Notes")}
+                        {". "}
+                        <a
+                          target="_blank"
+                          rel="noreferrer"
+                          href="http://www.cuttinboard.com/help/global-notes"
+                        >
+                          {t("Learn more")}
+                        </a>
                       </p>
                     }
                     image={notesImage}

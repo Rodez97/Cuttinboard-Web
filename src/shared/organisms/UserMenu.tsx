@@ -1,13 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  DashboardOutlined,
-  DownOutlined,
-  LogoutOutlined,
-  MobileOutlined,
-  QuestionCircleOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { DownOutlined, UserOutlined } from "@ant-design/icons";
 import { Dropdown, MenuProps, Modal, Space } from "antd";
 import { signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
@@ -19,6 +12,12 @@ import {
 import androidStore from "../../assets/images/android-store.png";
 import appleStore from "../../assets/images/apple-store.png";
 import CuttinboardAvatar from "../atoms/Avatar";
+import mdiDashboard from "@mdi/svg/svg/view-dashboard-outline.svg";
+import mdiAccount from "@mdi/svg/svg/account-cog-outline.svg";
+import mdiHelp from "@mdi/svg/svg/help-circle-outline.svg";
+import mdiMobile from "@mdi/svg/svg/tablet-cellphone.svg";
+import mdiLogout from "@mdi/svg/svg/logout.svg";
+import Icon from "@ant-design/icons";
 
 function UserMenu({ color }: { color?: string }) {
   const { t } = useTranslation();
@@ -63,6 +62,7 @@ function UserMenu({ color }: { color?: string }) {
         break;
       case "signOut":
         await signOut(AUTH);
+        navigate("/login");
         break;
       case "mobile-app":
         showMobileAppDialog();
@@ -85,32 +85,27 @@ function UserMenu({ color }: { color?: string }) {
           {
             key: "dashboard",
             label: t("Dashboard"),
-            icon: <DashboardOutlined />,
+            icon: <Icon component={mdiDashboard} className="user-menu-icon" />,
           },
           {
             key: "account",
             label: t("Account"),
-            icon: <UserOutlined />,
+            icon: <Icon component={mdiAccount} className="user-menu-icon" />,
           },
           {
             key: "helpCenter",
             label: t("Help Center"),
-            icon: <QuestionCircleOutlined />,
-          },
-          {
-            key: "trans",
-            label: t("Translations"),
-            icon: <QuestionCircleOutlined />,
+            icon: <Icon component={mdiHelp} className="user-menu-icon" />,
           },
           {
             key: "mobile-app",
             label: t("Mobile App"),
-            icon: <MobileOutlined />,
+            icon: <Icon component={mdiMobile} className="user-menu-icon" />,
           },
           {
             key: "signOut",
             label: t("Sign Out"),
-            icon: <LogoutOutlined />,
+            icon: <Icon component={mdiLogout} className="user-menu-icon" />,
           },
         ],
         onClick,

@@ -3,9 +3,13 @@ import { jsx } from "@emotion/react";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { LoadingPage } from "./shared";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  LocationProvider,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import InitialForm from "./Dashboard/InitialForm/InitialForm";
 import useSignUpLocalTracker from "./hooks/useSignUpLocalTracker";
+import Location from "./Location";
 
 const Dashboard = lazy(
   () => import(/* webpackChunkName: "dashboard" */ "./Dashboard")
@@ -23,18 +27,10 @@ function MainRouter() {
       <Routes>
         <Route path="/">
           {organizationKey ? (
-            <Route
-              index
-              element={
-                <Navigate
-                  to={`l/${organizationKey.orgId}/${organizationKey.locId}`}
-                />
-              }
-            />
+            <Route index element={<Navigate to={`location`} />} />
           ) : (
             <Route index element={<Navigate to="dashboard" />} />
           )}
-
           <Route
             path="dashboard/*"
             element={
@@ -46,9 +42,19 @@ function MainRouter() {
             }
           />
           <Route
-            path="l/:organizationId/:locationId/*"
+            path="l/:organizationId/:locationId/"
             element={<LocationRoutes />}
           />
+          {organizationKey && (
+            <Route
+              path="location/*"
+              element={
+                <LocationProvider>
+                  <Location />
+                </LocationProvider>
+              }
+            />
+          )}
           <Route path="*" element={<Navigate to="dashboard" />} />
         </Route>
       </Routes>

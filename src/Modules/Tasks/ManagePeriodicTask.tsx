@@ -66,7 +66,7 @@ const defaultRecurrence: FormDataType["recurrence"] = {
   onDay: 1,
 };
 
-const WEEKDAYS = [
+export const WEEKDAYS = [
   { label: "Monday", value: 1 },
   { label: "Tuesday", value: 2 },
   { label: "Wednesday", value: 3 },
@@ -90,7 +90,7 @@ export default forwardRef<
   const [periodicTask, setPeriodicTask] = useState<
     [string, IRecurringTask] | null
   >(null);
-  const { addPeriodicTask, updatePeriodicTask, removePeriodicTask } =
+  const { addRecurringTask, updateRecurringTask, removeRecurringTask } =
     useRecurringTasks();
 
   useImperativeHandle(ref, () => ({
@@ -99,7 +99,7 @@ export default forwardRef<
   }));
 
   const openNew = () => {
-    setTitle("Add Periodic Task");
+    setTitle("Add Recurring Task");
     setPeriodicTask(null);
     form.resetFields();
     startEditing();
@@ -107,7 +107,7 @@ export default forwardRef<
   };
 
   const openEdit = (recurringTask: [string, IRecurringTask]) => {
-    setTitle("Edit Periodic Task");
+    setTitle("Edit Recurring Task");
     setPeriodicTask(recurringTask);
     const { recurrence, name, description } = recurringTask[1];
     const startingOn = recurrence.startingOn
@@ -168,13 +168,13 @@ export default forwardRef<
     }
     if (periodicTask && recurringTaskDoc) {
       // Update existing task
-      updatePeriodicTask(
+      updateRecurringTask(
         { ...values, recurrence: newRecurrence },
         periodicTask[0]
       );
     } else {
-      addPeriodicTask({ ...values, recurrence: newRecurrence });
-      message.success("Periodic Task Successfully Created");
+      addRecurringTask({ ...values, recurrence: newRecurrence });
+      message.success("Recurring Task Successfully Created");
     }
     handleClose();
   };
@@ -190,7 +190,7 @@ export default forwardRef<
       okType: "danger",
       cancelText: "No",
       onOk: () => {
-        removePeriodicTask(periodicTask[0]);
+        removeRecurringTask(periodicTask[0]);
         handleClose();
       },
     });
@@ -280,7 +280,11 @@ export default forwardRef<
             },
           ]}
         >
-          <Input maxLength={80} showCount placeholder={t("Clean trash cans")} />
+          <Input
+            maxLength={80}
+            showCount
+            placeholder={t('e.g. "Clean trash cans"')}
+          />
         </Form.Item>
         <Form.Item
           name="description"
@@ -334,7 +338,7 @@ export default forwardRef<
               return (
                 <Form.Item
                   name={["recurrence", "byWeekday"]}
-                  label={t("Repeat every week on:")}
+                  label={t("Repeat every week on")}
                   required
                   rules={[
                     {
@@ -416,7 +420,7 @@ export default forwardRef<
                   >
                     <InputNumber min={1} max={28} css={{ width: 60 }} />
                   </Form.Item>
-                  <Typography.Text>{t("of every month.")}</Typography.Text>
+                  <Typography.Text>{t("of every month")}</Typography.Text>
                 </div>
               );
             }

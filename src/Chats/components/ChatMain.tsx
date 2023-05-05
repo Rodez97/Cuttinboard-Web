@@ -1,23 +1,26 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ChatInput from "./ChatInput";
-import { Divider, Spin, Tag, Typography } from "antd";
-import DirectMessageBubble from "./DirectMessageBubble";
+import { Button, Layout, Typography } from "antd";
+import MessageBubble from "./MessageBubble";
 import { useMessages } from "@cuttinboard-solutions/cuttinboard-library";
-import dayjs from "dayjs";
+import { INITIAL_LOAD_SIZE } from "../ChatConstants";
+import { LoadingPage } from "../../shared";
+import ErrorPage from "../../shared/molecules/PageError";
 
 interface ChatMainProps {
-  type: "chats" | "conversations";
   canUse?: boolean;
 }
 
-const ChatMain = ({ type, canUse }: ChatMainProps) => {
+const ChatMain = ({ canUse }: ChatMainProps) => {
   const { t } = useTranslation();
-  const { messages, noMoreMessages, fetchPreviousMessages } = useMessages();
+  const { messages, noMoreMessages, fetchPreviousMessages, loading, error } =
+    useMessages();
   const infiniteScrollRef = useRef<InfiniteScroll>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const handleNewMessage = useCallback(() => {
     // Scroll to the bottom of the chat
@@ -32,77 +35,15 @@ const ChatMain = ({ type, canUse }: ChatMainProps) => {
     }
   }, []);
 
+  const handleLoadMore = useCallback(() => {
+    setLoadingMore(true);
+    fetchPreviousMessages().finally(() => {
+      setLoadingMore(false);
+    });
+  }, [fetchPreviousMessages]);
+
   return (
     <React.Fragment>
-      <div
-        id="scrollableDiv"
-        css={{
-          height: "100%",
-          overflow: "auto",
-          display: "flex",
-          flexDirection: "column-reverse",
-          paddingY: 2,
-          paddingX: 1,
-        }}
-      >
-        {/*Put the scroll bar always on the bottom*/}
-        <InfiniteScroll
-          ref={infiniteScrollRef}
-          dataLength={messages ? messages.length : 0}
-          next={fetchPreviousMessages}
-          css={{
-            display: "flex",
-            flexDirection: "column-reverse",
-            overflow: "hidden !important",
-          }} //To put endMessage and loader to the top.
-          inverse={true} //
-          hasMore={!noMoreMessages}
-          loader={
-            <div
-              css={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 1,
-              }}
-            >
-              <Spin />
-            </div>
-          }
-          scrollableTarget="scrollableDiv"
-        >
-          {messages?.map((rm, index) =>
-            rm.systemType === "start" ? (
-              <div
-                key={rm._id}
-                css={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "10px",
-                  marginTop: "10px",
-                }}
-              >
-                <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-                  {t("The conversation starts here 😉")}
-                </Typography.Text>
-                <Divider plain>
-                  <Tag>{dayjs(rm.createdAt).format("MM/DD/YYYY h:mm A")}</Tag>
-                </Divider>
-              </div>
-            ) : (
-              <DirectMessageBubble
-                key={rm._id}
-                prevMessage={messages[index + 1]}
-                currentMessage={rm}
-                canUse={canUse || type === "chats"}
-              />
-            )
-          )}
-        </InfiniteScroll>
-      </div>
-
       <div
         css={{
           position: "relative",
@@ -110,25 +51,49 @@ const ChatMain = ({ type, canUse }: ChatMainProps) => {
       >
         {canUse && <ChatInput onMessageSend={handleNewMessage} />}
       </div>
+      {loading ? (
+        <LoadingPage />
+      ) : error ? (
+        <ErrorPage error={error} />
+      ) : (
+        <Layout.Content id="scrollable">
+          <div
+            css={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {messages?.map((rm) => (
+              <MessageBubble key={rm._id} currentMessage={rm} canUse={canUse} />
+            ))}
+            {!noMoreMessages && messages.length >= INITIAL_LOAD_SIZE ? (
+              <Button
+                onClick={handleLoadMore}
+                css={{
+                  margin: "20px auto",
+                  alignSelf: "center",
+                }}
+                type="link"
+                loading={loadingMore}
+              >
+                {t("Load more")}
+              </Button>
+            ) : (
+              <Typography.Text
+                type="secondary"
+                css={{
+                  margin: "20px auto",
+                  textAlign: "center",
+                }}
+              >
+                {t("This is the beginning of the message history")}
+              </Typography.Text>
+            )}
+          </div>
+        </Layout.Content>
+      )}
     </React.Fragment>
   );
 };
-
-{
-  /* <Space
-  css={{
-    display: "flex",
-    justifyContent: "center",
-    backgroundColor: Colors.MainOnWhite,
-    padding: "20px",
-  }}
->
-  <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-    {t(
-      "You can't participate in this conversation because you are not a member 🤐"
-    )}
-  </Typography.Text>
-</Space>; */
-}
 
 export default ChatMain;

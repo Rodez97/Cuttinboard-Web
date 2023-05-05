@@ -115,11 +115,9 @@ function MyDocuments() {
 
   const handleDeleteFile = (file: StorageReference) => async () => {
     Modal.confirm({
-      title: t(
-        "Are you sure you want to delete this file? This action cannot be undone."
-      ),
+      title: t("Are you sure you want to delete this file?"),
       icon: <ExclamationCircleOutlined />,
-
+      cancelText: t("Cancel"),
       async onOk() {
         try {
           await deleteObject(file);

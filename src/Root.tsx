@@ -1,8 +1,6 @@
 import { CuttinboardProvider } from "@cuttinboard-solutions/cuttinboard-library";
 import React, { lazy, Suspense } from "react";
-import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
-import store from "./Redux/store";
 import { LoadingPage } from "./shared";
 import { recordError } from "./utils/utils";
 
@@ -13,11 +11,9 @@ export default function Root() {
     <React.StrictMode>
       <BrowserRouter>
         <Suspense fallback={<LoadingPage />}>
-          <Provider store={store}>
-            <CuttinboardProvider onError={recordError}>
-              <App />
-            </CuttinboardProvider>
-          </Provider>
+          <CuttinboardProvider onError={recordError}>
+            <App />
+          </CuttinboardProvider>
         </Suspense>
       </BrowserRouter>
     </React.StrictMode>

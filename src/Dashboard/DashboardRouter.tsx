@@ -12,7 +12,7 @@ const DirectMessages = lazy(() => import("../Chats/DirectMessages"));
 const Conversations = lazy(() => import("../Chats/Conversations"));
 const GNotes = lazy(() => import("./GNotes"));
 const GFiles = lazy(() => import("./GFiles"));
-const UpgradeAccount = lazy(() => import("./UpgradeAccount"));
+const AddFirstLocation = lazy(() => import("./UpgradeCreate/AddFirstLocation"));
 const MyShifts = lazy(() => import("../Modules/MyShifts"));
 
 function DashboardRouter() {
@@ -44,7 +44,7 @@ function DashboardRouter() {
           )}
 
           {!userDocument?.subscriptionId && (
-            <Route path="upgrade" element={<UpgradeAccount />} />
+            <Route path="upgrade-create" element={<AddFirstLocation />} />
           )}
 
           <Route

@@ -6,7 +6,7 @@ import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-libra
 import { useMemo } from "react";
 import { getLocationUsage } from "@cuttinboard-solutions/types-helpers";
 
-export default () => {
+export default function FilesCounter() {
   const { location } = useCuttinboardLocation();
 
   const locationUsage = useMemo(() => {
@@ -42,4 +42,4 @@ export default () => {
       </Space>
     </Space>
   );
-};
+}

@@ -1,18 +1,16 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ClearOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { Button, Layout, Space } from "antd";
+import { Button, Layout, Modal, Space } from "antd";
 import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader, DraggableList, LoadingPage } from "../../shared";
 import TaskBlock from "../Tasks/TaskBlock";
 import { nanoid } from "nanoid";
 import {
-  useChecklistsActions,
+  useChecklist,
   useCuttinboardLocation,
-  useDailyChecklistsData,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import usePageTitle from "../../hooks/usePageTitle";
 import ErrorPage from "../../shared/molecules/PageError";
 import {
   getChecklistsSummary,
@@ -21,42 +19,41 @@ import {
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 
-export default () => {
-  usePageTitle("Daily Checklists");
+export default function GlobalChecklistMain() {
   const { t } = useTranslation();
   const { role } = useCuttinboardLocation();
   const {
-    checklistGroup,
-    checklistsArray,
-    resetAllTasks,
-    addChecklist,
-    reorderChecklists,
-    addChecklistTask,
-    removeChecklist,
+    reorderChecklistsPosition,
+    addTaskToChecklist,
+    deleteChecklist,
     updateChecklistTask,
     changeChecklistTaskStatus,
-    removeChecklistTask,
-    updateChecklists,
-    reorderChecklistTask,
-  } = useChecklistsActions("dailyChecklists");
+    removeTaskFromChecklist,
+    reorderTaskPositions,
+    updateChecklistsData,
+    addNewChecklist,
+    checklistsArray,
+    checklistGroup,
+    loading,
+    error,
+    resetAllChecklistTasks,
+  } = useChecklist();
   const scrollBottomTarget = useRef<HTMLDivElement>(null);
-
-  const { loading, error } = useDailyChecklistsData();
 
   const canWrite = useMemo(() => role <= RoleAccessLevels.MANAGER, [role]);
 
   const getSummaryText = useMemo(() => {
     if (!checklistGroup) {
-      return "0/0 tasks completed";
+      return t("{{0}} task(s) completed", { 0: "0/0" });
     }
     const summary = getChecklistsSummary(checklistGroup);
     const total = summary.total;
     const completed = summary.completed;
-    return `${completed}/${total} ${t("tasks completed")}`;
+    return t("{{0}} task(s) completed", { 0: `${completed}/${total}` });
   }, [checklistGroup, t]);
 
   const addBlock = () => {
-    addChecklist(nanoid());
+    addNewChecklist(nanoid());
     scrollBottomTarget.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
@@ -71,7 +68,19 @@ export default () => {
     if (!checklistGroup) {
       return;
     }
-    reorderChecklists(element.id, targetIndex);
+    reorderChecklistsPosition(element.id, targetIndex);
+  };
+
+  const resetTasks = () => {
+    Modal.confirm({
+      title: t("Are you sure you want to clear all tasks?"),
+      content: t(
+        "This will reset all tasks in this list. This action cannot be undone"
+      ),
+      okText: t("Clear All"),
+      cancelText: t("Cancel"),
+      onOk: resetAllChecklistTasks,
+    });
   };
 
   if (loading) {
@@ -79,7 +88,7 @@ export default () => {
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   return (
@@ -99,7 +108,7 @@ export default () => {
               >
                 {t("New Task List")}
               </Button>
-              <Button onClick={resetAllTasks} icon={<ClearOutlined />} danger>
+              <Button onClick={resetTasks} icon={<ClearOutlined />} danger>
                 {t("Clear All")}
               </Button>
             </Space>
@@ -130,13 +139,13 @@ export default () => {
                       sectionId={checklist.id}
                       canManage={canWrite}
                       isDragging={isDragging}
-                      onAddTask={addChecklistTask}
-                      onRemoveChecklist={removeChecklist}
+                      onAddTask={addTaskToChecklist}
+                      onRemoveChecklist={deleteChecklist}
                       onRenameTask={updateChecklistTask}
                       onTaskStatusChange={changeChecklistTaskStatus}
-                      onRemoveTask={removeChecklistTask}
-                      onRename={updateChecklists}
-                      onReorderTasks={reorderChecklistTask}
+                      onRemoveTask={removeTaskFromChecklist}
+                      onRename={updateChecklistsData}
+                      onReorderTasks={reorderTaskPositions}
                     />
                   )}
                   onReorder={reorderItem}
@@ -154,11 +163,11 @@ export default () => {
                       {". "}
                       <a onClick={addBlock}>{t("Create one")}</a> {t("or")}{" "}
                       <a
-                        href="https://www.cuttinboard.com/help/tasks-app"
+                        href="http://www.cuttinboard.com/help/daily-checklists"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {t("learn more")}
+                        {t("Learn more")}
                       </a>
                     </span>
                   }
@@ -171,4 +180,4 @@ export default () => {
       </Layout.Content>
     </Layout.Content>
   );
-};
+}

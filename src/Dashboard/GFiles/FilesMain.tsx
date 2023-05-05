@@ -38,6 +38,7 @@ import {
 } from "../../Modules/Files/FileTypeIcons";
 import FileMenu from "../../Modules/Files/FileMenu";
 import {
+  FilesProvider,
   getFileUrl,
   STORAGE,
   useCuttinboard,
@@ -49,36 +50,42 @@ import {
 import dayjs from "dayjs";
 import ErrorPage from "../../shared/molecules/PageError";
 import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+dayjs.extend(LocalizedFormat);
 
 export default function FilesMain() {
   const { boardId } = useParams();
   if (!boardId) {
     throw new Error("No board id");
   }
-  const { selectedBoard, selectActiveBoard, loading, error } = useGBoard();
+  const { selectedBoard, selectBoardId, loading, error } = useGBoard();
 
   useLayoutEffect(() => {
     if (boardId) {
-      selectActiveBoard(boardId);
+      selectBoardId(boardId);
     }
     return () => {
-      selectActiveBoard();
+      selectBoardId();
     };
-  }, [boardId, selectActiveBoard]);
+  }, [boardId, selectBoardId]);
 
   if (loading) {
     return <LoadingPage />;
   }
 
   if (error) {
-    return <ErrorPage error={new Error(error)} />;
+    return <ErrorPage error={error} />;
   }
 
   if (!selectedBoard) {
     return <NotFound />;
   }
 
-  return <Main />;
+  return (
+    <FilesProvider selectedBoard={selectedBoard}>
+      <Main />
+    </FilesProvider>
+  );
 }
 
 function Main() {
@@ -91,10 +98,10 @@ function Main() {
   const [searchQuery, setSearchQuery] = useState("");
   const [pickFileOpen, pickFiles, closePickFile] = useDisclose();
   const [viewImage, setViewImage] = useState<string | null>("");
-  const { files } = useFiles(selectedBoard);
+  const { files } = useFiles();
   const [infoOpen, openInfo, closeInfo] = useDisclose();
   const { baseRef, editBoard } = useManageBoard();
-  const { renameCuttinboardFile, RenameFile } = useRenameFile(selectedBoard);
+  const { renameCuttinboardFile, RenameFile } = useRenameFile();
   const storagePathRef = useMemo(
     () =>
       selectedBoard &&
@@ -166,11 +173,11 @@ function Main() {
         sorter: (a, b) => a.size - b.size,
       },
       {
-        title: "Created",
+        title: t("Created"),
         dataIndex: "createdAt",
         key: "createdAt",
         render: (_, { createdAt }) => (
-          <Typography.Text>{dayjs(createdAt).toLocaleString()}</Typography.Text>
+          <Typography.Text>{dayjs(createdAt).format("lll")}</Typography.Text>
         ),
         width: "20%",
         sorter: (a, b) => a.createdAt - b.createdAt,
@@ -181,18 +188,13 @@ function Main() {
         dataIndex: "actions",
         key: "actions",
         render: (_, file) => (
-          <FileMenu
-            file={file}
-            onRename={renameCuttinboardFile}
-            canManage
-            board={selectedBoard}
-          />
+          <FileMenu file={file} onRename={renameCuttinboardFile} canManage />
         ),
         width: "7%",
         align: "center",
       },
     ],
-    [renameCuttinboardFile, selectedBoard, t]
+    [renameCuttinboardFile, t]
   );
 
   const fileClick = async (file: ICuttinboard_File) => {
@@ -252,11 +254,11 @@ function Main() {
               {t("No files")}. <a onClick={pickFiles}>{t("upload one")}</a>{" "}
               {t("or")}{" "}
               <a
-                href="https://www.cuttinboard.com/help/understanding-the-notes-app"
+                href="http://www.cuttinboard.com/help/global-files"
                 target="_blank"
                 rel="noreferrer"
               >
-                {t("learn more")}
+                {t("Learn more")}
               </a>
             </span>
           }
@@ -308,7 +310,6 @@ function Main() {
       {RenameFile}
       <PickFile
         maxSize={5e7}
-        maxFiles={3}
         baseStorageRef={storagePathRef}
         open={pickFileOpen}
         onClose={closePickFile}

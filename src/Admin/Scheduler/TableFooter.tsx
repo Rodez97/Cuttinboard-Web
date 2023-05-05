@@ -5,12 +5,16 @@ import { useTranslation } from "react-i18next";
 import { ShiftsTable } from "./Scheduler";
 import { Typography } from "antd";
 import { useCallback } from "react";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  useLocationPermissions,
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { minutesToTextDuration } from "@cuttinboard-solutions/types-helpers";
 
 function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
   const { t } = useTranslation();
   const { weekDays, summaryDoc, wageData } = useSchedule();
+  const checkPermission = useLocationPermissions();
 
   const cellData = useCallback(
     (weekDay: dayjs.Dayjs) => {
@@ -62,24 +66,26 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
           return <td key={i + 1}>{cellData(wd).totalHours}</td>;
         })}
       </tr>
-      <tr>
-        <th>{t("LABOR COST")}</th>
-        {weekDays.map((wd, i) => {
-          const { wages, laborPercent } = cellData(wd);
-          return (
-            <td key={i + 1}>
-              <Typography.Text>
-                {wages.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-                {" - "}
-                <b>({laborPercent})</b>
-              </Typography.Text>
-            </td>
-          );
-        })}
-      </tr>
+      {checkPermission("seeWages") && (
+        <tr>
+          <th>{t("LABOR COST")}</th>
+          {weekDays.map((wd, i) => {
+            const { wages, laborPercent } = cellData(wd);
+            return (
+              <td key={i + 1}>
+                <Typography.Text>
+                  {wages.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                  {" - "}
+                  <b>({laborPercent})</b>
+                </Typography.Text>
+              </td>
+            );
+          })}
+        </tr>
+      )}
     </tfoot>
   );
 }

@@ -15,7 +15,7 @@ import { Route, Routes, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 
-export default () => {
+export default ({ locationId }: { locationId?: string }) => {
   usePageTitle("Direct Messages");
   const { t } = useTranslation();
 
@@ -28,7 +28,7 @@ export default () => {
           collapsedWidth="0"
           className="module-sider"
         >
-          <DMList />
+          <DMList locationId={locationId} />
         </Layout.Sider>
         <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
           <Routes>
@@ -39,8 +39,15 @@ export default () => {
                 <EmptyExtended
                   description={
                     <p>
-                      {t("Welcome to Direct Messages.")}{" "}
-                      <a>{t("Learn More")}</a>
+                      {t("Welcome to Direct Messages")}
+                      {". "}
+                      <a
+                        href="http://www.cuttinboard.com/help/direct-messages"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("Learn more")}
+                      </a>
                     </p>
                   }
                   image={dmImage}
@@ -79,7 +86,15 @@ const Main = () => {
       <EmptyBoard
         description={
           <p>
-            {t("Welcome to Direct Messages.")} <a>{t("Learn More")}</a>
+            {t("Welcome to Direct Messages")}
+            {". "}
+            <a
+              href="http://www.cuttinboard.com/help/direct-messages"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("Learn more")}
+            </a>
           </p>
         }
         image={dmImage}

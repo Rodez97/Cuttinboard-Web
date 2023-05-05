@@ -6,10 +6,14 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { logEvent } from "firebase/analytics";
 // third party
 import { recordError } from "../utils/utils";
-import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { Alert, Button, Form, Input, Typography } from "antd";
-import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  AUTH,
+  Colors,
+  useCuttinboardRaw,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { ANALYTICS } from "firebase";
+import { AuthError, signInWithEmailAndPassword } from "firebase/auth";
 
 //= ===========================|| FIREBASE - LOGIN ||============================//
 
@@ -17,8 +21,8 @@ const FirebaseLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [signInWithEmailAndPassword, user, loading, error] =
-    useSignInWithEmailAndPassword(AUTH);
+  const [error, setError] = useState<AuthError>();
+  const { user } = useCuttinboardRaw();
 
   const onFinish = async ({
     email,
@@ -29,12 +33,14 @@ const FirebaseLogin = () => {
   }) => {
     setIsSubmitting(true);
     try {
-      await signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(AUTH, email, password);
       logEvent(ANALYTICS, "login", {
         method: "Email-Password",
         email,
       });
+      navigate("/dashboard");
     } catch (error) {
+      setError(error);
       recordError(error);
     } finally {
       setIsSubmitting(false);
@@ -54,7 +60,7 @@ const FirebaseLogin = () => {
       <Typography.Title level={4} css={{ marginBottom: "20px !important" }}>
         {t("Hi, Welcome Back")}
       </Typography.Title>
-      <Form disabled={isSubmitting || loading} onFinish={onFinish}>
+      <Form disabled={isSubmitting} onFinish={onFinish}>
         <Form.Item
           required
           name="email"
@@ -93,13 +99,8 @@ const FirebaseLogin = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button
-            block
-            htmlType="submit"
-            loading={isSubmitting || loading}
-            type="primary"
-          >
-            {t("Sign in")}
+          <Button block htmlType="submit" loading={isSubmitting} type="primary">
+            {t("Sign In")}
           </Button>
         </Form.Item>
 
@@ -118,7 +119,7 @@ const FirebaseLogin = () => {
       {error && (
         <Alert
           message="Error"
-          description={t(error?.message)}
+          description={t(error.code)}
           type="error"
           showIcon
           closable

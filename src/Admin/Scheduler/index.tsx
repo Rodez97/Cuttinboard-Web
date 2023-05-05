@@ -2,9 +2,8 @@
 import { jsx } from "@emotion/react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import {
-  employeesSelectors,
   ScheduleProvider,
-  useAppSelector,
+  useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { useTranslation } from "react-i18next";
 import { lazy } from "react";
@@ -15,7 +14,7 @@ const RosterView = lazy(() => import("./RosterView"));
 
 export default () => {
   const { t } = useTranslation();
-  const employees = useAppSelector(employeesSelectors.selectAll);
+  const { employees } = useCuttinboardLocation();
   const navigate = useNavigate();
 
   if (employees.length === 0) {

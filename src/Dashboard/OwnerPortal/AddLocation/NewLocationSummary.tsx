@@ -19,7 +19,7 @@ function NewLocationSummary() {
   const getPriceText = useCallback(() => {
     const price = subscriptionDocument?.items[0]?.price.unit_amount / 100;
     const newQuantity = Number(organization?.locations) + 1;
-    return t(`{{0}} locations x {{1}}.`, {
+    return t(`{{0}} locations x {{1}}`, {
       0: newQuantity,
       1: price.toLocaleString("EN-us", {
         style: "currency",
