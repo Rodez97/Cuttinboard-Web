@@ -2,6 +2,7 @@ import { getAnalytics } from "firebase/analytics";
 import { FirebaseOptions, initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
 import { getPerformance } from "firebase/performance";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 // Firebase configuration object
 export const FIREBASE_CONFIG: FirebaseOptions = {
@@ -17,6 +18,15 @@ export const FIREBASE_CONFIG: FirebaseOptions = {
 
 // Initialize the Firebase app
 const APP = initializeApp(FIREBASE_CONFIG);
+
+// Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
+// key is the counterpart to the secret key you set in the Firebase console.
+initializeAppCheck(APP, {
+  provider: new ReCaptchaV3Provider(process.env.RECAPTCHA3_SITE_KEY),
+  // Optional argument. If true, the SDK automatically refreshes App Check
+  // tokens as needed.
+  isTokenAutoRefreshEnabled: true,
+});
 
 // Initialize Firestore
 initializeFirestore(APP, {
