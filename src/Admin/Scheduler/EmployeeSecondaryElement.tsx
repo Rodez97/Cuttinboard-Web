@@ -3,16 +3,14 @@ import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import { Space, Tag, Tooltip, Typography } from "antd";
 import {
+  getEmployeeShiftsSummary,
+  minutesToTextDuration,
   useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import currency from "currency.js";
-import {
-  getEmployeeShiftsSummary,
-  IShift,
-  minutesToTextDuration,
-} from "@cuttinboard-solutions/types-helpers";
 import { useTranslation } from "react-i18next";
+import { IShift } from "@cuttinboard-solutions/types-helpers";
 
 const EmployeeSecondaryElement = ({
   employeeId,

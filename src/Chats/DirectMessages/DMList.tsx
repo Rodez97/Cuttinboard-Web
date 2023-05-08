@@ -161,9 +161,8 @@ const DMListItem = ({ chat, recipient }: IDMItem) => {
         <Avatar icon={<UserOutlined />} />
       ) : (
         <CuttinboardAvatar
-          src={recipient.avatar || undefined}
-          userId={recipient._id}
-          icon={<UserOutlined />}
+          src={recipient.avatar}
+          alt={recipient.name}
           className="dm-list-item__avatar"
         />
       )}

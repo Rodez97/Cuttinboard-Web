@@ -29,7 +29,6 @@ function MessageBubble({ currentMessage, canUse }: MessageBubbleProps) {
       title={
         <GroupHeadingAvatar
           avatar={currentMessage.user.avatar || undefined}
-          userId={currentMessage.user._id}
           name={currentMessage.user.name}
         />
       }

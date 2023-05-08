@@ -35,7 +35,7 @@ const FirebaseLogin = () => {
     try {
       await signInWithEmailAndPassword(AUTH, email, password);
       logEvent(ANALYTICS, "login", {
-        method: "Email-Password",
+        method: "email-password",
         email,
       });
       navigate("/dashboard");
@@ -84,7 +84,7 @@ const FirebaseLogin = () => {
             },
           ]}
         >
-          <Input.Password placeholder={t("Password")} maxLength={255} />
+          <Input.Password placeholder={t("Password")} />
         </Form.Item>
         <Form.Item>
           <Typography.Link

@@ -182,6 +182,21 @@ service cloud.firestore {
       }
     }
 
+    match /shifts {
+      allow read: if isAuthenticated() && (locMember(resource.data.locationId) || resource.data.employeeId == request.auth.uid);
+
+      match /{shiftId} {
+        allow create: if locMember(request.resource.data.locationId) && request.auth.token.organizationKey.role <= 3;
+        allow update, delete: if locMember(resource.data.locationId) && request.auth.token.organizationKey.role <= 3;
+        allow read: if (locMember(resource.data.locationId) && request.auth.token.organizationKey.role <= 3) || resource.data.employeeId == request.auth.uid;
+      }
+    }
+
+    match /schedule/{document=**} {
+      allow create: if locMember(request.resource.data.locationId) && request.auth.token.organizationKey.role <= 3;
+      allow read, update, delete: if locMember(resource.data.locationId) && request.auth.token.organizationKey.role <= 3;
+    }
+
     match /directMessages/{dmId} {
       function isMemberOfDM(dmId) {
         return get(/databases/$(database)/documents/directMessages/$(dmId)).data.members.keys().hasAny([request.auth.uid]);

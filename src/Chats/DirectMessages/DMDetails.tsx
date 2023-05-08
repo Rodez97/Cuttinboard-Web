@@ -32,7 +32,7 @@ export default (props: ModalProps) => {
         }}
       >
         <CuttinboardAvatar
-          userId={recipientUser._id}
+          alt={recipientUser.name}
           size={100}
           src={recipientUser.avatar}
         />

@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { DownOutlined, UserOutlined } from "@ant-design/icons";
+import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, MenuProps, Modal, Space } from "antd";
 import { signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
@@ -122,11 +122,9 @@ function UserMenu({ color }: { color?: string }) {
       >
         <CuttinboardAvatar
           src={user.photoURL ?? undefined}
-          alt={user.displayName ?? ""}
-          icon={<UserOutlined />}
-          userId={user.uid}
+          alt={user.displayName ?? undefined}
         />
-        <DownOutlined style={{ fontSize: 14, color: color ?? "#fff" }} />
+        <DownOutlined css={{ fontSize: 14, color: color ?? "#fff" }} />
       </div>
     </Dropdown>
   );

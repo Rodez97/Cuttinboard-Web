@@ -1,10 +1,12 @@
 /** @jsx jsx */
-import { minutesToTextDuration } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
 import { Alert, Card, Divider, Skeleton, Space, Statistic } from "antd";
 import { useTranslation } from "react-i18next";
 import { ScheduleTodaySummary } from "./useSummaryData";
-import { useLocationPermissions } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  minutesToTextDuration,
+  useLocationPermissions,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import React from "react";
 
 export default function ScheduleSummary({

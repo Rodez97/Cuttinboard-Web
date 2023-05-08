@@ -158,7 +158,10 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
                 borderBottom: "1px solid #e8e8e8",
               }}
             >
-              <CuttinboardAvatar src={emp.avatar} userId={emp.id} />
+              <CuttinboardAvatar
+                src={emp.avatar}
+                alt={getEmployeeFullName(emp)}
+              />
 
               <Typography.Text
                 ellipsis

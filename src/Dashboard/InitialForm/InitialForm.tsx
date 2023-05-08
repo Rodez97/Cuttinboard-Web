@@ -32,7 +32,7 @@ function InitialForm() {
             text={t(
               "\"With Cuttinboard's scheduling tool, I can easily manage my staff's schedules, and the app's push notifications keep everyone on track. It's been a lifesaver! I can't believe I get all of this for only {{0}} a month.\"",
               {
-                0: "$30",
+                0: "$50",
               }
             )}
             author="Mark Williamson"

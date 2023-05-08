@@ -5,11 +5,9 @@ import CuttinboardAvatar from "../../shared/atoms/Avatar";
 
 export function GroupHeadingAvatar({
   avatar,
-  userId,
   name,
 }: {
   avatar?: string;
-  userId: string;
   name: string;
 }) {
   return (
@@ -20,7 +18,7 @@ export function GroupHeadingAvatar({
         gap: 8,
       }}
     >
-      <CuttinboardAvatar size={30} src={avatar} userId={userId} />
+      <CuttinboardAvatar alt={name} size={30} src={avatar} />
       <Typography>{name}</Typography>
     </div>
   );

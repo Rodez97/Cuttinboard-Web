@@ -6,11 +6,10 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import LodashModuleReplacementPlugin from "lodash-webpack-plugin";
 import path from "path";
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
-import webpack from "webpack";
 import { fileURLToPath } from "url";
 import CompressionPlugin from "compression-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
-import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import { GenerateSW } from "workbox-webpack-plugin";
 import Dotenv from "dotenv-webpack";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -223,6 +222,47 @@ const webpackConfig = () => {
         minRatio: 0.8,
       }),
       new Dotenv(),
+      new GenerateSW({
+        clientsClaim: true,
+        skipWaiting: true,
+        runtimeCaching: [
+          {
+            urlPattern: new RegExp(
+              "^https://firebasestorage.googleapis.com/v0/b/"
+            ),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "firebase-storage",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+            },
+          },
+          {
+            urlPattern: new RegExp("^https://fonts.googleapis.com/"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+          {
+            urlPattern: new RegExp("^https://fonts.gstatic.com/"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+        ],
+      }),
     ],
   };
 };

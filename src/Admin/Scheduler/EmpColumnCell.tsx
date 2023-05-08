@@ -99,8 +99,8 @@ function EmpColumnCell({ employee, empShifts }: EmpColumnCellProps) {
       <div className="employee-cell__content">
         <CuttinboardAvatar
           size={40}
-          src={employee?.avatar}
-          userId={employee.id}
+          src={employee.avatar}
+          alt={getEmployeeFullName(employee)}
         />
         <div className="employee-cell__content__secondary">
           <Typography.Text

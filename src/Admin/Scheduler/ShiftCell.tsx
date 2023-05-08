@@ -4,12 +4,11 @@ import ShiftElement from "./ShiftElement";
 import { PlusOutlined } from "@ant-design/icons";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { useMemo } from "react";
+import { IEmployee, IShift } from "@cuttinboard-solutions/types-helpers";
 import {
   getShiftDayjsDate,
   getShiftIsoWeekday,
-  IEmployee,
-  IShift,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@cuttinboard-solutions/cuttinboard-library";
 dayjs.extend(isoWeek);
 
 export interface ManageShiftsProps {

@@ -1,20 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { collectionData, docData } from "rxfire/firestore";
-import { combineLatest, map } from "rxjs";
-import { collection, doc, Query, query, where } from "firebase/firestore";
+import { defaultIfEmpty, map, merge } from "rxjs";
+import {
+  collection,
+  doc,
+  limit,
+  Query,
+  query,
+  where,
+} from "firebase/firestore";
 import dayjs from "dayjs";
 import {
-  DATABASE,
   FIRESTORE,
   recurringTaskDocConverter,
+  scheduleConverter,
   useCuttinboardLocation,
   utensilConverter,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ref } from "firebase/database";
-import { object } from "rxfire/database";
 import {
   extractRecurringTasksArray,
   IRecurringTask,
+  IRecurringTaskDoc,
   IScheduleDoc,
   IUtensil,
   recurringTaskIsToday,
@@ -49,6 +55,11 @@ type SummaryDataHook = [
   boolean
 ];
 
+type BaseEvent =
+  | { type: "recurringTasks"; event: [string, IRecurringTask][] }
+  | { type: "utensils"; event: IUtensil[] }
+  | { type: "schedule"; event: ScheduleTodaySummary };
+
 export function useSummaryData(): SummaryDataHook {
   const { location } = useCuttinboardLocation();
   const [scheduleTodaySummary, setScheduleTodaySummary] =
@@ -61,7 +72,6 @@ export function useSummaryData(): SummaryDataHook {
   useEffect(() => {
     setLoading(true);
     const weekId = dayjs().format(WEEKFORMAT);
-    const scheduleRef = ref(DATABASE, `schedule/${location.id}/${weekId}`);
     const recurringTaskDocRef = doc(
       FIRESTORE,
       "Locations",
@@ -73,10 +83,17 @@ export function useSummaryData(): SummaryDataHook {
       collection(FIRESTORE, "Locations", location.id, "utensils"),
       where("percent", "<=", 33.33)
     ).withConverter(utensilConverter);
+    const scheduleRef = query(
+      collection(FIRESTORE, "schedule"),
+      where("weekId", "==", weekId),
+      where("locationId", "==", location.id),
+      limit(1)
+    ).withConverter(scheduleConverter);
 
-    const scheduleDocument$ = object(scheduleRef).pipe(
-      map(({ snapshot }) => {
-        const scheduleData: IScheduleDoc | null = snapshot.val();
+    const scheduleDocument$ = collectionData(scheduleRef).pipe(
+      defaultIfEmpty(new Array<IScheduleDoc>()),
+      map<IScheduleDoc[], BaseEvent>((schedule) => {
+        const scheduleData: IScheduleDoc | null = schedule?.[0] ?? null;
         const isoWeekDay = dayjs().isoWeekday();
         if (scheduleData?.scheduleSummary?.byDay[isoWeekDay]) {
           const data = scheduleData.scheduleSummary.byDay[isoWeekDay];
@@ -84,40 +101,65 @@ export function useSummaryData(): SummaryDataHook {
             scheduleData.projectedSalesByDay?.[isoWeekDay] ?? 0;
           const laborPercent = (data.totalWage / projectedSales) * 100;
           return {
-            ...data,
-            percent: isFinite(laborPercent) ? laborPercent : 0,
-            projectedSales,
+            type: "schedule",
+            event: {
+              ...data,
+              percent: isFinite(laborPercent) ? laborPercent : 0,
+              projectedSales,
+            },
           };
         } else {
-          return defaultScheduleTodaySummary;
+          return {
+            type: "schedule",
+            event: defaultScheduleTodaySummary,
+          };
         }
       })
     );
     const recurringTaskDoc$ = docData(recurringTaskDocRef).pipe(
-      map((recurringTaskDoc) =>
-        recurringTaskDoc
+      map<IRecurringTaskDoc, BaseEvent>((recurringTaskDoc) => {
+        const rTasks = recurringTaskDoc
           ? extractRecurringTasksArray(recurringTaskDoc).filter(([, task]) => {
               return recurringTaskIsToday(task);
             })
-          : []
-      )
+          : [];
+        return {
+          type: "recurringTasks",
+          event: rTasks,
+        };
+      })
     );
-    const utensilsCollection$ = collectionData(utensilsCollectionRef);
+    const utensilsCollection$ = collectionData(utensilsCollectionRef).pipe(
+      map<IUtensil[], BaseEvent>((utensils) => {
+        return {
+          type: "utensils",
+          event: utensils,
+        };
+      })
+    );
 
-    const combined$ = combineLatest([
+    const combined$ = merge(
       scheduleDocument$,
       recurringTaskDoc$,
-      utensilsCollection$,
-    ]);
-
-    const subscription = combined$.subscribe(
-      ([scheduleDocument, recurringTasks, utensils]) => {
-        setLoading(false);
-        setScheduleTodaySummary(scheduleDocument);
-        setRecurringTasksSummary(recurringTasks);
-        setUtensils(utensils);
-      }
+      utensilsCollection$
     );
+
+    const subscription = combined$.subscribe({
+      next: (event) => {
+        switch (event.type) {
+          case "schedule":
+            setScheduleTodaySummary(event.event);
+            break;
+          case "recurringTasks":
+            setRecurringTasksSummary(event.event);
+            break;
+          case "utensils":
+            setUtensils(event.event);
+            break;
+        }
+        setLoading(false);
+      },
+    });
 
     return () => {
       subscription.unsubscribe();

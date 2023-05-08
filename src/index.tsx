@@ -5,6 +5,7 @@ import reportWebVitals from "./reportWebVitals";
 import "./styles/custom-classes.less";
 import { createRoot } from "react-dom/client";
 import Root from "./Root";
+import registerSW from "./registerSW";
 
 export const container = document.getElementById("root");
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -15,3 +16,4 @@ root.render(<Root />);
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+registerSW();

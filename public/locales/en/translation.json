@@ -25,6 +25,7 @@
   "Firebase: Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later. (auth/too-many-requests).": "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later",
   "exceededCharacterLimit": "Character Limit Reached",
   "contentRequired": "Content Required",
+  "Are you sure you want to delete this conversation?": "Are you sure you want to delete this Message Board?",
   "Drag & drop some files here, or click to select files": "Drag & drop a file here, or click to select a file",
   "Upload Files": "Upload File",
   "Past Due": "Past Due",
@@ -45,6 +46,7 @@
   "all_scheduled": "All employees scheduled",
   "changed": "Employees with updates",
   "none": "No one",
+  "Conversations Details": "Message Board Details",
   "Rename Checklist": "Rename Task List",
   "DM_DELETED_USER_WARNING": "This user has deleted their account"
 }

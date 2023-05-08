@@ -15,12 +15,14 @@ import mdiClockAlert from "@mdi/svg/svg/clock-alert.svg";
 import mdiComment from "@mdi/svg/svg/comment-quote-outline.svg";
 import { MouseEvent, useMemo } from "react";
 import ShowLegend from "./ShowLegend";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
-import { ManageShiftsProps } from "./ShiftCell";
 import {
   checkIfShiftsHaveChanges,
   getShiftDayjsDate,
   getShiftLatestData,
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { ManageShiftsProps } from "./ShiftCell";
+import {
   IEmployee,
   IShift,
   RoleAccessLevels,

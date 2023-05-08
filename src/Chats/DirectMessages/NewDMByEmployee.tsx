@@ -11,7 +11,10 @@ import {
   useDirectMessageChat,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
-import { IEmployee } from "@cuttinboard-solutions/types-helpers";
+import {
+  IEmployee,
+  getEmployeeFullName,
+} from "@cuttinboard-solutions/types-helpers";
 
 type Props = {
   onCreatingChange: (status: boolean) => void;
@@ -60,7 +63,12 @@ export default function NewDMByEmployee({ onCreatingChange, onClose }: Props) {
             }}
           >
             <List.Item.Meta
-              avatar={<CuttinboardAvatar userId={emp.id} src={emp.avatar} />}
+              avatar={
+                <CuttinboardAvatar
+                  alt={getEmployeeFullName(emp)}
+                  src={emp.avatar}
+                />
+              }
               title={`${emp.name} ${emp.lastName}`}
               description={emp.email}
             />

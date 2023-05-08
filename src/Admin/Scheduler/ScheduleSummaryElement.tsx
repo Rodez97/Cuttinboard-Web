@@ -3,10 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Statistic } from "antd";
 import {
   Colors,
+  minutesToTextDuration,
   useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { minutesToTextDuration } from "@cuttinboard-solutions/types-helpers";
 
 function ScheduleSummaryElement() {
   const { t } = useTranslation();

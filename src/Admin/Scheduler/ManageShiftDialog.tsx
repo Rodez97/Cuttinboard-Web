@@ -31,6 +31,9 @@ import {
 } from "antd";
 import { capitalize, isEmpty } from "lodash";
 import {
+  checkForOverlappingShiftsARRAY,
+  getShiftDayjsDate,
+  getShiftLatestData,
   useCuttinboardLocation,
   useLocationPermissions,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -38,16 +41,13 @@ import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
 import { Timestamp } from "firebase/firestore";
 import {
-  checkForOverlappingShiftsARRAY,
-  getEmployeeHourlyWage,
-  getShiftDayjsDate,
-  getShiftLatestData,
   IEmployee,
   IPrimaryShiftData,
   IShift,
   RoleAccessLevels,
   Shift,
   WEEKFORMAT,
+  getEmployeeHourlyWage,
 } from "@cuttinboard-solutions/types-helpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
@@ -196,9 +196,6 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
             locationName: location.name,
             locationId: location.id,
             employeeId: state.employee.id,
-            locationQuery: "",
-            employeeQuery: "",
-            employeeLocationQuery: "",
             weekOrderFactor: 0,
           };
           createShift(newShift, weekDays, applyTo);

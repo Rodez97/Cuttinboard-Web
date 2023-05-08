@@ -31,6 +31,7 @@ import { useManageShiftDialog } from "./ManageShiftDialog";
 import { GrayPageHeader, LoadingPage } from "../../shared";
 import PublishDialog from "./PublishDialog";
 import {
+  checkShiftArrayChanges,
   useCuttinboardLocation,
   useDisclose,
   useLocationPermissions,
@@ -44,7 +45,6 @@ import ErrorPage from "../../shared/molecules/PageError";
 import ScheduleSettings from "../Settings/ScheduleSettings";
 import {
   checkEmployeePositions,
-  checkShiftArrayChanges,
   getEmployeeFullName,
   IEmployee,
   IShift,

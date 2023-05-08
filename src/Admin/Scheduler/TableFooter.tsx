@@ -6,10 +6,10 @@ import { ShiftsTable } from "./Scheduler";
 import { Typography } from "antd";
 import { useCallback } from "react";
 import {
+  minutesToTextDuration,
   useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { minutesToTextDuration } from "@cuttinboard-solutions/types-helpers";
 
 function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
   const { t } = useTranslation();

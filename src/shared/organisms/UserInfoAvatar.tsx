@@ -4,7 +4,10 @@ import { Modal } from "antd";
 import { useTranslation } from "react-i18next";
 import UserInfoElement from "./UserInfoElement";
 import CuttinboardAvatar from "../atoms/Avatar";
-import { ICuttinboardUser } from "@cuttinboard-solutions/types-helpers";
+import {
+  ICuttinboardUser,
+  getEmployeeFullName,
+} from "@cuttinboard-solutions/types-helpers";
 
 function UserInfoAvatar({
   employee,
@@ -22,11 +25,11 @@ function UserInfoAvatar({
   };
   return (
     <CuttinboardAvatar
-      size={size}
-      src={employee?.avatar}
+      size={size ?? 30}
+      src={employee.avatar}
+      alt={getEmployeeFullName(employee)}
       onClick={handleOpen}
       css={{ cursor: "pointer" }}
-      userId={employee.id}
     />
   );
 }

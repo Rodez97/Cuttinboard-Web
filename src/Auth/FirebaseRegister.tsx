@@ -178,11 +178,7 @@ const FirebaseRegister = () => {
             },
           ]}
         >
-          <Input.Password
-            placeholder={t("Password")}
-            maxLength={255}
-            showCount
-          />
+          <Input.Password placeholder={t("Password")} showCount />
         </Form.Item>
         <Form.Item
           required

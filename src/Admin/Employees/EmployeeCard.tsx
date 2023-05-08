@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import { css, jsx } from "@emotion/react";
+import { jsx } from "@emotion/react";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Button, Dropdown, MenuProps, Modal, Skeleton, Tag } from "antd";
+import { Button, Dropdown, MenuProps, Modal, Tag, Typography } from "antd";
 import {
   ExclamationCircleOutlined,
   FileTextOutlined,
@@ -12,7 +12,7 @@ import {
   MoreOutlined,
   TagOutlined,
 } from "@ant-design/icons";
-import { GrayPageHeader, UserInfoElement } from "../../shared";
+import { UserInfoElement } from "../../shared";
 import EmployeeContactDialog from "./EmployeeContactDialog";
 import {
   useCuttinboard,
@@ -21,13 +21,14 @@ import {
   useEmployees,
   useLocationPermissions,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import AvatarPlaceholder from "../../shared/atoms/AvatarPlaceholder";
 import {
   CompareRoles,
   getEmployeeFullName,
   IEmployee,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
+import CuttinboardAvatar from "../../shared/atoms/Avatar";
+import styled from "@emotion/styled";
 
 interface EmployeeCardProps {
   employee: IEmployee;
@@ -118,42 +119,40 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
 
   return (
     <React.Fragment>
-      <Skeleton loading={!employee} active>
-        <GrayPageHeader
-          css={cardStyle}
-          avatar={{
-            src: employee.avatar,
-            onClick: handleAvatarClick,
-            style: { cursor: "pointer" },
-            icon: <AvatarPlaceholder userId={employee.id} />,
-          }}
-          subTitle={getEmployeeFullName(employee)}
-          extra={
-            <Dropdown
-              menu={{
-                items: [
-                  ...items,
-                  ...(employee.id !== user.uid && compareRoles && manageItems
-                    ? manageItems
-                    : []),
-                ],
-              }}
-              trigger={["click"]}
-            >
-              <Button type="text" shape="circle" icon={<MoreOutlined />} />
-            </Dropdown>
-          }
-          footer={
-            getPositions.length
-              ? getPositions.map((pos) => (
-                  <Tag key={pos} color="processing">
-                    {pos}
-                  </Tag>
-                ))
-              : undefined
-          }
-        />
-      </Skeleton>
+      <Container>
+        <Content>
+          <LeftContent>
+            <EmployeeAvatar
+              src={employee.avatar}
+              // If there is no avatar, we will use the email to fetch the gravatars
+              alt={getEmployeeFullName(employee)}
+              onClick={handleAvatarClick}
+            />
+            <Name>{getEmployeeFullName(employee)}</Name>
+          </LeftContent>
+
+          <Dropdown
+            menu={{
+              items: [
+                ...items,
+                ...(employee.id !== user.uid && compareRoles && manageItems
+                  ? manageItems
+                  : []),
+              ],
+            }}
+            trigger={["click"]}
+          >
+            <Button type="text" shape="circle" icon={<MoreOutlined />} />
+          </Dropdown>
+        </Content>
+        <TagsContainer>
+          {getPositions.map((pos) => (
+            <Tag key={pos} color="processing">
+              {pos}
+            </Tag>
+          ))}
+        </TagsContainer>
+      </Container>
       <EmployeeContactDialog
         employee={employee}
         open={infoOpen}
@@ -164,11 +163,41 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
   );
 }
 
-const cardStyle = css`
-  margin-bottom: 4px;
-  .ant-page-header-footer {
-    margin-top: 0;
-  }
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: #fbfbfa;
+  padding: 6px 16px;
+  margin: 0px 0px 4px;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-block: 5px;
+`;
+
+const LeftContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const Name = styled(Typography.Text)`
+  margin-left: 10px;
+  color: rgba(0, 0, 0, 0.65);
+`;
+
+const EmployeeAvatar = styled(CuttinboardAvatar)`
+  cursor: pointer;
 `;
 
 export default EmployeeCard;

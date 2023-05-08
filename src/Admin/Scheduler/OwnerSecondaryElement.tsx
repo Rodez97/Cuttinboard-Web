@@ -1,11 +1,11 @@
 import React, { useMemo } from "react";
 import { Tag } from "antd";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
 import {
   getEmployeeShiftsSummary,
-  IShift,
   minutesToTextDuration,
-} from "@cuttinboard-solutions/types-helpers";
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { IShift } from "@cuttinboard-solutions/types-helpers";
 
 const OwnerSecondaryElement = ({
   employeeId,

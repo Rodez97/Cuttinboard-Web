@@ -6,12 +6,14 @@ import {
   MobileOutlined,
   PhoneOutlined,
   SendOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { Button, List } from "antd";
 import { useTranslation } from "react-i18next";
 import CuttinboardAvatar from "../atoms/Avatar";
-import { ICuttinboardUser } from "@cuttinboard-solutions/types-helpers";
+import {
+  ICuttinboardUser,
+  getEmployeeFullName,
+} from "@cuttinboard-solutions/types-helpers";
 
 function UserInfoElement({ employee }: { employee: ICuttinboardUser }) {
   const { t } = useTranslation();
@@ -22,9 +24,7 @@ function UserInfoElement({ employee }: { employee: ICuttinboardUser }) {
         <CuttinboardAvatar
           src={employee.avatar}
           size={60}
-          alt={employee.name}
-          icon={<UserOutlined />}
-          userId={employee.id}
+          alt={getEmployeeFullName(employee)}
         />
       </List.Item>
 
