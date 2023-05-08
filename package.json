@@ -1,6 +1,6 @@
 {
   "name": "cuttinboard",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "type": "module",
   "private": true,
   "description": "Elevvate Technologies manages Cuttinboard, an application to help restaurants be more organized and intercommunicated. Cuttinboard is the platform where restaurant professionals perform the digital work. Cuttinboard brings restaurant employees into a centralized platform of information exchange.",
@@ -64,9 +64,7 @@
     "match-sorter": "^6.3.1",
     "moment": "^2.29.4",
     "nanoid": "^4.0.2",
-    "prop-types": "^15.8.1",
     "react": "^18.2.0",
-    "react-avatar": "^5.0.3",
     "react-avatar-editor": "^13.0.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
@@ -79,11 +77,6 @@
     "react-to-print": "^2.14.12",
     "react-use-wizard": "^2.2.1",
     "rooks": "^6.4.3",
-    "swr": "^2.1.0",
-    "workbox": "^0.0.0",
-    "workbox-precaching": "^6.5.4",
-    "workbox-sw": "^6.5.4",
-    "workbox-webpack-plugin": "^6.5.4",
     "yup": "^1.1.1"
   },
   "devDependencies": {
@@ -155,6 +148,7 @@
     "webpack": "^5.75.0",
     "webpack-bundle-analyzer": "^4.7.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.0"
+    "webpack-dev-server": "^4.11.0",
+    "workbox-webpack-plugin": "^6.5.4"
   }
 }
