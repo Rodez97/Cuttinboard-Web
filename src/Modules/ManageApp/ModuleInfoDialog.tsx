@@ -20,7 +20,6 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { useNavigate } from "react-router-dom";
 import {
-  getBoardPosition,
   getEmployeeFullName,
   PrivacyLevel,
   privacyLevelToString,
@@ -37,10 +36,14 @@ function ModuleInfoDialog({
   const navigate = useNavigate();
 
   const admins = useMemo(() => {
-    if (!selectedBoard || !selectedBoard.hosts || !selectedBoard.hosts.length) {
+    if (
+      !selectedBoard ||
+      !selectedBoard.details.admins ||
+      !selectedBoard.details.admins.length
+    ) {
       return [];
     }
-    const admins = selectedBoard.hosts;
+    const admins = selectedBoard.details.admins;
     return employees.filter((e) => admins.includes(e.id));
   }, [employees, selectedBoard]);
 
@@ -114,9 +117,10 @@ function ModuleInfoDialog({
         <List.Item>
           <List.Item.Meta
             avatar={
-              selectedBoard.privacyLevel === PrivacyLevel.PRIVATE ? (
+              selectedBoard.details.privacyLevel === PrivacyLevel.PRIVATE ? (
                 <LockOutlined />
-              ) : selectedBoard.privacyLevel === PrivacyLevel.POSITIONS ? (
+              ) : selectedBoard.details.privacyLevel ===
+                PrivacyLevel.POSITIONS ? (
                 <TagsOutlined />
               ) : (
                 <GlobalOutlined />
@@ -126,7 +130,7 @@ function ModuleInfoDialog({
             description={
               selectedBoard.global
                 ? t("Available across all locations")
-                : t(privacyLevelToString(selectedBoard.privacyLevel))
+                : t(privacyLevelToString(selectedBoard.details.privacyLevel))
             }
           />
         </List.Item>
@@ -150,13 +154,13 @@ function ModuleInfoDialog({
             }
           />
         </List.Item>
-        {selectedBoard.privacyLevel === PrivacyLevel.POSITIONS &&
-          Boolean(getBoardPosition(selectedBoard)) && (
+        {selectedBoard.details.privacyLevel === PrivacyLevel.POSITIONS &&
+          selectedBoard.details.position && (
             <List.Item>
               <List.Item.Meta
                 avatar={<TagOutlined />}
                 title={t("Position")}
-                description={getBoardPosition(selectedBoard)}
+                description={selectedBoard.details.position}
               />
             </List.Item>
           )}

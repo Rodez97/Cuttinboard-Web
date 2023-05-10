@@ -27,7 +27,6 @@ import {
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
 import Select from "react-select";
 import {
-  getBoardPosition,
   IBoard,
   POSITIONS,
   PrivacyLevel,
@@ -106,7 +105,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
       setTitle(t("Edit ") + moduleName);
       setBaseModule(module);
 
-      const position = getBoardPosition(module);
+      const position = module.details.position;
 
       const positionOption: PositionOption | undefined = position
         ? {
@@ -119,7 +118,7 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
         name: module.name,
         description: module.description,
         position: positionOption,
-        privacyLevel: module.privacyLevel,
+        privacyLevel: module.details.privacyLevel,
       });
       open();
     };

@@ -37,14 +37,16 @@ function ModuleManageMembers(props: ModalProps) {
   return (
     <ManageBoardMembers
       readonly={!canManageBoard}
-      members={selectedBoard.accessTags ?? []}
+      members={selectedBoard.details.members ?? []}
       removeMember={handleRemoveMember}
       addMembers={handleAddMembers}
       setAppHost={handleSetAppHost}
       removeHost={handleRemoveHost}
-      privacyLevel={selectedBoard.privacyLevel}
-      positions={selectedBoard.accessTags}
-      admins={selectedBoard.hosts}
+      privacyLevel={selectedBoard.details.privacyLevel}
+      positions={
+        selectedBoard.details.position ? [selectedBoard.details.position] : []
+      }
+      admins={selectedBoard.details.admins}
       {...props}
     />
   );

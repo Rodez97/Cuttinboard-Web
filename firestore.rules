@@ -105,12 +105,12 @@ service cloud.firestore {
 
       function canWriteBoard(){
         let highRole = request.auth.token.organizationKey.role <= 2;
-        return locMember(locationId) && (highRole || request.auth.uid in resource.data.hosts);
+        return locMember(locationId) && (highRole || request.auth.uid in resource.data.details.admins);
       }
 
       function canWriteBoardContent(collectionName, boardId){
         let highRole = request.auth.token.organizationKey.role <= 2;
-        return locMember(locationId) && (highRole || request.auth.uid in get(/databases/$(database)/documents/Locations/$(locationId)/$(collectionName)/$(boardId)).data.hosts);
+        return locMember(locationId) && (highRole || request.auth.uid in get(/databases/$(database)/documents/Locations/$(locationId)/$(collectionName)/$(boardId)).data.details.admins);
       }
 
       match /notes/{boardId} {
@@ -214,11 +214,11 @@ service cloud.firestore {
 
 
     match /{path=**}/notes/{boardId} {
-      allow read: if resource.data.parentId == request.auth.token.organizationKey.orgId || resource.data.parentId == request.auth.token.organizationKey.locId;
+      allow read: if resource.data.details.parentId == request.auth.token.organizationKey.orgId || resource.data.details.parentId == request.auth.token.organizationKey.locId;
     }
 
     match /{path=**}/files/{boardId} {
-      allow read: if resource.data.parentId == request.auth.token.organizationKey.orgId || resource.data.parentId == request.auth.token.organizationKey.locId; 
+      allow read: if resource.data.details.parentId == request.auth.token.organizationKey.orgId || resource.data.details.parentId == request.auth.token.organizationKey.locId; 
     }
 
     match /{path=**}/employees/{employeeId} {
