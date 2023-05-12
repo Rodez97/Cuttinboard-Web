@@ -12,6 +12,7 @@ import {
 import { nanoid } from "nanoid";
 import { Timestamp, doc } from "firebase/firestore";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 
 interface IManageUtensilDialogRef {
   openNew: () => void;
@@ -70,6 +71,11 @@ const ManageUtensilDialog = forwardRef<IManageUtensilDialogRef, unknown>(
           createdAt: Timestamp.now().toMillis(),
         };
         createUtensil(newUtensil);
+
+        logAnalyticsEvent("utensil_created", {
+          name: newUtensil.name,
+          optimalQuantity: newUtensil.optimalQuantity,
+        });
       }
       handleClose();
     };

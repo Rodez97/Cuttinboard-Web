@@ -18,6 +18,7 @@ import {
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
+import { logAnalyticsEvent } from "../../firebase";
 
 export default function GlobalChecklistMain() {
   const { t } = useTranslation();
@@ -79,7 +80,11 @@ export default function GlobalChecklistMain() {
       ),
       okText: t("Clear All"),
       cancelText: t("Cancel"),
-      onOk: resetAllChecklistTasks,
+      onOk: async () => {
+        await resetAllChecklistTasks();
+
+        logAnalyticsEvent("daily_checklist_clear_all");
+      },
     });
   };
 

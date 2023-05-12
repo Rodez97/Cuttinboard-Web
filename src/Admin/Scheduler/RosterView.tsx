@@ -33,6 +33,7 @@ import {
   IShift,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 dayjs.extend(isoWeek);
 
 export type RosterData = {
@@ -215,16 +216,17 @@ function RosterView() {
     return `${firstDayWeek} - ${lastDayWeek}`.toUpperCase();
   }, [weekId]);
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const amRoster = dataSource["am"] ?? [];
     const pmRoster = dataSource["pm"] ?? [];
-    generateRosterPdf(
+    await generateRosterPdf(
       amRoster,
       pmRoster,
       weekId,
       weekDays[selectedDateIndex],
       location.name
     );
+    logAnalyticsEvent("schedule_roster_pdf_generated");
   };
 
   if (loading) {

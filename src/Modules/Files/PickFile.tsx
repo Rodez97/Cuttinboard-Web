@@ -24,6 +24,7 @@ import {
   getLocationUsage,
   ICuttinboard_File,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 
 const { Dragger } = Upload;
 
@@ -191,6 +192,11 @@ export default ({ maxSize, baseStorageRef, onClose, open }: PickFileProps) => {
         close();
         setFileList([]);
         setFilesToUpload([]);
+
+        logAnalyticsEvent("files_file_uploaded", {
+          size: fileToUpload.size,
+          type: fileToUpload.type,
+        });
       }
     );
   }, [

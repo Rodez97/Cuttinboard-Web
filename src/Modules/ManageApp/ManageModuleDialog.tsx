@@ -33,6 +33,7 @@ import {
   privacyLevelToString,
 } from "@cuttinboard-solutions/types-helpers";
 import { trimObject } from "../../utils/utils";
+import { logAnalyticsEvent } from "../../firebase";
 
 export interface ManageModuleDialogRef {
   openNew: () => void;
@@ -141,6 +142,12 @@ const ManageModuleDialog = forwardRef<ManageModuleDialogRef, ManageModuleProps>(
         updateBoard(baseModule, { ...values, position: position?.value });
       } else {
         addNewBoard({ ...values, privacyLevel, position: position?.value });
+
+        logAnalyticsEvent("location_board_created", {
+          name: values.name,
+          membershipType: privacyLevelToString(privacyLevel),
+          type: moduleName,
+        });
       }
       handleClose();
     };

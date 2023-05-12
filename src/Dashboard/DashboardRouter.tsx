@@ -5,7 +5,7 @@ import { useDashboard } from "./DashboardProvider";
 
 const Locations = lazy(() => import("./Locations"));
 const Account = lazy(() => import("./Account/Account"));
-const MyDocuments = lazy(() => import("./MyDocuments"));
+const MyDocuments = lazy(() => import("./Account/MyDocuments"));
 const Subscription = lazy(() => import("./Subscription"));
 const OwnerPortal = lazy(() => import("./OwnerPortal"));
 const DirectMessages = lazy(() => import("../Chats/DirectMessages"));

@@ -5,12 +5,11 @@ import { Alert, Button, Divider, Form, Input, Modal } from "antd";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isEmpty } from "lodash";
-import { logEvent } from "firebase/analytics";
 import {
   useDisclose,
   useGBoard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import { IBoard } from "@cuttinboard-solutions/types-helpers";
 
 export interface ManageBoardRef {
@@ -62,16 +61,15 @@ const ManageBoard = forwardRef<ManageBoardRef, ManageBoardProps>(
     const onFinish = async (values: FormType) => {
       if (isEditing && selectedBoard) {
         updateBoard(selectedBoard, values);
-        logEvent(ANALYTICS, "update_module", {
-          moduleName,
-          global: true,
+        logAnalyticsEvent("global_board_updated", {
+          type: moduleName,
+          name: values.name ?? selectedBoard.name,
         });
       } else {
         addNewBoard(values);
-        // Report to analytics
-        logEvent(ANALYTICS, "create_module", {
-          moduleName,
-          global: true,
+        logAnalyticsEvent("global_board_created", {
+          type: moduleName,
+          name: values.name,
         });
       }
       handleClose();

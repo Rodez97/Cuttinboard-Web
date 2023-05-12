@@ -15,6 +15,7 @@ import React, {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { logAnalyticsEvent } from "../../firebase";
 
 interface ManageNoteDialogRef {
   openNew: () => void;
@@ -60,7 +61,7 @@ export default forwardRef<ManageNoteDialogRef, ManageNoteDialogProps>(
       form.resetFields();
     };
 
-    const onFinish = (values: { title?: string; content: string }) => {
+    const onFinish = async (values: { title?: string; content: string }) => {
       // Normalize values to avoid leading/trailing spaces
       const title = values.title ? values.title.trim() : "";
       const content = values.content ? values.content.trim() : "";
@@ -82,7 +83,11 @@ export default forwardRef<ManageNoteDialogRef, ManageNoteDialogProps>(
             name: user.displayName ?? user.email ?? user.uid,
           },
         };
-        addNote(newNote);
+        await addNote(newNote);
+
+        logAnalyticsEvent("notes_note_created", {
+          size: content.length,
+        });
       }
       handleClose();
     };

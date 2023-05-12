@@ -11,6 +11,7 @@ import SetupPaymentMethodForm, {
 } from "./SetupPaymentMethodForm";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader } from "../shared";
+import { logAnalyticsEvent } from "../firebase";
 
 function Subscription() {
   usePageTitle("Manage Billing");
@@ -37,6 +38,8 @@ function Subscription() {
     const uri = `https://billing.stripe.com/p/login/dR615w5MkeoI8cE288?prefilled_email=${encodeEmail}`;
 
     window.open(uri, "_blank", "noopener,noreferrer");
+    // Report to analytics
+    logAnalyticsEvent("visit_stripe_portal");
   };
 
   const getPrice = useMemo(

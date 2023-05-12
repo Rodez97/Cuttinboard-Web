@@ -23,6 +23,7 @@ import {
 import moment from "moment";
 import { compact, isEqual } from "lodash";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { logAnalyticsEvent } from "../../firebase";
 
 type ScheduleFormData = {
   ot_week: {
@@ -84,9 +85,11 @@ function ScheduleSettings(props: DrawerProps) {
       end: time.end.format("HH:mm"),
     }));
 
-    updateScheduleSettings({ ...values, presetTimes });
+    await updateScheduleSettings({ ...values, presetTimes });
 
     message.success(t("Schedule settings saved"));
+
+    logAnalyticsEvent("schedule_settings_updated", values);
   };
 
   return (

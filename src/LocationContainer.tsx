@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   Navigate,
   Route,
@@ -25,6 +25,7 @@ import mdiEmployees from "@mdi/svg/svg/account-group.svg";
 import mdiSchedule from "@mdi/svg/svg/store-clock.svg";
 import mdiUtensils from "@mdi/svg/svg/blender.svg";
 import {
+  useCuttinboard,
   useCuttinboardLocation,
   useLocationPermissions,
   useNotifications,
@@ -33,6 +34,12 @@ import {
   RoleAccessLevels,
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
+import {
+  setUserId,
+  setAnalyticsCollectionEnabled,
+  setUserProperties,
+} from "firebase/analytics";
+import { ANALYTICS } from "./firebase";
 
 const DM = lazy(() => import("./Chats/DirectMessages"));
 const Conversations = lazy(() => import("./Chats/Conversations"));
@@ -49,6 +56,7 @@ const Summary = lazy(() => import("./Modules/Summary"));
 
 export default () => {
   const { pathname } = useRouterLocation();
+  const { user } = useCuttinboard();
   const navigate = useNavigate();
   const { role, location } = useCuttinboardLocation();
   const { t } = useTranslation();
@@ -59,6 +67,15 @@ export default () => {
     getTotalScheduleBadges,
   } = useNotifications();
   const checkPermission = useLocationPermissions();
+
+  useEffect(() => {
+    setAnalyticsCollectionEnabled(ANALYTICS, true);
+    setUserId(ANALYTICS, user.uid);
+    setUserProperties(ANALYTICS, {
+      email: user.email,
+      username: user.displayName,
+    });
+  }, [user.displayName, user.email, user.uid]);
 
   const sidebarItems = useMemo(() => {
     const adminItems = [

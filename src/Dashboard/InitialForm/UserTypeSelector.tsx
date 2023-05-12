@@ -12,6 +12,7 @@ import {
   SectionWrapper,
   UserTypeCard,
 } from "./SectionWrapper";
+import { logAnalyticsEvent } from "../../firebase";
 
 export type UserType = "employee" | "owner";
 
@@ -28,6 +29,10 @@ function UserTypeSelector() {
       nextStep();
     } else {
       removeNewUser();
+      // Report to analytics
+      logAnalyticsEvent("sign_up_flow", {
+        type: "employee",
+      });
     }
   };
 

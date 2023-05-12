@@ -1,5 +1,8 @@
 /** @jsx jsx */
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import {
+  useCuttinboardLocation,
+  useSchedule,
+} from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import {
   Descriptions,
@@ -10,14 +13,17 @@ import {
   Space,
   Typography,
 } from "antd";
-import { ANALYTICS } from "firebase";
-import { logEvent } from "firebase/analytics";
+import dayjs from "dayjs";
+import { logAnalyticsEvent } from "firebase";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import isoWeek from "dayjs/plugin/isoWeek";
+dayjs.extend(isoWeek);
 
 export default (props: ModalProps & { onAccept: () => void }) => {
   const { t } = useTranslation();
-  const { publish, updatesCount, weekSummary } = useSchedule();
+  const { role } = useCuttinboardLocation();
+  const { publish, updatesCount, weekSummary, weekDays } = useSchedule();
   const [notifyTo, setNotifyTo] = useState<
     "all" | "all_scheduled" | "changed" | "none"
   >("changed");
@@ -26,9 +32,13 @@ export default (props: ModalProps & { onAccept: () => void }) => {
     publish(notifyTo);
     message.success(t("Changes Published"));
     // Report to analytics
-    logEvent(ANALYTICS, "publish_schedule", {
-      notifyTo: notifyTo,
-      ...weekSummary,
+    const futureWeek = weekDays[0].isAfter(dayjs(), "isoWeek");
+
+    logAnalyticsEvent("schedule_published", {
+      notifyTo,
+      futureWeek,
+      role,
+      summary: weekSummary.total,
     });
     props.onAccept();
   };

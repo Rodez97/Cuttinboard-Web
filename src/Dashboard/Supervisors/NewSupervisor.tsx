@@ -17,12 +17,11 @@ import { useNavigate } from "react-router-dom";
 import LocationsPicker from "./LocationsPicker";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { recordError, trimObject } from "../../utils/utils";
-import { logEvent } from "firebase/analytics";
 import {
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import {
   ILocation,
   IOrganizationEmployee,
@@ -44,7 +43,7 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
   const [step, setStep] = useState(1);
   const [executeCallable, loading, error] = useHttpsCallable<Supervisor, void>(
     FUNCTIONS,
-    "http-employees-createSupervisor"
+    "http-employees-createsupervisor"
   );
   const [supervisorData, setSupervisorData] = useState<Supervisor | null>(null);
   const [selectedLocations, setSelectedLocations] = useState<ILocation[]>([]);
@@ -87,8 +86,7 @@ export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {
       });
       message.success(t("Supervisor created successfully"));
       // Report to analytics
-      logEvent(ANALYTICS, "create_supervisor", {
-        method: "email",
+      logAnalyticsEvent("supervisor_created", {
         locations: selectedLocations.length,
       });
       navigate(-1);

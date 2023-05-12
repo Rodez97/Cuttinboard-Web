@@ -23,10 +23,9 @@ import { GMArgs, IUpgradeOwnerData } from "../InitialForm/AddGM";
 import { useNavigate } from "react-router-dom";
 import FirstLocationSummary from "./FirstLocationSummary";
 import { httpsCallable } from "firebase/functions";
-import { logEvent } from "firebase/analytics";
 import { recordError } from "../../utils/utils";
 import * as yup from "yup";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import { collection, doc, getDocs, query, where } from "firebase/firestore";
 import {
@@ -78,7 +77,7 @@ function AddFirstLocation() {
       setIsLoading(true);
       const upgradeAccount = httpsCallable<IUpgradeOwnerData, void>(
         FUNCTIONS,
-        "http-locations-upgradeCreate"
+        "http-locations-upgradecreate"
       );
       const isGMValid = await gmValidationSchema.isValid(generalManager);
 
@@ -102,14 +101,19 @@ function AddFirstLocation() {
         gm: isGMValid && generalManager ? generalManager : null,
       });
 
-      // Report to analytics
-      logEvent(ANALYTICS, "upgrade-create-location", {
-        method: "stripe",
-        uid: user.uid,
-      });
       message.success(t("Location added successfully"));
       // Go back to the previous page
       navigate("/dashboard/owner-portal");
+
+      // Get the filled fields
+      const usedFields = Object.keys(location).filter(
+        (key) => location[key as keyof ILocationInfo]
+      );
+      // Report to analytics
+      logAnalyticsEvent("location_created", {
+        usedFields,
+        gmAdded: isGMValid,
+      });
     } catch (error) {
       setError(error);
       recordError(error);

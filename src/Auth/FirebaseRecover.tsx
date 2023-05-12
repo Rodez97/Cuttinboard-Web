@@ -7,8 +7,7 @@ import { useCountdown, useSessionstorageState } from "rooks";
 import { Alert, Button, Form, Input, message, Typography } from "antd";
 import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "../utils/utils";
-import { logEvent } from "firebase/analytics";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 
 const initialCounterTime = new Date();
 
@@ -37,9 +36,7 @@ function FirebaseRecover() {
         t("Email sent, if you don't see it check your spam folder")
       );
       // Report to analytics
-      logEvent(ANALYTICS, "recover_password", {
-        method: "email",
-      });
+      logAnalyticsEvent("forgot_password");
     } catch (error) {
       recordError(error);
     }

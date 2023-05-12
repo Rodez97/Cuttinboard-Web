@@ -84,7 +84,7 @@ export default () => {
       setIsLoading(true);
       const upgradeAccount = httpsCallable<undefined, void>(
         FUNCTIONS,
-        "stripe-upgradeOwner"
+        "stripe-upgradeowner"
       );
       await upgradeAccount();
       // Report to analytics

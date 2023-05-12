@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
-import { logEvent } from "firebase/analytics";
 // third party
 import { recordError } from "../utils/utils";
 import { Alert, Button, Form, Input, Typography } from "antd";
@@ -12,7 +11,7 @@ import {
   Colors,
   useCuttinboardRaw,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import { AuthError, signInWithEmailAndPassword } from "firebase/auth";
 
 //= ===========================|| FIREBASE - LOGIN ||============================//
@@ -34,9 +33,8 @@ const FirebaseLogin = () => {
     setIsSubmitting(true);
     try {
       await signInWithEmailAndPassword(AUTH, email, password);
-      logEvent(ANALYTICS, "login", {
+      logAnalyticsEvent("login", {
         method: "email-password",
-        email,
       });
       navigate("/dashboard");
     } catch (error) {
