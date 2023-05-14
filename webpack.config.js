@@ -223,16 +223,19 @@ const webpackConfig = () => {
       }),
       new Dotenv(),
       new GenerateSW({
+        cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
         runtimeCaching: [
           {
-            urlPattern: new RegExp(
-              "^https://firebasestorage.googleapis.com/v0/b/"
-            ),
+            urlPattern: /\.js$/,
+            handler: "NetworkFirst",
+          },
+          {
+            urlPattern: /https?:\/\/[^\s]+\.(jpg|jpeg|png)(?:\?.*)?/gm,
             handler: "CacheFirst",
             options: {
-              cacheName: "firebase-storage",
+              cacheName: "images",
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days

@@ -203,7 +203,7 @@ export default () => {
       <GrayPageHeader
         onBack={() => navigate(-1)}
         title={getEmployeeFullName(employee)}
-        subTitle={roleToString(employee.role)}
+        subTitle={t(roleToString(employee.role))}
         avatar={getAvatarObject(employee)}
       />
       <Layout.Content

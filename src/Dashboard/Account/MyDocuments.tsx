@@ -65,6 +65,8 @@ function MyDocuments() {
       // List all files in the user's storage location
       const userResult = await listAll(userStorageRef);
 
+      console.log(userResult.items);
+
       // Set the userFiles state variable with the files from the user's storage location
       setUserFiles(userResult.items);
     } catch (error) {
