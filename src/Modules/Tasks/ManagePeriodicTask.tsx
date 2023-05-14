@@ -36,6 +36,7 @@ import {
   IRecurringTaskDoc,
   RecurrenceObject,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -175,6 +176,11 @@ export default forwardRef<
     } else {
       addRecurringTask({ ...values, recurrence: newRecurrence });
       message.success("Recurring Task Successfully Created");
+
+      logAnalyticsEvent("recurring_task_created", {
+        name: values.name,
+        recurrence: newRecurrence.unit,
+      });
     }
     handleClose();
   };

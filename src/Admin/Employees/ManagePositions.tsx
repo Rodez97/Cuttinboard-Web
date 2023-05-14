@@ -17,6 +17,7 @@ import { compact } from "lodash";
 import { matchSorter } from "match-sorter";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { logAnalyticsEvent } from "../../firebase";
 
 function ManagePositions(props: DrawerProps) {
   const { t } = useTranslation();
@@ -27,6 +28,9 @@ function ManagePositions(props: DrawerProps) {
     ({ position }: { position: string }) => {
       addPosition(position);
       form.resetFields();
+      logAnalyticsEvent("location_position_created", {
+        position,
+      });
     },
     [addPosition, form]
   );

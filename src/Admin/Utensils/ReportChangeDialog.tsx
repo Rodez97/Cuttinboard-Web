@@ -12,6 +12,7 @@ import { IUtensil } from "@cuttinboard-solutions/types-helpers";
 import { Button, Drawer, Form, Input, InputNumber, Typography } from "antd";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { logAnalyticsEvent } from "../../firebase";
 
 interface ReportChangeDialogProps {
   open: boolean;
@@ -28,7 +29,7 @@ function ReportChangeDialog({
   const [form] = Form.useForm();
   const { addUtensilChange } = useUtensils();
 
-  const saveChanges = ({
+  const saveChanges = async ({
     changeQty,
     reason,
   }: {
@@ -38,8 +39,10 @@ function ReportChangeDialog({
     if (changeQty === 0) {
       return;
     }
-    addUtensilChange(utensil, changeQty, reason);
+    await addUtensilChange(utensil, changeQty, reason);
     handleClose();
+
+    logAnalyticsEvent("utensil_report_change");
   };
 
   const handleClose = () => {

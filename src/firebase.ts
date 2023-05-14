@@ -1,8 +1,9 @@
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import { FirebaseOptions, initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
 import { getPerformance } from "firebase/performance";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { AnalyticsEvents } from "@cuttinboard-solutions/cuttinboard-library";
 
 // Firebase configuration object
 export const FIREBASE_CONFIG: FirebaseOptions = {
@@ -37,3 +38,13 @@ initializeFirestore(APP, {
 export const ANALYTICS = getAnalytics(APP);
 
 export const PERF = getPerformance(APP);
+
+export function logAnalyticsEvent(
+  eventName: AnalyticsEvents,
+  eventParams?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  }
+) {
+  logEvent(ANALYTICS, eventName as string, eventParams);
+}

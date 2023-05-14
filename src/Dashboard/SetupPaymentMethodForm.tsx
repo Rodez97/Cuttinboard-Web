@@ -10,6 +10,7 @@ import { Button, Modal, Result, Spin } from "antd";
 import { useDashboard } from "./DashboardProvider";
 import { httpsCallable } from "firebase/functions";
 import { useTranslation } from "react-i18next";
+import { logAnalyticsEvent } from "../firebase";
 
 const stripePromise = loadStripe(
   "pk_live_51KZnSWCYVoOESVglKcMEB4amoGeOkMeSkqgfcEVW7wQLGVmYL8YJFmx4nB70ZLa3pNvEoOzsz6Dl9qeuQkebAXJq00ZxWrYzFj"
@@ -47,17 +48,21 @@ const SetupPaymentMethodForm = forwardRef<SetupPMDialogRef, unknown>(
 
         const createSetupIntent = httpsCallable<undefined, string>(
           FUNCTIONS,
-          "stripe-createSetupIntent"
+          "stripe-createsetupintent"
         );
         const data = await createSetupIntent();
 
         if (!data) {
-          throw new Error("No data returned from stripe-createSetupIntent");
+          throw new Error("No data returned from stripe-createsetupintent");
         }
 
         const setupIntent = data.data;
 
         setClientSecret(setupIntent);
+
+        logAnalyticsEvent("manage_payment_methods", {
+          from: "cuttinboard",
+        });
       } catch (error) {
         setErrorMessage(error.message);
       } finally {

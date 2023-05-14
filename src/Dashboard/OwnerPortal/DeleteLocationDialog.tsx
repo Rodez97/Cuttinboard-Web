@@ -7,7 +7,6 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { Alert, Button, Form, Input, List, Modal } from "antd";
-import { logEvent } from "firebase/analytics";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { deleteDoc, doc } from "firebase/firestore";
 import { forwardRef, useImperativeHandle, useState } from "react";
@@ -17,7 +16,7 @@ import {
   FIRESTORE,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 export interface DeleteLocationDialogRef {
@@ -42,13 +41,10 @@ export default forwardRef<DeleteLocationDialogRef, unknown>((_, ref) => {
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
       await deleteDoc(doc(FIRESTORE, location.refPath));
-      // Report to analytics
-      logEvent(ANALYTICS, "delete_location", {
-        location_id: location.id,
-        location_name: location.name,
-      });
       // Close dialog
       close();
+      // Report to analytics
+      logAnalyticsEvent("location_deleted");
     } catch (error) {
       setError(error);
       recordError(error);

@@ -14,6 +14,7 @@ import {
   useUpdateAccount,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { nanoid } from "nanoid";
+import { logAnalyticsEvent } from "../../firebase";
 
 function ProfilePanel() {
   const [form] = Form.useForm();
@@ -54,6 +55,12 @@ function ProfilePanel() {
       await user.getIdToken(true);
       setEditing(false);
       message.success(t("Changes saved"));
+      // Get the filled fields
+      const usedFields = Object.keys(values).filter((key) => values[key]);
+      // Report to analytics
+      logAnalyticsEvent("user_profile_updated", {
+        usedFields,
+      });
     } catch (error) {
       recordError(error);
     } finally {

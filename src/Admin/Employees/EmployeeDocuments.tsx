@@ -30,7 +30,6 @@ import {
   InboxOutlined,
 } from "@ant-design/icons";
 import { getAvatarObject, recordError } from "../../utils/utils";
-import { logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrayPageHeader } from "../../shared";
 import {
@@ -39,7 +38,7 @@ import {
   useCuttinboardLocation,
   useEmployees,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import {
   getEmployeeFullName,
   roleToString,
@@ -111,7 +110,6 @@ export default () => {
       throw new Error("Employee not found");
     }
     const { type, name, size } = file;
-    const { id: locationId } = location;
     const storageRef = ref(
       STORAGE,
       `locations/${location.id}/employees/${employee.id}/${name}`
@@ -121,13 +119,13 @@ export default () => {
       const uploadRef = await uploadBytes(storageRef, file, {
         contentType: type,
       });
-      setFiles([...files, uploadRef.ref]);
+      const newList = [...files, uploadRef.ref];
+      setFiles(newList);
       // Report to analytics
-      logEvent(ANALYTICS, "file_upload", {
+      logAnalyticsEvent("employee_documents_uploaded", {
+        contentType: type,
         size,
-        type,
-        locationId,
-        from: "employee_documents",
+        totalFiles: newList.length,
       });
     } catch (error) {
       recordError(error);
@@ -205,7 +203,7 @@ export default () => {
       <GrayPageHeader
         onBack={() => navigate(-1)}
         title={getEmployeeFullName(employee)}
-        subTitle={roleToString(employee.role)}
+        subTitle={t(roleToString(employee.role))}
         avatar={getAvatarObject(employee)}
       />
       <Layout.Content

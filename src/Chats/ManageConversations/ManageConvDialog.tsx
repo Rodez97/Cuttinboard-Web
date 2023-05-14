@@ -33,6 +33,7 @@ import {
   PrivacyLevel,
   privacyLevelToString,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 
 export interface ManageConvDialogRef {
   openNew: () => void;
@@ -107,6 +108,11 @@ const ManageConvDialog = forwardRef<ManageConvDialogRef, unknown>((_, ref) => {
         employees,
         initialPrivateMembers
       );
+
+      logAnalyticsEvent("message_board_created", {
+        name: values.name,
+        membership_type: privacyLevelToString(values.privacyLevel),
+      });
     }
     handleClose();
   };

@@ -17,6 +17,7 @@ import DeleteLocationDialog, {
 } from "./DeleteLocationDialog";
 import { useOwner } from ".";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 
 export default () => {
   const { t } = useTranslation();
@@ -62,6 +63,14 @@ export default () => {
   if (!organization) {
     return <Result status="error" title="Organization not found" />;
   }
+
+  const navigateManageBilling = () => {
+    navigate("/dashboard/subscription");
+    // Report to analytics
+    logAnalyticsEvent("manage_billing", {
+      from: "owner_portal",
+    });
+  };
 
   return (
     <Layout>
@@ -113,10 +122,7 @@ export default () => {
               type="warning"
               showIcon
               action={
-                <Button
-                  type="link"
-                  onClick={() => navigate("/dashboard/subscription")}
-                >
+                <Button type="link" onClick={navigateManageBilling}>
                   {t("Manage Billing")}
                 </Button>
               }

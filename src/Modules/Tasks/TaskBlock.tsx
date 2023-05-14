@@ -30,6 +30,7 @@ import {
   IChecklist,
   ITask,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 
 interface TasksSectionProps {
   sectionId: string;
@@ -133,6 +134,8 @@ export default ({
 
   const updateChecklistName = (newName: string) => {
     onRename(sectionId, { name: newName });
+
+    logAnalyticsEvent("checklist_renamed", { newName });
   };
 
   // Prints a list of tasks, only the name, with the logo and the name of the checklist, in the format of a ticket
@@ -144,6 +147,8 @@ export default ({
 
     try {
       handlePrintTasks();
+
+      logAnalyticsEvent("checklist_printed");
     } catch (error) {
       alert(error);
     }
@@ -158,6 +163,8 @@ export default ({
       return;
     }
     onReorderTasks(sectionId, element.id, targetIndex);
+
+    logAnalyticsEvent("checklist_reorder");
   };
 
   return (

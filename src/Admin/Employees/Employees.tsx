@@ -38,6 +38,7 @@ import {
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
+import { logAnalyticsEvent } from "../../firebase";
 
 function Employees() {
   const { location, role } = useCuttinboardLocation();
@@ -55,6 +56,12 @@ function Employees() {
     try {
       setJoiningLocation(true);
       await joinLocation(location);
+
+      logAnalyticsEvent(
+        role === RoleAccessLevels.OWNER
+          ? "owner_join_location"
+          : "supervisor_join_location"
+      );
     } catch (error) {
       recordError(error);
     } finally {
@@ -69,6 +76,12 @@ function Employees() {
       async onOk() {
         try {
           await leaveLocation(location);
+
+          logAnalyticsEvent(
+            role === RoleAccessLevels.OWNER
+              ? "owner_leave_location"
+              : "supervisor_leave_location"
+          );
         } catch (error) {
           recordError(error);
         }

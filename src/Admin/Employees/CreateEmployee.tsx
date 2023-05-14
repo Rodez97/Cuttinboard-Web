@@ -19,12 +19,11 @@ import {
   SaveFilled,
 } from "@ant-design/icons";
 import { compact } from "lodash";
-import { logEvent } from "firebase/analytics";
 import {
   useAddEmployee,
   useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import {
   ManagerPermissions,
   POSITIONS,
@@ -56,15 +55,17 @@ function CreateEmployee(props: DrawerProps) {
   const [loading, setLoading] = useState(false);
 
   const onFinish = async ({ positions, ...values }: EmployeeData) => {
+    const wagePerPosition = positions
+      ? positions.reduce(
+          (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
+          {}
+        )
+      : {};
+
     const employeeToAdd = {
       ...values,
       positions: positions ? positions.map((pos) => pos.position) : [],
-      wagePerPosition: positions
-        ? positions.reduce(
-            (acc, pos) => ({ ...acc, [pos.position]: pos.wage }),
-            {}
-          )
-        : {},
+      wagePerPosition,
       mainPosition: "",
     };
 
@@ -72,9 +73,16 @@ function CreateEmployee(props: DrawerProps) {
       setLoading(true);
       const result = await addEmployee(employeeToAdd);
       message.success(t(result));
-      // Report to analytics
-      logEvent(ANALYTICS, "employee_added");
+      const newAccount =
+        result ===
+        "An account has been created and a temporary password has been emailed to this user";
       form.resetFields();
+      logAnalyticsEvent("employee_created", {
+        newAccount,
+        wagePerPosition,
+        role: roleToString(values.role),
+        permissions: values.permissions,
+      });
     } catch (error) {
       message.error(t(error.message));
       recordError(error);

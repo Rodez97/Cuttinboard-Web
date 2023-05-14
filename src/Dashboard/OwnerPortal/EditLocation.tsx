@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { useOwner } from ".";
-import { logEvent } from "firebase/analytics";
 import { PageHeader } from "@ant-design/pro-layout";
 import { LocationInfoForm } from "../../shared";
 import {
@@ -16,7 +15,7 @@ import {
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ILocationInfo } from "./AddLocation/AddLocation";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import {
   collection,
   doc,
@@ -38,7 +37,8 @@ export default () => {
     [locations, locationId]
   );
 
-  const handleChange = async ({ name, intId, address }: ILocationInfo) => {
+  const handleChange = async (values: ILocationInfo) => {
+    const { name, intId, address } = values;
     if (!getLocation) {
       throw new Error("Location not found");
     }
@@ -84,9 +84,13 @@ export default () => {
       message.success(t("Changes saved"));
       setEditing(false);
       // Report location update from card to analytics
-      logEvent(ANALYTICS, "update_location", {
-        location_id: getLocation.id,
-        updated_from: "owner_portal",
+      // Get the filled fields
+      const usedFields = Object.keys(values).filter(
+        (key) => values[key as keyof ILocationInfo]
+      );
+      // Report to analytics
+      logAnalyticsEvent("location_updated", {
+        usedFields,
       });
     } catch (error) {
       recordError(error);

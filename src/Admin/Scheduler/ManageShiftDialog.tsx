@@ -49,6 +49,7 @@ import {
   WEEKFORMAT,
   getEmployeeHourlyWage,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -199,6 +200,10 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
             weekOrderFactor: 0,
           };
           createShift(newShift, weekDays, applyTo);
+          logAnalyticsEvent("schedule_shift_created", {
+            appliedTo: applyTo.length,
+            hasNotes: !!notes,
+          });
         } else {
           updateShift(state.shift, shiftToSaveBase);
         }

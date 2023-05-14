@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
 import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library";
+import { logAnalyticsEvent } from "../../firebase";
 
 type EmployeeContactData = {
   phoneNumber: string;
@@ -43,6 +44,14 @@ function ContactDetails() {
       setEditing(false);
       form.resetFields();
       message.success(t("Changes saved"));
+      // Get the filled fields
+      const usedFields = Object.keys(values).filter(
+        (key) => values[key as keyof EmployeeContactData]
+      );
+      // Report to analytics
+      logAnalyticsEvent("user_contact_details_updated", {
+        usedFields,
+      });
     } catch (error) {
       recordError(error);
     }

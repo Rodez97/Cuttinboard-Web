@@ -50,6 +50,7 @@ import {
   IShift,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../firebase";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(isToday);
@@ -143,6 +144,7 @@ function Scheduler() {
       weekDays,
       wageData
     );
+    logAnalyticsEvent("schedule_pdf_generated");
   }, [shiftsSource, location.name, weekId, weekDays, wageData, t]);
 
   if (loading) {

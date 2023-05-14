@@ -5,9 +5,8 @@ import styled from "@emotion/styled";
 import { Button, Descriptions, InputNumber, Modal } from "antd";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { logEvent } from "firebase/analytics";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 
 const ProjectedSalesTable = styled(Descriptions)`
   .ant-input-number {
@@ -60,7 +59,7 @@ function ProjectedSalesDialog({
   const save = async () => {
     updateProjectedSales(projectedSalesByDay);
     // Report to analytics
-    logEvent(ANALYTICS, "projected_sales_edited");
+    logAnalyticsEvent("schedule_projected_sales_changed", projectedSalesByDay);
   };
 
   return (

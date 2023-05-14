@@ -6,8 +6,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Alert, Button, Form, Input, Typography } from "antd";
-import { ANALYTICS } from "firebase";
-import { logEvent } from "firebase/analytics";
+import { logAnalyticsEvent } from "firebase";
 import { httpsCallable } from "firebase/functions";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +22,7 @@ import {
 } from "./SectionWrapper";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
+import { isEmpty } from "lodash";
 
 export interface GMArgs {
   name: string;
@@ -70,16 +70,16 @@ function AddGM({ locationName }: AddGMProps) {
 
       const upgradeAccount = httpsCallable<IUpgradeOwnerData, void>(
         FUNCTIONS,
-        "http-locations-upgradeCreate"
+        "http-locations-upgradecreate"
       );
       await upgradeAccount({
         locationName,
         gm,
       });
       // Report to analytics
-      logEvent(ANALYTICS, "upgrade-create-location", {
-        method: "stripe",
-        uid: user.uid,
+      logAnalyticsEvent("sign_up_flow", {
+        type: "owner",
+        gmAdded: isEmpty(gm) ? false : true,
       });
       // Redirect to dashboard
       navigate("/dashboard/owner-portal");

@@ -2,7 +2,6 @@
 import { jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { logEvent } from "firebase/analytics";
 import { recordError, TrimRule } from "../utils/utils";
 import { Alert, Button, Checkbox, Form, Input, Typography } from "antd";
 import {
@@ -12,7 +11,7 @@ import {
 import { useMemo } from "react";
 import { AuthError } from "firebase/auth";
 import useSignUpLocalTracker from "../hooks/useSignUpLocalTracker";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 
 //= ==========================|| FIREBASE - REGISTER ||===========================//
 
@@ -49,9 +48,8 @@ const FirebaseRegister = () => {
       // Store the newly created user in the local storage to be used in the first login event to show the onboarding flow
       setNewUser(email);
 
-      logEvent(ANALYTICS, "sign_up", {
-        method: "Email-Password",
-        email,
+      logAnalyticsEvent("sign_up", {
+        method: "email-password",
       });
 
       navigate("/dashboard", { replace: true });

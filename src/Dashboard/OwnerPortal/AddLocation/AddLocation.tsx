@@ -28,12 +28,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import NewLocationSummary from "./NewLocationSummary";
 import { httpsCallable } from "firebase/functions";
-import { logEvent } from "firebase/analytics";
 import { recordError } from "../../../utils/utils";
 import * as yup from "yup";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { useDashboard } from "../../DashboardProvider";
 
 const gmValidationSchema = yup.object().shape({
   name: yup.string().required(),
@@ -73,6 +73,7 @@ function AddLocation() {
   const [addGM, setAddGM] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { organization } = useDashboard();
 
   const onFinish = async (values: locFormType) => {
     const { generalManager, ...location } = values;
@@ -101,14 +102,22 @@ function AddLocation() {
         location,
         generalManager: isGMValid ? generalManager : undefined,
       });
-      // Report to analytics
-      logEvent(ANALYTICS, "location_added", {
-        locationName: location.name,
-        withGeneralManager: !!generalManager,
-      });
       message.success(t("Location added successfully"));
       // Go back to the previous page
       navigate(-1);
+
+      // Get the filled fields
+      const usedFields = Object.keys(location).filter(
+        (key) => location[key as keyof ILocationInfo]
+      );
+      // Report to analytics
+      logAnalyticsEvent("location_created", {
+        usedFields,
+        gmAdded: isGMValid,
+        numberOfLocations: organization?.locations
+          ? organization.locations + 1
+          : 0,
+      });
     } catch (error) {
       setError(error);
       recordError(error);

@@ -28,23 +28,22 @@ import {
 } from "firebase/storage";
 import React, { useCallback, useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { recordError } from "../utils/utils";
-import { logEvent } from "firebase/analytics";
+import { recordError } from "../../utils/utils";
 import {
   getFileColorsByType,
   getFileIconByType,
-} from "../Modules/Files/FileTypeIcons";
-import usePageTitle from "../hooks/usePageTitle";
+} from "../../Modules/Files/FileTypeIcons";
+import usePageTitle from "../../hooks/usePageTitle";
 import {
   STORAGE,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
+import { logAnalyticsEvent } from "firebase";
 import {
   MAX_DOCUMENTS,
   MAX_FILE_SIZE,
 } from "@cuttinboard-solutions/types-helpers";
-import { GrayPageHeader } from "../shared";
+import { GrayPageHeader } from "../../shared";
 
 const { Dragger } = Upload;
 
@@ -65,6 +64,8 @@ function MyDocuments() {
 
       // List all files in the user's storage location
       const userResult = await listAll(userStorageRef);
+
+      console.log(userResult.items);
 
       // Set the userFiles state variable with the files from the user's storage location
       setUserFiles(userResult.items);
@@ -101,12 +102,14 @@ function MyDocuments() {
       const uploadRef = await uploadBytes(storageRef, file, {
         contentType: file.type,
       });
-      setUserFiles([...userFiles, uploadRef.ref]);
+
+      const newList = [...userFiles, uploadRef.ref];
+      setUserFiles(newList);
       // Report document upload to analytics
-      logEvent(ANALYTICS, "upload_document", {
+      logAnalyticsEvent("user_my_documents_uploaded", {
         contentType: file.type,
         size: file.size,
-        from: "MyDocuments",
+        totalFiles: newList.length,
       });
     } catch (error) {
       recordError(error);

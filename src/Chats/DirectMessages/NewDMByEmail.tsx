@@ -5,7 +5,7 @@ import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useParams } from "react-router-dom";
-import { ArrowRightOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
 import { GrayPageHeader } from "../../shared";
 import {
   useCuttinboard,
@@ -127,9 +127,8 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
             <Typography>{t("Eligible User:")}</Typography>
             <GrayPageHeader
               avatar={{
-                src: targetUser.avatar
-                  ? targetUser.avatar
-                  : `https://api.dicebear.com/5.x/shapes/svg?seed=${targetUser.id}&background=%23ffffff&radius=50`,
+                src: targetUser.avatar,
+                icon: <UserOutlined />,
               }}
               title={`${targetUser.name} ${targetUser.lastName}`}
               extra={
