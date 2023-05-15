@@ -221,7 +221,7 @@ function Scheduler() {
           </Tooltip>,
         ]}
         tags={
-          dayjs().isSame(weekDays[0], "week")
+          dayjs().isSame(weekDays[0], "isoWeek")
             ? [
                 <Tag key="thisWeek" color="processing">
                   {t("This week")}

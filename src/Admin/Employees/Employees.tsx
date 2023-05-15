@@ -53,6 +53,16 @@ function Employees() {
   const [joiningLocation, setJoiningLocation] = useState(false);
 
   const joinToLocation = async () => {
+    if (usage.employeesCount === usage.employeesLimit) {
+      Modal.warning({
+        title: t("Limit Reached"),
+        content: t(
+          "You cannot join this location because it has reached its employee limit"
+        ),
+      });
+      return;
+    }
+
     try {
       setJoiningLocation(true);
       await joinLocation(location);
@@ -64,6 +74,18 @@ function Employees() {
       );
     } catch (error) {
       recordError(error);
+
+      if (
+        error.message ===
+        "You have reached the maximum number of employees for this location"
+      ) {
+        Modal.warning({
+          title: t("Limit Reached"),
+          content: t(
+            "You cannot join this location because it has reached its employee limit"
+          ),
+        });
+      }
     } finally {
       setJoiningLocation(false);
     }

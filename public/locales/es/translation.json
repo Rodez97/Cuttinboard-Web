@@ -1,5 +1,6 @@
 {
   "auth/email-already-in-use": "El email ya está en uso",
+  "functions/already-exists": "El email ya está en uso",
   "Firebase: Error (auth/user-not-found).": "Usuario no encontrado",
   "auth/user-not-found": "Usuario no encontrado",
   "Firebase: Error (auth/network-request-failed).": "Algo ha fallado",
@@ -832,5 +833,6 @@
   "If you delete your account, all of your data will be permanently erased and you will be removed from all locations and organizations you belong to. This action cannot be reversed. Are you sure you want to proceed with deleting your account?": "Si elimina su cuenta, todos sus datos se borrarán de forma permanente y se le eliminará de todas las ubicaciones y organizaciones a las que pertenece. Esta acción no se puede revertir. ¿Está seguro de que desea continuar con la eliminación de su cuenta?",
   "DM_DELETED_USER_WARNING": "Este usuario ha borrado su cuenta",
   "Are you sure to cancel this update?": "¿Seguro que desea cancelar este cambio?",
-  "The shift will be restored to the previous state": "El turno sera regresado a su estado anterior"
+  "The shift will be restored to the previous state": "El turno sera regresado a su estado anterior",
+  "You cannot join this location because it has reached its employee limit": "No puede unirse a esta locación porque ha alcanzado su límite de empleados"
 }

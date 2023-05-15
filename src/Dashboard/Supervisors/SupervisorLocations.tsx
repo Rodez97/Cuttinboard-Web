@@ -9,6 +9,7 @@ import {
   DeleteOutlined,
   ExclamationCircleOutlined,
   PlusSquareOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { deleteDoc, doc } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
@@ -61,11 +62,10 @@ export default ({ locations, onUnassign, supervisor }: props) => {
       <GrayPageHeader
         onBack={() => navigate(-1)}
         avatar={{
-          src: supervisor.avatar
-            ? supervisor.avatar
-            : `https://api.dicebear.com/5.x/shapes/svg?seed=${supervisor.id}&background=%23ffffff&radius=50`,
+          src: supervisor.avatar,
           onClick: handleAvatarClick,
           style: { cursor: "pointer" },
+          icon: <UserOutlined />,
         }}
         title={`${supervisor.name} ${supervisor.lastName}`}
         subTitle={

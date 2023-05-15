@@ -50,11 +50,10 @@ export default ({
           recipientUser._id === "deleted"
             ? { icon: <UserOutlined /> }
             : {
-                src: recipientUser.avatar
-                  ? recipientUser.avatar
-                  : `https://api.dicebear.com/5.x/shapes/svg?seed=${recipientUser._id}&background=%23ffffff&radius=50`,
+                src: recipientUser.avatar,
                 onClick: openInfo,
                 style: { cursor: "pointer" },
+                icon: <UserOutlined />,
               }
         }
         title={recipientUser.name}

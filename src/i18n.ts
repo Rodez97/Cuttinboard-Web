@@ -31,7 +31,6 @@ i18n
       },
       preload: ["en", "es"],
       fallbackLng,
-      debug: true,
       interpolation: {
         escapeValue: false, // not needed for react as it escapes by default
       },
@@ -41,8 +40,6 @@ i18n
     (err) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log("i18n initialized");
       }
       dayjs.locale(i18n.language);
     }

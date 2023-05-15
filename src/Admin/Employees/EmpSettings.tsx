@@ -19,6 +19,7 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
+  UserOutlined,
 } from "@ant-design/icons";
 import { compact } from "lodash";
 import { logEvent } from "firebase/analytics";
@@ -121,9 +122,8 @@ export default () => {
         title={getEmployeeFullName(employee)}
         subTitle={t("Employee settings")}
         avatar={{
-          src: employee.avatar
-            ? employee.avatar
-            : `https://api.dicebear.com/5.x/shapes/svg?seed=${employee.id}&background=%23ffffff&radius=50`,
+          src: employee.avatar,
+          icon: <UserOutlined />,
         }}
       />
       <Layout.Content

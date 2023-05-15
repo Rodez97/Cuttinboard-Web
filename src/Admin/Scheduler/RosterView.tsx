@@ -17,6 +17,7 @@ import { GrayPageHeader, LoadingPage } from "../../shared";
 import {
   getShiftDayjsDate,
   getShiftDuration,
+  getShiftLatestData,
   minutesToTextDuration,
   parseWeekId,
   useCuttinboardLocation,
@@ -83,12 +84,13 @@ function RosterView() {
         title: t("Position"),
         dataIndex: "position",
         key: "position",
-        render: (_, { shift }) =>
-          shift.position ? (
+        render: (_, { shift }) => {
+          return shift.position ? (
             <Tag color="processing">{shift.position}</Tag>
           ) : (
             <Tag color="error">{t("No position")}</Tag>
-          ),
+          );
+        },
       },
       {
         title: t("Start"),
@@ -176,12 +178,14 @@ function RosterView() {
       .map(({ employee, shifts }) => ({
         employeeId: employee.id,
         shiftsColl: shifts
-          ? shifts.filter((shift) =>
-              getShiftDayjsDate(shift, "start").isSame(
-                weekDays[selectedDateIndex],
-                "day"
+          ? shifts
+              .filter((shift) =>
+                getShiftDayjsDate(shift, "start").isSame(
+                  weekDays[selectedDateIndex],
+                  "day"
+                )
               )
-            )
+              .map(getShiftLatestData)
           : [],
       }))
       .forEach((shiftsDoc) => {

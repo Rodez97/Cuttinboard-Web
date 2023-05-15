@@ -1,5 +1,6 @@
 {
   "auth/email-already-in-use": "Email already in use",
+  "functions/already-exists": "Email already in use",
   "Firebase: Error (auth/user-not-found).": "User not found",
   "auth/user-not-found": "Uer not found",
   "Firebase: Error (auth/network-request-failed).": "Something went wrong",
