@@ -76,7 +76,7 @@ function ConvDetails(props: ModalProps) {
             <List.Item.Meta
               avatar={<TeamOutlined />}
               title={t("Members")}
-              description={activeConversation.members?.length ?? 0}
+              description={Object.keys(activeConversation.members).length}
             />
           </List.Item>
         )}

@@ -68,7 +68,7 @@ export default ({
         />
       )}
 
-      <ChatMain canUse={recipientUser._id !== "deleted"} />
+      <ChatMain canUse={recipientUser._id !== "deleted"} type="dm" />
 
       <DMDetails open={infoOpen} onCancel={closeInfo} />
     </MessagesProvider>

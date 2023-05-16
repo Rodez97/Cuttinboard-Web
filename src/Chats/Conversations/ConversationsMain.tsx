@@ -51,7 +51,7 @@ function ConversationsMain({
           title={activeConversation.name}
           subTitle={activeConversation.locationName}
         />
-        <ChatMain canUse={canUse} />
+        <ChatMain canUse={canUse} type="mb" />
 
         <ConvDetails open={infoOpen} onCancel={closeInfo} />
       </MessagesProvider>

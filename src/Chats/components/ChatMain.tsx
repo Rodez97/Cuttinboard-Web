@@ -13,9 +13,10 @@ import ErrorPage from "../../shared/molecules/PageError";
 
 interface ChatMainProps {
   canUse?: boolean;
+  type: "dm" | "mb";
 }
 
-const ChatMain = ({ canUse }: ChatMainProps) => {
+const ChatMain = ({ canUse, type }: ChatMainProps) => {
   const { t } = useTranslation();
   const { messages, noMoreMessages, fetchPreviousMessages, loading, error } =
     useMessages();
@@ -64,7 +65,12 @@ const ChatMain = ({ canUse }: ChatMainProps) => {
             }}
           >
             {messages?.map((rm) => (
-              <MessageBubble key={rm._id} currentMessage={rm} canUse={canUse} />
+              <MessageBubble
+                key={rm._id}
+                currentMessage={rm}
+                canUse={canUse}
+                type={type}
+              />
             ))}
             {!noMoreMessages && messages.length >= INITIAL_LOAD_SIZE ? (
               <Button

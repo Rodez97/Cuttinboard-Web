@@ -3,7 +3,10 @@ import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import { Card } from "antd";
 import MessageElement from "./MessageElement";
-import { GroupHeadingAvatar } from "./GroupHeadingAvatar";
+import {
+  GroupHeadingAvatarDM,
+  GroupHeadingAvatarMB,
+} from "./GroupHeadingAvatar";
 import AttachmentElement from "./AttachmentElement";
 import { ImageMessage } from "./MessageElements";
 import {
@@ -15,9 +18,10 @@ import MessageMenu from "./MessageMenu";
 interface MessageBubbleProps {
   currentMessage: IMessage;
   canUse?: boolean;
+  type: "dm" | "mb";
 }
 
-function MessageBubble({ currentMessage, canUse }: MessageBubbleProps) {
+function MessageBubble({ currentMessage, canUse, type }: MessageBubbleProps) {
   const parsedMedia = useMemo(
     () =>
       currentMessage.text ? parseMediaFromText(currentMessage.text) : null,
@@ -27,10 +31,11 @@ function MessageBubble({ currentMessage, canUse }: MessageBubbleProps) {
   return (
     <Card
       title={
-        <GroupHeadingAvatar
-          avatar={currentMessage.user.avatar || undefined}
-          name={currentMessage.user.name}
-        />
+        type === "dm" ? (
+          <GroupHeadingAvatarDM message={currentMessage} />
+        ) : (
+          <GroupHeadingAvatarMB message={currentMessage} />
+        )
       }
       css={{
         minWidth: 350,

@@ -87,7 +87,8 @@ function Employees() {
         });
       }
     } finally {
-      setJoiningLocation(false);
+      // Wait half a second to make sure the database has updated correctly
+      setTimeout(() => setJoiningLocation(false), 500);
     }
   };
 

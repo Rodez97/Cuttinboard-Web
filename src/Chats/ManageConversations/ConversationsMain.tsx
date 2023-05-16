@@ -33,7 +33,7 @@ function ConversationsMain({
           title={activeConversation.name}
           subTitle={activeConversation.locationName}
         />
-        <ChatMain canUse={false} />
+        <ChatMain canUse={false} type="mb" />
       </MessagesProvider>
     </Layout.Content>
   );
