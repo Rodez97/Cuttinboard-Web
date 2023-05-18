@@ -1,10 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import {
   ref as storageRef,
   uploadBytesResumable,
   UploadTask,
 } from "firebase/storage";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import fileSize from "filesize";
 import { useTranslation } from "react-i18next";
 import { message, Modal, Upload, UploadFile, UploadProps } from "antd";
@@ -77,12 +76,21 @@ export default ({ maxSize, baseStorageRef, onClose, open }: PickFileProps) => {
         setFilesToUpload(newFilesToUpload);
       },
       beforeUpload: (file) => {
+        const locationUsage = getLocationUsage(location);
+
+        const total = file.size + locationUsage.storageUsed;
+
         if (file.size > maxSize) {
           messageApi.open({
             type: "warning",
             content: t("File size limit {{0}}", {
               0: fileSize(maxSize),
             }),
+          });
+        } else if (total > locationUsage.storageLimit) {
+          messageApi.open({
+            type: "warning",
+            content: t("You don't have enough storage to upload this file"),
           });
         } else if (fileList.length > 0) {
           messageApi.open({
@@ -112,27 +120,16 @@ export default ({ maxSize, baseStorageRef, onClose, open }: PickFileProps) => {
       t,
       setFileList,
       setFilesToUpload,
-      uploading,
+      location,
     ]
   );
 
-  const handleUpload = useCallback(async () => {
+  const handleUpload = async () => {
     if (!selectedBoard) {
       return;
     }
 
-    const locationUsage = getLocationUsage(location);
-
     const fileToUpload = filesToUpload[0];
-
-    const total = fileToUpload.size ?? 0 + locationUsage.storageUsed;
-
-    if (total > locationUsage.storageLimit) {
-      return messageApi.open({
-        type: "warning",
-        content: t("You don't have enough storage to upload this file"),
-      });
-    }
 
     const fileId = nanoid();
     const fileName = `${fileId}.${fileToUpload.name.split(".").pop()}`;
@@ -199,15 +196,7 @@ export default ({ maxSize, baseStorageRef, onClose, open }: PickFileProps) => {
         });
       }
     );
-  }, [
-    baseStorageRef,
-    filesToUpload,
-    messageApi,
-    selectedBoard,
-    t,
-    addFile,
-    location,
-  ]);
+  };
 
   const handleCancel = () => {
     if (uploadTask.current) {

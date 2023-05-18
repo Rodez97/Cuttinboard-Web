@@ -9,7 +9,6 @@ import {
   DeleteOutlined,
   ExclamationCircleOutlined,
   PlusSquareOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { deleteDoc, doc } from "firebase/firestore";
 import { logEvent } from "firebase/analytics";
@@ -20,6 +19,7 @@ import {
   ILocation,
   IOrganizationEmployee,
 } from "@cuttinboard-solutions/types-helpers";
+import { imgAvatar } from "../../assets/images";
 
 type props = {
   locations: ILocation[];
@@ -62,10 +62,9 @@ export default ({ locations, onUnassign, supervisor }: props) => {
       <GrayPageHeader
         onBack={() => navigate(-1)}
         avatar={{
-          src: supervisor.avatar,
+          src: supervisor.avatar ? supervisor.avatar : imgAvatar,
           onClick: handleAvatarClick,
           style: { cursor: "pointer" },
-          icon: <UserOutlined />,
         }}
         title={`${supervisor.name} ${supervisor.lastName}`}
         subTitle={

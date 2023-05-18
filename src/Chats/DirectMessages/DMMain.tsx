@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { UserOutlined } from "@ant-design/icons";
 import { useEffect } from "react";
 import ChatMain from "../components/ChatMain";
 import DMDetails from "./DMDetails";
@@ -14,6 +13,7 @@ import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
 import { Alert } from "antd";
 import { useTranslation } from "react-i18next";
 import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";
+import { imgAvatar } from "../../assets/images";
 
 export default ({
   recipientUser,
@@ -32,8 +32,7 @@ export default ({
     return () => {
       removeDMBadge(selectedDirectMessage.id);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDirectMessage.id]);
+  }, [removeDMBadge, selectedDirectMessage.id]);
 
   return (
     <MessagesProvider
@@ -48,12 +47,11 @@ export default ({
         backIcon={false}
         avatar={
           recipientUser._id === "deleted"
-            ? { icon: <UserOutlined /> }
+            ? { src: imgAvatar }
             : {
-                src: recipientUser.avatar,
+                src: recipientUser.avatar ? recipientUser.avatar : imgAvatar,
                 onClick: openInfo,
                 style: { cursor: "pointer" },
-                icon: <UserOutlined />,
               }
         }
         title={recipientUser.name}

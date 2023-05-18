@@ -347,7 +347,6 @@ function Main() {
       {RenameFile}
       <PickFile
         maxSize={5e7}
-        // 200MB
         baseStorageRef={storagePathRef}
         open={pickFileOpen}
         onClose={closePickFile}

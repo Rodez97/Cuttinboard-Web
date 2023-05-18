@@ -19,7 +19,6 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
-  UserOutlined,
 } from "@ant-design/icons";
 import { compact } from "lodash";
 import { logEvent } from "firebase/analytics";
@@ -41,6 +40,7 @@ import {
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
 import PermissionsChecker from "./PermissionsChecker";
+import { imgAvatar } from "../../assets/images";
 
 type EmployeeRoleData = {
   positions?: { position: string; wage: number }[];
@@ -122,8 +122,7 @@ export default () => {
         title={getEmployeeFullName(employee)}
         subTitle={t("Employee settings")}
         avatar={{
-          src: employee.avatar,
-          icon: <UserOutlined />,
+          src: employee.avatar ? employee.avatar : imgAvatar,
         }}
       />
       <Layout.Content

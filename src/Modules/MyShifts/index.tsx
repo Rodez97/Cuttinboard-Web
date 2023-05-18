@@ -24,7 +24,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import { WEEKFORMAT } from "@cuttinboard-solutions/types-helpers";
 import MyAvailability from "./MyAvailability";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import WeekNavigator from "../../Admin/Scheduler/WeekNavigator";
 dayjs.extend(isoWeek);
@@ -102,6 +102,12 @@ export function MyShiftsContent({
     setOnlyLocation(e.target.checked);
   };
 
+  const sorted = useMemo(() => {
+    return groupedByDay.sort(([a], [b]) => {
+      return dayjs(a).isAfter(dayjs(b)) ? 1 : -1;
+    });
+  }, [groupedByDay]);
+
   return (
     <React.Fragment>
       {locationId && (
@@ -145,7 +151,7 @@ export function MyShiftsContent({
                     style={{ display: "flex", width: "100%" }}
                     direction="vertical"
                   >
-                    {groupedByDay.map(([day, shifts], index) => {
+                    {sorted.map(([day, shifts], index) => {
                       const date = dayjs(day);
                       const dateText = date.format("dddd, MMMM DD, YYYY");
                       const isToday = date.isSame(dayjs(), "day");

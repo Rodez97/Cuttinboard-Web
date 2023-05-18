@@ -124,7 +124,6 @@ function EmployeeCard({ employee }: EmployeeCardProps) {
           <LeftContent>
             <EmployeeAvatar
               src={employee.avatar}
-              // If there is no avatar, we will use the email to fetch the gravatars
               alt={getEmployeeFullName(employee)}
               onClick={handleAvatarClick}
             />
