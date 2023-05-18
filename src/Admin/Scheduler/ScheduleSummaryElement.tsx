@@ -36,7 +36,7 @@ function ScheduleSummaryElement() {
           />
           <Statistic
             title={t("Labor %")}
-            value={laborPercentage}
+            value={laborPercentage.toFixed(2)}
             suffix="%"
             precision={2}
           />
