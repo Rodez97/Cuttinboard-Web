@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import EmployeeMultiSelect from "./EmployeeMultiSelect";
 import BoardMemberItem from "../molecules/BoardMemberItem";
 import EmployeeSelect from "../molecules/EmployeeSelect";
-import { indexOf } from "lodash";
+import indexOf from "lodash-es/indexOf";
 import {
   Button,
   Divider,
@@ -15,7 +15,7 @@ import {
   Space,
   Tag,
   Typography,
-} from "antd";
+} from "antd/es";
 import { ExclamationCircleOutlined, UserAddOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import {

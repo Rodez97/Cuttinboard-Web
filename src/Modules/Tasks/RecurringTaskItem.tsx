@@ -4,7 +4,7 @@ import {
   recurringTaskIsCompleted,
 } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
-import { Checkbox, Typography } from "antd";
+import { Checkbox, Typography } from "antd/es";
 import { useMemo } from "react";
 
 export default ({

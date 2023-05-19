@@ -10,7 +10,7 @@ import {
   Radio,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   forwardRef,
   useImperativeHandle,
@@ -19,7 +19,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash-es/isEmpty";
 import {
   useBoard,
   useDisclose,
@@ -33,7 +33,7 @@ import {
   privacyLevelToString,
 } from "@cuttinboard-solutions/types-helpers";
 import { trimObject } from "../../utils/utils";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export interface ManageModuleDialogRef {
   openNew: () => void;

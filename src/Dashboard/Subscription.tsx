@@ -1,9 +1,9 @@
 import React, { useMemo, useRef } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import { capitalize } from "lodash";
+import capitalize from "lodash-es/capitalize";
 import { useDashboard } from "./DashboardProvider";
-import { Alert, Button, Descriptions, Modal, Result, Space } from "antd";
+import { Alert, Button, Descriptions, Modal, Result, Space } from "antd/es";
 import { CreditCardTwoTone } from "@ant-design/icons";
 import usePageTitle from "../hooks/usePageTitle";
 import SetupPaymentMethodForm, {
@@ -11,7 +11,7 @@ import SetupPaymentMethodForm, {
 } from "./SetupPaymentMethodForm";
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader } from "../shared";
-import { logAnalyticsEvent } from "../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 function Subscription() {
   usePageTitle("Manage Billing");

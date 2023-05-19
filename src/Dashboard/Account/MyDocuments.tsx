@@ -17,7 +17,7 @@ import {
   Typography,
   Upload,
   UploadProps,
-} from "antd";
+} from "antd/es";
 import {
   deleteObject,
   getDownloadURL,
@@ -38,7 +38,7 @@ import {
   STORAGE,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   MAX_DOCUMENTS,
   MAX_FILE_SIZE,

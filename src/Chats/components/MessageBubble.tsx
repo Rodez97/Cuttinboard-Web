@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
-import { Card } from "antd";
+import { Card } from "antd/es";
 import MessageElement from "./MessageElement";
 import {
   GroupHeadingAvatarDM,

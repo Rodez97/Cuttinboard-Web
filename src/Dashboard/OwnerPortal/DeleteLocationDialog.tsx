@@ -6,7 +6,7 @@ import {
   ShopOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { Alert, Button, Form, Input, List, Modal } from "antd";
+import { Alert, Button, Form, Input, List, Modal } from "antd/es";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { deleteDoc, doc } from "firebase/firestore";
 import { forwardRef, useImperativeHandle, useState } from "react";
@@ -16,7 +16,7 @@ import {
   FIRESTORE,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 export interface DeleteLocationDialogRef {

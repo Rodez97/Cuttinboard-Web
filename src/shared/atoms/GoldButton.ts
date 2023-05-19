@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Button } from "antd";
+import { Button } from "antd/es";
 
 const GoldButton = styled(Button)`
   color: #ffffff;

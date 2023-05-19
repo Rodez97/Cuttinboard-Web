@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Card, List, message, Modal } from "antd";
+import { Button, Card, List, message, Modal } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
@@ -9,13 +9,12 @@ import { useHttpsCallable } from "react-firebase-hooks/functions";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
-import { logEvent } from "firebase/analytics";
 import {
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
 const { Meta } = Card;
 
@@ -57,7 +56,7 @@ export default ({ location, actions }: LocationCardProps) => {
           }
 
           // Report to analytics
-          logEvent(ANALYTICS, "billing_session_created", {
+          logAnalyticsEvent("billing_session_created", {
             location_id: location.id,
             organization_id: location.organizationId,
             from: "location_card",

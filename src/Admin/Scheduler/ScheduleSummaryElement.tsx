@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Statistic } from "antd";
+import { Statistic } from "antd/es";
 import {
   Colors,
   minutesToTextDuration,

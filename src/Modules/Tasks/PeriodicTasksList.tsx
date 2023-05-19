@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { useRecurringTasks } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Button, Card, Drawer, DrawerProps, Empty } from "antd";
+import { Button, Card, Drawer, DrawerProps, Empty } from "antd/es";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";

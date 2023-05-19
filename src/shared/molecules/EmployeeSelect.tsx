@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Input, List, Modal, ModalProps } from "antd";
+import { Button, Input, List, Modal, ModalProps } from "antd/es";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import UserInfoAvatar from "../organisms/UserInfoAvatar";
 import { useMemo, useState } from "react";

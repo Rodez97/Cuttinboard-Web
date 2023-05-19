@@ -2,7 +2,7 @@ import {
   ICuttinboardUser,
   Organization,
 } from "@cuttinboard-solutions/types-helpers";
-import { Result } from "antd";
+import { Result } from "antd/es";
 import { DocumentData } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";
 import { LoadingPage } from "../shared";

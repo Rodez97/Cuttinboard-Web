@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Input, Space } from "antd";
+import { Input, Space } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { SplitButton } from "../shared";
 

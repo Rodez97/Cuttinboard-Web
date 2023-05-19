@@ -3,7 +3,7 @@ import {
   useFiles,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
-import { Form, Input, Modal } from "antd";
+import { Form, Input, Modal } from "antd/es";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 

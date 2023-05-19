@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { KeyOption, matchSorter } from "match-sorter";
-import { orderBy } from "lodash";
+import orderBy from "lodash-es/orderBy";
 
 type InitialState = {
   order: "desc" | "asc";

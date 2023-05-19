@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { useCallback, useMemo } from "react";
-import { List, Modal, Tag, Typography } from "antd";
+import { List, Modal, Tag, Typography } from "antd/es";
 import EmployeeSecondaryElement from "./EmployeeSecondaryElement";
 import OwnerSecondaryElement from "./OwnerSecondaryElement";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";

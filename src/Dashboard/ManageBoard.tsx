@@ -1,15 +1,15 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
-import { Alert, Button, Divider, Form, Input, Modal } from "antd";
+import { Alert, Button, Divider, Form, Input, Modal } from "antd/es";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash-es/isEmpty";
 import {
   useDisclose,
   useGBoard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { IBoard } from "@cuttinboard-solutions/types-helpers";
 
 export interface ManageBoardRef {

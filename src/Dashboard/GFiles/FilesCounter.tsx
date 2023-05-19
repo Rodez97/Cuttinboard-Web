@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import fileSize from "filesize";
-import { Progress, Space, Typography } from "antd";
+import { Progress, Space, Typography } from "antd/es";
 import { useDashboard } from "../DashboardProvider";
 import { useMemo } from "react";
 

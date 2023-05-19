@@ -1,14 +1,17 @@
-import { AvatarProps } from "antd";
-import { ANALYTICS } from "firebase";
-import { logEvent } from "firebase/analytics";
+import type { AvatarProps } from "antd/es";
 import i18n from "../i18n";
 
 export const recordError = (error: Error, fatal?: boolean) => {
   console.error({ error, fatal });
-  logEvent(ANALYTICS, "exception", {
-    name: error.name,
-    description: error.message,
-    fatal,
+
+  import("firebase/analytics").then(({ getAnalytics, logEvent }) => {
+    const analytics = getAnalytics();
+
+    logEvent(analytics, "exception", {
+      name: error.name,
+      description: error.message,
+      fatal,
+    });
   });
 };
 

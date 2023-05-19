@@ -4,7 +4,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ChatInput from "./ChatInput";
-import { Button, Layout, Typography } from "antd";
+import { Button, Layout, Typography } from "antd/es";
 import MessageBubble from "./MessageBubble";
 import { useMessages } from "@cuttinboard-solutions/cuttinboard-library";
 import { INITIAL_LOAD_SIZE } from "../ChatConstants";

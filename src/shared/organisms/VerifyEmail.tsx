@@ -7,15 +7,15 @@ import { recordError } from "../../utils/utils";
 import axios from "axios";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { useSendEmailVerification } from "react-firebase-hooks/auth";
-import { Alert, Button, Modal, Typography } from "antd";
-import { logEvent } from "firebase/analytics";
+import { Alert, Button, Modal, Typography } from "antd/es";
 import mdiEmailSealOutline from "@mdi/svg/svg/email-seal-outline.svg";
 import Icon, { SendOutlined } from "@ant-design/icons";
 import {
   AUTH,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS, FIREBASE_CONFIG } from "../../firebase";
+import { FIREBASE_CONFIG } from "../../firebase";
+import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
 const initialCounterTime = new Date();
 
@@ -52,7 +52,7 @@ function VerifyEmail() {
         ),
       });
       // Report to analytics
-      logEvent(ANALYTICS, "email_verification_sent");
+      logAnalyticsEvent("email_verification_sent");
     } catch (error) {
       setError(error);
       recordError(error);
@@ -75,7 +75,7 @@ function VerifyEmail() {
       if (response.data?.users?.[0]?.emailVerified) {
         clearSentTime();
         // Report to analytics
-        logEvent(ANALYTICS, "email_verified", {
+        logAnalyticsEvent("email_verified", {
           email: user?.email,
         });
         location.reload();

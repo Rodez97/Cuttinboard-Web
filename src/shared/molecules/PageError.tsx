@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Result } from "antd";
+import { Button, Result } from "antd/es";
 import { FirebaseError } from "firebase/app";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";

@@ -7,7 +7,7 @@ import {
   ExclamationCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Modal, Tag, Typography } from "antd";
+import { Button, Modal, Tag, Typography } from "antd/es";
 import Linkify from "linkify-react";
 import { useTranslation } from "react-i18next";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";

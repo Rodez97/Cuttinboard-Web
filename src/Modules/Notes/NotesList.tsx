@@ -5,8 +5,8 @@ import {
   useBoard,
   useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { Button, Input, Menu, MenuProps, Spin } from "antd";
-import { orderBy } from "lodash";
+import { Button, Input, Menu, MenuProps, Spin } from "antd/es";
+import orderBy from "lodash-es/orderBy";
 import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";

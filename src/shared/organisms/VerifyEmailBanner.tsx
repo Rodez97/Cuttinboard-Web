@@ -1,22 +1,23 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Button, Modal, Space } from "antd";
+import { Alert, Button, Modal, Space } from "antd/es";
 import axios from "axios";
-import { logEvent } from "firebase/analytics";
 import { useSendEmailVerification } from "react-firebase-hooks/auth";
 import { useTranslation } from "react-i18next";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { recordError } from "../../utils/utils";
-import { ANALYTICS, FIREBASE_CONFIG } from "../../firebase";
-import * as Cuttinboard from "@cuttinboard-solutions/cuttinboard-library";
+import { FIREBASE_CONFIG } from "../../firebase";
+import {
+  AUTH,
+  useCuttinboard,
+} from "@cuttinboard-solutions/cuttinboard-library";
+import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
 const initialCounterTime = new Date();
 
 function VerifyEmailBanner() {
-  const { user } = Cuttinboard.useCuttinboard();
-  const [sendEmailVerification, sending] = useSendEmailVerification(
-    Cuttinboard.AUTH
-  );
+  const { user } = useCuttinboard();
+  const [sendEmailVerification, sending] = useSendEmailVerification(AUTH);
   const { t } = useTranslation();
   const [sentTime, setSentTime, clearSentTime] = useSessionstorageState(
     "verification-email-sent-time",
@@ -44,7 +45,7 @@ function VerifyEmailBanner() {
         ),
       });
       // Report to analytics
-      logEvent(ANALYTICS, "email_verification_sent");
+      logAnalyticsEvent("email_verification_sent");
     } catch (error) {
       recordError(error);
     }
@@ -64,7 +65,7 @@ function VerifyEmailBanner() {
       if (response.data?.users?.[0]?.emailVerified) {
         clearSentTime();
         // Report to analytics
-        logEvent(ANALYTICS, "email_verified", {
+        logAnalyticsEvent("email_verified", {
           email: user?.email,
         });
         location.reload();

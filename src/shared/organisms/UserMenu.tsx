@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { DownOutlined } from "@ant-design/icons";
-import { Dropdown, MenuProps, Modal, Space } from "antd";
+import { Dropdown, MenuProps, Modal, Space } from "antd/es";
 import { signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";

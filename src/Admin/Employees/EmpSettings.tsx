@@ -14,14 +14,12 @@ import {
   Select,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { compact } from "lodash";
-import { logEvent } from "firebase/analytics";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrayPageHeader } from "../../shared";
 import {
@@ -29,7 +27,6 @@ import {
   useEmployees,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { Timestamp } from "firebase/firestore";
-import { ANALYTICS } from "firebase";
 import {
   EmployeeLocationInfo,
   getEmployeeFullName,
@@ -40,7 +37,9 @@ import {
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
 import PermissionsChecker from "./PermissionsChecker";
-import { imgAvatar } from "../../assets/images";
+import imgAvatar from "../../assets/images/avatar.webp";
+import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
+import { compact } from "lodash-es";
 
 type EmployeeRoleData = {
   positions?: { position: string; wage: number }[];
@@ -88,7 +87,7 @@ export default () => {
       updateEmployee(employee, dataToAdd);
       message.success(t("Changes saved"));
       // Report to analytics
-      logEvent(ANALYTICS, "employee_role_wage_updated", {
+      logAnalyticsEvent("employee_role_wage_updated", {
         employeeId: employee.id,
         locationId: location.id,
       });

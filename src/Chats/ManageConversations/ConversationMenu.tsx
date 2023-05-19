@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
 import { IConversation } from "@cuttinboard-solutions/types-helpers";
-import { Button, Dropdown, Modal } from "antd";
+import { Button, Dropdown, Modal } from "antd/es";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

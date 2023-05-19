@@ -3,15 +3,16 @@ import { jsx } from "@emotion/react";
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import { Divider, Layout, Table, TableColumnsType, Tag } from "antd";
-import { Button, Space, Typography } from "antd";
+import { Divider, Layout, Table, TableColumnsType, Tag } from "antd/es";
+import { Button, Space, Typography } from "antd/es";
 import {
   FilePdfOutlined,
   LeftCircleOutlined,
   RightCircleOutlined,
 } from "@ant-design/icons";
 import "./RosterView.scss";
-import { groupBy, upperFirst } from "lodash";
+import groupBy from "lodash-es/groupBy";
+import upperFirst from "lodash-es/upperFirst";
 import { useNavigate } from "react-router-dom";
 import { GrayPageHeader, LoadingPage } from "../../shared";
 import {
@@ -34,7 +35,7 @@ import {
   IShift,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 
 export type RosterData = {

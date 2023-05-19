@@ -6,7 +6,7 @@ import {
   useMessages,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { IMessage } from "@cuttinboard-solutions/types-helpers";
-import { Button, Dropdown, Modal, Typography } from "antd";
+import { Button, Dropdown, Modal, Typography } from "antd/es";
 import dayjs from "dayjs";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";

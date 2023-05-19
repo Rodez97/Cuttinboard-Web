@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Space, Typography } from "antd";
+import { Space, Typography } from "antd/es";
 import { where } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "../../hooks/usePageTitle";

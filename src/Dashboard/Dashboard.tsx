@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
 import { useMemo, useState } from "react";
 import DashboardRouter from "./DashboardRouter";
-import { Badge, Button, Layout, Menu, MenuProps, Tag } from "antd";
+import { Badge, Button, Layout, Menu, MenuProps, Tag } from "antd/es";
 import { useDashboard } from "./DashboardProvider";
 import {
   useNavigate,

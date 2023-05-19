@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Modal, ModalProps, Typography } from "antd";
+import { Modal, ModalProps, Typography } from "antd/es";
 import { useRef, useState } from "react";
 import NewDMByEmployee from "./NewDMByEmployee";
 import NewDMByEmail, { NewDMByEmailRef } from "./NewDMByEmail";

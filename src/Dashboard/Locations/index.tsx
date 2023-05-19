@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../DashboardProvider";
-import { Layout, Tabs } from "antd";
+import { Layout, Tabs } from "antd/es";
 import { ShopOutlined } from "@ant-design/icons";
 import { PageHeader } from "@ant-design/pro-layout";
 import { GoldButton, LoadingPage } from "../../shared";

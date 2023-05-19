@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Layout } from "antd";
+import { Layout } from "antd/es";
 
 export const AddLocationWrapper = styled(Layout)`
   overflow: auto;

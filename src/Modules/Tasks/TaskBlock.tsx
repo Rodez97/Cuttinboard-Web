@@ -13,7 +13,7 @@ import {
   Tag,
   Tooltip,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   CheckCircleOutlined,
   DeleteOutlined,
@@ -30,7 +30,7 @@ import {
   IChecklist,
   ITask,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 interface TasksSectionProps {
   sectionId: string;

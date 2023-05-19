@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import React from "react";
 import Linkify from "linkify-react";
-import { Card, Tooltip, Typography } from "antd";
+import { Card, Tooltip, Typography } from "antd/es";
 import { StickyNote } from "../../shared";
 import { INote } from "@cuttinboard-solutions/types-helpers";
 

@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { BaseMediaProps } from "./BaseMediaProps";
-import { Image, Spin } from "antd";
-import { imgPlaceholderResultImg } from "../../../assets/images";
+import { Image, Spin } from "antd/es";
+import imgPlaceholderResultImg from "../../../assets/images/placeholder_result_img.png";
 import { memo } from "react";
 
 function ImageMessage(props: BaseMediaProps) {

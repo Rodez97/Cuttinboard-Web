@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Tag } from "antd";
+import { Tag } from "antd/es";
 
 const OwnerGoldTag = styled(Tag)`
   color: #ffffff;

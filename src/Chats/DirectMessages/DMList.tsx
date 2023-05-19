@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { useCallback, useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
-import { Avatar, Badge, Button, Input, Spin, Typography } from "antd";
+import { Avatar, Badge, Button, Input, Spin, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import Icon, { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
@@ -15,7 +15,7 @@ import {
   getDirectMessageRecipient,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
-import { orderBy } from "lodash";
+import orderBy from "lodash-es/orderBy";
 import { useNavigate } from "react-router-dom";
 import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
 

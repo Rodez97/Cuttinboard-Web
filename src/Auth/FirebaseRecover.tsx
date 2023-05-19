@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSendPasswordResetEmail } from "react-firebase-hooks/auth";
 import { useCountdown, useSessionstorageState } from "rooks";
-import { Alert, Button, Form, Input, message, Typography } from "antd";
+import { Alert, Button, Form, Input, message, Typography } from "antd/es";
 import { AUTH, Colors } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "../utils/utils";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 const initialCounterTime = new Date();
 

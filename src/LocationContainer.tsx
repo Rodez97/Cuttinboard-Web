@@ -11,19 +11,6 @@ import {
 import { Badge, Button, Layout, Menu, MenuProps } from "antd";
 import { useTranslation } from "react-i18next";
 import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
-import Forum from "@mdi/svg/svg/forum.svg";
-import mdiMessageCogOutline from "@mdi/svg/svg/message-cog.svg";
-import MessageTextLock from "@mdi/svg/svg/message-text-lock.svg";
-import { DarkPageHeader, LoadingPage, UserMenu } from "./shared";
-import mdiChartBox from "@mdi/svg/svg/chart-box.svg";
-import mdiMyShifts from "@mdi/svg/svg/account-clock.svg";
-import mdiNotes from "@mdi/svg/svg/note-multiple.svg";
-import mdiTasks from "@mdi/svg/svg/checkbox-marked-circle.svg";
-import mdiFiles from "@mdi/svg/svg/folder-home.svg";
-import mdiChecklist from "@mdi/svg/svg/clipboard-list.svg";
-import mdiEmployees from "@mdi/svg/svg/account-group.svg";
-import mdiSchedule from "@mdi/svg/svg/store-clock.svg";
-import mdiUtensils from "@mdi/svg/svg/blender.svg";
 import {
   useCuttinboard,
   useCuttinboardLocation,
@@ -34,13 +21,22 @@ import {
   RoleAccessLevels,
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
-import {
-  setUserId,
-  setAnalyticsCollectionEnabled,
-  setUserProperties,
-} from "firebase/analytics";
-import { ANALYTICS } from "./firebase";
+import { LoadingPage } from "./shared";
 
+const Forum = lazy(() => import("@mdi/svg/svg/forum.svg"));
+const mdiMessageCogOutline = lazy(() => import("@mdi/svg/svg/message-cog.svg"));
+const MessageTextLock = lazy(
+  () => import("@mdi/svg/svg/message-text-lock.svg")
+);
+const mdiChartBox = lazy(() => import("@mdi/svg/svg/chart-box.svg"));
+const mdiMyShifts = lazy(() => import("@mdi/svg/svg/account-clock.svg"));
+const mdiNotes = lazy(() => import("@mdi/svg/svg/note-multiple.svg"));
+const mdiTasks = lazy(() => import("@mdi/svg/svg/checkbox-marked-circle.svg"));
+const mdiFiles = lazy(() => import("@mdi/svg/svg/folder-home.svg"));
+const mdiChecklist = lazy(() => import("@mdi/svg/svg/clipboard-list.svg"));
+const mdiEmployees = lazy(() => import("@mdi/svg/svg/account-group.svg"));
+const mdiSchedule = lazy(() => import("@mdi/svg/svg/store-clock.svg"));
+const mdiUtensils = lazy(() => import("@mdi/svg/svg/blender.svg"));
 const DM = lazy(() => import("./Chats/DirectMessages"));
 const Conversations = lazy(() => import("./Chats/Conversations"));
 const Tasks = lazy(() => import("./Modules/Tasks"));
@@ -53,6 +49,16 @@ const Employees = lazy(() => import("./Admin/Employees"));
 const Scheduler = lazy(() => import("./Admin/Scheduler"));
 const Utensils = lazy(() => import("./Admin/Utensils"));
 const Summary = lazy(() => import("./Modules/Summary"));
+const DarkPageHeader = lazy(() =>
+  import("./shared").then((module) => ({
+    default: module.DarkPageHeader,
+  }))
+);
+const UserMenu = lazy(() =>
+  import("./shared").then((module) => ({
+    default: module.UserMenu,
+  }))
+);
 
 export default () => {
   const { pathname } = useRouterLocation();
@@ -69,12 +75,23 @@ export default () => {
   const checkPermission = useLocationPermissions();
 
   useEffect(() => {
-    setAnalyticsCollectionEnabled(ANALYTICS, true);
-    setUserId(ANALYTICS, user.uid);
-    setUserProperties(ANALYTICS, {
-      email: user.email,
-      username: user.displayName,
-    });
+    import("firebase/analytics").then(
+      ({
+        setAnalyticsCollectionEnabled,
+        setUserId,
+        setUserProperties,
+        getAnalytics,
+      }) => {
+        const ANALYTICS = getAnalytics();
+
+        setAnalyticsCollectionEnabled(ANALYTICS, true);
+        setUserId(ANALYTICS, user.uid);
+        setUserProperties(ANALYTICS, {
+          email: user.email,
+          username: user.displayName,
+        });
+      }
+    );
   }, [user.displayName, user.email, user.uid]);
 
   const sidebarItems = useMemo(() => {

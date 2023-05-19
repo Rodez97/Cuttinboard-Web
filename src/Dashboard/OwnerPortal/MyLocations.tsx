@@ -2,7 +2,15 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { PageHeader } from "@ant-design/pro-layout";
 import { jsx } from "@emotion/react";
-import { Alert, Button, Input, Layout, Result, Space, Typography } from "antd";
+import {
+  Alert,
+  Button,
+  Input,
+  Layout,
+  Result,
+  Space,
+  Typography,
+} from "antd/es";
 import dayjs from "dayjs";
 import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
@@ -17,7 +25,7 @@ import DeleteLocationDialog, {
 } from "./DeleteLocationDialog";
 import { useOwner } from ".";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export default () => {
   const { t } = useTranslation();

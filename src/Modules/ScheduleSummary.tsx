@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Card, Divider, Skeleton, Space, Statistic } from "antd";
+import { Alert, Card, Divider, Skeleton, Space, Statistic } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { ScheduleTodaySummary } from "./useSummaryData";
 import {

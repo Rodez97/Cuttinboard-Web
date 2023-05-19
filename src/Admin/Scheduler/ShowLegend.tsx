@@ -2,7 +2,7 @@
 import { css, jsx } from "@emotion/react";
 import Icon from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
-import { Modal } from "antd";
+import { Modal } from "antd/es";
 import mdiClockAlert from "@mdi/svg/svg/clock-alert.svg";
 import mdiSquare from "@mdi/svg/svg/square-rounded.svg";
 import i18next from "i18next";

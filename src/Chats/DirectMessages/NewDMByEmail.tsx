@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Form, Input, message, Typography } from "antd";
+import { Button, Form, Input, message, Typography } from "antd/es";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
@@ -16,7 +16,7 @@ import {
   ICuttinboardUser,
   IEmployee,
 } from "@cuttinboard-solutions/types-helpers";
-import { imgAvatar } from "../../assets/images";
+import imgAvatar from "../../assets/images/avatar.webp";
 
 export interface NewDMByEmailRef {
   reset: () => void;

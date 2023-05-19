@@ -1,8 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Modal, ModalProps } from "antd";
+import { Modal, ModalProps } from "antd/es";
 import { useTranslation } from "react-i18next";
-import { List } from "antd";
+import { List } from "antd/es";
 import {
   FormOutlined,
   GlobalOutlined,

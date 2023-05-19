@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Button, Dropdown, MenuProps, Modal, Tag, Typography } from "antd";
+import { Button, Dropdown, MenuProps, Modal, Tag, Typography } from "antd/es";
 import {
   ExclamationCircleOutlined,
   FileTextOutlined,

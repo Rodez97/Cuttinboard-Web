@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Typography } from "antd";
+import { Typography } from "antd/es";
 import Linkify from "linkify-react";
 
 function isEmojiOnly(text: string) {

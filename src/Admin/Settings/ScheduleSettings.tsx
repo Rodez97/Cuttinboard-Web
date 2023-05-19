@@ -11,9 +11,9 @@ import {
   message,
   Space,
   TimePicker,
-} from "antd";
+} from "antd/es";
 import { useTranslation } from "react-i18next";
-import { Checkbox } from "antd";
+import { Checkbox } from "antd/es";
 import {
   MinusCircleOutlined,
   PlusOutlined,
@@ -21,9 +21,10 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
-import { compact, isEqual } from "lodash";
+import compact from "lodash-es/compact";
+import isEqual from "lodash-es/isEqual";
 import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 type ScheduleFormData = {
   ot_week: {

@@ -7,7 +7,7 @@ import {
   PhoneOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { Button, List } from "antd";
+import { Button, List } from "antd/es";
 import { useTranslation } from "react-i18next";
 import CuttinboardAvatar from "../atoms/Avatar";
 import {

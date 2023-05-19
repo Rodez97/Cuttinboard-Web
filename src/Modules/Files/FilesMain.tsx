@@ -15,7 +15,7 @@ import {
   Tag,
   Tooltip,
   Typography,
-} from "antd";
+} from "antd/es";
 import Icon, {
   CloudUploadOutlined,
   GlobalOutlined,

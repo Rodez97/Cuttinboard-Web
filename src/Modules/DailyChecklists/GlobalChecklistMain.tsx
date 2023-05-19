@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ClearOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { Button, Layout, Modal, Space } from "antd";
+import { Button, Layout, Modal, Space } from "antd/es";
 import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader, DraggableList, LoadingPage } from "../../shared";
@@ -18,7 +18,7 @@ import {
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export default function GlobalChecklistMain() {
   const { t } = useTranslation();

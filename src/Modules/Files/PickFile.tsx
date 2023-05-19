@@ -6,7 +6,7 @@ import {
 import React, { useMemo, useRef, useState } from "react";
 import fileSize from "filesize";
 import { useTranslation } from "react-i18next";
-import { message, Modal, Upload, UploadFile, UploadProps } from "antd";
+import { message, Modal, Upload, UploadFile, UploadProps } from "antd/es";
 import { InboxOutlined } from "@ant-design/icons";
 import { recordError } from "../../utils/utils";
 import { doc, Timestamp } from "firebase/firestore";
@@ -23,7 +23,7 @@ import {
   getLocationUsage,
   ICuttinboard_File,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 const { Dragger } = Upload;
 

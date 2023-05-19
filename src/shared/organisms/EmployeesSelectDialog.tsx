@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
-import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd";
+import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd/es";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UsergroupAddOutlined } from "@ant-design/icons";

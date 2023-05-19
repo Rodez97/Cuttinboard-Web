@@ -28,8 +28,9 @@ import {
   Tag,
   TimePicker,
   Typography,
-} from "antd";
-import { capitalize, isEmpty } from "lodash";
+} from "antd/es";
+import capitalize from "lodash-es/capitalize";
+import isEmpty from "lodash-es/isEmpty";
 import {
   checkForOverlappingShiftsARRAY,
   getShiftDayjsDate,
@@ -49,7 +50,7 @@ import {
   WEEKFORMAT,
   getEmployeeHourlyWage,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);

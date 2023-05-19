@@ -13,7 +13,7 @@ import {
   Table,
   TableColumnsType,
   Typography,
-} from "antd";
+} from "antd/es";
 import { useTranslation } from "react-i18next";
 import { useManageConvs } from "./ManageConvDialog";
 import { useNavigate } from "react-router-dom";

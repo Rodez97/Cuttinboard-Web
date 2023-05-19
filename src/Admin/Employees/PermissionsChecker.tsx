@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { ManagerPermissions } from "@cuttinboard-solutions/types-helpers";
 import { useTranslation } from "react-i18next";
-import { Checkbox, Space, Typography } from "antd";
+import { Checkbox, Space, Typography } from "antd/es";
 
 interface PermissionsCheckerProps {
   value?: ManagerPermissions;

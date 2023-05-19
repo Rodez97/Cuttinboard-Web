@@ -1,4 +1,4 @@
-import { Empty } from "antd";
+import { Empty } from "antd/es";
 import styled from "@emotion/styled";
 
 const EmptyBoard = styled(Empty)`

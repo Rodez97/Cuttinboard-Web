@@ -6,11 +6,11 @@ import {
   MinusOutlined,
 } from "@ant-design/icons";
 import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
-import { Avatar, Drawer, Empty, List, Space, Typography } from "antd";
+import { Avatar, Drawer, Empty, List, Space, Typography } from "antd/es";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
-import { orderBy } from "lodash";
+import orderBy from "lodash-es/orderBy";
 
 interface ChangesDialogProps {
   open: boolean;

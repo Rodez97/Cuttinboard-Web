@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dropdown } from "antd";
+import { Dropdown } from "antd/es";
 import {
   FilterOutlined,
   SortAscendingOutlined,

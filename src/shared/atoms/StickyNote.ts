@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Card } from "antd";
+import { Card } from "antd/es";
 
 const StickyNote = styled(Card)`
   background-color: #fffb99;

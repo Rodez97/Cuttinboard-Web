@@ -1,12 +1,12 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { orderBy } from "lodash";
+import orderBy from "lodash-es/orderBy";
 import { useLayoutEffect, useMemo, useState } from "react";
 import ManageNoteDialog, { useManageNote } from "./ManageNoteDialog";
 import NoteCard from "./Note";
 import { useTranslation } from "react-i18next";
 import ToolBar from "../ToolBar";
-import { Button, Layout, Space, Tag } from "antd";
+import { Button, Layout, Space, Tag } from "antd/es";
 import Icon, {
   GlobalOutlined,
   InfoCircleOutlined,

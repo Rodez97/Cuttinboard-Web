@@ -1,4 +1,4 @@
-import { Select } from "antd";
+import { Select } from "antd/es";
 import dayjs from "dayjs";
 import React from "react";
 import { useTranslation } from "react-i18next";

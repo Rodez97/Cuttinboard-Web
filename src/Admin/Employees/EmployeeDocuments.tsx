@@ -21,7 +21,7 @@ import {
   Result,
   Upload,
   UploadProps,
-} from "antd";
+} from "antd/es";
 import {
   DeleteFilled,
   DownloadOutlined,
@@ -38,7 +38,7 @@ import {
   useCuttinboardLocation,
   useEmployees,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   getEmployeeFullName,
   roleToString,

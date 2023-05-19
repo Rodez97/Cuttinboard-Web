@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Tag } from "antd";
+import { Tag } from "antd/es";
 import {
   getEmployeeShiftsSummary,
   minutesToTextDuration,

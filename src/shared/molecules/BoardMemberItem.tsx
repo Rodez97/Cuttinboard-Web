@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { DeleteFilled } from "@ant-design/icons";
-import { Button, List } from "antd";
+import { Button, List } from "antd/es";
 import { useMemo } from "react";
 import {
   useCuttinboard,

@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { IEmployee } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
-import { Divider, List, Modal, ModalProps, Typography } from "antd";
+import { Divider, List, Modal, ModalProps, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 
 export default ({

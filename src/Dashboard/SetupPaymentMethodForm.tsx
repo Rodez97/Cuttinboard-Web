@@ -6,11 +6,11 @@ import {
   useDisclose,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import SetupForm from "./SetupForm";
-import { Button, Modal, Result, Spin } from "antd";
+import { Button, Modal, Result, Spin } from "antd/es";
 import { useDashboard } from "./DashboardProvider";
 import { httpsCallable } from "firebase/functions";
 import { useTranslation } from "react-i18next";
-import { logAnalyticsEvent } from "../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 const stripePromise = loadStripe(
   "pk_live_51KZnSWCYVoOESVglKcMEB4amoGeOkMeSkqgfcEVW7wQLGVmYL8YJFmx4nB70ZLa3pNvEoOzsz6Dl9qeuQkebAXJq00ZxWrYzFj"

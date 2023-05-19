@@ -1,18 +1,18 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import Icon, { MinusOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Typography } from "antd";
-import { useState } from "react";
+import { Button, Checkbox, Typography } from "antd/es";
+import { Suspense, useState } from "react";
 import mdiDrag from "@mdi/svg/svg/drag.svg";
 import { recordError } from "../../utils/utils";
 import { reorder } from "../../utils/reorder";
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from "react-beautiful-dnd";
-import { ITask } from "@cuttinboard-solutions/types-helpers";
+import type { ITask } from "@cuttinboard-solutions/types-helpers";
+import type { DropResult } from "react-beautiful-dnd";
+import { lazily } from "react-lazily";
+
+const { DragDropContext, Droppable, Draggable } = lazily(
+  () => import("react-beautiful-dnd")
+);
 
 interface SimpleTodoProps {
   tasks: ITask[];
@@ -61,93 +61,95 @@ function Tasklist({
   }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="droppable-list-tasks">
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
-            {(items ?? tasks).map((task, index) => (
-              <Draggable
-                key={task.id + index}
-                draggableId={task.id}
-                index={index}
-              >
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    css={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: 10,
-                    }}
-                  >
-                    <Icon
-                      component={mdiDrag}
-                      {...provided.dragHandleProps}
-                      css={{
-                        fontSize: 20,
-                        marginRight: 10,
-                        color: "#00000050",
-                      }}
-                    />
+    <Suspense fallback={null}>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable-list-tasks">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {(items ?? tasks).map((task, index) => (
+                <Draggable
+                  key={task.id + index}
+                  draggableId={task.id}
+                  index={index}
+                >
+                  {(provided) => (
                     <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
                       css={{
                         display: "flex",
                         alignItems: "center",
-                        width: "100%",
+                        marginBottom: 10,
                       }}
                     >
+                      <Icon
+                        component={mdiDrag}
+                        {...provided.dragHandleProps}
+                        css={{
+                          fontSize: 20,
+                          marginRight: 10,
+                          color: "#00000050",
+                        }}
+                      />
                       <div
                         css={{
                           display: "flex",
                           alignItems: "center",
                           width: "100%",
-                          gap: 10,
                         }}
                       >
-                        <Checkbox
-                          checked={task.status}
-                          onChange={(e) => onChange(task, e.target.checked)}
-                        />
-                        <Typography.Paragraph
-                          delete={task.status}
-                          editable={
-                            canRemove &&
-                            onTaskNameChange && {
-                              onChange: (newName) =>
-                                onTaskNameChange(task, newName),
-                            }
-                          }
+                        <div
                           css={{
-                            color: task.status ? "#00000050" : "#000000",
+                            display: "flex",
+                            alignItems: "center",
                             width: "100%",
-                            margin: "0 !important",
-                            padding: "0 !important",
+                            gap: 10,
                           }}
                         >
-                          {task.name}
-                        </Typography.Paragraph>
-                      </div>
+                          <Checkbox
+                            checked={task.status}
+                            onChange={(e) => onChange(task, e.target.checked)}
+                          />
+                          <Typography.Paragraph
+                            delete={task.status}
+                            editable={
+                              canRemove &&
+                              onTaskNameChange && {
+                                onChange: (newName) =>
+                                  onTaskNameChange(task, newName),
+                              }
+                            }
+                            css={{
+                              color: task.status ? "#00000050" : "#000000",
+                              width: "100%",
+                              margin: "0 !important",
+                              padding: "0 !important",
+                            }}
+                          >
+                            {task.name}
+                          </Typography.Paragraph>
+                        </div>
 
-                      {canRemove && onRemove && (
-                        <Button
-                          key="delete"
-                          onClick={() => onRemove(task)}
-                          danger
-                          type="link"
-                          icon={<MinusOutlined />}
-                        />
-                      )}
+                        {canRemove && onRemove && (
+                          <Button
+                            key="delete"
+                            onClick={() => onRemove(task)}
+                            danger
+                            type="link"
+                            icon={<MinusOutlined />}
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </Suspense>
   );
 }
 

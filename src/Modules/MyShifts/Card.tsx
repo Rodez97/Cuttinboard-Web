@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
-import { Button, Modal, Tag, Typography } from "antd";
+import { Button, Modal, Tag, Typography } from "antd/es";
 import Icon from "@ant-design/icons";
 import { NoteIcon } from "../Notes/notesIcons";
 import { GrayPageHeader } from "../../shared";

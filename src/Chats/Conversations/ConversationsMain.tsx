@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { memo, useEffect } from "react";
 import ChatMain from "../components/ChatMain";
-import { Layout } from "antd";
+import { Layout } from "antd/es";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import ConvDetails from "./ConvDetails";
 import {

@@ -5,6 +5,7 @@ declare global {
       NODE_ENV: "development" | "production";
       STRIPE_PRODUCT_ID: string;
       RECAPTCHA3_SITE_KEY: string;
+      production: boolean;
     }
   }
 }

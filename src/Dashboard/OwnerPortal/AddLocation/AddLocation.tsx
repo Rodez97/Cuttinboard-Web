@@ -13,7 +13,7 @@ import {
   message,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   FIRESTORE,
   FUNCTIONS,
@@ -30,7 +30,7 @@ import NewLocationSummary from "./NewLocationSummary";
 import { httpsCallable } from "firebase/functions";
 import { recordError } from "../../../utils/utils";
 import * as yup from "yup";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useDashboard } from "../../DashboardProvider";

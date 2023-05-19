@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { SaveFilled } from "@ant-design/icons";
-import { Button, Drawer, Form, Input, InputNumber } from "antd";
+import { Button, Drawer, Form, Input, InputNumber } from "antd/es";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -12,7 +12,7 @@ import {
 import { nanoid } from "nanoid";
 import { Timestamp, doc } from "firebase/firestore";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 interface IManageUtensilDialogRef {
   openNew: () => void;

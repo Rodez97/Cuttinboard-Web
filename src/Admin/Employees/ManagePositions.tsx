@@ -12,12 +12,12 @@ import {
   Input,
   List,
   Typography,
-} from "antd";
-import { compact } from "lodash";
+} from "antd/es";
+import compact from "lodash-es/compact";
 import { matchSorter } from "match-sorter";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 function ManagePositions(props: DrawerProps) {
   const { t } = useTranslation();

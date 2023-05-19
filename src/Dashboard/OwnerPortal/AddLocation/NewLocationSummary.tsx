@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Avatar, Typography } from "antd";
+import { Avatar, Typography } from "antd/es";
 import { useDashboard } from "../../DashboardProvider";
 import { CreditCardOutlined } from "@ant-design/icons";
 

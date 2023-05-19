@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { orderBy } from "lodash";
+import orderBy from "lodash-es/orderBy";
 import { useLayoutEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Layout, Space } from "antd";
+import { Button, Layout, Space } from "antd/es";
 import Icon, { InfoCircleOutlined } from "@ant-design/icons";
 import { matchSorter } from "match-sorter";
 import {

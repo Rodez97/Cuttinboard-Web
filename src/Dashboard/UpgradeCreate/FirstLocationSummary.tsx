@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Typography } from "antd";
+import { Typography } from "antd/es";
 import { FolderOpenOutlined, TeamOutlined } from "@ant-design/icons";
 import { DocumentData } from "firebase/firestore";
 

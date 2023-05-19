@@ -13,7 +13,7 @@ import {
   Segmented,
   TimePicker,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   FIRESTORE,
   useCuttinboard,

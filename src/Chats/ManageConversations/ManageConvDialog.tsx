@@ -10,7 +10,7 @@ import {
   Select,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import React, {
   forwardRef,
   useImperativeHandle,
@@ -19,7 +19,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { TrimRule } from "../../utils/utils";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash-es/isEmpty";
 import {
   useConversations,
   useCuttinboardLocation,
@@ -33,7 +33,7 @@ import {
   PrivacyLevel,
   privacyLevelToString,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export interface ManageConvDialogRef {
   openNew: () => void;

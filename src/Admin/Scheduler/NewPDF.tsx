@@ -1,14 +1,5 @@
 import React from "react";
 import {
-  Page,
-  Text,
-  View,
-  Document,
-  StyleSheet,
-  pdf,
-  Image,
-} from "@react-pdf/renderer";
-import {
   Colors,
   getEmployeeShiftsSummary,
   getShiftDayjsDate,
@@ -16,74 +7,90 @@ import {
   minutesToTextDuration,
   parseWeekId,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { Dictionary, groupBy, upperFirst } from "lodash";
+import groupBy from "lodash-es/groupBy";
+import upperFirst from "lodash-es/upperFirst";
 import dayjs from "dayjs";
 import i18n from "../../i18n";
 import AllWhiteLogo from "../../assets/images/Color-on-light-backgrounds.png";
 import fileDownload from "js-file-download";
 import { RosterData } from "./RosterView";
 import {
+  WageDataRecord,
   getEmployeeFullName,
-  IEmployee,
-  IShift,
-  ShiftWage,
-  WageDataByDay,
 } from "@cuttinboard-solutions/types-helpers";
+import type { IEmployee, IShift } from "@cuttinboard-solutions/types-helpers";
 
-const styles = StyleSheet.create({
-  body: {
-    padding: 5,
-  },
-  table: {
-    display: "flex",
-    width: "auto",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-  },
-  tableRow: {
-    margin: "auto",
-    flexDirection: "row",
-  },
-  headerRow: {
-    backgroundColor: Colors.Blue.Light,
-  },
-  tableCol: {
-    width: "12.5%",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-  },
-  tableRosterCol: {
-    width: "33.33%",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-  },
-  empCol: {
-    backgroundColor: Colors.Blue.Light,
-  },
-  headerCell: {
-    margin: 3,
-    textAlign: "center",
-    fontSize: 12,
-  },
-  employeeTitle: {
-    margin: 2,
-    fontSize: 10,
-    fontWeight: "bold",
-    textOverflow: "ellipsis",
-  },
-  employeeSubtitle: {
-    margin: 2,
-    fontSize: 8,
-  },
-});
+// Lazy load pdf tools
+const getPdfTools = async () => {
+  const { Page, Text, View, Document, StyleSheet, pdf, Image } = await import(
+    "@react-pdf/renderer"
+  );
 
-const SchedulePDF = (
+  const styles = StyleSheet.create({
+    body: {
+      padding: 5,
+    },
+    table: {
+      display: "flex",
+      width: "auto",
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderRightWidth: 0,
+      borderBottomWidth: 0,
+    },
+    tableRow: {
+      margin: "auto",
+      flexDirection: "row",
+    },
+    headerRow: {
+      backgroundColor: Colors.Blue.Light,
+    },
+    tableCol: {
+      width: "12.5%",
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+    },
+    tableRosterCol: {
+      width: "33.33%",
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+    },
+    empCol: {
+      backgroundColor: Colors.Blue.Light,
+    },
+    headerCell: {
+      margin: 3,
+      textAlign: "center",
+      fontSize: 12,
+    },
+    employeeTitle: {
+      margin: 2,
+      fontSize: 10,
+      fontWeight: "bold",
+      textOverflow: "ellipsis",
+    },
+    employeeSubtitle: {
+      margin: 2,
+      fontSize: 8,
+    },
+  });
+
+  return {
+    Page,
+    Text,
+    View,
+    Document,
+    pdf,
+    Image,
+    styles,
+  };
+};
+
+const SchedulePDF = async (
   empDocs: {
     key: string;
     employee: IEmployee;
@@ -92,17 +99,10 @@ const SchedulePDF = (
   locationName: string,
   weekId: string,
   weekDays: dayjs.Dayjs[],
-  wageData: Dictionary<{
-    summary: WageDataByDay;
-    shifts: Map<
-      string,
-      {
-        wageData: ShiftWage;
-        isoWeekDay: number;
-      }
-    >;
-  }>
+  wageData: Record<string, WageDataRecord>
 ) => {
+  // Lazy load pdf tools
+  const { Page, Text, View, Document, Image, styles } = await getPdfTools();
   // Get Week number and text
   const { start, end, week } = parseWeekId(weekId);
 
@@ -273,12 +273,14 @@ const SchedulePDF = (
   );
 };
 
-function Header(props: {
+async function Header(props: {
   locationName: string;
   week: number;
   firstDayWeek: string;
   lastDayWeek: string;
 }) {
+  // Lazy load pdf tools
+  const { Text, View, Image } = await getPdfTools();
   return (
     <View
       style={{
@@ -338,7 +340,9 @@ function Header(props: {
   );
 }
 
-function RosterPosition({ children }: { children: string }) {
+async function RosterPosition({ children }: { children: string }) {
+  // Lazy load pdf tools
+  const { Text, View, styles } = await getPdfTools();
   return (
     <View
       style={{
@@ -363,7 +367,7 @@ function RosterPosition({ children }: { children: string }) {
   );
 }
 
-function RosterRow({
+async function RosterRow({
   name,
   start,
   end,
@@ -372,6 +376,8 @@ function RosterRow({
   start: string;
   end: string;
 }) {
+  // Lazy load pdf tools
+  const { Text, View, styles } = await getPdfTools();
   return (
     <View style={styles.tableRow}>
       <View style={styles.tableRosterCol}>
@@ -389,13 +395,15 @@ function RosterRow({
   );
 }
 
-const RosterPDF = (
+const RosterPDF = async (
   amRoster: RosterData[] | null,
   pmRoster: RosterData[] | null,
   weekId: string,
   day: dayjs.Dayjs,
   locationName: string
 ) => {
+  // Lazy load pdf tools
+  const { Page, Text, View, Document, styles } = await getPdfTools();
   // Get Week number and text
   const { start, end, week } = parseWeekId(weekId);
 
@@ -412,15 +420,67 @@ const RosterPDF = (
     shift.position ? shift.position : "NO POSITION"
   );
 
+  const HeaderComponent = await Header({
+    locationName,
+    week,
+    firstDayWeek,
+    lastDayWeek,
+  });
+
+  const RosterPositionComponent = await RosterPosition({
+    children: "Position",
+  });
+
+  const RosterAMBody = await Promise.all(
+    Object.entries(amRosterGrouped).map(async ([position, shifts]) => {
+      const RosterRowComponent = await Promise.all(
+        shifts.map(async ({ employee, shift }) => {
+          const Row = await RosterRow({
+            name: getEmployeeFullName(employee),
+            start: getShiftDayjsDate(shift, "start").format("h:mm a"),
+            end: getShiftDayjsDate(shift, "end").format("h:mm a"),
+          });
+          return Row;
+        })
+      );
+
+      return (
+        <View key={position}>
+          {RosterPositionComponent}
+
+          {RosterRowComponent}
+        </View>
+      );
+    })
+  );
+
+  const RosterPMBody = await Promise.all(
+    Object.entries(pmRosterGrouped).map(async ([position, shifts]) => {
+      const RosterRowComponent = await Promise.all(
+        shifts.map(async ({ employee, shift }) => {
+          const Row = await RosterRow({
+            name: getEmployeeFullName(employee),
+            start: getShiftDayjsDate(shift, "start").format("h:mm a"),
+            end: getShiftDayjsDate(shift, "end").format("h:mm a"),
+          });
+          return Row;
+        })
+      );
+
+      return (
+        <View key={position}>
+          {RosterPositionComponent}
+
+          {RosterRowComponent}
+        </View>
+      );
+    })
+  );
+
   return (
     <Document>
       <Page size="A4" style={styles.body}>
-        <Header
-          week={week}
-          firstDayWeek={firstDayWeek}
-          lastDayWeek={lastDayWeek}
-          locationName={locationName}
-        />
+        {HeaderComponent}
 
         <Text style={styles.headerCell}>{dayText}</Text>
 
@@ -449,24 +509,7 @@ const RosterPDF = (
             <Text style={styles.headerCell}>AM Roster</Text>
           </View>
 
-          {Object.entries(amRosterGrouped).map(([position, shifts]) => {
-            return (
-              <View key={position}>
-                <RosterPosition>{position}</RosterPosition>
-
-                {shifts.map(({ employee, shift }) => {
-                  return (
-                    <RosterRow
-                      key={shift.id}
-                      name={getEmployeeFullName(employee)}
-                      start={getShiftDayjsDate(shift, "start").format("h:mm a")}
-                      end={getShiftDayjsDate(shift, "end").format("h:mm a")}
-                    />
-                  );
-                })}
-              </View>
-            );
-          })}
+          {RosterAMBody}
 
           <View
             style={{
@@ -480,24 +523,7 @@ const RosterPDF = (
             <Text style={styles.headerCell}>PM Roster</Text>
           </View>
 
-          {Object.entries(pmRosterGrouped).map(([position, shifts]) => {
-            return (
-              <View key={position}>
-                <RosterPosition>{position}</RosterPosition>
-
-                {shifts.map(({ employee, shift }) => {
-                  return (
-                    <RosterRow
-                      key={shift.id}
-                      name={getEmployeeFullName(employee)}
-                      start={getShiftDayjsDate(shift, "start").format("h:mm a")}
-                      end={getShiftDayjsDate(shift, "end").format("h:mm a")}
-                    />
-                  );
-                })}
-              </View>
-            );
-          })}
+          {RosterPMBody}
         </View>
       </Page>
     </Document>
@@ -513,20 +539,20 @@ export const generateSchedulePdf = async (
   locationName: string,
   weekId: string,
   weekDays: dayjs.Dayjs[],
-  wageData: Dictionary<{
-    summary: WageDataByDay;
-    shifts: Map<
-      string,
-      {
-        wageData: ShiftWage;
-        isoWeekDay: number;
-      }
-    >;
-  }>
+  wageData: Record<string, WageDataRecord>
 ) => {
-  const blob = await pdf(
-    SchedulePDF(empDocs, locationName, weekId, weekDays, wageData)
-  ).toBlob();
+  // Lazy load pdf tools
+  const { pdf } = await getPdfTools();
+
+  const SchedulePdfComponent = await SchedulePDF(
+    empDocs,
+    locationName,
+    weekId,
+    weekDays,
+    wageData
+  );
+
+  const blob = await pdf(SchedulePdfComponent).toBlob();
 
   fileDownload(blob, "Schedule " + weekId + ".pdf", "application/pdf");
 };
@@ -538,9 +564,18 @@ export const generateRosterPdf = async (
   day: dayjs.Dayjs,
   locationName: string
 ) => {
-  const blob = await pdf(
-    RosterPDF(amRoster, pmRoster, weekId, day, locationName)
-  ).toBlob();
+  // Lazy load pdf tools
+  const { pdf } = await getPdfTools();
+
+  const RosterPdfComponent = await RosterPDF(
+    amRoster,
+    pmRoster,
+    weekId,
+    day,
+    locationName
+  );
+
+  const blob = await pdf(RosterPdfComponent).toBlob();
 
   fileDownload(blob, "Roster " + weekId + ".pdf", "application/pdf");
 };

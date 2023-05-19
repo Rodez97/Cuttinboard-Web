@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import styled from "@emotion/styled";
-import { Col, Layout, Row, Space, Typography } from "antd";
+import { Col, Layout, Row, Space, Typography } from "antd/es";
 
 const ImageColumn = styled(Col)<{ image: string }>`
   background-image: linear-gradient(0deg, #00000070, #00000070),

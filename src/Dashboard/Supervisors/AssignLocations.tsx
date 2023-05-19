@@ -8,7 +8,7 @@ import {
   IOrganizationEmployee,
 } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
-import { Alert, Button, Layout, Space } from "antd";
+import { Alert, Button, Layout, Space } from "antd/es";
 import { arrayUnion, doc, writeBatch } from "firebase/firestore";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";

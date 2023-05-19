@@ -8,7 +8,7 @@ import Icon, {
   ExclamationCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Modal, Tag, Tooltip, Typography } from "antd";
+import { Dropdown, Modal, Tag, Tooltip, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import mdiClockAlert from "@mdi/svg/svg/clock-alert.svg";

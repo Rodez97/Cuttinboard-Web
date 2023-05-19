@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { orderBy } from "lodash";
+import orderBy from "lodash-es/orderBy";
 import { useCallback, useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
 import Icon from "@ant-design/icons";
-import { Input, Spin, Typography } from "antd";
+import { Input, Spin, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import Forum from "@mdi/svg/svg/forum.svg";
 import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";

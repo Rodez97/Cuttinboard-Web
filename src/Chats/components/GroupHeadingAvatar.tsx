@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Typography } from "antd";
+import { Typography } from "antd/es";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import {
   getConversationMember,

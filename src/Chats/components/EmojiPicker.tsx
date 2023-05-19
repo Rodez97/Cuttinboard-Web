@@ -1,9 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import React, { useState } from "react";
-import { Button, Popover } from "antd";
+import { Button, Popover } from "antd/es";
 import { SmileFilled } from "@ant-design/icons";
-import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import i18n from "../../i18n";
 import "./EmojiPicker.scss";
@@ -25,6 +24,14 @@ function EmojiPicker({
     setOpen(newOpen);
   };
 
+  const getData = async () => {
+    const response = await fetch(
+      "https://cdn.jsdelivr.net/npm/@emoji-mart/data"
+    );
+
+    return response.json();
+  };
+
   return (
     <Popover
       open={open}
@@ -34,7 +41,7 @@ function EmojiPicker({
         <Picker
           locale={i18n.language}
           theme="light"
-          data={data}
+          data={getData}
           onEmojiSelect={({ native }) => {
             onSelect(native);
             hide();

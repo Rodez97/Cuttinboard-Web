@@ -13,7 +13,7 @@ import {
   Space,
   Spin,
   Tag,
-} from "antd";
+} from "antd/es";
 import {
   Colors,
   MyShiftsProvider,

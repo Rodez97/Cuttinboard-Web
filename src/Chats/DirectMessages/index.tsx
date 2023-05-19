@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Layout } from "antd";
+import { Layout } from "antd/es";
 import DMList from "./DMList";
 import dmImage from "../../assets/images/encrypted-data.png";
 import { useTranslation } from "react-i18next";

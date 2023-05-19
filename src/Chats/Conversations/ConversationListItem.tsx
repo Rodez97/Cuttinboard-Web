@@ -1,7 +1,7 @@
 import { MessageOutlined } from "@ant-design/icons";
 import { useNotifications } from "@cuttinboard-solutions/cuttinboard-library";
 import { IConversation } from "@cuttinboard-solutions/types-helpers";
-import { Badge } from "antd";
+import { Badge } from "antd/es";
 import React, { useMemo } from "react";
 
 interface ConversationListItemProps {

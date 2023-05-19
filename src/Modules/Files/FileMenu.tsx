@@ -11,7 +11,7 @@ import {
   useFiles,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
-import { Button, Dropdown, message, Modal } from "antd";
+import { Button, Dropdown, message, Modal } from "antd/es";
 import axios from "axios";
 import fileDownload from "js-file-download";
 import React from "react";

@@ -6,7 +6,7 @@ import {
   useCuttinboardLocation,
   useDisclose,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { Button, Divider, List, Modal, Tag, Typography } from "antd";
+import { Button, Divider, List, Modal, Tag, Typography } from "antd/es";
 import React, {
   useCallback,
   useImperativeHandle,

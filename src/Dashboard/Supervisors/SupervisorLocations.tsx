@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Button, Layout, message, Modal, Table } from "antd";
+import { Alert, Button, Layout, message, Modal, Table } from "antd/es";
 import React from "react";
 import { GrayPageHeader, UserInfoElement } from "../../shared";
 import { useNavigate } from "react-router-dom";
@@ -11,15 +11,14 @@ import {
   PlusSquareOutlined,
 } from "@ant-design/icons";
 import { deleteDoc, doc } from "firebase/firestore";
-import { logEvent } from "firebase/analytics";
 import { recordError } from "../../utils/utils";
 import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library";
-import { ANALYTICS } from "firebase";
 import {
   ILocation,
   IOrganizationEmployee,
 } from "@cuttinboard-solutions/types-helpers";
-import { imgAvatar } from "../../assets/images";
+import imgAvatar from "../../assets/images/avatar.webp";
+import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
 type props = {
   locations: ILocation[];
@@ -48,7 +47,7 @@ export default ({ locations, onUnassign, supervisor }: props) => {
           await deleteDoc(doc(FIRESTORE, supervisor.refPath));
           message.success(t("Supervisor deleted"));
           // Report to analytics
-          logEvent(ANALYTICS, "delete_supervisor");
+          logAnalyticsEvent("delete_supervisor");
         } catch (error) {
           recordError(error);
           message.error(t("Failed to delete supervisor"));

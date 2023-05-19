@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { useLocalStorage } from "@rehooks/local-storage/lib/use-localstorage";
-import { Button, Checkbox, Typography } from "antd";
+import { Button, Checkbox, Typography } from "antd/es";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useWizard } from "react-use-wizard";
@@ -12,7 +12,7 @@ import {
   SectionWrapper,
   UserTypeCard,
 } from "./SectionWrapper";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export type UserType = "employee" | "owner";
 

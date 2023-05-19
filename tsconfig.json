@@ -15,7 +15,6 @@
       "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "ES6"],
-    "sourceMap": true,
     "noImplicitAny": false,
     "noImplicitThis": true,
     "outDir": "build",
@@ -23,5 +22,5 @@
     "strictNullChecks": true,
     "strictFunctionTypes": false
   },
-  "include": ["src", "webpack.config.js", "__tests__/Login.test.ts"]
+  "include": ["src", "webpack.config.js"]
 }

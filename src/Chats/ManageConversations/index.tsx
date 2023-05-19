@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Layout } from "antd";
+import { Layout } from "antd/es";
 import ConversationsList from "./ConversationsList";
 import { useTranslation } from "react-i18next";
 import {

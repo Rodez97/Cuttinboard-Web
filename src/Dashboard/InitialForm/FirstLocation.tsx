@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Form, Input, Typography } from "antd";
+import { Button, Form, Input, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { useWizard } from "react-use-wizard";
 import { TrimRule } from "../../utils/utils";

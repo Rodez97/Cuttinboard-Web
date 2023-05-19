@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { ArrowRightOutlined, PlusOutlined } from "@ant-design/icons";
 import { jsx } from "@emotion/react";
-import { Button, Layout, List, Tag } from "antd";
+import { Button, Layout, List, Tag } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@ant-design/pro-layout";

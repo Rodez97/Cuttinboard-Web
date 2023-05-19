@@ -3,58 +3,48 @@ import AntdDayjsWebpackPlugin from "antd-dayjs-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import LodashModuleReplacementPlugin from "lodash-webpack-plugin";
+//import LodashModuleReplacementPlugin from "lodash-webpack-plugin";
 import path from "path";
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
 import { fileURLToPath } from "url";
-import CompressionPlugin from "compression-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import { GenerateSW } from "workbox-webpack-plugin";
 import Dotenv from "dotenv-webpack";
+//import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import CompressionPlugin from "compression-webpack-plugin";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const webpackConfig = () => {
   return {
     entry: "./src/index.tsx",
-    ...(process.env.production || !process.env.development
-      ? {}
-      : { devtool: "eval-source-map" }),
+    // ...(process.env.production ? {} : { devtool: "eval-source-map" }),
 
     optimization: {
       minimize: true,
       usedExports: true,
       splitChunks: {
+        chunks: "all",
+        minSize: 20000,
+        maxSize: 70000,
+        minChunks: 1,
+        maxAsyncRequests: 30,
+        maxInitialRequests: 30,
+        automaticNameDelimiter: "~",
+        enforceSizeThreshold: 50000,
         cacheGroups: {
-          reactVendor: {
-            test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
-            name: "vendor-react",
-            chunks: "all",
-          },
-          firebaseVendor: {
-            test: /[\\/]node_modules[\\/](@firebase|firebase)[\\/]/,
-            name: "vendor-firebase",
-            chunks: "all",
-          },
-          lottieVendor: {
-            test: /[\\/]node_modules[\\/](lottie-web)[\\/]/,
-            name: "vendor-lottie",
-            chunks: "all",
-          },
-          antdVendor: {
-            test: /[\\/]node_modules[\\/](antd)[\\/]/,
-            name: "vendor-antd",
-            chunks: "all",
-          },
-          pdfVendor: {
-            test: /[\\/]node_modules[\\/](@react-pdf)[\\/]/,
-            name: "vendor-pdf",
-            chunks: "all",
-          },
-          emojiVendor: {
-            test: /[\\/]node_modules[\\/](@emoji-mart)[\\/]/,
-            name: "vendor-emoji",
-            chunks: "all",
+          defaultVendors: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+            reuseExistingChunk: true,
+
+            name(module) {
+              const packageName = module.context.match(
+                /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+              )[1];
+
+              return `npm.${packageName.replace("@", "")}`;
+            },
           },
         },
       },
@@ -212,15 +202,15 @@ const webpackConfig = () => {
         patterns: [{ from: "src/assets/images", to: "images/" }, "public"],
       }),
       new AntdDayjsWebpackPlugin(),
-      new LodashModuleReplacementPlugin({ paths: true }),
+      //new LodashModuleReplacementPlugin({ paths: true }),
       //new BundleAnalyzerPlugin(),
-      new CompressionPlugin(),
-      new CleanWebpackPlugin({
+      new CompressionPlugin({
         algorithm: "gzip",
         test: /\.js$|\.css$/,
         threshold: 10240,
         minRatio: 0.8,
       }),
+      new CleanWebpackPlugin(),
       new Dotenv(),
       new GenerateSW({
         cleanupOutdatedCaches: true,

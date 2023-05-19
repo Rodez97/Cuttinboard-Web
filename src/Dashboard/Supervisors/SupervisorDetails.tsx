@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { Button, Layout, Modal, Result } from "antd";
+import { Button, Layout, Modal, Result } from "antd/es";
 import { arrayRemove, doc, writeBatch } from "firebase/firestore";
 import { lazy, Suspense, useMemo } from "react";
 import { useTranslation } from "react-i18next";

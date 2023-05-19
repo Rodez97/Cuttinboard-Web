@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Checkbox, Modal, Typography } from "antd";
+import { Alert, Checkbox, Modal, Typography } from "antd/es";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -13,14 +13,13 @@ import {
   useEmployees,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logEvent } from "firebase/analytics";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
-import { ANALYTICS } from "firebase";
 import {
   getEmployeeFullName,
   RoleAccessLevels,
   WEEKFORMAT,
 } from "@cuttinboard-solutions/types-helpers";
+import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
@@ -65,7 +64,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
       await cloneWeek(selectedWeek, selectedEmployees);
       props.onCancel();
       // Report to analytics
-      logEvent(ANALYTICS, "clone_schedule");
+      logAnalyticsEvent("clone_schedule");
     } catch (error) {
       recordError(error);
     } finally {

@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, Divider, Form, Input, Layout, Space } from "antd";
+import { Button, Divider, Form, Input, Layout, Space } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { CloseOutlined, SaveFilled } from "@ant-design/icons";
 import { ILocationInfo } from "../../Dashboard/OwnerPortal/AddLocation/AddLocation";

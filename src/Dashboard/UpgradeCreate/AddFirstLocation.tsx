@@ -13,7 +13,7 @@ import {
   message,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   FIRESTORE,
   FUNCTIONS,
@@ -25,7 +25,7 @@ import FirstLocationSummary from "./FirstLocationSummary";
 import { httpsCallable } from "firebase/functions";
 import { recordError } from "../../utils/utils";
 import * as yup from "yup";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import { collection, doc, getDocs, query, where } from "firebase/firestore";
 import {

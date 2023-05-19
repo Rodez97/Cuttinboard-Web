@@ -5,8 +5,8 @@ import {
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Alert, Button, Form, Input, Typography } from "antd";
-import { logAnalyticsEvent } from "firebase";
+import { Alert, Button, Form, Input, Typography } from "antd/es";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { httpsCallable } from "firebase/functions";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,7 +22,7 @@ import {
 } from "./SectionWrapper";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash-es/isEmpty";
 
 export interface GMArgs {
   name: string;

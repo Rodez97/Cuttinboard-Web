@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Alert, Button, Card, Form, Input, message, Space } from "antd";
+import { Alert, Button, Card, Form, Input, message, Space } from "antd/es";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useState } from "react";
 import { useUpdatePassword } from "react-firebase-hooks/auth";

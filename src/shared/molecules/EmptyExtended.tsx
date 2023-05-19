@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Empty, EmptyProps, Timeline, Typography } from "antd";
+import { Empty, EmptyProps, Timeline, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 
 export default function EmptyExtended({

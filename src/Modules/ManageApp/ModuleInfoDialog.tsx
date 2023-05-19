@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, List, Modal, ModalProps } from "antd";
+import { Button, List, Modal, ModalProps } from "antd/es";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {

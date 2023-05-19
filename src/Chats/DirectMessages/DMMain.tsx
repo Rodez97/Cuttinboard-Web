@@ -10,10 +10,10 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader } from "../../shared";
 import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
-import { Alert } from "antd";
+import { Alert } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";
-import { imgAvatar } from "../../assets/images";
+import imgAvatar from "../../assets/images/avatar.webp";
 
 export default ({
   recipientUser,

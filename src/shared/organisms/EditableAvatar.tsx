@@ -17,7 +17,7 @@ import {
   Typography,
   Upload,
   UploadProps,
-} from "antd";
+} from "antd/es";
 import { EditOutlined, PaperClipOutlined } from "@ant-design/icons";
 
 interface EditableAvatarProps {

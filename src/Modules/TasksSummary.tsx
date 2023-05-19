@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Divider, Skeleton, Space, Typography } from "antd";
+import { Alert, Divider, Skeleton, Space, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { RecurringTasksSummary } from "./useSummaryData";
 

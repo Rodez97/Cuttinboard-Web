@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Alert, Modal, ModalProps, Typography } from "antd";
+import { Alert, Modal, ModalProps, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { useDirectMessageChat } from "@cuttinboard-solutions/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";

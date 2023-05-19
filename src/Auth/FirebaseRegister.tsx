@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError, TrimRule } from "../utils/utils";
-import { Alert, Button, Checkbox, Form, Input, Typography } from "antd";
+import { Alert, Button, Checkbox, Form, Input, Typography } from "antd/es";
 import {
   Colors,
   useRegister,
@@ -11,7 +11,7 @@ import {
 import { useMemo } from "react";
 import { AuthError } from "firebase/auth";
 import useSignUpLocalTracker from "../hooks/useSignUpLocalTracker";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 //= ==========================|| FIREBASE - REGISTER ||===========================//
 

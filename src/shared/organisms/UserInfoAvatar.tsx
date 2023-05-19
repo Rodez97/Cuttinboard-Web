@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Modal } from "antd";
+import { Modal } from "antd/es";
 import { useTranslation } from "react-i18next";
 import UserInfoElement from "./UserInfoElement";
 import CuttinboardAvatar from "../atoms/Avatar";

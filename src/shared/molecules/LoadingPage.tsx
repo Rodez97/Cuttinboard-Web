@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Spin } from "antd";
+import { Spin } from "antd/es";
 
 function LoadingPage() {
   return (

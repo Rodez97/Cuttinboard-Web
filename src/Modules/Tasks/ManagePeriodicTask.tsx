@@ -20,11 +20,11 @@ import {
   Radio,
   Row,
   Typography,
-} from "antd";
+} from "antd/es";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash-es/isEmpty";
 import {
   useDisclose,
   useRecurringTasks,
@@ -36,7 +36,7 @@ import {
   IRecurringTaskDoc,
   RecurrenceObject,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 

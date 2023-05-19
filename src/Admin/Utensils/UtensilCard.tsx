@@ -12,7 +12,7 @@ import {
   useUtensils,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import styled from "@emotion/styled";
-import { Button, Dropdown, Modal, Progress, Typography } from "antd";
+import { Button, Dropdown, Modal, Progress, Typography } from "antd/es";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ChangesDialog from "./ChangesDialog";

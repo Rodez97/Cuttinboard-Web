@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Space, Typography } from "antd";
+import { Space, Typography } from "antd/es";
 
 // ===========================|| FOOTER - AUTHENTICATION 2 & 3 ||=========================== //
 export default () => (

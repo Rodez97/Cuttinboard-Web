@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { useMemo } from "react";
-import { Space, Tag, Tooltip, Typography } from "antd";
+import { Space, Tag, Tooltip, Typography } from "antd/es";
 import {
   getEmployeeShiftsSummary,
   minutesToTextDuration,

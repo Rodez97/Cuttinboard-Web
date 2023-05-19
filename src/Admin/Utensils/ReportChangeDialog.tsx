@@ -9,10 +9,10 @@ import {
   useUtensils,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { IUtensil } from "@cuttinboard-solutions/types-helpers";
-import { Button, Drawer, Form, Input, InputNumber, Typography } from "antd";
+import { Button, Drawer, Form, Input, InputNumber, Typography } from "antd/es";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 interface ReportChangeDialogProps {
   open: boolean;

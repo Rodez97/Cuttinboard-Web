@@ -12,7 +12,7 @@ import {
   Modal,
   Space,
   Tooltip,
-} from "antd";
+} from "antd/es";
 import {
   ExclamationCircleOutlined,
   TagOutlined,
@@ -38,7 +38,7 @@ import {
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 function Employees() {
   const { location, role } = useCuttinboardLocation();

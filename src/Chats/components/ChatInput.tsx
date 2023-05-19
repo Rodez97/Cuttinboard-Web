@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Input, InputRef, message, Upload } from "antd";
+import { Button, Input, InputRef, message, Upload } from "antd/es";
 import { FileImageOutlined, SendOutlined } from "@ant-design/icons";
 import { getDataURLFromFile, recordError } from "../../utils/utils";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -13,9 +13,9 @@ import {
   useMessages,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import EmojiPicker from "./EmojiPicker";
-import { throttle } from "lodash";
+import throttle from "lodash-es/throttle";
 import { InputAttachmentElement } from "./InputAttachmentElement";
-import { imgPlaceholderResultImg } from "../../assets/images";
+import imgPlaceholderResultImg from "../../assets/images/placeholder_result_img.png";
 
 export type FileAttachment = {
   file: File;

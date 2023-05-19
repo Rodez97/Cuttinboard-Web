@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Divider, Space } from "antd";
+import { Divider, Space } from "antd/es";
 import { where } from "firebase/firestore";
-import { groupBy } from "lodash";
+import groupBy from "lodash-es/groupBy";
 import React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";

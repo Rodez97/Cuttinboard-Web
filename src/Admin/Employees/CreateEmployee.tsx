@@ -12,18 +12,17 @@ import {
   InputNumber,
   message,
   Select,
-} from "antd";
+} from "antd/es";
 import {
   MinusCircleOutlined,
   PlusOutlined,
   SaveFilled,
 } from "@ant-design/icons";
-import { compact } from "lodash";
 import {
   useAddEmployee,
   useCuttinboardLocation,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   ManagerPermissions,
   POSITIONS,
@@ -31,6 +30,7 @@ import {
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
 import PermissionsChecker from "./PermissionsChecker";
+import { compact } from "lodash-es";
 
 type EmployeeData = {
   name: string;

@@ -5,7 +5,7 @@ import LangSelect from "./LangSelect";
 import PasswordPanel from "./PasswordPanel";
 import ContactDetails from "./ContactDetails";
 import ProfilePanel from "./ProfilePanel";
-import { Button, Layout } from "antd";
+import { Button, Layout } from "antd/es";
 import { UserDeleteOutlined } from "@ant-design/icons";
 import React from "react";
 import DeleteAccountDialog from "./DeleteAccountDialog";

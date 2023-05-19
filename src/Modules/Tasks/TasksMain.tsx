@@ -11,7 +11,7 @@ import {
   Modal,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import {
   useChecklist,
   useCuttinboardLocation,
@@ -27,7 +27,8 @@ import {
 import { matchSorter } from "match-sorter";
 import RecurringTaskItem from "./RecurringTaskItem";
 import { DraggableList, GrayPageHeader, LoadingPage } from "../../shared";
-import { orderBy, upperFirst } from "lodash";
+import orderBy from "lodash-es/orderBy";
+import upperFirst from "lodash-es/upperFirst";
 import {
   getChecklistsSummary,
   extractRecurringTasksArray,

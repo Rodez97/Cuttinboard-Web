@@ -5,7 +5,7 @@ import {
   useNotes,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { IBoard, INote } from "@cuttinboard-solutions/types-helpers";
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, Modal } from "antd/es";
 import { Timestamp } from "firebase/firestore";
 import { nanoid } from "nanoid";
 import React, {
@@ -15,7 +15,7 @@ import React, {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 interface ManageNoteDialogRef {
   openNew: () => void;

@@ -1,11 +1,11 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Input, Layout, Table } from "antd";
+import { Input, Layout, Table } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
 import { useOwner } from "../OwnerPortal";
-import { differenceBy } from "lodash";
+import differenceBy from "lodash-es/differenceBy";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
 
 export default ({

@@ -10,7 +10,7 @@ import {
   Space,
   Steps,
   Typography,
-} from "antd";
+} from "antd/es";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ import {
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   ILocation,
   IOrganizationEmployee,

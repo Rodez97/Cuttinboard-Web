@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Button, List, Typography } from "antd";
+import { Button, List, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { ArrowRightOutlined } from "@ant-design/icons";

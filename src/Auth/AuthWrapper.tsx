@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import styled from "@emotion/styled";
-import { Col, Layout, Row, Space, Typography } from "antd";
+import { Col, Layout, Row, Space, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
-import authImage from "../assets/images/authImage.jpg";
+import authImage from "../assets/images/authImage.webp";
 import AuthFooter from "./AuthFooter";
 import AuthRouter from ".";
 

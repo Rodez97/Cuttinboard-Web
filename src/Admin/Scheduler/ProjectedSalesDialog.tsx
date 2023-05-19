@@ -2,11 +2,11 @@
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Descriptions, InputNumber, Modal } from "antd";
+import { Button, Descriptions, InputNumber, Modal } from "antd/es";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 const ProjectedSalesTable = styled(Descriptions)`
   .ant-input-number {

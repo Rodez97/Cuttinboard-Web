@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { EditFilled, SaveFilled } from "@ant-design/icons";
-import { Button, Card, Form, Input, message, Space } from "antd";
+import { Button, Card, Form, Input, message, Space } from "antd/es";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,7 +14,7 @@ import {
   useUpdateAccount,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { nanoid } from "nanoid";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 function ProfilePanel() {
   const [form] = Form.useForm();

@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Layout, message, Result } from "antd";
+import { Layout, message, Result } from "antd/es";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -15,7 +15,7 @@ import {
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ILocationInfo } from "./AddLocation/AddLocation";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   collection,
   doc,

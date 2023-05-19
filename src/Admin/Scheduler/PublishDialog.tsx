@@ -12,9 +12,9 @@ import {
   Radio,
   Space,
   Typography,
-} from "antd";
+} from "antd/es";
 import dayjs from "dayjs";
-import { logAnalyticsEvent } from "firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import isoWeek from "dayjs/plugin/isoWeek";

@@ -6,7 +6,7 @@ import {
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
 import { jsx } from "@emotion/react";
-import { Layout } from "antd";
+import { Layout } from "antd/es";
 import { collection, query, where } from "firebase/firestore";
 import { createContext, lazy, Suspense, useContext } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";

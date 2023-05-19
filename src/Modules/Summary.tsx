@@ -1,10 +1,10 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Empty, Layout, Typography } from "antd";
+import { Empty, Layout, Typography } from "antd/es";
 import ScheduleSummary from "./ScheduleSummary";
 import UtensilsSummary from "./UtensilsSummary";
 import { useTranslation } from "react-i18next";
-import { upperFirst } from "lodash";
+import upperFirst from "lodash-es/upperFirst";
 import dayjs from "dayjs";
 import TasksSummary from "./TasksSummary";
 import { useSummaryData } from "./useSummaryData";

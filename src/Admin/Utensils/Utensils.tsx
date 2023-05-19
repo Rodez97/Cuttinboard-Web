@@ -9,7 +9,7 @@ import {
   IUtensil,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
-import { Button, Input, Layout, List, Space } from "antd";
+import { Button, Input, Layout, List, Space } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader, LoadingPage, SplitButton } from "../../shared";
 import { useManageUtensilDialog } from "./ManageUtensilDialog";

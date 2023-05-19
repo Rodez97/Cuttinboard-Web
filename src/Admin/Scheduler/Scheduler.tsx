@@ -13,7 +13,7 @@ import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
-import { Button, Input, Layout, message, Select, Tag, Tooltip } from "antd";
+import { Button, Input, Layout, message, Select, Tag, Tooltip } from "antd/es";
 import TableFooter from "./TableFooter";
 import {
   FilePdfOutlined,
@@ -50,7 +50,7 @@ import {
   IShift,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
-import { logAnalyticsEvent } from "../../firebase";
+import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(isToday);

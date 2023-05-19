@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { ShiftsTable } from "./Scheduler";
-import { Typography } from "antd";
+import { Typography } from "antd/es";
 import { useCallback } from "react";
 import {
   minutesToTextDuration,

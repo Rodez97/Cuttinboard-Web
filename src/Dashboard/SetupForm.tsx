@@ -3,7 +3,7 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { Button, message, Skeleton } from "antd";
+import { Button, message, Skeleton } from "antd/es";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
