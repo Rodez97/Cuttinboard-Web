@@ -32,7 +32,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
   const { employees } = useEmployees();
 
   // 4. Get the data needed for the cloneWeek function using the useSchedule hook.
-  const { cloneWeek, weekId, weekSummary, weekDays } = useSchedule();
+  const { cloneWeek, weekId, weekDays, shifts } = useSchedule();
 
   // 5. Create state variables using the useState hook.
   const [isCloning, setIsCloning] = useState(false);
@@ -84,7 +84,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     }
 
     // Return false if the current week has shifts scheduled
-    if (weekSummary.total.totalShifts > 0) {
+    if (shifts.length > 0) {
       return false;
     }
 
@@ -95,7 +95,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
     selectedEmployees.length,
     selectedWeek,
     weekId,
-    weekSummary.total.totalShifts,
+    shifts,
   ]);
 
   return (
@@ -129,7 +129,7 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
           message={t("Cannot clone the same week")}
         />
       )}
-      {weekSummary.total.totalShifts > 0 && (
+      {shifts.length > 0 && (
         <Alert
           css={{ marginTop: 10 }}
           showIcon

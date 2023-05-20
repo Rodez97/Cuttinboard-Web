@@ -2,18 +2,22 @@
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import { ShiftsTable } from "./Scheduler";
 import { Typography } from "antd/es";
 import { useCallback } from "react";
 import {
+  calculateWageData,
+  getShiftIsoWeekday,
+  getWageOptions,
   minutesToTextDuration,
+  useCuttinboardLocation,
   useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 
-function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
+function TableFooter() {
   const { t } = useTranslation();
-  const { weekDays, summaryDoc, wageData } = useSchedule();
+  const { scheduleSettings } = useCuttinboardLocation();
+  const { weekDays, summaryDoc, shifts } = useSchedule();
   const checkPermission = useLocationPermissions();
 
   const cellData = useCallback(
@@ -29,17 +33,21 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
       };
 
       const isoWeekDay = weekDay.isoWeekday();
+      const wageOptions = getWageOptions(scheduleSettings);
 
-      data?.forEach(({ shifts, employee }) => {
-        if (shifts) {
-          const weekData = wageData?.[employee.id]?.summary;
-          const shiftWage = weekData?.[isoWeekDay];
-          if (shiftWage) {
-            sum.totalHours += shiftWage.totalHours;
-            sum.wages += shiftWage.totalWage;
-          }
-        }
-      });
+      // Get the shifts for the day
+      const dayShifts = shifts?.filter(
+        (shift) => getShiftIsoWeekday(shift) === isoWeekDay
+      );
+
+      const wageData = calculateWageData(dayShifts, wageOptions);
+      const weekDataSummary = wageData.summary;
+      const shiftWage = weekDataSummary[isoWeekDay];
+
+      if (shiftWage) {
+        sum.totalHours += shiftWage.totalHours;
+        sum.wages += shiftWage.totalWage;
+      }
 
       const totalHoursText = minutesToTextDuration(sum.totalHours * 60);
 
@@ -55,7 +63,7 @@ function TableFooter({ data }: { data: readonly ShiftsTable[] }) {
         )}%`,
       };
     },
-    [data, summaryDoc?.projectedSalesByDay, wageData]
+    [scheduleSettings, shifts, summaryDoc?.projectedSalesByDay]
   );
 
   return (

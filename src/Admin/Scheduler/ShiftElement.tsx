@@ -19,6 +19,7 @@ import {
   checkIfShiftsHaveChanges,
   getShiftDayjsDate,
   getShiftLatestData,
+  useEmployeeWageData,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { ManageShiftsProps } from "./ShiftCell";
@@ -44,8 +45,8 @@ function ShiftElement({
   newShift,
 }: ShiftElementProps) {
   const { t } = useTranslation();
-  const { deleteShift, restoreShift, cancelShiftUpdate, wageData } =
-    useSchedule();
+  const { deleteShift, restoreShift, cancelShiftUpdate } = useSchedule();
+  const wageData = useEmployeeWageData(employee.id);
 
   const handleOnAddShift = useCallback(() => {
     newShift(employee, column);
@@ -101,9 +102,9 @@ function ShiftElement({
   );
 
   const haveOvertime = useMemo(() => {
-    const shiftWageData = wageData?.[employee.id]?.shifts.get(shift.id);
+    const shiftWageData = wageData?.shifts.get(shift.id);
     return Boolean(shiftWageData && shiftWageData.wageData.overtimeHours > 0);
-  }, [employee.id, shift.id, wageData]);
+  }, [shift.id, wageData]);
 
   const shouldShowTag = useMemo(() => {
     const employeeRole = employee.role;

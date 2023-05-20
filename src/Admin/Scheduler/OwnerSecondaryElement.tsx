@@ -3,9 +3,9 @@ import { Tag } from "antd/es";
 import {
   getEmployeeShiftsSummary,
   minutesToTextDuration,
-  useSchedule,
+  useEmployeeWageData,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { IShift } from "@cuttinboard-solutions/types-helpers";
+import type { IShift } from "@cuttinboard-solutions/types-helpers";
 
 const OwnerSecondaryElement = ({
   employeeId,
@@ -14,15 +14,15 @@ const OwnerSecondaryElement = ({
   employeeId: string;
   empShifts?: IShift[];
 }) => {
-  const { wageData } = useSchedule();
+  const wageData = useEmployeeWageData(employeeId);
   const totalTime = useMemo(() => {
     if (!empShifts || !wageData) {
       return `${0}h ${0}min`;
     }
-    const weekData = wageData[employeeId]?.summary;
+    const weekData = wageData.summary;
     const weekSummary = getEmployeeShiftsSummary(weekData);
     return minutesToTextDuration(weekSummary.totalHours * 60);
-  }, [empShifts, employeeId, wageData]);
+  }, [empShifts, wageData]);
 
   return (
     <div>

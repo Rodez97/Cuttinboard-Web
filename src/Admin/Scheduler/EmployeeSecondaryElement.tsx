@@ -5,8 +5,8 @@ import { Space, Tag, Tooltip, Typography } from "antd/es";
 import {
   getEmployeeShiftsSummary,
   minutesToTextDuration,
+  useEmployeeWageData,
   useLocationPermissions,
-  useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import currency from "currency.js";
 import { useTranslation } from "react-i18next";
@@ -21,7 +21,7 @@ const EmployeeSecondaryElement = ({
 }) => {
   const { t } = useTranslation();
   const checkPermission = useLocationPermissions();
-  const { wageData } = useSchedule();
+  const wageData = useEmployeeWageData(employeeId);
   const summaryText = useMemo(() => {
     if (!empShifts || !wageData) {
       if (!checkPermission("seeWages")) {
@@ -31,7 +31,7 @@ const EmployeeSecondaryElement = ({
       }
     }
 
-    const weekData = wageData[employeeId]?.summary;
+    const weekData = wageData.summary;
 
     const weekSummary = weekData ? getEmployeeShiftsSummary(weekData) : null;
 
@@ -46,14 +46,14 @@ const EmployeeSecondaryElement = ({
     const totalWage = weekSummary?.totalWage ?? 0;
 
     return `${totalTime} - ${currency(totalWage).format()}`;
-  }, [checkPermission, empShifts, employeeId, wageData]);
+  }, [checkPermission, empShifts, wageData]);
 
   const overtime = useMemo(() => {
     if (!empShifts || !wageData) {
       return null;
     }
 
-    const weekData = wageData[employeeId]?.summary;
+    const weekData = wageData.summary;
 
     const weekSummary = weekData ? getEmployeeShiftsSummary(weekData) : null;
 
@@ -71,7 +71,7 @@ const EmployeeSecondaryElement = ({
       overtimeText,
       overtimeWage,
     };
-  }, [empShifts, employeeId, wageData]);
+  }, [empShifts, wageData]);
 
   if (overtime) {
     return (

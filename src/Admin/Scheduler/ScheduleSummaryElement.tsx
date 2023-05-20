@@ -1,27 +1,32 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Statistic } from "antd/es";
 import {
   Colors,
+  getWeekSummary,
   minutesToTextDuration,
   useLocationPermissions,
   useSchedule,
+  useWageData,
 } from "@cuttinboard-solutions/cuttinboard-library";
 
 function ScheduleSummaryElement() {
   const { t } = useTranslation();
+  const wageData = useWageData();
+  const { summaryDoc } = useSchedule();
   const {
-    weekSummary: {
-      total: {
-        totalHours,
-        totalPeople,
-        totalWage,
-        laborPercentage,
-        totalShifts,
-        projectedSales,
-      },
+    total: {
+      totalHours,
+      totalPeople,
+      totalWage,
+      laborPercentage,
+      totalShifts,
+      projectedSales,
     },
-  } = useSchedule();
+  } = useMemo(
+    () => getWeekSummary(wageData, summaryDoc),
+    [summaryDoc, wageData]
+  );
   const checkPermission = useLocationPermissions();
 
   return (

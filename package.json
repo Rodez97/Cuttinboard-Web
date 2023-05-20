@@ -1,6 +1,6 @@
 {
   "name": "cuttinboard",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "type": "module",
   "private": true,
   "files": [
@@ -34,8 +34,8 @@
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@ant-design/pro-layout": "^7.10.3",
-    "@cuttinboard-solutions/cuttinboard-library": "^8.7.6",
-    "@cuttinboard-solutions/types-helpers": "^1.9.1",
+    "@cuttinboard-solutions/cuttinboard-library": "^8.8.1",
+    "@cuttinboard-solutions/types-helpers": "^1.9.2",
     "@emoji-mart/react": "^1.1.1",
     "@mdi/js": "^7.2.96",
     "@mdi/react": "^1.6.1",

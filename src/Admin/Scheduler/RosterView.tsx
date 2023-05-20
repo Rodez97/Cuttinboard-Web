@@ -24,6 +24,7 @@ import {
   useCuttinboardLocation,
   useLocationPermissions,
   useSchedule,
+  useWageData,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import isoWeek from "dayjs/plugin/isoWeek";
 import usePageTitle from "../../hooks/usePageTitle";
@@ -50,7 +51,7 @@ function RosterView() {
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const { t } = useTranslation();
   const { location, employees: getEmployees } = useCuttinboardLocation();
-  const { wageData } = useSchedule();
+  const wageData = useWageData();
   const checkPermission = useLocationPermissions();
 
   const employees = useMemo(() => {

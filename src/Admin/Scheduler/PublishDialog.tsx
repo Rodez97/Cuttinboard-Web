@@ -2,6 +2,7 @@
 import {
   useCuttinboardLocation,
   useSchedule,
+  useUpdatesCount,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import {
@@ -23,7 +24,8 @@ dayjs.extend(isoWeek);
 export default (props: ModalProps & { onAccept: () => void }) => {
   const { t } = useTranslation();
   const { role } = useCuttinboardLocation();
-  const { publish, updatesCount, weekSummary, weekDays } = useSchedule();
+  const { publish, weekDays } = useSchedule();
+  const updatesCount = useUpdatesCount();
   const [notifyTo, setNotifyTo] = useState<
     "all" | "all_scheduled" | "changed" | "none"
   >("changed");
@@ -38,7 +40,6 @@ export default (props: ModalProps & { onAccept: () => void }) => {
       notifyTo,
       futureWeek,
       role,
-      summary: weekSummary.total,
     });
     props.onAccept();
   };
