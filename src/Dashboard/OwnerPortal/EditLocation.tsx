@@ -14,7 +14,7 @@ import {
   locationConverter,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { ILocationInfo } from "./AddLocation/AddLocation";
+import { ILocationInfo } from "./AddLocation/NewLocationTypes";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   collection,

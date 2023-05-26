@@ -21,24 +21,14 @@ import {
   SectionWrapper,
 } from "./SectionWrapper";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import isEmpty from "lodash-es/isEmpty";
-
-export interface GMArgs {
-  name: string;
-  lastName: string;
-  email: string;
-}
+import type {
+  AddLocationFunctionArgs,
+  GMArgs,
+} from "../OwnerPortal/AddLocation/NewLocationTypes";
 
 type AddGMProps = {
   locationName: string;
-};
-
-export type IUpgradeOwnerData = {
-  locationName: string;
-  intId?: string;
-  address?: ILocationAddress;
-  gm: GMArgs | null;
 };
 
 function AddGM({ locationName }: AddGMProps) {
@@ -68,13 +58,15 @@ function AddGM({ locationName }: AddGMProps) {
         }
       }
 
-      const upgradeAccount = httpsCallable<IUpgradeOwnerData, void>(
+      const upgradeAccount = httpsCallable<AddLocationFunctionArgs, void>(
         FUNCTIONS,
         "http-locations-upgradecreate"
       );
       await upgradeAccount({
-        locationName,
-        gm,
+        location: {
+          name: locationName,
+        },
+        generalManager: gm ? gm : undefined,
       });
       // Report to analytics
       logAnalyticsEvent("sign_up_flow", {

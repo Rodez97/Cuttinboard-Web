@@ -31,7 +31,6 @@ import {
   useNotifications,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import VerifyEmailBanner from "../shared/organisms/VerifyEmailBanner";
-import i18next from "../i18n";
 dayjs.extend(relativeTime);
 
 const { Content, Sider } = Layout;
@@ -42,54 +41,6 @@ const StyledContent = styled(Content)`
   display: flex;
   flex-direction: column;
 `;
-
-const OptionsRoutes: MenuProps["items"] = [
-  {
-    label: i18next.t("Locations") as string,
-    key: "locations",
-    icon: <Icon component={mdiLocations} className="sidebar-icon" />,
-  },
-  {
-    label: i18next.t("Account") as string,
-    key: "account",
-    icon: <Icon component={mdiAccount} className="sidebar-icon" />,
-  },
-  {
-    label: i18next.t("My Documents") as string,
-    key: "my-documents",
-    icon: <Icon component={mdiMyDocuments} className="sidebar-icon" />,
-  },
-];
-
-const OwnerRoute = {
-  label: i18next.t("Owner Portal") as string,
-  key: "owner-portal",
-  icon: <Icon component={mdiDashboard} className="sidebar-icon" />,
-};
-
-const GlobalBoardRoute = {
-  label: i18next.t("Global Boards") as string,
-  key: "global-boards",
-  icon: <Icon component={mdiPublic} className="sidebar-icon" />,
-  children: [
-    {
-      label: i18next.t("Global Notes") as string,
-      key: "global-notes",
-      icon: <Icon component={mdiNotes} className="sidebar-icon" />,
-    },
-    {
-      label: i18next.t("Global Files") as string,
-      key: "global-files",
-      icon: <Icon component={mdiFiles} className="sidebar-icon" />,
-    },
-  ],
-};
-
-const BillingRoute = {
-  label: i18next.t("Manage Billing") as string,
-  key: "subscription",
-  icon: <Icon component={mdiBilling} className="sidebar-icon" />,
-};
 
 export default () => {
   const navigate = useNavigate();
@@ -103,6 +54,64 @@ export default () => {
     getTotalScheduleBadges,
   } = useNotifications();
   const [collapsed, setCollapsed] = useState(false);
+
+  const { OptionsRoutes, OwnerRoute, GlobalBoardRoute, BillingRoute } =
+    useMemo(() => {
+      const optionsRoutes: MenuProps["items"] = [
+        {
+          label: t("Locations") as string,
+          key: "locations",
+          icon: <Icon component={mdiLocations} className="sidebar-icon" />,
+        },
+        {
+          label: t("Account") as string,
+          key: "account",
+          icon: <Icon component={mdiAccount} className="sidebar-icon" />,
+        },
+        {
+          label: t("My Documents") as string,
+          key: "my-documents",
+          icon: <Icon component={mdiMyDocuments} className="sidebar-icon" />,
+        },
+      ];
+
+      const ownerRoute = {
+        label: t("Owner Portal") as string,
+        key: "owner-portal",
+        icon: <Icon component={mdiDashboard} className="sidebar-icon" />,
+      };
+
+      const globalBoardRoute = {
+        label: t("Global Boards") as string,
+        key: "global-boards",
+        icon: <Icon component={mdiPublic} className="sidebar-icon" />,
+        children: [
+          {
+            label: t("Global Notes") as string,
+            key: "global-notes",
+            icon: <Icon component={mdiNotes} className="sidebar-icon" />,
+          },
+          {
+            label: t("Global Files") as string,
+            key: "global-files",
+            icon: <Icon component={mdiFiles} className="sidebar-icon" />,
+          },
+        ],
+      };
+
+      const billingRoute = {
+        label: t("Manage Billing") as string,
+        key: "subscription",
+        icon: <Icon component={mdiBilling} className="sidebar-icon" />,
+      };
+
+      return {
+        OptionsRoutes: optionsRoutes,
+        OwnerRoute: ownerRoute,
+        GlobalBoardRoute: globalBoardRoute,
+        BillingRoute: billingRoute,
+      };
+    }, [t]);
 
   const getTrialDays = useMemo(() => {
     if (!userDocument || !userDocument.subscriptionId) return;
@@ -124,7 +133,14 @@ export default () => {
       fullRoutes.push(GlobalBoardRoute);
     }
     return [...fullRoutes, ...OptionsRoutes, BillingRoute];
-  }, [organization?.hadMultipleLocations, userDocument?.subscriptionId]);
+  }, [
+    BillingRoute,
+    GlobalBoardRoute,
+    OptionsRoutes,
+    OwnerRoute,
+    organization?.hadMultipleLocations,
+    userDocument?.subscriptionId,
+  ]);
 
   return (
     <Layout>

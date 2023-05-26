@@ -20,6 +20,7 @@ import "./ShiftTable.scss";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
 import { GrayPageHeader, LoadingPage } from "../../shared";
 import {
+  EmployeeShifts,
   checkShiftArrayChanges,
   useCuttinboardLocation,
   useSchedule,
@@ -71,7 +72,7 @@ function Scheduler() {
     manageShiftDialogRef.current?.openEdit(employee, shift);
   };
 
-  const columnFilter = useCallback((value: string, record: ShiftsTable) => {
+  const columnFilter = useCallback((value: string, record: EmployeeShifts) => {
     if (value === "all_scheduled") {
       return Boolean(record.shifts && record.shifts.length > 0);
     }
@@ -204,8 +205,8 @@ function Scheduler() {
               </tr>
             </thead>
             <tbody>
-              {shiftsSource.map(({ shifts, key, employee }) => (
-                <tr key={key}>
+              {shiftsSource.map(({ shifts, employee }, index) => (
+                <tr key={employee.id + index}>
                   <th>
                     <EmpColumnCell
                       employee={employee}

@@ -92,7 +92,6 @@ const getPdfTools = async () => {
 
 const SchedulePDF = async (
   empDocs: {
-    key: string;
     employee: IEmployee;
     shifts: IShift[];
   }[],
@@ -427,10 +426,6 @@ const RosterPDF = async (
     lastDayWeek,
   });
 
-  const RosterPositionComponent = await RosterPosition({
-    children: "Position",
-  });
-
   const RosterAMBody = await Promise.all(
     Object.entries(amRosterGrouped).map(async ([position, shifts]) => {
       const RosterRowComponent = await Promise.all(
@@ -443,6 +438,10 @@ const RosterPDF = async (
           return Row;
         })
       );
+
+      const RosterPositionComponent = await RosterPosition({
+        children: position,
+      });
 
       return (
         <View key={position}>
@@ -466,6 +465,10 @@ const RosterPDF = async (
           return Row;
         })
       );
+
+      const RosterPositionComponent = await RosterPosition({
+        children: position,
+      });
 
       return (
         <View key={position}>
@@ -532,7 +535,6 @@ const RosterPDF = async (
 
 export const generateSchedulePdf = async (
   empDocs: {
-    key: string;
     employee: IEmployee;
     shifts: IShift[];
   }[],

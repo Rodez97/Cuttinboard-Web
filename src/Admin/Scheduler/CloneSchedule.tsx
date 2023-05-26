@@ -16,7 +16,6 @@ import {
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import {
   getEmployeeFullName,
-  RoleAccessLevels,
   WEEKFORMAT,
 } from "@cuttinboard-solutions/types-helpers";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
@@ -145,40 +144,38 @@ function CloneSchedule(props: { open: boolean; onCancel: () => void }) {
           width: "100%",
         }}
       >
-        {employees
-          .filter((e) => e.role !== RoleAccessLevels.ADMIN)
-          .map((emp) => (
-            <div
-              key={emp.id}
+        {employees.map((emp) => (
+          <div
+            key={emp.id}
+            css={{
+              display: "flex",
+              alignItems: "center",
+              padding: 10,
+              borderBottom: "1px solid #e8e8e8",
+            }}
+          >
+            <CuttinboardAvatar
+              src={emp.avatar}
+              alt={getEmployeeFullName(emp)}
+            />
+
+            <Typography.Text
+              ellipsis
               css={{
-                display: "flex",
-                alignItems: "center",
-                padding: 10,
-                borderBottom: "1px solid #e8e8e8",
+                marginLeft: 10,
+                marginRight: 10,
+                flex: 1,
               }}
             >
-              <CuttinboardAvatar
-                src={emp.avatar}
-                alt={getEmployeeFullName(emp)}
-              />
-
-              <Typography.Text
-                ellipsis
-                css={{
-                  marginLeft: 10,
-                  marginRight: 10,
-                  flex: 1,
-                }}
-              >
-                {getEmployeeFullName(emp)}
-              </Typography.Text>
-              <Checkbox
-                checked={selectedEmployees.includes(emp.id)}
-                onChange={() => handleSelectedEmpChange(emp.id)}
-                disabled={!canClone}
-              />
-            </div>
-          ))}
+              {getEmployeeFullName(emp)}
+            </Typography.Text>
+            <Checkbox
+              checked={selectedEmployees.includes(emp.id)}
+              onChange={() => handleSelectedEmpChange(emp.id)}
+              disabled={!canClone}
+            />
+          </div>
+        ))}
       </div>
     </Modal>
   );

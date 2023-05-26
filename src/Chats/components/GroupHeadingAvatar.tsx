@@ -9,8 +9,10 @@ import {
   useDirectMessageChat,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { IMessage } from "@cuttinboard-solutions/types-helpers";
+import { useTranslation } from "react-i18next";
 
 export function GroupHeadingAvatarMB({ message }: { message: IMessage }) {
+  const { t } = useTranslation();
   const { activeConversation } = useConversations();
 
   const sender = activeConversation
@@ -19,13 +21,14 @@ export function GroupHeadingAvatarMB({ message }: { message: IMessage }) {
 
   return (
     <GroupHeadingAvatarComponent
-      name={sender?.name ?? ""}
+      name={sender?.name ?? t("Deleted User")}
       avatar={sender?.avatar ?? ""}
     />
   );
 }
 
 export function GroupHeadingAvatarDM({ message }: { message: IMessage }) {
+  const { t } = useTranslation();
   const { user } = useCuttinboard();
   const { recipientUser } = useDirectMessageChat();
 
@@ -42,7 +45,7 @@ export function GroupHeadingAvatarDM({ message }: { message: IMessage }) {
 
   return (
     <GroupHeadingAvatarComponent
-      name={sender?.name ?? ""}
+      name={sender?.name ?? t("Deleted User")}
       avatar={sender?.avatar ?? ""}
     />
   );

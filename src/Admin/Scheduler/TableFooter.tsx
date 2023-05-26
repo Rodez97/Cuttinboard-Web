@@ -5,20 +5,17 @@ import { useTranslation } from "react-i18next";
 import { Typography } from "antd/es";
 import { useCallback } from "react";
 import {
-  calculateWageData,
-  getShiftIsoWeekday,
-  getWageOptions,
   minutesToTextDuration,
-  useCuttinboardLocation,
   useLocationPermissions,
   useSchedule,
+  useWageData,
 } from "@cuttinboard-solutions/cuttinboard-library";
 
 function TableFooter() {
   const { t } = useTranslation();
-  const { scheduleSettings } = useCuttinboardLocation();
-  const { weekDays, summaryDoc, shifts } = useSchedule();
+  const { weekDays, summaryDoc } = useSchedule();
   const checkPermission = useLocationPermissions();
+  const wageData = useWageData();
 
   const cellData = useCallback(
     (weekDay: dayjs.Dayjs) => {
@@ -33,21 +30,16 @@ function TableFooter() {
       };
 
       const isoWeekDay = weekDay.isoWeekday();
-      const wageOptions = getWageOptions(scheduleSettings);
-
-      // Get the shifts for the day
-      const dayShifts = shifts?.filter(
-        (shift) => getShiftIsoWeekday(shift) === isoWeekDay
+      const dayWageData = Object.values(wageData).map(
+        (wd) => wd.summary[isoWeekDay]
       );
 
-      const wageData = calculateWageData(dayShifts, wageOptions);
-      const weekDataSummary = wageData.summary;
-      const shiftWage = weekDataSummary[isoWeekDay];
-
-      if (shiftWage) {
-        sum.totalHours += shiftWage.totalHours;
-        sum.wages += shiftWage.totalWage;
-      }
+      dayWageData.forEach((dwd) => {
+        if (dwd) {
+          sum.totalHours += dwd.totalHours;
+          sum.wages += dwd.totalWage;
+        }
+      });
 
       const totalHoursText = minutesToTextDuration(sum.totalHours * 60);
 
@@ -63,7 +55,7 @@ function TableFooter() {
         )}%`,
       };
     },
-    [scheduleSettings, shifts, summaryDoc?.projectedSalesByDay]
+    [summaryDoc?.projectedSalesByDay, wageData]
   );
 
   return (

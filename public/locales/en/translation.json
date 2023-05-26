@@ -31,6 +31,7 @@
   "Upload Files": "Upload File",
   "Past Due": "Past Due",
   "Define the location details and add a general manager if needed": "Define the location details and add a General Manager if needed",
+  "Global Boards are public by default": "Global elements are public across all your locations",
   "New or Draft:": "New Shifts:",
   "Print Task block": "Print Task List",
   "Upload successfully": "Uploaded successfully",
@@ -49,5 +50,8 @@
   "none": "No one",
   "Conversations Details": "Message Board Details",
   "Rename Checklist": "Rename Task List",
-  "DM_DELETED_USER_WARNING": "This user has deleted their account"
+  "Every month on": "Every month on day",
+  "DM_DELETED_USER_WARNING": "This user has deleted their account",
+  "recurrence.onDay must be greater than or equal to 1": "Day must be greater than or equal to 1",
+  "recurrence.onDay must be less than or equal to 28": "Day must be less than or equal to 28"
 }

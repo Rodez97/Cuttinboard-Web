@@ -19,14 +19,11 @@ import {
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { GMArgs, IUpgradeOwnerData } from "../InitialForm/AddGM";
 import { useNavigate } from "react-router-dom";
 import FirstLocationSummary from "./FirstLocationSummary";
 import { httpsCallable } from "firebase/functions";
 import { recordError } from "../../utils/utils";
-import * as yup from "yup";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
-import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import { collection, doc, getDocs, query, where } from "firebase/firestore";
 import {
   AddLocationContent,
@@ -36,26 +33,16 @@ import {
 import { useDocumentDataOnce } from "react-firebase-hooks/firestore";
 import { LoadingPage } from "../../shared";
 import ErrorPage from "../../shared/molecules/PageError";
-
-const gmValidationSchema = yup.object().shape({
-  name: yup.string().required(),
-  lastName: yup.string().required(),
-  email: yup.string().email().required(),
-});
-
-export interface ILocationInfo {
-  name: string;
-  intId?: string;
-  address?: ILocationAddress;
-}
-
-interface locFormType extends ILocationInfo {
-  generalManager?: GMArgs;
-}
+import {
+  AddLocationFunctionArgs,
+  gmValidationSchema,
+  ILocationInfo,
+  LocFormType,
+} from "../OwnerPortal/AddLocation/NewLocationTypes";
 
 function AddFirstLocation() {
   const { user } = useCuttinboard();
-  const [locationForm] = Form.useForm<locFormType>();
+  const [locationForm] = Form.useForm<LocFormType>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [addGM, setAddGM] = useState(false);
@@ -71,11 +58,11 @@ function AddFirstLocation() {
     )
   );
 
-  const onFinish = async (values: locFormType) => {
+  const onFinish = async (values: LocFormType) => {
     const { generalManager, ...location } = values;
     try {
       setIsLoading(true);
-      const upgradeAccount = httpsCallable<IUpgradeOwnerData, void>(
+      const upgradeAccount = httpsCallable<AddLocationFunctionArgs, void>(
         FUNCTIONS,
         "http-locations-upgradecreate"
       );
@@ -95,10 +82,8 @@ function AddFirstLocation() {
       }
 
       await upgradeAccount({
-        locationName: location.name,
-        intId: location.intId,
-        address: location.address,
-        gm: isGMValid && generalManager ? generalManager : null,
+        location,
+        generalManager: isGMValid ? generalManager : undefined,
       });
 
       message.success(t("Location added successfully"));
@@ -139,7 +124,7 @@ function AddFirstLocation() {
   }
 
   return (
-    <Form<locFormType>
+    <Form<LocFormType>
       form={locationForm}
       layout="vertical"
       initialValues={{

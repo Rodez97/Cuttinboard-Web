@@ -209,7 +209,6 @@ const ShiftEditor: React.FC<ShiftEditorProps> = ({
       open={isOpen}
       width={400}
       onClose={onClose}
-      closable={false}
       title={t(!shift ? "Add Shift" : "Edit Shift")}
       extra={
         <Space>
@@ -251,6 +250,7 @@ const ShiftEditor: React.FC<ShiftEditorProps> = ({
               css={{ width: "100%" }}
               showNow={false}
               value={values.start}
+              changeOnBlur
               onChange={(value) => {
                 if (!value) {
                   return;
@@ -275,6 +275,7 @@ const ShiftEditor: React.FC<ShiftEditorProps> = ({
               css={{ width: "100%" }}
               showNow={false}
               value={values.end}
+              changeOnBlur
               onChange={(value) => {
                 if (!value) {
                   return;

@@ -358,7 +358,7 @@
   "Welcome to Files": "Bienvenido a Archivos",
   "Upload Files": "Subir Archivo",
   "Upload progress": "Progreso de la subida",
-  "You don't have enough storage to upload this file": "No tienes suficiente almacenamiento para subir este archivo",
+  "You don't have enough storage to upload this file": "No hay suficiente espacio para subir este archivo",
   "URL copied to clipboard": "URL copiado",
   "Copy link": "Copiar enlace",
   "Rename {{0}}": "Renombrar {{0}}",
@@ -481,7 +481,7 @@
   "Create file drawers accessible across all your locations": "Cree cajones de archivos accesibles en todas sus locaciónes",
   "Store public files that should be accessible to all employees across all locations": "Almacene archivos públicos que deberían ser accesibles para todos los empleados en todas las locaciones",
   "Transmit and document company culture, guidelines and best practices across all your locations": "Transmita y documente la cultura y las mejores prácticas de la empresa en todas sus locaciones",
-  "Global Boards are public by default": "Los elementos globales son públicos por defecto",
+  "Global Boards are public by default": "Los elementos globales son públicos en todas tus locaciones",
   "No files": "Sin archivos",
   "upload one": "Sube uno",
   "or": "o",
@@ -834,5 +834,10 @@
   "DM_DELETED_USER_WARNING": "Este usuario ha borrado su cuenta",
   "Are you sure to cancel this update?": "¿Seguro que desea cancelar este cambio?",
   "The shift will be restored to the previous state": "El turno sera regresado a su estado anterior",
-  "You cannot join this location because it has reached its employee limit": "No puede unirse a esta locación porque ha alcanzado su límite de empleados"
+  "You cannot join this location because it has reached its employee limit": "No puede unirse a esta locación porque ha alcanzado su límite de empleados",
+  "You can only upload one file at a time": "Solo puede subir un archivo a la vez",
+  "recurrence.onDay must be greater than or equal to 1": "El día debe ser mayor o igual que 1",
+  "recurrence.onDay must be less than or equal to 28": "El día debe ser menor o igual que 28",
+  "Share": "Compartir",
+  "Deleted User": "Usuario Borrado"
 }

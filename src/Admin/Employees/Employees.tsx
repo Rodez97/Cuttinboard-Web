@@ -87,8 +87,7 @@ function Employees() {
         });
       }
     } finally {
-      // Wait half a second to make sure the database has updated correctly
-      setTimeout(() => setJoiningLocation(false), 500);
+      setJoiningLocation(false);
     }
   };
 
@@ -99,6 +98,9 @@ function Employees() {
       async onOk() {
         try {
           await leaveLocation(location);
+
+          // Add a delay of 500ms to allow the data to be updated
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
           logAnalyticsEvent(
             role === RoleAccessLevels.OWNER

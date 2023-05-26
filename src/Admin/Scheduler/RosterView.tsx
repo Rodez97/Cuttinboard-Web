@@ -34,7 +34,6 @@ import {
   getEmployeeFullName,
   IEmployee,
   IShift,
-  RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(isoWeek);
@@ -55,10 +54,8 @@ function RosterView() {
   const checkPermission = useLocationPermissions();
 
   const employees = useMemo(() => {
-    // Get all employees except the supervisor
-    const emp = getEmployees.filter((e) => e.role !== RoleAccessLevels.ADMIN);
     // Return the array sorted by locationRole
-    return emp.sort((a, b) => a.role - b.role);
+    return getEmployees.sort((a, b) => a.role - b.role);
   }, [getEmployees]);
 
   const columns = useMemo(

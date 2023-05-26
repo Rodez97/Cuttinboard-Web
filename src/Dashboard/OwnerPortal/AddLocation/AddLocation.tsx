@@ -19,7 +19,6 @@ import {
   FUNCTIONS,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { GMArgs } from "../../InitialForm/AddGM";
 import {
   AddLocationContent,
   AddLocationHeader,
@@ -29,22 +28,15 @@ import { useNavigate } from "react-router-dom";
 import NewLocationSummary from "./NewLocationSummary";
 import { httpsCallable } from "firebase/functions";
 import { recordError } from "../../../utils/utils";
-import * as yup from "yup";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
-import { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useDashboard } from "../../DashboardProvider";
-
-const gmValidationSchema = yup.object().shape({
-  name: yup.string().required(),
-  lastName: yup.string().required(),
-  email: yup.string().email().required(),
-});
-
-type AddLocationFunctionArgs = {
-  location: ILocationInfo;
-  generalManager?: GMArgs;
-};
+import {
+  LocFormType,
+  AddLocationFunctionArgs,
+  gmValidationSchema,
+  ILocationInfo,
+} from "./NewLocationTypes";
 
 type AddLocationFunctionResult =
   | {
@@ -55,19 +47,9 @@ type AddLocationFunctionResult =
   | undefined
   | null;
 
-export interface ILocationInfo {
-  name: string;
-  intId?: string;
-  address?: ILocationAddress;
-}
-
-interface locFormType extends ILocationInfo {
-  generalManager?: GMArgs;
-}
-
 function AddLocation() {
   const { user } = useCuttinboard();
-  const [locationForm] = Form.useForm<locFormType>();
+  const [locationForm] = Form.useForm<LocFormType>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [addGM, setAddGM] = useState(false);
@@ -75,7 +57,7 @@ function AddLocation() {
   const [isLoading, setIsLoading] = useState(false);
   const { organization } = useDashboard();
 
-  const onFinish = async (values: locFormType) => {
+  const onFinish = async (values: LocFormType) => {
     const { generalManager, ...location } = values;
     try {
       setIsLoading(true);
@@ -131,7 +113,7 @@ function AddLocation() {
   };
 
   return (
-    <Form<locFormType>
+    <Form<LocFormType>
       form={locationForm}
       layout="vertical"
       initialValues={{
