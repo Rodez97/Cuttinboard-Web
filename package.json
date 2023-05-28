@@ -34,8 +34,8 @@
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@ant-design/pro-layout": "^7.10.3",
-    "@cuttinboard-solutions/cuttinboard-library": "^8.8.3",
-    "@cuttinboard-solutions/types-helpers": "^1.9.2",
+    "@cuttinboard-solutions/cuttinboard-library": "^9.1.1",
+    "@cuttinboard-solutions/types-helpers": "^2.1.0",
     "@emoji-mart/react": "^1.1.1",
     "@mdi/js": "^7.2.96",
     "@mdi/react": "^1.6.1",

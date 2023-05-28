@@ -1,17 +1,16 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import dayjs from "dayjs";
-import React, { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import {
+  IEmployee,
+  IShift,
   getShiftDayjsDate,
   getShiftLatestData,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { IEmployee, IShift } from "@cuttinboard-solutions/types-helpers";
+} from "@cuttinboard-solutions/types-helpers";
 import ShiftEditor, { ShiftFormDataType } from "./ShiftEditorFormik";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);
-
-
 
 export interface IManageShiftDialogRef {
   openNew: (employee: IEmployee, date: dayjs.Dayjs) => void;
@@ -42,10 +41,17 @@ const ManageShiftDialog = forwardRef<IManageShiftDialogRef, unknown>(
 
     useImperativeHandle(ref, () => ({
       openNew: (employee: IEmployee, date: dayjs.Dayjs) => {
+        const position =
+          employee.positions && employee.positions.length === 1
+            ? employee.positions[0]
+            : "";
+
         setInitialValues({
           applyTo: [date.isoWeekday()],
           start: date.add(8, "hours"),
           end: date.add(16, "hours"),
+          notes: "",
+          position,
         });
         setState({
           isOpen: true,

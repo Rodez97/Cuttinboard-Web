@@ -2,8 +2,6 @@ import React from "react";
 import {
   Colors,
   getEmployeeShiftsSummary,
-  getShiftDayjsDate,
-  getShiftIsoWeekday,
   minutesToTextDuration,
   parseWeekId,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -17,6 +15,8 @@ import { RosterData } from "./RosterView";
 import {
   WageDataRecord,
   getEmployeeFullName,
+  getShiftDayjsDate,
+  getShiftIsoWeekday,
 } from "@cuttinboard-solutions/types-helpers";
 import type { IEmployee, IShift } from "@cuttinboard-solutions/types-helpers";
 

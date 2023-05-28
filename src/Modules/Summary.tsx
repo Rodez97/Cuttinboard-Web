@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { Empty, Layout, Typography } from "antd/es";
-import ScheduleSummary from "./ScheduleSummary";
 import UtensilsSummary from "./UtensilsSummary";
 import { useTranslation } from "react-i18next";
 import upperFirst from "lodash-es/upperFirst";
@@ -15,8 +14,7 @@ import { useNavigate } from "react-router-dom";
 export default function Summary() {
   usePageTitle("Summary");
   const { t } = useTranslation();
-  const [scheduleTodaySummary, recurringTasksSummary, utensils, loading] =
-    useSummaryData();
+  const [recurringTasksSummary, utensils, loading] = useSummaryData();
   const { employees } = useCuttinboardLocation();
   const navigate = useNavigate();
 
@@ -57,7 +55,7 @@ export default function Summary() {
 
       <TasksSummary {...{ recurringTasksSummary, loading }} />
 
-      <ScheduleSummary {...{ scheduleTodaySummary, loading }} />
+      {/* <ScheduleSummary {...{ scheduleTodaySummary, loading }} /> */}
 
       <UtensilsSummary {...{ utensils, loading }} />
     </Layout.Content>

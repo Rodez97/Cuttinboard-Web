@@ -1,6 +1,5 @@
 import { FilePdfOutlined } from "@ant-design/icons";
 import {
-  getTotalWageData,
   useCuttinboardLocation,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -10,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 import { generateSchedulePdf } from "./NewPDF";
 import { recordError } from "../../utils/utils";
+import { getTotalWageData } from "@cuttinboard-solutions/types-helpers";
 
 function GeneratePdfBtn() {
   const { t } = useTranslation();
