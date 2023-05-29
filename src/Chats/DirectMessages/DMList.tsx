@@ -17,14 +17,18 @@ import {
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import orderBy from "lodash-es/orderBy";
 import { useNavigate } from "react-router-dom";
-import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
+import {
+  IDirectMessage,
+  IEmployee,
+  Sender,
+} from "@cuttinboard-solutions/types-helpers";
 
 interface IDMItem {
   chat: IDirectMessage;
   recipient: Sender;
 }
 
-export default ({ locationId }: { locationId?: string }) => {
+export default ({ employees }: { employees?: IEmployee[] }) => {
   const { t } = useTranslation();
   const { user } = useCuttinboard();
   const { directMessages, loading, error } = useDirectMessageChat();
@@ -127,7 +131,7 @@ export default ({ locationId }: { locationId?: string }) => {
         open={newDmOpen}
         onCancel={closeNewDm}
         onClose={closeNewDm}
-        locationId={locationId}
+        employees={employees}
       />
     </div>
   );

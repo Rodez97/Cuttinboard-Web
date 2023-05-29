@@ -5,12 +5,13 @@ import { useRef, useState } from "react";
 import NewDMByEmployee from "./NewDMByEmployee";
 import NewDMByEmail, { NewDMByEmailRef } from "./NewDMByEmail";
 import { useTranslation } from "react-i18next";
+import { IEmployee } from "@cuttinboard-solutions/types-helpers";
 
 export default ({
   onClose,
-  locationId,
+  employees,
   ...props
-}: ModalProps & { onClose: () => void; locationId?: string }) => {
+}: ModalProps & { onClose: () => void; employees?: IEmployee[] }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const newDMByEmailRef = useRef<NewDMByEmailRef>(null);
@@ -32,10 +33,15 @@ export default ({
         onCreatingChange={setLoading}
         onClose={handleClose}
         ref={newDMByEmailRef}
+        employees={employees}
       />
 
-      {locationId ? (
-        <NewDMByEmployee onCreatingChange={setLoading} onClose={handleClose} />
+      {employees ? (
+        <NewDMByEmployee
+          onCreatingChange={setLoading}
+          onClose={handleClose}
+          employees={employees}
+        />
       ) : (
         <Typography.Text
           type="secondary"
