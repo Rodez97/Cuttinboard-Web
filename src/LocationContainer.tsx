@@ -64,7 +64,7 @@ export default () => {
   const { pathname } = useRouterLocation();
   const { user } = useCuttinboard();
   const navigate = useNavigate();
-  const { role, location } = useCuttinboardLocation();
+  const { role, location, employees } = useCuttinboardLocation();
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const {
@@ -273,10 +273,7 @@ export default () => {
               <Route path={`checklist/*`} element={<GlobalChecklist />} />
 
               <Route path={`my-message-boards/*`} element={<Conversations />} />
-              <Route
-                path={`chats/*`}
-                element={<DM locationId={location.id} />}
-              />
+              <Route path={`chats/*`} element={<DM employees={employees} />} />
               <Route
                 path="*"
                 element={

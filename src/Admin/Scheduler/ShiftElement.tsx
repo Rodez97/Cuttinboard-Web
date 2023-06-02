@@ -16,9 +16,6 @@ import mdiComment from "@mdi/svg/svg/comment-quote-outline.svg";
 import { MouseEvent, useMemo } from "react";
 import ShowLegend from "./ShowLegend";
 import {
-  checkIfShiftsHaveChanges,
-  getShiftDayjsDate,
-  getShiftLatestData,
   useEmployeeWageData,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
@@ -27,6 +24,9 @@ import {
   IEmployee,
   IShift,
   RoleAccessLevels,
+  checkIfShiftsHaveChanges,
+  getShiftDayjsDate,
+  getShiftLatestData,
 } from "@cuttinboard-solutions/types-helpers";
 
 interface ShiftElementProps extends ManageShiftsProps {

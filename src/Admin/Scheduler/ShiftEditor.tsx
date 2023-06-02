@@ -19,18 +19,14 @@ import {
   Modal,
   Row,
   Select,
-  Tag,
   TimePicker,
-  Typography,
 } from "antd/es";
 import capitalize from "lodash-es/capitalize";
 import {
   checkForOverlappingShiftsARRAY,
   useCuttinboardLocation,
-  useLocationPermissions,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
 import { Timestamp } from "firebase/firestore";
 import {
   IEmployee,
@@ -73,7 +69,6 @@ const ShiftEditor = ({
   shift,
   form,
 }: ShiftEditorProps) => {
-  const checkPermission = useLocationPermissions();
   const { location } = useCuttinboardLocation();
   const { createShift, weekDays, updateShift, shifts } = useSchedule();
   const { t } = useTranslation();

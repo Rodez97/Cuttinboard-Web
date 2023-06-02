@@ -5,14 +5,10 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { ReactNode, useCallback, useMemo } from "react";
-import { useHttpsCallable } from "react-firebase-hooks/functions";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
-import {
-  FUNCTIONS,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { ILocation } from "@cuttinboard-solutions/types-helpers";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
@@ -28,10 +24,6 @@ export default ({ location, actions }: LocationCardProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useCuttinboard();
-  const [createBillingSession] = useHttpsCallable<
-    { return_url: string },
-    string
-  >(FUNCTIONS, "stripe-createBillingSession");
 
   // Define a function that shows a billing modal
   const showBillingModal = useCallback(() => {
@@ -45,26 +37,22 @@ export default ({ location, actions }: LocationCardProps) => {
       // to the Stripe billing portal
       async onOk() {
         try {
-          // Create a billing session
-          const billingSessionResponse = await createBillingSession({
-            return_url: window.location.href,
-          });
-
-          // Check if a response was returned
-          if (!billingSessionResponse?.data) {
-            throw new Error("No data returned");
+          if (!user.email || !user.emailVerified) {
+            Modal.error({
+              title: t("Email not verified"),
+              content: t(
+                "To manage your subscription, please verify your email first"
+              ),
+            });
+            return;
           }
+          const encodeEmail = encodeURIComponent(user.email);
 
+          const uri = `https://billing.stripe.com/p/login/dR615w5MkeoI8cE288?prefilled_email=${encodeEmail}`;
+
+          window.open(uri, "_blank", "noopener,noreferrer");
           // Report to analytics
-          logAnalyticsEvent("billing_session_created", {
-            location_id: location.id,
-            organization_id: location.organizationId,
-            from: "location_card",
-            for: "activate_location",
-          });
-
-          // Redirect to Stripe Billing Portal
-          window.location.assign(billingSessionResponse.data);
+          logAnalyticsEvent("visit_stripe_portal");
         } catch (error) {
           // Handle any errors that occur
           recordError(error);
@@ -76,7 +64,7 @@ export default ({ location, actions }: LocationCardProps) => {
       okText: t("Manage Billing"),
       okType: "primary",
     });
-  }, [createBillingSession, location.id, location.organizationId, t]);
+  }, [t, user.email, user.emailVerified]);
 
   const handleSelectLocation = useCallback(async () => {
     // Destructure properties from the location object

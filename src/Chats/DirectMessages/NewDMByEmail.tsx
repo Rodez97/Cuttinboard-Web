@@ -4,7 +4,6 @@ import { Button, Form, Input, message, Typography } from "antd/es";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
-import { useParams } from "react-router-dom";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { GrayPageHeader } from "../../shared";
 import {
@@ -25,12 +24,12 @@ export interface NewDMByEmailRef {
 type Props = {
   onCreatingChange: (status: boolean) => void;
   onClose: () => void;
+  employees?: IEmployee[];
 };
 
 const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
-  ({ onCreatingChange, onClose }: Props, ref) => {
+  ({ onCreatingChange, onClose, employees }: Props, ref) => {
     const [form] = Form.useForm<{ email: string }>();
-    const { locationId } = useParams();
     const { t } = useTranslation();
     const { user } = useCuttinboard();
     const [targetUser, setTargetUser] = useState<
@@ -38,7 +37,7 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
     >(null);
     const { startNewDirectMessageChat } = useDirectMessageChat();
     const [messageApi, contextHolder] = message.useMessage();
-    const findRecipient = useFindDMRecipient();
+    const findRecipient = useFindDMRecipient(employees);
 
     useImperativeHandle(ref, () => ({
       reset,
@@ -52,7 +51,7 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
     const searchUser = async ({ email }: { email: string }) => {
       try {
         onCreatingChange(true);
-        const employee = await findRecipient(email, locationId);
+        const employee = await findRecipient(email);
         if (employee) {
           setTargetUser(employee);
         }
@@ -98,7 +97,7 @@ const NewDMByEmail = forwardRef<NewDMByEmailRef, Props>(
             normalize={(value: string) => value?.toLowerCase()}
             label={
               <Typography.Text type="secondary" css={{ fontSize: 18 }}>
-                {t("With someone in your organizations")}
+                {t("With someone using Cuttinboard")}
               </Typography.Text>
             }
             rules={[

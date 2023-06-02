@@ -16,9 +16,6 @@ import upperFirst from "lodash-es/upperFirst";
 import { useNavigate } from "react-router-dom";
 import { GrayPageHeader, LoadingPage } from "../../shared";
 import {
-  getShiftDayjsDate,
-  getShiftDuration,
-  getShiftLatestData,
   minutesToTextDuration,
   parseWeekId,
   useCuttinboardLocation,
@@ -32,6 +29,9 @@ import { generateRosterPdf } from "./NewPDF";
 import ErrorPage from "../../shared/molecules/PageError";
 import {
   getEmployeeFullName,
+  getShiftDayjsDate,
+  getShiftDuration,
+  getShiftLatestData,
   IEmployee,
   IShift,
 } from "@cuttinboard-solutions/types-helpers";

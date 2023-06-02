@@ -7,7 +7,6 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 import {
   Colors,
   useCuttinboard,
-  useCuttinboardLocation,
   useDirectMessageChat,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
@@ -19,12 +18,16 @@ import {
 type Props = {
   onCreatingChange: (status: boolean) => void;
   onClose: () => void;
+  employees: IEmployee[];
 };
 
-export default function NewDMByEmployee({ onCreatingChange, onClose }: Props) {
+export default function NewDMByEmployee({
+  onCreatingChange,
+  onClose,
+  employees,
+}: Props) {
   const { t } = useTranslation();
   const { startNewDirectMessageChat } = useDirectMessageChat();
-  const { employees } = useCuttinboardLocation();
   const { user } = useCuttinboard();
 
   const startNewChat = (selectedUser: IEmployee) => {

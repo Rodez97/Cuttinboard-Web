@@ -839,5 +839,6 @@
   "recurrence.onDay must be greater than or equal to 1": "El día debe ser mayor o igual que 1",
   "recurrence.onDay must be less than or equal to 28": "El día debe ser menor o igual que 28",
   "Share": "Compartir",
-  "Deleted User": "Usuario Borrado"
+  "Deleted User": "Usuario Borrado",
+  "With someone using Cuttinboard": "Con otro usuario de Cuttinboard"
 }

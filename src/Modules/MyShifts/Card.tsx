@@ -6,8 +6,7 @@ import Icon from "@ant-design/icons";
 import { NoteIcon } from "../Notes/notesIcons";
 import { GrayPageHeader } from "../../shared";
 import { useMemo } from "react";
-import { IShift } from "@cuttinboard-solutions/types-helpers";
-import { getShiftBaseData } from "@cuttinboard-solutions/cuttinboard-library";
+import { IShift, getShiftBaseData } from "@cuttinboard-solutions/types-helpers";
 
 interface ShiftCardProps {
   shift: IShift;

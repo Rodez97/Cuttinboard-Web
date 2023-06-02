@@ -14,8 +14,9 @@ import ActiveDM from "./ActiveDM";
 import { Route, Routes, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
+import { IEmployee } from "@cuttinboard-solutions/types-helpers";
 
-export default ({ locationId }: { locationId?: string }) => {
+export default ({ employees }: { employees?: IEmployee[] }) => {
   usePageTitle("Direct Messages");
   const { t } = useTranslation();
 
@@ -28,7 +29,7 @@ export default ({ locationId }: { locationId?: string }) => {
           collapsedWidth="0"
           className="module-sider"
         >
-          <DMList locationId={locationId} />
+          <DMList employees={employees} />
         </Layout.Sider>
         <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
           <Routes>
