@@ -5,10 +5,10 @@ import {
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import { jsx } from "@emotion/react";
-import { Alert, Button, Form, Input, Typography } from "antd/es";
+import { Button, Form, Input, Modal, Typography, message } from "antd/es";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { httpsCallable } from "firebase/functions";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useWizard } from "react-use-wizard";
@@ -37,14 +37,11 @@ function AddGM({ locationName }: AddGMProps) {
   const { user } = useCuttinboard();
   const { t } = useTranslation();
   const { previousStep } = useWizard();
-  const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [, , removeNewUser] = useSignUpLocalTracker();
+  const [promoCode, setPromoCode] = useState<string>();
 
-  const confirmCreation = async (gm: GMArgs | null) => {
+  const confirmCreation = async (gm?: GMArgs) => {
     try {
-      setIsLoading(true);
-
       if (gm?.email) {
         // Check if the new employee is already an organization level employee
         const checkForSupervisor = await getDocs(
@@ -67,6 +64,7 @@ function AddGM({ locationName }: AddGMProps) {
           name: locationName,
         },
         generalManager: gm ? gm : undefined,
+        promo: promoCode,
       });
       // Report to analytics
       logAnalyticsEvent("sign_up_flow", {
@@ -79,18 +77,53 @@ function AddGM({ locationName }: AddGMProps) {
       removeNewUser();
     } catch (error) {
       recordError(error);
-      setError(error);
-    } finally {
-      setIsLoading(false);
+      message.error(t(error?.message || "Something went wrong"));
     }
   };
 
-  const handleNext = async (gm: GMArgs) => {
-    confirmCreation(gm);
+  const handleNext = (gm: GMArgs) => {
+    confirmCreate(gm);
   };
 
   const handleSkip = () => {
-    confirmCreation(null);
+    confirmCreate();
+  };
+
+  const confirmCreate = (gm?: GMArgs) => {
+    Modal.confirm({
+      title: t("You are about to create your first location!"),
+      content: (
+        <React.Fragment>
+          <Typography.Text
+            css={{
+              fontSize: 24,
+              fontWeight: 500,
+              textAlign: "center",
+              display: "block",
+              marginBottom: 16,
+              // Underline
+              textDecoration: "underline",
+            }}
+          >
+            {locationName}
+          </Typography.Text>
+          <Form.Item
+            name="promo"
+            rules={[TrimRule]}
+            label={t("Do you have a promo code?")}
+          >
+            <Input
+              onChange={(e) => {
+                setPromoCode(e.target.value);
+              }}
+            />
+          </Form.Item>
+        </React.Fragment>
+      ),
+      okText: t("Confirm"),
+      cancelText: t("Cancel"),
+      onOk: () => confirmCreation(gm),
+    });
   };
 
   return (
@@ -109,7 +142,7 @@ function AddGM({ locationName }: AddGMProps) {
       </SectionHeader>
 
       <SectionContent>
-        <Form
+        <Form<GMArgs>
           layout="vertical"
           autoComplete="off"
           autoCorrect="off"
@@ -120,7 +153,6 @@ function AddGM({ locationName }: AddGMProps) {
             width: "100%",
             margin: "0 auto",
           }}
-          disabled={isLoading}
         >
           <Form.Item
             name="name"
@@ -187,33 +219,16 @@ function AddGM({ locationName }: AddGMProps) {
             <Input />
           </Form.Item>
         </Form>
-
-        {error && <Alert message={t(error.message)} type="error" showIcon />}
       </SectionContent>
 
       <SectionFooter>
-        <Button
-          onClick={previousStep}
-          type="dashed"
-          size="large"
-          disabled={isLoading}
-        >
+        <Button onClick={previousStep} type="dashed" size="large">
           {t("Back")}
         </Button>
-        <Button
-          onClick={handleSkip}
-          type="default"
-          size="large"
-          disabled={isLoading}
-        >
+        <Button onClick={handleSkip} type="default" size="large">
           {t("Skip")}
         </Button>
-        <Button
-          onClick={form.submit}
-          type="primary"
-          size="large"
-          loading={isLoading}
-        >
+        <Button onClick={form.submit} type="primary" size="large">
           {t("Done")}
         </Button>
       </SectionFooter>

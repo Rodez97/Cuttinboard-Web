@@ -22,6 +22,7 @@ export interface ILocationInfo {
 export type AddLocationFunctionArgs = {
   location: ILocationInfo;
   generalManager?: GMArgs;
+  promo?: string;
 };
 
 export interface LocFormType extends ILocationInfo {

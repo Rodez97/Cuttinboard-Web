@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -11,6 +11,7 @@ import {
   Input,
   Layout,
   message,
+  Modal,
   Space,
   Typography,
 } from "antd/es";
@@ -48,6 +49,7 @@ function AddFirstLocation() {
   const [addGM, setAddGM] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [promoCode, setPromoCode] = useState<string>();
   const [price, loadingPrice, priceError] = useDocumentDataOnce(
     doc(
       FIRESTORE,
@@ -58,7 +60,7 @@ function AddFirstLocation() {
     )
   );
 
-  const onFinish = async (values: LocFormType) => {
+  const confirm = async (values: LocFormType) => {
     const { generalManager, ...location } = values;
     try {
       setIsLoading(true);
@@ -84,6 +86,7 @@ function AddFirstLocation() {
       await upgradeAccount({
         location,
         generalManager: isGMValid ? generalManager : undefined,
+        promo: promoCode,
       });
 
       message.success(t("Location added successfully"));
@@ -105,6 +108,39 @@ function AddFirstLocation() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onFinish = (values: LocFormType) => {
+    Modal.confirm({
+      title: t("You are about to create your first location!"),
+      content: (
+        <React.Fragment>
+          <Typography.Text
+            css={{
+              fontSize: 24,
+              fontWeight: 500,
+              textAlign: "center",
+              display: "block",
+              marginBottom: 16,
+              // Underline
+              textDecoration: "underline",
+            }}
+          >
+            {values.name}
+          </Typography.Text>
+          <Form.Item name="promo" label={t("Do you have a promo code?")}>
+            <Input
+              onChange={(e) => {
+                setPromoCode(e.target.value);
+              }}
+            />
+          </Form.Item>
+        </React.Fragment>
+      ),
+      okText: t("Confirm"),
+      cancelText: t("Cancel"),
+      onOk: () => confirm(values),
+    });
   };
 
   const handleCancel = () => {
