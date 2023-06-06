@@ -7,7 +7,7 @@ import {
   LocationProvider,
   useCuttinboard,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import InitialForm from "./Dashboard/InitialForm/InitialForm";
+import InitialForm from "./Dashboard/SignUpLocation/InitialForm";
 import useSignUpLocalTracker from "./hooks/useSignUpLocalTracker";
 import Location from "./Location";
 
