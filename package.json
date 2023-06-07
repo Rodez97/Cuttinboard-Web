@@ -1,6 +1,6 @@
 {
   "name": "cuttinboard",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "type": "module",
   "private": true,
   "files": [
@@ -13,6 +13,7 @@
     "build:all": "npm run fetch:i18n && webpack --mode=production --env production --progress",
     "lint": "eslint src/**/*.{ts,tsx} --quiet --fix",
     "publish": "npm run build && firebase deploy --only hosting",
+    "publish-preview": "npm run build && firebase hosting:channel:deploy preview --expires 7d",
     "test": "jest --coverage",
     "push:i18n": "node push-google-spreadsheet.js",
     "fetch:i18n": "node fetch-google-spreadsheet.js",

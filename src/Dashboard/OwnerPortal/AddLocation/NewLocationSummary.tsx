@@ -1,20 +1,54 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar, Typography } from "antd/es";
 import { useDashboard } from "../../DashboardProvider";
 import { CreditCardOutlined } from "@ant-design/icons";
+import {
+  DiscountCoupon,
+  applyDiscount,
+  getDiscountTextFn,
+} from "../../Subscription";
 
 function NewLocationSummary() {
   const { t } = useTranslation();
   const { subscriptionDocument, organization } = useDashboard();
 
-  const getPrice = useCallback(() => {
-    const price = subscriptionDocument?.items[0]?.price.unit_amount / 100;
+  const getPrice = useMemo(() => {
+    const unitPrice = subscriptionDocument?.items[0]?.price.unit_amount / 100;
     const newQuantity = Number(organization?.locations) + 1;
-    return price * newQuantity;
+    const price = newQuantity * unitPrice;
+    const discount = subscriptionDocument?.discount?.coupon;
+
+    const priceText = price.toLocaleString("EN-us", {
+      style: "currency",
+      currency: "USD",
+    });
+
+    if (discount) {
+      const priceWithCoupon = applyDiscount(price, discount);
+      const priceWithCouponText = priceWithCoupon.toLocaleString("EN-us", {
+        style: "currency",
+        currency: "USD",
+      });
+
+      return (
+        <React.Fragment>
+          <span css={{ textDecoration: "line-through" }}>{priceText}</span>{" "}
+          {priceWithCouponText}
+        </React.Fragment>
+      );
+    }
+
+    return priceText;
   }, [subscriptionDocument, organization]);
+
+  const getDiscountText = useMemo<string | undefined>(() => {
+    const discount: DiscountCoupon | undefined =
+      subscriptionDocument?.discount?.coupon;
+    return getDiscountTextFn(discount, t);
+  }, [subscriptionDocument?.discount?.coupon, t]);
 
   const getPriceText = useCallback(() => {
     const price = subscriptionDocument?.items[0]?.price.unit_amount / 100;
@@ -58,13 +92,13 @@ function NewLocationSummary() {
             margin: "0.2rem 0",
           }}
         >
-          {getPrice().toLocaleString("EN-us", {
-            style: "currency",
-            currency: "USD",
-          })}
+          {getPrice}
           <Typography.Text type="secondary">{t("/month")}</Typography.Text>
         </Typography.Text>
         <Typography.Text type="secondary">{getPriceText()}</Typography.Text>
+        {getDiscountText && (
+          <Typography.Text type="success">{getDiscountText}</Typography.Text>
+        )}
       </div>
     </div>
   );

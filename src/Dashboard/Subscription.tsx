@@ -1,6 +1,8 @@
+/** @jsx jsx */
+import { jsx } from "@emotion/react";
 import React, { useMemo, useRef } from "react";
 import dayjs from "dayjs";
-import { useTranslation } from "react-i18next";
+import { TFunction, useTranslation } from "react-i18next";
 import capitalize from "lodash-es/capitalize";
 import { useDashboard } from "./DashboardProvider";
 import { Alert, Button, Descriptions, Modal, Result, Space } from "antd/es";
@@ -12,6 +14,72 @@ import SetupPaymentMethodForm, {
 import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
 import { GrayPageHeader } from "../shared";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
+
+export type DiscountCoupon = {
+  duration: "forever" | "once" | "repeating";
+  duration_in_months: number;
+  percent_off: number;
+  amount_off: number;
+  valid: boolean;
+};
+
+export const applyDiscount = (price: number, discount: DiscountCoupon) => {
+  if (!discount.valid) return price;
+  if (discount.amount_off > 0) {
+    return price - discount.amount_off;
+  }
+  if (discount.percent_off > 0) {
+    return price - price * (discount.percent_off / 100);
+  }
+  return price;
+};
+
+export const getDiscountTextFn = (
+  discount: DiscountCoupon | undefined,
+  t: TFunction<"translation", undefined>
+) => {
+  if (!discount || !discount.valid) return undefined;
+  if (discount.amount_off > 0) {
+    const amountOff = discount.amount_off.toLocaleString("EN-us", {
+      style: "currency",
+      currency: "USD",
+    });
+    switch (discount.duration) {
+      case "forever":
+        return t("{{0}} off forever", {
+          0: amountOff,
+        });
+      case "once":
+        return t("{{0}} off for the first month", {
+          0: amountOff,
+        });
+      case "repeating":
+        return t("{{0}} off for {{1}} months", {
+          0: amountOff,
+          1: discount.duration_in_months,
+        });
+    }
+  }
+  if (discount.percent_off > 0) {
+    switch (discount.duration) {
+      case "forever":
+        return t("{{0}}% off forever", {
+          0: discount.percent_off,
+        });
+      case "once":
+        return t("{{0}}% off for the first month", {
+          0: discount.percent_off,
+        });
+      case "repeating":
+        return t("{{0}}% off for {{1}} months", {
+          0: discount.percent_off,
+          1: discount.duration_in_months,
+        });
+    }
+  }
+
+  return "";
+};
 
 function Subscription() {
   usePageTitle("Manage Billing");
@@ -42,17 +110,41 @@ function Subscription() {
     logAnalyticsEvent("visit_stripe_portal");
   };
 
-  const getPrice = useMemo(
-    () =>
-      (
-        Number(organization?.locations) *
-        (Number(subscriptionDocument?.items[0].price.unit_amount) / 100)
-      ).toLocaleString("EN-us", {
+  const getDiscountText = useMemo<string | undefined>(() => {
+    const discount: DiscountCoupon | undefined =
+      subscriptionDocument?.discount?.coupon;
+    return getDiscountTextFn(discount, t);
+  }, [subscriptionDocument?.discount?.coupon, t]);
+
+  const getPrice = useMemo(() => {
+    const numberOfLocations = Number(organization?.locations);
+    const unitPrice =
+      Number(subscriptionDocument?.items[0].price.unit_amount) / 100;
+    const price = numberOfLocations * unitPrice;
+    const discount = subscriptionDocument?.discount?.coupon;
+
+    const priceText = price.toLocaleString("EN-us", {
+      style: "currency",
+      currency: "USD",
+    });
+
+    if (discount) {
+      const priceWithCoupon = applyDiscount(price, discount);
+      const priceWithCouponText = priceWithCoupon.toLocaleString("EN-us", {
         style: "currency",
         currency: "USD",
-      }),
-    [subscriptionDocument, organization]
-  );
+      });
+
+      return (
+        <React.Fragment>
+          <span css={{ textDecoration: "line-through" }}>{priceText}</span>{" "}
+          {priceWithCouponText}
+        </React.Fragment>
+      );
+    }
+
+    return priceText;
+  }, [subscriptionDocument, organization]);
 
   const createManagePaymentIntent = () => {
     if (!user.emailVerified) {
@@ -110,7 +202,9 @@ function Subscription() {
             )}
         </Descriptions>
 
-        {}
+        {getDiscountText && (
+          <Alert message={getDiscountText} type="success" showIcon />
+        )}
 
         {organization.subscriptionStatus === "canceled" ? (
           <Alert
@@ -140,7 +234,7 @@ function Subscription() {
         {organization.subscriptionStatus !== "canceled" &&
           (!userDocument.paymentMethods ||
             userDocument.paymentMethods.length < 1) && (
-            <>
+            <React.Fragment>
               <Alert
                 message={t("No payment method saved")}
                 description={t(
@@ -161,7 +255,7 @@ function Subscription() {
                 }
               />
               <SetupPaymentMethodForm ref={setupPMFormRef} />
-            </>
+            </React.Fragment>
           )}
 
         <Button

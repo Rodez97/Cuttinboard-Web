@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -39,6 +39,7 @@ import {
   ILocationInfo,
   LocFormType,
 } from "../OwnerPortal/AddLocation/NewLocationTypes";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
 function AddFirstLocation() {
   const { user } = useCuttinboard();
@@ -58,22 +59,22 @@ function AddFirstLocation() {
     )
   );
 
-  const onFinish = async (values: LocFormType) => {
-    const { generalManager, ...location } = values;
+  const confirm = async (values: LocFormType) => {
+    const { generalManager, promo, ...location } = values;
+
+    const promoCode = promo.length > 0 ? promo[0].promo : undefined;
+
     try {
       setIsLoading(true);
-      const upgradeAccount = httpsCallable<AddLocationFunctionArgs, void>(
-        FUNCTIONS,
-        "http-locations-upgradecreate"
-      );
+
       const isGMValid = await gmValidationSchema.isValid(generalManager);
 
-      if (isGMValid) {
+      if (isGMValid && generalManager) {
         // Check if the new employee is already an organization level employee
         const checkForSupervisor = await getDocs(
           query(
             collection(FIRESTORE, "Organizations", user.uid, "employees"),
-            where("email", "==", generalManager?.email.toLowerCase())
+            where("email", "==", generalManager.email.trim().toLowerCase())
           )
         );
         if (checkForSupervisor.size === 1) {
@@ -81,9 +82,14 @@ function AddFirstLocation() {
         }
       }
 
+      const upgradeAccount = httpsCallable<AddLocationFunctionArgs, void>(
+        FUNCTIONS,
+        "http-locations-upgradecreate"
+      );
       await upgradeAccount({
         location,
         generalManager: isGMValid ? generalManager : undefined,
+        promo: promoCode,
       });
 
       message.success(t("Location added successfully"));
@@ -100,6 +106,8 @@ function AddFirstLocation() {
         gmAdded: isGMValid,
       });
     } catch (error) {
+      console.log(error);
+
       setError(error);
       recordError(error);
     } finally {
@@ -130,7 +138,7 @@ function AddFirstLocation() {
       initialValues={{
         ...location,
       }}
-      onFinish={onFinish}
+      onFinish={confirm}
       size="small"
       autoComplete="off"
       css={{
@@ -308,8 +316,53 @@ function AddFirstLocation() {
             <FirstLocationSummary price={price} />
             <Space
               direction="vertical"
-              css={{ justifyContent: "center", display: "flex", width: 150 }}
+              css={{ justifyContent: "center", display: "flex", width: 300 }}
             >
+              <Form.List name="promo">
+                {(fields, { add, remove }) => (
+                  <React.Fragment>
+                    <Form.Item>
+                      {fields.length === 0 ? (
+                        <Button
+                          type="dashed"
+                          onClick={() => add(undefined, 0)}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          {t("Do you have a promo code?")}
+                        </Button>
+                      ) : (
+                        <Button
+                          type="dashed"
+                          onClick={() => remove(0)}
+                          block
+                          icon={<MinusCircleOutlined />}
+                          danger
+                        >
+                          {t("Remove Promo Code")}
+                        </Button>
+                      )}
+                    </Form.Item>
+
+                    {fields.map((field) => (
+                      <Form.Item
+                        key={field.key}
+                        name={[field.name, "promo"]}
+                        rules={[
+                          {
+                            required: true,
+                            message: "",
+                          },
+                        ]}
+                        label={t("Promo Code")}
+                      >
+                        <Input />
+                      </Form.Item>
+                    ))}
+                  </React.Fragment>
+                )}
+              </Form.List>
+
               <Button
                 type="primary"
                 htmlType="submit"
