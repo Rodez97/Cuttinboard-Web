@@ -219,7 +219,7 @@ const webpackConfig = () => {
         runtimeCaching: [
           {
             urlPattern: /\.js$/,
-            handler: "NetworkFirst",
+            handler: "NetworkOnly",
           },
           {
             urlPattern: /https?:\/\/[^\s]+\.(jpg|jpeg|png)(?:\?.*)?/gm,

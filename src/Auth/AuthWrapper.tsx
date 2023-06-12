@@ -1,10 +1,11 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import styled from "@emotion/styled";
 import { Col, Layout, Row, Space, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
 import authImage from "../assets/images/authImage.webp";
+import ColorLogo from "../assets/images/Color-on-light-backgrounds.png";
 import AuthFooter from "./AuthFooter";
 import AuthRouter from ".";
 
@@ -77,6 +78,19 @@ function AuthWrapper() {
               flex: 1,
             }}
           >
+            <div
+              css={css`
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                @media (min-width: 768px) {
+                  display: none;
+                }
+              `}
+            >
+              <img src={ColorLogo} alt="CuttinBoard" height={40} />
+            </div>
             <AuthRouter />
           </div>
           <AuthFooter />

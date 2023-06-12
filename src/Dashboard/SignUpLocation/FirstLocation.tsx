@@ -52,9 +52,9 @@ function FirstLocation() {
   const handleNext = async (values: LocationFormType) => {
     const { name, gm, promo } = values;
 
-    const generalManager = gm.length > 0 ? gm[0] : undefined;
+    const generalManager = gm?.length > 0 ? gm[0] : undefined;
 
-    const promoCode = promo.length > 0 ? promo[0].promo : undefined;
+    const promoCode = promo?.length > 0 ? promo[0].promo : undefined;
 
     try {
       setError(undefined);
