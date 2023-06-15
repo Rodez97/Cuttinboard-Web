@@ -29,6 +29,7 @@ import {
   privacyLevelToString,
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
+import { useMediaQuery } from "@react-hook/media-query";
 dayjs.extend(LocalizedFormat);
 
 export default () => {
@@ -39,6 +40,7 @@ export default () => {
   const { ManageConvDialog, newConversation, editConversation } =
     useManageConvs();
   const { ConvManageMembers, openDialog } = useManageMembers();
+  const matches = useMediaQuery("only screen and (max-width: 430px)");
 
   const sortedConversations = useMemo(() => {
     if (!conversations) {
@@ -191,7 +193,7 @@ export default () => {
           onClick={newConversation}
           icon={<PlusOutlined />}
         >
-          {t("New Message Board")}
+          {matches ? t("Add") : t("New Message Board")}
         </Button>
 
         <Input.Search

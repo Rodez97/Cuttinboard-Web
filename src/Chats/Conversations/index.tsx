@@ -14,22 +14,28 @@ import ConversationsMain from "./ConversationsMain";
 import { Route, Routes, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
+import { useDrawerSider } from "../../shared/organisms/useDrawerSider";
 
 export default () => {
   usePageTitle("My Message Boards");
   const { t } = useTranslation();
+  const { DrawerSider, DrawerHeaderControl } = useDrawerSider();
 
   return (
     <ConversationsProvider>
+      <DrawerHeaderControl title={t("My Message Boards")} />
       <Layout hasSider>
-        <Layout.Sider
+        <DrawerSider>
+          <ConversationsList />
+        </DrawerSider>
+        {/* <Layout.Sider
           width={250}
           breakpoint="lg"
           collapsedWidth="0"
           className="module-sider"
         >
           <ConversationsList />
-        </Layout.Sider>
+        </Layout.Sider> */}
         <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
           <Routes>
             <Route path=":conversationId" element={<Main />} />

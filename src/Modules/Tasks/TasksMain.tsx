@@ -3,7 +3,6 @@ import { jsx } from "@emotion/react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Button,
   Card,
   Divider,
   Input,
@@ -42,6 +41,7 @@ import ErrorPage from "../../shared/molecules/PageError";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
 import PeriodicTasksList from "./PeriodicTasksList";
+import PageHeaderButtons from "../../shared/molecules/PageHeaderButtons";
 
 export default function TasksMain() {
   const { t } = useTranslation();
@@ -157,19 +157,32 @@ export default function TasksMain() {
       <GrayPageHeader
         title={upperFirst(dayjs().format("dddd, MMMM D YYYY"))}
         extra={
-          role <= RoleAccessLevels.MANAGER && (
-            <Space>
-              <Button icon={<PlusCircleOutlined />} onClick={addBlock}>
-                {t("New Task List")}
-              </Button>
-              <Button
-                icon={<ClockCircleOutlined />}
-                onClick={openPeriodicTasks}
-              >
-                {t("Recurring Tasks")}
-              </Button>
-            </Space>
-          )
+          <PageHeaderButtons
+            items={[
+              {
+                key: "newShiftTasks",
+                icon: <ClearOutlined />,
+                onClick: startNewShift,
+                label: t("Start New Shift"),
+                hidden: !canUse,
+                type: "primary",
+              },
+              {
+                key: "newTasksList",
+                icon: <PlusCircleOutlined />,
+                onClick: addBlock,
+                label: t("New Task List"),
+                hidden: role > RoleAccessLevels.MANAGER,
+              },
+              {
+                key: "recurringTasks",
+                icon: <ClockCircleOutlined />,
+                onClick: openPeriodicTasks,
+                label: t("Recurring Tasks"),
+                hidden: role > RoleAccessLevels.MANAGER,
+              },
+            ]}
+          />
         }
       />
       <Space css={{ marginBottom: 20, padding: "10px 20px" }}>
@@ -180,15 +193,6 @@ export default function TasksMain() {
           value={searchText}
           css={{ width: 200 }}
         />
-        {canUse && (
-          <Button
-            icon={<ClearOutlined />}
-            onClick={startNewShift}
-            type="primary"
-          >
-            {t("Start New Shift")}
-          </Button>
-        )}
       </Space>
       <Layout.Content
         css={{

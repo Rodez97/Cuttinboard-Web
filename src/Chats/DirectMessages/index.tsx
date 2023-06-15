@@ -15,22 +15,28 @@ import { Route, Routes, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import { IEmployee } from "@cuttinboard-solutions/types-helpers";
+import { useDrawerSider } from "../../shared/organisms/useDrawerSider";
 
 export default ({ employees }: { employees?: IEmployee[] }) => {
   usePageTitle("Direct Messages");
   const { t } = useTranslation();
+  const { DrawerSider, DrawerHeaderControl } = useDrawerSider();
 
   return (
     <DirectMessagesProvider>
+      <DrawerHeaderControl title={t("Direct Messages")} />
       <Layout hasSider>
-        <Layout.Sider
+        <DrawerSider>
+          <DMList employees={employees} />
+        </DrawerSider>
+        {/* <Layout.Sider
           width={250}
           breakpoint="lg"
           collapsedWidth="0"
           className="module-sider"
         >
           <DMList employees={employees} />
-        </Layout.Sider>
+        </Layout.Sider> */}
         <Layout.Content css={{ display: "flex", flexDirection: "column" }}>
           <Routes>
             <Route path=":dmId" element={<Main />} />

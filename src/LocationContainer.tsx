@@ -8,7 +8,7 @@ import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
-import { Badge, Button, Layout, Menu, MenuProps } from "antd";
+import { Badge, Button, Drawer, Layout, Menu, MenuProps } from "antd";
 import { useTranslation } from "react-i18next";
 import Icon, { ArrowLeftOutlined } from "@ant-design/icons";
 import {
@@ -22,6 +22,10 @@ import {
   roleToString,
 } from "@cuttinboard-solutions/types-helpers";
 import { LoadingPage } from "./shared";
+import { useMediaQuery } from "@react-hook/media-query";
+import mdiMenu from "@mdi/svg/svg/menu.svg";
+import mdiCloseDrawer from "@mdi/svg/svg/backburger.svg";
+import { StyledContent } from "./Dashboard/Dashboard";
 
 const Forum = lazy(() => import("@mdi/svg/svg/forum.svg"));
 const mdiMessageCogOutline = lazy(() => import("@mdi/svg/svg/message-cog.svg"));
@@ -73,6 +77,8 @@ export default () => {
     getTotalScheduleBadges,
   } = useNotifications();
   const checkPermission = useLocationPermissions();
+  const matches = useMediaQuery("only screen and (max-width: 600px)");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     import("firebase/analytics").then(
@@ -166,10 +172,16 @@ export default () => {
   return (
     <Layout>
       <DarkPageHeader
-        onBack={() => navigate("/dashboard", { replace: true })}
-        backIcon={<ArrowLeftOutlined />}
+        onBack={() =>
+          matches
+            ? setDrawerOpen(true)
+            : navigate("/dashboard", { replace: true })
+        }
+        backIcon={
+          matches ? <Icon component={mdiMenu} /> : <ArrowLeftOutlined />
+        }
         title={location.name}
-        subTitle={t(roleToString(role))}
+        subTitle={!matches && t(roleToString(role))}
         extra={[
           <Badge
             key="my-shifts"
@@ -218,25 +230,64 @@ export default () => {
         ]}
       />
 
-      <Layout hasSider>
-        <Layout.Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-          css={{ height: "100%", backgroundColor: "#121432 !important" }}
+      {matches && (
+        <Drawer
+          title={
+            <span
+              css={{
+                color: "white",
+              }}
+            >
+              {location.name}
+            </span>
+          }
+          closeIcon={
+            <Icon
+              component={mdiCloseDrawer}
+              css={{ color: "white", fontSize: 24 }}
+            />
+          }
+          placement="left"
+          onClose={() => setDrawerOpen(false)}
+          open={drawerOpen}
+          css={{ backgroundColor: "#121432 !important" }}
+          width={280}
         >
           <Menu
             mode="inline"
             items={sidebarItems}
             onSelect={({ key }) => {
               navigate(key, { replace: true });
+              setDrawerOpen(false);
             }}
             selectedKeys={[pathname.split("/")[2]]}
             theme="dark"
             css={{ backgroundColor: "#121432" }}
           />
-        </Layout.Sider>
-        <Layout.Content css={{ display: "flex" }}>
+        </Drawer>
+      )}
+
+      <Layout hasSider>
+        {!matches && (
+          <Layout.Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={(value) => setCollapsed(value)}
+            css={{ height: "100%", backgroundColor: "#121432 !important" }}
+          >
+            <Menu
+              mode="inline"
+              items={sidebarItems}
+              onSelect={({ key }) => {
+                navigate(key, { replace: true });
+              }}
+              selectedKeys={[pathname.split("/")[2]]}
+              theme="dark"
+              css={{ backgroundColor: "#121432" }}
+            />
+          </Layout.Sider>
+        )}
+        <StyledContent>
           <Suspense fallback={<LoadingPage />}>
             <Routes>
               {role <= 3 && [
@@ -284,7 +335,7 @@ export default () => {
               />
             </Routes>
           </Suspense>
-        </Layout.Content>
+        </StyledContent>
       </Layout>
     </Layout>
   );

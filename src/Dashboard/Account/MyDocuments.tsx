@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import Icon, {
   DeleteFilled,
   DownloadOutlined,
@@ -64,8 +64,6 @@ function MyDocuments() {
 
       // List all files in the user's storage location
       const userResult = await listAll(userStorageRef);
-
-      console.log(userResult.items);
 
       // Set the userFiles state variable with the files from the user's storage location
       setUserFiles(userResult.items);
@@ -163,12 +161,15 @@ function MyDocuments() {
       <GrayPageHeader title={t("My Documents")} />
       <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
         <div
-          css={{
-            minWidth: 270,
-            maxWidth: 500,
-            margin: "auto",
-            width: "100%",
-          }}
+          css={css`
+            min-width: 200px;
+            max-width: 500px;
+            margin: auto;
+            width: 100%;
+            @media (max-width: 575px) {
+              max-width: calc(100vw - 40px);
+            }
+          `}
         >
           <Alert
             type="warning"
@@ -268,10 +269,15 @@ function MyDocuments() {
               },
             ]}
             size="small"
-            css={{
-              minWidth: 500,
-              margin: "auto",
-            }}
+            css={css`
+              min-width: 500px;
+              margin: auto;
+              @media (max-width: 575px) {
+                max-width: calc(100vw - 40px);
+                width: 100%;
+                min-width: auto;
+              }
+            `}
             pagination={false}
             sticky
           />

@@ -18,6 +18,7 @@ export const AddLocationContent = styled(Layout.Content)`
 export const AddLocationHeader = styled(Layout.Header)`
   background-color: transparent !important;
   text-align: center;
+  height: auto !important;
 `;
 
 export const SummaryNewLocationContainer = styled.div`

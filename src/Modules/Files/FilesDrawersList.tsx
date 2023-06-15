@@ -20,6 +20,7 @@ import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
 import { RoleAccessLevels } from "@cuttinboard-solutions/types-helpers";
+import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 export default () => {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export default () => {
   const { role } = useCuttinboardLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const { baseRef, newModule } = useManageModule();
+  const { setDrawerOpen } = useDrawerSiderContext();
 
   const menuItems = useMemo((): MenuProps["items"] => {
     const sorted = boards
@@ -98,7 +100,10 @@ export default () => {
       <div className="module-sider-menu-container">
         <Menu
           items={menuItems}
-          onSelect={({ key }) => navigate(key, { replace: true })}
+          onSelect={({ key }) => {
+            navigate(key, { replace: true });
+            setDrawerOpen(false);
+          }}
           selectedKeys={selectedBoard ? [selectedBoard.id] : []}
           className="module-sider-menu"
         />

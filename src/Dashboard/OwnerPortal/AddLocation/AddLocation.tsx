@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -37,6 +37,7 @@ import {
   gmValidationSchema,
   ILocationInfo,
 } from "./NewLocationTypes";
+import { useMediaQuery } from "@react-hook/media-query";
 
 type AddLocationFunctionResult =
   | {
@@ -56,6 +57,7 @@ function AddLocation() {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { organization } = useDashboard();
+  const matches = useMediaQuery("only screen and (max-width: 955px)");
 
   const onFinish = async (values: LocFormType) => {
     const { generalManager, ...location } = values;
@@ -122,11 +124,14 @@ function AddLocation() {
       onFinish={onFinish}
       size="small"
       autoComplete="off"
-      css={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-      }}
+      css={css`
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        @media (max-width: 900px) {
+          overflow: auto;
+        }
+      `}
       disabled={isLoading}
     >
       <AddLocationWrapper>
@@ -152,14 +157,19 @@ function AddLocation() {
             }}
           >
             <Space
-              wrap
-              css={{
-                justifyContent: "space-evenly",
-                display: "flex",
-                alignItems: "flex-start",
-              }}
+              css={css`
+                justify-content: space-evenly;
+                display: flex;
+                align-items: flex-start;
+                @media (max-width: 900px) {
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  overflow: auto;
+                }
+              `}
             >
-              <Form.Item css={{ minWidth: 280 }}>
+              <Form.Item css={{ minWidth: 200 }}>
                 <Divider orientation="left">{t("Information")}</Divider>
                 <Input.Group size="small">
                   <Form.Item
@@ -176,7 +186,7 @@ function AddLocation() {
                 </Input.Group>
               </Form.Item>
 
-              <Form.Item css={{ minWidth: 280 }}>
+              <Form.Item css={{ minWidth: 200 }}>
                 <Divider orientation="left">{t("Address")}</Divider>
                 <Input.Group>
                   <Form.Item
@@ -197,7 +207,7 @@ function AddLocation() {
                 </Input.Group>
               </Form.Item>
 
-              <Form.Item css={{ minWidth: 280 }}>
+              <Form.Item css={{ minWidth: 200 }}>
                 <Divider orientation="left">{t("General Manager")}</Divider>
                 <Form.Item>
                   <Checkbox
@@ -279,7 +289,13 @@ function AddLocation() {
         </AddLocationContent>
 
         <Layout.Footer>
-          <Space css={{ display: "flex", justifyContent: "space-between" }}>
+          <Space
+            css={
+              matches
+                ? { display: "flex", flexDirection: "column" }
+                : { display: "flex", justifyContent: "space-between" }
+            }
+          >
             <NewLocationSummary />
             <Space
               direction="vertical"

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -40,6 +40,7 @@ import {
   LocFormType,
 } from "../OwnerPortal/AddLocation/NewLocationTypes";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { useMediaQuery } from "@react-hook/media-query";
 
 function AddFirstLocation() {
   const { user } = useCuttinboard();
@@ -49,6 +50,7 @@ function AddFirstLocation() {
   const [addGM, setAddGM] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const matches = useMediaQuery("only screen and (max-width: 955px)");
   const [price, loadingPrice, priceError] = useDocumentDataOnce(
     doc(
       FIRESTORE,
@@ -62,7 +64,7 @@ function AddFirstLocation() {
   const confirm = async (values: LocFormType) => {
     const { generalManager, promo, ...location } = values;
 
-    const promoCode = promo.length > 0 ? promo[0].promo : undefined;
+    const promoCode = promo?.length > 0 ? promo[0].promo : undefined;
 
     try {
       setIsLoading(true);
@@ -141,11 +143,14 @@ function AddFirstLocation() {
       onFinish={confirm}
       size="small"
       autoComplete="off"
-      css={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-      }}
+      css={css`
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        @media (max-width: 900px) {
+          overflow: auto;
+        }
+      `}
       disabled={isLoading}
     >
       <AddLocationWrapper>
@@ -171,14 +176,19 @@ function AddFirstLocation() {
             }}
           >
             <Space
-              wrap
-              css={{
-                justifyContent: "space-evenly",
-                display: "flex",
-                alignItems: "flex-start",
-              }}
+              css={css`
+                justify-content: space-evenly;
+                display: flex;
+                align-items: flex-start;
+                @media (max-width: 900px) {
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  overflow: auto;
+                }
+              `}
             >
-              <Form.Item css={{ minWidth: 280 }}>
+              <Form.Item css={{ minWidth: 200 }}>
                 <Divider orientation="left">{t("Information")}</Divider>
                 <Space.Compact
                   size="small"
@@ -201,7 +211,7 @@ function AddFirstLocation() {
                 </Space.Compact>
               </Form.Item>
 
-              <Form.Item css={{ minWidth: 280 }}>
+              <Form.Item css={{ minWidth: 200 }}>
                 <Divider orientation="left">{t("Address")}</Divider>
                 <Space.Compact
                   direction="vertical"
@@ -228,7 +238,7 @@ function AddFirstLocation() {
                 </Space.Compact>
               </Form.Item>
 
-              <Form.Item css={{ minWidth: 280 }}>
+              <Form.Item css={{ minWidth: 200 }}>
                 <Divider orientation="left">{t("General Manager")}</Divider>
                 <Form.Item>
                   <Checkbox
@@ -312,11 +322,17 @@ function AddFirstLocation() {
         </AddLocationContent>
 
         <Layout.Footer>
-          <Space css={{ display: "flex", justifyContent: "space-between" }}>
+          <Space
+            css={
+              matches
+                ? { display: "flex", flexDirection: "column" }
+                : { display: "flex", justifyContent: "space-between" }
+            }
+          >
             <FirstLocationSummary price={price} />
             <Space
               direction="vertical"
-              css={{ justifyContent: "center", display: "flex", width: 300 }}
+              css={{ justifyContent: "center", display: "flex", width: 250 }}
             >
               <Form.List name="promo">
                 {(fields, { add, remove }) => (

@@ -9,6 +9,7 @@
   "auth/too-many-requests": "El acceso a esta cuenta se ha inhabilitado temporalmente debido a muchos intentos fallidos de inicio de sesión. Puede restaurarlo inmediatamente restableciendo su contraseña o puede volver a intentarlo más tarde",
   "auth/account-exists-with-different-credential": "Este número ya está asociado con otra cuenta",
   "auth/invalid-phone-number": "Número de teléfono inválido",
+  "functions/failed-precondition": "El email ya está en uso",
   "Cannot read properties of undefined (reading 'toLowerCase')": "No ha introducido un email",
   "PUBLIC": "Abierta para todos",
   "POSITIONS": "Ligada a una posición",
@@ -844,12 +845,13 @@
   "Do you have a promo code?": "¿Tienes un código promocional?",
   "You are about to create your first location!": "Estás a punto de crear tu primera locación!",
   "Confirm": "Confirmar",
-  "The promo code does not exist or has expired!": "El código promocional no existe, o ha expirado",
+  "The promo code does not exist or has expired!": "El código promocional no existe o ha expirado",
   "{{0}} off forever": "{{0}} de descuento de por vida",
   "{{0}} off for the first month": "{{0}} de descuento el primer mes",
   "{{0}} off for {{1}} months": "{{0}} de descuento por {{1}} meses",
   "{{0}}% off forever": "{{0}}% de descuento de por vida",
   "{{0}}% off for the first month": "{{0}}% de descuento el primer mes",
   "{{0}}% off for {{1}} months": "{{0}}% de descuento por {{1}} meses",
-  "Add General Manager": "Agregar Gerente General"
+  "Add General Manager": "Agregar Gerente General",
+  "View more": "Ver más"
 }

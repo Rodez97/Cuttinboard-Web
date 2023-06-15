@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
+import { css, jsx } from "@emotion/react";
 import dayjs from "dayjs";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,16 @@ import ScheduleSummaryElement from "./ScheduleSummaryElement";
 import WeekNavigator from "./WeekNavigator";
 import EmpColumnCell from "./EmpColumnCell";
 import ShiftCell from "./ShiftCell";
-import { Button, Input, Layout, Select } from "antd/es";
+import { Input, Layout, Select } from "antd/es";
 import TableFooter from "./TableFooter";
-import { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
+import {
+  FilePdfOutlined,
+  FundProjectionScreenOutlined,
+  InfoCircleOutlined,
+  ScheduleOutlined,
+  SettingOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import "./Scheduler.scss";
 import "./ShiftTable.scss";
 import ManageShiftDialog, { IManageShiftDialogRef } from "./ManageShiftDialog";
@@ -23,6 +30,8 @@ import {
   EmployeeShifts,
   checkShiftArrayChanges,
   useCuttinboardLocation,
+  useDisclose,
+  useLocationPermissions,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import ShowLegend from "./ShowLegend";
@@ -36,12 +45,13 @@ import {
   IShift,
   RoleAccessLevels,
 } from "@cuttinboard-solutions/types-helpers";
-import ProjectedSalesBtn from "./ProjectedSalesBtn";
-import GeneratePdfBtn from "./GeneratePdfBtn";
-import CloneScheduleBtn from "./CloneScheduleBtn";
-import ScheduleSettingsBtn from "./ScheduleSettingsBtn";
+import useGeneratePdfBtn from "./GeneratePdfBtn";
 import PublishScheduleBtn from "./PublishScheduleBtn";
 import ThisWeekTag from "./ThisWeekTag";
+import PageHeaderButtons from "../../shared/molecules/PageHeaderButtons";
+import ProjectedSalesDialog from "./ProjectedSalesDialog";
+import CloneSchedule from "./CloneSchedule";
+import ScheduleSettings from "../Settings/ScheduleSettings";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);
 dayjs.extend(isToday);
@@ -63,6 +73,11 @@ function Scheduler() {
   const [searchQuery, setSearchQuery] = useState("");
   const [position, setPosition] = useState("");
   const manageShiftDialogRef = useRef<IManageShiftDialogRef>(null);
+  const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
+  const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
+  const { generatePdf, generatingPDF } = useGeneratePdfBtn();
+  const checkPermission = useLocationPermissions();
+  const [isSettingsOpen, openSettings, closeSettings] = useDisclose(false);
 
   const openNew = (employee: IEmployee, date: dayjs.Dayjs) => {
     manageShiftDialogRef.current?.openNew(employee, date);
@@ -123,19 +138,59 @@ function Scheduler() {
       <GrayPageHeader
         backIcon={<InfoCircleOutlined />}
         onBack={ShowLegend}
-        title={t("Schedule")}
-        extra={[
-          <ProjectedSalesBtn key="projectedSales" />,
-          <GeneratePdfBtn key="generatePdf" />,
-          <CloneScheduleBtn key="clone" />,
-          <Button
-            key="2"
-            icon={<TeamOutlined />}
-            onClick={() => navigate("roster")}
+        title={
+          <span
+            css={css`
+              @media (max-width: 625px) {
+                display: none;
+              }
+            `}
           >
-            {t("See Roster")}
-          </Button>,
-          <ScheduleSettingsBtn key="settings" />,
+            {t("Schedule")}
+          </span>
+        }
+        extra={[
+          <PageHeaderButtons
+            key="pageHeaderButtons"
+            mediaQuery="only screen and (max-width: 1280px)"
+            items={[
+              {
+                key: "projectedSales",
+                icon: <FundProjectionScreenOutlined />,
+                onClick: () => setProjectedSalesOpen(true),
+                label: t("Projected Sales"),
+                type: "dashed",
+              },
+              {
+                key: "generatePdf",
+                icon: <FilePdfOutlined />,
+                onClick: generatePdf,
+                label: t("Generate PDF"),
+                loading: generatingPDF,
+                type: "dashed",
+              },
+              {
+                key: "clone",
+                icon: <ScheduleOutlined />,
+                onClick: () => setCloneDialogOpen(true),
+                label: t("Clone Schedule"),
+                type: "dashed",
+              },
+              {
+                key: "navigateRoster",
+                icon: <TeamOutlined />,
+                onClick: () => navigate("roster"),
+                label: t("See Roster"),
+              },
+              {
+                key: "settings",
+                icon: <SettingOutlined />,
+                onClick: openSettings,
+                label: t("Settings"),
+                hidden: !checkPermission("manageScheduleSettings"),
+              },
+            ]}
+          />,
           <PublishScheduleBtn key="publish" />,
         ]}
         tags={[<ThisWeekTag key="thisWeek" />]}
@@ -237,6 +292,17 @@ function Scheduler() {
       </Layout.Content>
 
       <ManageShiftDialog ref={manageShiftDialogRef} />
+      <ProjectedSalesDialog
+        visible={projectedSalesOpen}
+        onClose={() => setProjectedSalesOpen(false)}
+      />
+      <CloneSchedule
+        open={cloneDialogOpen}
+        onCancel={() => setCloneDialogOpen(false)}
+      />
+      {checkPermission("manageScheduleSettings") && (
+        <ScheduleSettings open={isSettingsOpen} onClose={closeSettings} />
+      )}
     </Layout>
   );
 }

@@ -1,3 +1,5 @@
+/** @jsx jsx */
+import { css, jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 import { Select } from "antd/es";
 import React from "react";
@@ -14,9 +16,12 @@ export function PositionSelect({
   return (
     <Select
       showSearch
-      style={{
-        width: 200,
-      }}
+      css={css`
+        width: 200px;
+        @media (max-width: 1125px) {
+          display: none;
+        }
+      `}
       onSelect={onSelect}
       onClear={() => onSelect(null)}
       placeholder={t("Filter by position")}

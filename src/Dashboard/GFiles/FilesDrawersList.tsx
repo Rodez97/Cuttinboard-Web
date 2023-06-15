@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import FilesCounter from "./FilesCounter";
 import ManageBoard, { useManageBoard } from "../ManageBoard";
 import { useGBoard } from "@cuttinboard-solutions/cuttinboard-library";
+import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 export default () => {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ export default () => {
   const { selectedBoard, boards } = useGBoard();
   const [searchQuery, setSearchQuery] = useState("");
   const { baseRef, newBoard } = useManageBoard();
+  const { setDrawerOpen } = useDrawerSiderContext();
 
   const menuItems = useMemo((): MenuProps["items"] => {
     const sorted = boards
@@ -51,7 +53,10 @@ export default () => {
       <div className="module-sider-menu-container">
         <Menu
           items={menuItems}
-          onSelect={({ key }) => navigate(key, { replace: true })}
+          onSelect={({ key }) => {
+            navigate(key, { replace: true });
+            setDrawerOpen(false);
+          }}
           selectedKeys={selectedBoard ? [selectedBoard.id] : []}
           className="module-sider-menu"
         />

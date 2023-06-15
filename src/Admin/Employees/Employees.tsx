@@ -3,16 +3,7 @@ import { jsx } from "@emotion/react";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import EmployeeCard from "./EmployeeCard";
-import {
-  Button,
-  Divider,
-  Input,
-  Layout,
-  List,
-  Modal,
-  Space,
-  Tooltip,
-} from "antd/es";
+import { Button, Divider, Input, Layout, List, Modal, Space } from "antd/es";
 import {
   ExclamationCircleOutlined,
   TagOutlined,
@@ -39,6 +30,7 @@ import {
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
+import PageHeaderButtons from "../../shared/molecules/PageHeaderButtons";
 
 function Employees() {
   const { location, role } = useCuttinboardLocation();
@@ -126,34 +118,32 @@ function Employees() {
       <GrayPageHeader
         title={t("Employees")}
         subTitle={`${usage.employeesCount} / ${usage.employeesLimit}`}
-        extra={[
-          role < RoleAccessLevels.MANAGER && (
-            <Button
-              key="ManagePositions"
-              icon={<TagOutlined />}
-              onClick={() => setManagePositionsOpen(true)}
-              type="primary"
-            >
-              {t("Manage Positions")}
-            </Button>
-          ),
-          <Tooltip
-            key="1"
-            title={
-              usage.employeesCount === usage.employeesLimit &&
-              t("Limit Reached")
-            }
-          >
-            <Button
-              icon={<UserAddOutlined />}
-              onClick={openCreateEmployee}
-              type="primary"
-              disabled={usage.employeesCount === usage.employeesLimit}
-            >
-              {t("Add Employee")}
-            </Button>
-          </Tooltip>,
-        ]}
+        extra={
+          <PageHeaderButtons
+            items={[
+              {
+                key: "ManagePositions",
+                icon: <TagOutlined />,
+                onClick: () => setManagePositionsOpen(true),
+                label: t("Manage Positions"),
+                hidden: role >= RoleAccessLevels.MANAGER,
+                type: "primary",
+              },
+              {
+                key: "AddEmployee",
+                icon: <UserAddOutlined />,
+                onClick: openCreateEmployee,
+                label: t("Add Employee"),
+                disabled: usage.employeesCount === usage.employeesLimit,
+                tooltip:
+                  usage.employeesCount !== usage.employeesLimit
+                    ? t("Limit Reached")
+                    : undefined,
+                type: "primary",
+              },
+            ]}
+          />
+        }
       />
       <Space
         align="center"

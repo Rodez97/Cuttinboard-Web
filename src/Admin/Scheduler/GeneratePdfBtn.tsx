@@ -1,17 +1,16 @@
-import { FilePdfOutlined } from "@ant-design/icons";
 import {
   useCuttinboardLocation,
   useSchedule,
 } from "@cuttinboard-solutions/cuttinboard-library";
-import { Button, message } from "antd/es";
-import React, { useCallback, useState } from "react";
+import { message } from "antd/es";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 import { generateSchedulePdf } from "./NewPDF";
 import { recordError } from "../../utils/utils";
 import { getTotalWageData } from "@cuttinboard-solutions/types-helpers";
 
-function GeneratePdfBtn() {
+function useGeneratePdfBtn() {
   const { t } = useTranslation();
   const { location, scheduleSettings } = useCuttinboardLocation();
   const { weekId, employeeShifts, weekDays, loading, shifts } = useSchedule();
@@ -50,17 +49,10 @@ function GeneratePdfBtn() {
     t,
   ]);
 
-  return (
-    <Button
-      onClick={generatePdf}
-      icon={<FilePdfOutlined />}
-      key="generatePdf"
-      type="dashed"
-      loading={loading || generatingPDF}
-    >
-      {t("Generate PDF")}
-    </Button>
-  );
+  return {
+    generatePdf,
+    generatingPDF: generatingPDF || loading,
+  };
 }
 
-export default GeneratePdfBtn;
+export default useGeneratePdfBtn;

@@ -22,6 +22,7 @@ import {
   IEmployee,
   Sender,
 } from "@cuttinboard-solutions/types-helpers";
+import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 interface IDMItem {
   chat: IDirectMessage;
@@ -141,6 +142,7 @@ const DMListItem = ({ chat, recipient }: IDMItem) => {
   const navigate = useNavigate();
   const { selectedDirectMessage } = useDirectMessageChat();
   const { getDMBadgesById } = useNotifications();
+  const { setDrawerOpen } = useDrawerSiderContext();
 
   const badges = useMemo(
     () => getDMBadgesById(chat.id),
@@ -150,8 +152,9 @@ const DMListItem = ({ chat, recipient }: IDMItem) => {
   const selectActiveDM = useCallback(
     (chatId: string) => () => {
       navigate(chatId);
+      setDrawerOpen(false);
     },
-    [navigate]
+    [navigate, setDrawerOpen]
   );
 
   return (

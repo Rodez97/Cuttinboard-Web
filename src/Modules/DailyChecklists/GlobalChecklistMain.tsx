@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { ClearOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { Button, Layout, Modal, Space } from "antd/es";
+import { Layout, Modal, Space } from "antd/es";
 import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader, DraggableList, LoadingPage } from "../../shared";
@@ -19,6 +19,7 @@ import {
 } from "@cuttinboard-solutions/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
+import PageHeaderButtons from "../../shared/molecules/PageHeaderButtons";
 
 export default function GlobalChecklistMain() {
   const { t } = useTranslation();
@@ -104,20 +105,26 @@ export default function GlobalChecklistMain() {
         title={t("Daily Checklists")}
         subTitle={getSummaryText}
         extra={
-          canWrite && (
-            <Space>
-              <Button
-                onClick={addBlock}
-                icon={<PlusCircleOutlined />}
-                type="primary"
-              >
-                {t("New Task List")}
-              </Button>
-              <Button onClick={resetTasks} icon={<ClearOutlined />} danger>
-                {t("Clear All")}
-              </Button>
-            </Space>
-          )
+          <PageHeaderButtons
+            items={[
+              {
+                key: "newTasksList",
+                icon: <PlusCircleOutlined />,
+                onClick: addBlock,
+                label: t("New Task List"),
+                hidden: !canWrite,
+                type: "primary",
+              },
+              {
+                key: "clearAllTasks",
+                icon: <ClearOutlined />,
+                onClick: resetTasks,
+                label: t("Clear All"),
+                danger: true,
+                hidden: !canWrite,
+              },
+            ]}
+          />
         }
       />
 

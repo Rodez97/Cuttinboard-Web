@@ -3,7 +3,7 @@ import { jsx } from "@emotion/react";
 import AllWhiteLogo from "../assets/images/allWhiteLogo.svg";
 import { useMemo, useState } from "react";
 import DashboardRouter from "./DashboardRouter";
-import { Badge, Button, Layout, Menu, MenuProps, Tag } from "antd/es";
+import { Alert, Badge, Button, Drawer, Layout, Menu, MenuProps } from "antd/es";
 import { useDashboard } from "./DashboardProvider";
 import {
   useNavigate,
@@ -19,6 +19,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import mdiNotes from "@mdi/svg/svg/note-multiple.svg";
 import mdiFiles from "@mdi/svg/svg/folder-home.svg";
 import mdiMyShifts from "@mdi/svg/svg/account-clock.svg";
+import mdiCloseDrawer from "@mdi/svg/svg/backburger.svg";
+import mdiMenu from "@mdi/svg/svg/menu.svg";
 import mdiDashboard from "@mdi/svg/svg/view-dashboard.svg";
 import mdiPublic from "@mdi/svg/svg/earth.svg";
 import mdiLocations from "@mdi/svg/svg/home-group.svg";
@@ -31,12 +33,12 @@ import {
   useNotifications,
 } from "@cuttinboard-solutions/cuttinboard-library";
 import VerifyEmailBanner from "../shared/organisms/VerifyEmailBanner";
+import { useMediaQuery } from "@react-hook/media-query";
 dayjs.extend(relativeTime);
 
 const { Content, Sider } = Layout;
 
-const StyledContent = styled(Content)`
-  min-width: 300px;
+export const StyledContent = styled(Content)`
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -54,6 +56,8 @@ export default () => {
     getTotalScheduleBadges,
   } = useNotifications();
   const [collapsed, setCollapsed] = useState(false);
+  const matches = useMediaQuery("only screen and (max-width: 570px)");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const { OptionsRoutes, OwnerRoute, GlobalBoardRoute, BillingRoute } =
     useMemo(() => {
@@ -145,30 +149,45 @@ export default () => {
   return (
     <Layout>
       {!user.emailVerified && <VerifyEmailBanner />}
+
+      {getTrialDays && (
+        <Alert
+          message={t("Trial ends in {{0}}", {
+            0: getTrialDays,
+          })}
+          type="error"
+          banner
+          icon={<ClockCircleOutlined />}
+          css={{
+            // Volcano color
+            color: "#cf1322",
+          }}
+        />
+      )}
+
       <DarkPageHeader
         title={
-          <AllWhiteLogo
-            width={150}
-            css={{
-              display: "flex",
-            }}
-          />
+          matches ? (
+            <Button
+              icon={<Icon component={mdiMenu} />}
+              type={"text"}
+              shape="circle"
+              onClick={() => setDrawerOpen(true)}
+              size="large"
+            />
+          ) : (
+            <AllWhiteLogo
+              width={150}
+              css={{
+                display: "flex",
+              }}
+            />
+          )
         }
         subTitle={
           Boolean(userDocument?.subscriptionId) && (
             <OwnerGoldTag>OWNER</OwnerGoldTag>
           )
-        }
-        tags={
-          getTrialDays
-            ? [
-                <Tag key="trial" icon={<ClockCircleOutlined />} color="volcano">
-                  {t("Trial ends in {{0}}", {
-                    0: getTrialDays,
-                  })}
-                </Tag>,
-              ]
-            : undefined
         }
         extra={[
           <Badge
@@ -219,22 +238,62 @@ export default () => {
           <UserMenu key="userMenu" />,
         ]}
       />
-      <Layout hasSider>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-          css={{ height: "100%", backgroundColor: "#121432 !important" }}
+
+      {matches && (
+        <Drawer
+          title={
+            <AllWhiteLogo
+              width={150}
+              css={{
+                display: "flex",
+              }}
+            />
+          }
+          closeIcon={
+            <Icon
+              component={mdiCloseDrawer}
+              css={{ color: "white", fontSize: 24 }}
+            />
+          }
+          placement="left"
+          onClose={() => setDrawerOpen(false)}
+          open={drawerOpen}
+          css={{ backgroundColor: "#121432 !important" }}
+          width={280}
         >
           <Menu
             theme="dark"
             mode="inline"
             selectedKeys={[pathname.split("/")[2]]}
             items={routes}
-            onSelect={({ key }) => navigate(key, { replace: true })}
+            onSelect={({ key }) => {
+              navigate(key, { replace: true });
+              setDrawerOpen(false);
+            }}
             css={{ backgroundColor: "#121432" }}
           />
-        </Sider>
+        </Drawer>
+      )}
+
+      <Layout hasSider={!matches}>
+        {!matches && (
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={(value) => setCollapsed(value)}
+            css={{ height: "100%", backgroundColor: "#121432 !important" }}
+          >
+            <Menu
+              theme="dark"
+              mode="inline"
+              selectedKeys={[pathname.split("/")[2]]}
+              items={routes}
+              onSelect={({ key }) => navigate(key, { replace: true })}
+              css={{ backgroundColor: "#121432" }}
+            />
+          </Sider>
+        )}
+
         <StyledContent>
           <DashboardRouter />
         </StyledContent>

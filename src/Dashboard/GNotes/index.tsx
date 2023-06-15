@@ -11,22 +11,28 @@ import usePageTitle from "../../hooks/usePageTitle";
 import { GBoardProvider } from "@cuttinboard-solutions/cuttinboard-library";
 import { recordError } from "../../utils/utils";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
+import { useDrawerSider } from "../../shared/organisms/useDrawerSider";
 
 export default () => {
   const { t } = useTranslation();
   usePageTitle("Global Notes");
+  const { DrawerSider, DrawerHeaderControl } = useDrawerSider();
 
   return (
     <GBoardProvider boardCollection="notes" onError={recordError}>
+      <DrawerHeaderControl title={t("Global Notes")} />
       <Layout hasSider>
-        <Layout.Sider
+        <DrawerSider>
+          <NotesList />
+        </DrawerSider>
+        {/* <Layout.Sider
           width={250}
           breakpoint="lg"
           collapsedWidth="0"
           className="module-sider"
         >
           <NotesList />
-        </Layout.Sider>
+        </Layout.Sider> */}
         <Layout.Content>
           <Routes>
             <Route path="/">

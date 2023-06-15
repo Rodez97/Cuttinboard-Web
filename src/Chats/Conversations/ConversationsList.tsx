@@ -11,6 +11,7 @@ import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
 import ConversationListItem from "./ConversationListItem";
 import { useNavigate } from "react-router-dom";
 import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 export default () => {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ export default () => {
   const { conversations, activeConversation, loading, error } =
     useConversations();
   const [searchQuery, setSearchQuery] = useState("");
+  const { setDrawerOpen } = useDrawerSiderContext();
 
   const sortedConversations = useMemo(() => {
     if (!conversations) {
@@ -36,8 +38,9 @@ export default () => {
   const selectActiveConversation = useCallback(
     (conversation: IConversation) => {
       navigate(conversation.id);
+      setDrawerOpen(false);
     },
-    [navigate]
+    [navigate, setDrawerOpen]
   );
 
   if (loading) {

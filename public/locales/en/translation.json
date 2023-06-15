@@ -9,6 +9,7 @@
   "auth/too-many-requests": "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later",
   "auth/account-exists-with-different-credential": "This phone number is associated with another account",
   "auth/invalid-phone-number": "Invalid phone number",
+  "functions/failed-precondition": "Email already in use",
   "Cannot read properties of undefined (reading 'toLowerCase')": "No email entered",
   "PUBLIC": "Open to Everyone",
   "POSITIONS": "Linked to a position",

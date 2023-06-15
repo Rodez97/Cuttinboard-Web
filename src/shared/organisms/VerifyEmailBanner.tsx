@@ -1,6 +1,6 @@
 /** @jsx jsx */
-import { jsx } from "@emotion/react";
-import { Alert, Button, Modal, Space } from "antd/es";
+import { css, jsx } from "@emotion/react";
+import { Button, Modal, Space } from "antd/es";
 import axios from "axios";
 import { useSendEmailVerification } from "react-firebase-hooks/auth";
 import { useTranslation } from "react-i18next";
@@ -76,30 +76,55 @@ function VerifyEmailBanner() {
   };
 
   return (
-    <Alert
-      message={t(
-        "Verify Your Email Address, click the link in the email we sent you"
-      )}
-      type="info"
-      action={
-        <Space wrap>
-          <Button
-            size="small"
-            type="dashed"
-            onClick={sendVerificationEmail}
-            disabled={Boolean(count)}
-            loading={sending}
-          >
-            {count ? `${count}s` : t("Resend Verification Email")}
-          </Button>
-          <Button size="small" type="primary" onClick={handleContinue}>
-            {t("I've Verified My Email")}
-          </Button>
-        </Space>
-      }
-      showIcon
-      banner
-    />
+    <div
+      css={css`
+        background-color: #e6f4ff;
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 0;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding: 8px 12px;
+        margin: 0;
+        justify-content: space-between;
+        @media (max-width: 575px) {
+          flex-direction: column;
+        }
+      `}
+    >
+      <span
+        css={css`
+          @media (max-width: 575px) {
+            text-align: center;
+            margin-bottom: 8px;
+          }
+        `}
+      >
+        {t(
+          "Verify Your Email Address, click the link in the email we sent you"
+        )}
+      </span>
+      <Space
+        wrap
+        css={{
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Button
+          size="small"
+          type="dashed"
+          onClick={sendVerificationEmail}
+          disabled={Boolean(count)}
+          loading={sending}
+        >
+          {count ? `${count}s` : t("Resend Verification Email")}
+        </Button>
+        <Button size="small" type="primary" onClick={handleContinue} block>
+          {t("I've Verified My Email")}
+        </Button>
+      </Space>
+    </div>
   );
 }
 
