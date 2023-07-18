@@ -136,7 +136,7 @@ function Employees() {
                 label: t("Add Employee"),
                 disabled: usage.employeesCount === usage.employeesLimit,
                 tooltip:
-                  usage.employeesCount !== usage.employeesLimit
+                  usage.employeesCount >= usage.employeesLimit
                     ? t("Limit Reached")
                     : undefined,
                 type: "primary",
