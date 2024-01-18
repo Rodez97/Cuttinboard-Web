@@ -1,10 +1,8 @@
 import { GoogleSpreadsheet } from "google-spreadsheet";
-import sa from "./.cuttinboard-translations-SA.json" assert { type: "json" };
-
 import { readFileSync } from "fs";
 
-const _client_email = sa.client_email;
-const _private_key = sa.private_key;
+const _client_email = process.env.TRANSLATIONS_SA_CLIENT_EMAIL;
+const _private_key = process.env.TRANSLATIONS_SA_PRIVATE_KEY;
 
 //# Initialize the sheet
 const doc = new GoogleSpreadsheet(

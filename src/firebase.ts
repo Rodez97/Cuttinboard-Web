@@ -5,14 +5,14 @@ import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 // Firebase configuration object
 export const FIREBASE_CONFIG: FirebaseOptions = {
-  apiKey: "AIzaSyAfvaqijLqBAj8dou3yTbbzrUbO-8jT32k",
-  authDomain: "app.cuttinboard.com",
-  databaseURL: "https://cuttinboard-2021-default-rtdb.firebaseio.com",
-  projectId: "cuttinboard-2021",
-  storageBucket: "cuttinboard-2021.appspot.com",
-  messagingSenderId: "286988124291",
-  appId: "1:286988124291:web:114898298b49f9ab949bb6",
-  measurementId: "G-F2B7ZNZWD3",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize the Firebase app
