@@ -16,11 +16,8 @@ import {
   useCuttinboardLocation,
   useLocationPermissions,
   useNotifications,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  RoleAccessLevels,
-  roleToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { RoleAccessLevels, roleToString } from "@rodez97/types-helpers";
 import { LoadingPage } from "./shared";
 import { useMediaQuery } from "@react-hook/media-query";
 import mdiMenu from "@mdi/svg/svg/menu.svg";

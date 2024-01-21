@@ -1,4 +1,4 @@
-import { ITask } from "@cuttinboard-solutions/types-helpers";
+import { ITask } from "@rodez97/types-helpers";
 import React from "react";
 
 export const GeneratePDF = React.forwardRef<

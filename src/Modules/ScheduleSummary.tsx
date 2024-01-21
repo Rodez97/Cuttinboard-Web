@@ -6,7 +6,7 @@
 // import {
 //   minutesToTextDuration,
 //   useLocationPermissions,
-// } from "@cuttinboard-solutions/cuttinboard-library";
+// } from "@rodez97/cuttinboard-library";
 // import React from "react";
 
 // export default function ScheduleSummary({

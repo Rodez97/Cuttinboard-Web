@@ -4,8 +4,8 @@ import { NotFound } from "../../shared";
 import {
   getDirectMessageRecipient,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { IDirectMessage } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { IDirectMessage } from "@rodez97/types-helpers";
 
 export default ({
   selectedDirectMessage,

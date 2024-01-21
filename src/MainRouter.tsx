@@ -3,10 +3,7 @@ import { jsx } from "@emotion/react";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { LoadingPage } from "./shared";
-import {
-  LocationProvider,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { LocationProvider, useCuttinboard } from "@rodez97/cuttinboard-library";
 import InitialForm from "./Dashboard/SignUpLocation/InitialForm";
 import useSignUpLocalTracker from "./hooks/useSignUpLocalTracker";
 import Location from "./Location";

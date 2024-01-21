@@ -25,11 +25,7 @@ import { GrayPageHeader } from "../../shared";
 import { GeneratePDF } from "./GenerateTasksPDF";
 import React from "react";
 import { useReactToPrint } from "react-to-print";
-import {
-  getTasksArray,
-  IChecklist,
-  ITask,
-} from "@cuttinboard-solutions/types-helpers";
+import { getTasksArray, IChecklist, ITask } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 interface TasksSectionProps {

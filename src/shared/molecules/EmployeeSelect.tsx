@@ -6,11 +6,8 @@ import UserInfoAvatar from "../organisms/UserInfoAvatar";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { matchSorter } from "match-sorter";
-import {
-  getEmployeeFullName,
-  IEmployee,
-} from "@cuttinboard-solutions/types-helpers";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { getEmployeeFullName, IEmployee } from "@rodez97/types-helpers";
+import { Colors } from "@rodez97/cuttinboard-library";
 
 type EmployeeSelectProps = {
   onSelectedEmployee: (employee: IEmployee) => void;

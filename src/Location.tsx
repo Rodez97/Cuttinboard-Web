@@ -3,7 +3,7 @@ import { LoadingPage, PageError } from "./shared";
 import {
   useCuttinboard,
   useCuttinboardLocationRaw,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 
 const RootLoading = lazy(() => import("./shared/molecules/RootLoading"));
 const LocationContainer = lazy(() => import("./LocationContainer"));

@@ -7,17 +7,14 @@ import {
   HistoryOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import {
-  Colors,
-  useUtensils,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { Colors, useUtensils } from "@rodez97/cuttinboard-library";
 import styled from "@emotion/styled";
 import { Button, Dropdown, Modal, Progress, Typography } from "antd/es";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ChangesDialog from "./ChangesDialog";
 import ReportChangeDialog from "./ReportChangeDialog";
-import { IUtensil } from "@cuttinboard-solutions/types-helpers";
+import { IUtensil } from "@rodez97/types-helpers";
 
 interface IUtensilCard {
   utensil: IUtensil;

@@ -8,10 +8,10 @@ import {
   FIRESTORE,
   useCuttinboardLocation,
   useUtensils,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { nanoid } from "nanoid";
 import { Timestamp, doc } from "firebase/firestore";
-import { IUtensil } from "@cuttinboard-solutions/types-helpers";
+import { IUtensil } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 interface IManageUtensilDialogRef {

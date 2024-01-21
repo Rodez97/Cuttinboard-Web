@@ -20,7 +20,7 @@ import {
   useCuttinboardLocation,
   useDisclose,
   useEmployees,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import usePageTitle from "../../hooks/usePageTitle";
 import { WEEKDAYS } from "../Tasks/ManagePeriodicTask";
 import { doc, setDoc } from "firebase/firestore";
@@ -28,7 +28,7 @@ import {
   IEmployee,
   RoleAccessLevels,
   WeeklyAvailability,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { recordError } from "../../utils/utils";
 import React, { useMemo } from "react";
 import { useFormik } from "formik";

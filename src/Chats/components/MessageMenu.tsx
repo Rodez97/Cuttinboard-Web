@@ -1,11 +1,8 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
 import { DeleteOutlined, MoreOutlined } from "@ant-design/icons";
-import {
-  useCuttinboard,
-  useMessages,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { IMessage } from "@cuttinboard-solutions/types-helpers";
+import { useCuttinboard, useMessages } from "@rodez97/cuttinboard-library";
+import { IMessage } from "@rodez97/types-helpers";
 import { Button, Dropdown, Modal, Typography } from "antd/es";
 import dayjs from "dayjs";
 import { useCallback } from "react";

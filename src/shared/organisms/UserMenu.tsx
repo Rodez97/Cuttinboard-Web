@@ -5,10 +5,7 @@ import { Dropdown, MenuProps, Modal, Space } from "antd/es";
 import { signOut } from "firebase/auth";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-  AUTH,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { AUTH, useCuttinboard } from "@rodez97/cuttinboard-library";
 import androidStore from "../../assets/images/android-store.png";
 import appleStore from "../../assets/images/apple-store.png";
 import CuttinboardAvatar from "../atoms/Avatar";

@@ -1,7 +1,4 @@
-import {
-  ICuttinboardUser,
-  Organization,
-} from "@cuttinboard-solutions/types-helpers";
+import { ICuttinboardUser, Organization } from "@rodez97/types-helpers";
 import { Result } from "antd/es";
 import { DocumentData } from "firebase/firestore";
 import React, { createContext, ReactNode, useContext } from "react";

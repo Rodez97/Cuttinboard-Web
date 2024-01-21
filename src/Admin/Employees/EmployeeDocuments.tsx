@@ -37,12 +37,9 @@ import {
   STORAGE,
   useCuttinboardLocation,
   useEmployees,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
-import {
-  getEmployeeFullName,
-  roleToString,
-} from "@cuttinboard-solutions/types-helpers";
+import { getEmployeeFullName, roleToString } from "@rodez97/types-helpers";
 
 const { Dragger } = Upload;
 

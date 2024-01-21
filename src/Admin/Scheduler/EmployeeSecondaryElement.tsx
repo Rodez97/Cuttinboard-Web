@@ -7,10 +7,10 @@ import {
   minutesToTextDuration,
   useEmployeeWageData,
   useLocationPermissions,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import currency from "currency.js";
 import { useTranslation } from "react-i18next";
-import { IShift } from "@cuttinboard-solutions/types-helpers";
+import { IShift } from "@rodez97/types-helpers";
 
 const EmployeeSecondaryElement = ({
   employeeId,

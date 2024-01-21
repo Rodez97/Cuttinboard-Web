@@ -9,7 +9,7 @@ import {
   useLocationPermissions,
   useSchedule,
   useWageData,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 
 function TableFooter() {
   const { t } = useTranslation();

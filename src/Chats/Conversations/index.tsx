@@ -7,7 +7,7 @@ import convImage from "../../assets/images/chat.png";
 import {
   ConversationsProvider,
   useConversations,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { EmptyBoard, NotFound } from "../../shared";
 import usePageTitle from "../../hooks/usePageTitle";
 import ConversationsMain from "./ConversationsMain";

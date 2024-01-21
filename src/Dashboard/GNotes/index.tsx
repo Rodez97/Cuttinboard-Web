@@ -8,7 +8,7 @@ import notesImage from "../../assets/images/notes.png";
 import { NotFound } from "../../shared";
 import NotesMain from "./NotesMain";
 import usePageTitle from "../../hooks/usePageTitle";
-import { GBoardProvider } from "@cuttinboard-solutions/cuttinboard-library";
+import { GBoardProvider } from "@rodez97/cuttinboard-library";
 import { recordError } from "../../utils/utils";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import { useDrawerSider } from "../../shared/organisms/useDrawerSider";

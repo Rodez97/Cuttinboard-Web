@@ -8,8 +8,8 @@ import { ReactNode, useCallback, useMemo } from "react";
 import "./LocationCard.scss";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import React from "react";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
-import { ILocation } from "@cuttinboard-solutions/types-helpers";
+import { useCuttinboard } from "@rodez97/cuttinboard-library";
+import { ILocation } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
 const { Meta } = Card;

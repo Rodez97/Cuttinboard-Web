@@ -30,7 +30,7 @@
 //   FIRESTORE,
 //   FUNCTIONS,
 //   useCuttinboard,
-// } from "@cuttinboard-solutions/cuttinboard-library";
+// } from "@rodez97/cuttinboard-library";
 // import { httpsCallable } from "firebase/functions";
 // import { ANALYTICS } from "firebase";
 

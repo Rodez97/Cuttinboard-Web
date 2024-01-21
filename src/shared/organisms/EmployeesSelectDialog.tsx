@@ -1,15 +1,12 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { Colors } from "@rodez97/cuttinboard-library";
 import { Button, Checkbox, Input, List, Modal, ModalProps } from "antd/es";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { UsergroupAddOutlined } from "@ant-design/icons";
 import UserInfoAvatar from "./UserInfoAvatar";
-import {
-  getEmployeeFullName,
-  IEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+import { getEmployeeFullName, IEmployee } from "@rodez97/types-helpers";
 import { matchSorter } from "match-sorter";
 
 type EmployeesSelectDialogProps = {

@@ -3,7 +3,7 @@ import { css, jsx } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 import { Select } from "antd/es";
 import React from "react";
-import { POSITIONS } from "@cuttinboard-solutions/types-helpers";
+import { POSITIONS } from "@rodez97/types-helpers";
 
 export function PositionSelect({
   positions,

@@ -1,4 +1,4 @@
-import { ChecklistProvider } from "@cuttinboard-solutions/cuttinboard-library";
+import { ChecklistProvider } from "@rodez97/cuttinboard-library";
 import React from "react";
 import GlobalChecklistMain from "./GlobalChecklistMain";
 import usePageTitle from "../../hooks/usePageTitle";

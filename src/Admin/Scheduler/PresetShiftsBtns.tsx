@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import { Button, Space } from "antd/es";
 import dayjs from "dayjs";
 import { useCallback } from "react";

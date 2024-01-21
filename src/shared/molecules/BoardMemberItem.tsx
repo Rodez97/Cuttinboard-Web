@@ -7,14 +7,14 @@ import {
   useCuttinboard,
   useCuttinboardLocation,
   Colors,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import UserInfoAvatar from "../organisms/UserInfoAvatar";
 import {
   getEmployeeFullName,
   IEmployee,
   PrivacyLevel,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 
 type BoardMemberItemProps = {
   employee: IEmployee;

@@ -6,7 +6,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import ChatInput from "./ChatInput";
 import { Button, Layout, Typography } from "antd/es";
 import MessageBubble from "./MessageBubble";
-import { useMessages } from "@cuttinboard-solutions/cuttinboard-library";
+import { useMessages } from "@rodez97/cuttinboard-library";
 import { INITIAL_LOAD_SIZE } from "../ChatConstants";
 import { LoadingPage } from "../../shared";
 import ErrorPage from "../../shared/molecules/PageError";

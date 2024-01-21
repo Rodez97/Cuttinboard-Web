@@ -16,7 +16,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { recordError } from "../../utils/utils";
 import { useDashboard } from "../DashboardProvider";
-import { useUpdateAccount } from "@cuttinboard-solutions/cuttinboard-library";
+import { useUpdateAccount } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 type EmployeeContactData = {

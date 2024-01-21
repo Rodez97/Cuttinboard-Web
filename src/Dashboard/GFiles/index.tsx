@@ -8,7 +8,7 @@ import filesImage from "../../assets/images/drawer.png";
 import { NotFound } from "../../shared";
 import FilesMain from "./FilesMain";
 import usePageTitle from "../../hooks/usePageTitle";
-import { GBoardProvider } from "@cuttinboard-solutions/cuttinboard-library";
+import { GBoardProvider } from "@rodez97/cuttinboard-library";
 import { recordError } from "../../utils/utils";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import { useDrawerSider } from "../../shared/organisms/useDrawerSider";

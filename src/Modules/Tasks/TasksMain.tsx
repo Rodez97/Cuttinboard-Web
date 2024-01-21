@@ -16,7 +16,7 @@ import {
   useCuttinboardLocation,
   useDisclose,
   useRecurringTasks,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import TaskBlock from "./TaskBlock";
 import {
   ClearOutlined,
@@ -34,7 +34,7 @@ import {
   IChecklist,
   recurringTaskIsToday,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
 import ErrorPage from "../../shared/molecules/PageError";

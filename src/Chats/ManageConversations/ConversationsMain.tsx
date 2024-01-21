@@ -3,10 +3,10 @@ import { jsx } from "@emotion/react";
 import { memo } from "react";
 import ChatMain from "../components/ChatMain";
 import { Layout } from "antd/es";
-import { MessagesProvider } from "@cuttinboard-solutions/cuttinboard-library";
+import { MessagesProvider } from "@rodez97/cuttinboard-library";
 import { GrayPageHeader } from "../../shared";
 import { useNavigate } from "react-router-dom";
-import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { IConversation } from "@rodez97/types-helpers";
 import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";
 
 function ConversationsMain({

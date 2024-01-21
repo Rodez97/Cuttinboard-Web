@@ -12,7 +12,7 @@ import {
   STORAGE,
   useCuttinboard,
   useUpdateAccount,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { nanoid } from "nanoid";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 

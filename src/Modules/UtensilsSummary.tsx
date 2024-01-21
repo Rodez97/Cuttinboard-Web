@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { IUtensil } from "@cuttinboard-solutions/types-helpers";
+import { IUtensil } from "@rodez97/types-helpers";
 import { jsx } from "@emotion/react";
 import { Alert, Divider, Skeleton, Space } from "antd/es";
 import { useTranslation } from "react-i18next";

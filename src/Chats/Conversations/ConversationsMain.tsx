@@ -9,9 +9,9 @@ import {
   MessagesProvider,
   useDisclose,
   useNotifications,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { GrayPageHeader } from "../../shared";
-import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { IConversation } from "@rodez97/types-helpers";
 import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";
 
 function ConversationsMain({

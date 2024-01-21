@@ -11,7 +11,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import SetupPaymentMethodForm, {
   SetupPMDialogRef,
 } from "./SetupPaymentMethodForm";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@rodez97/cuttinboard-library";
 import { GrayPageHeader } from "../shared";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 

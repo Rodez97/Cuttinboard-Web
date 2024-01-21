@@ -7,9 +7,9 @@ import {
   MessagesProvider,
   useDisclose,
   useNotifications,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { GrayPageHeader } from "../../shared";
-import { IDirectMessage, Sender } from "@cuttinboard-solutions/types-helpers";
+import { IDirectMessage, Sender } from "@rodez97/types-helpers";
 import { Alert } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { BATCH_SIZE, INITIAL_LOAD_SIZE } from "../ChatConstants";

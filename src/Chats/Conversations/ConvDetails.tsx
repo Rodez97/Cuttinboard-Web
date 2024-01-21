@@ -13,11 +13,8 @@ import {
   TagsOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  PrivacyLevel,
-  privacyLevelToString,
-} from "@cuttinboard-solutions/types-helpers";
+import { useConversations } from "@rodez97/cuttinboard-library";
+import { PrivacyLevel, privacyLevelToString } from "@rodez97/types-helpers";
 
 function ConvDetails(props: ModalProps) {
   const { activeConversation } = useConversations();

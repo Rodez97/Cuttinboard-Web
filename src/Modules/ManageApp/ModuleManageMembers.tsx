@@ -1,5 +1,5 @@
-import { useBoard } from "@cuttinboard-solutions/cuttinboard-library";
-import { IEmployee } from "@cuttinboard-solutions/types-helpers";
+import { useBoard } from "@rodez97/cuttinboard-library";
+import { IEmployee } from "@rodez97/types-helpers";
 import { ModalProps } from "antd/es";
 import React from "react";
 import ManageBoardMembers from "../../shared/organisms/ManageBoardMembers";

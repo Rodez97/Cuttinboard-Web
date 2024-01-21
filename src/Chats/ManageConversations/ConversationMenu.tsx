@@ -6,8 +6,8 @@ import {
   MoreOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
-import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { useConversations } from "@rodez97/cuttinboard-library";
+import { IConversation } from "@rodez97/types-helpers";
 import { Button, Dropdown, Modal } from "antd/es";
 import React from "react";
 import { useTranslation } from "react-i18next";

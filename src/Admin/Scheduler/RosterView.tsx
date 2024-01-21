@@ -22,7 +22,7 @@ import {
   useLocationPermissions,
   useSchedule,
   useWageData,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import isoWeek from "dayjs/plugin/isoWeek";
 import usePageTitle from "../../hooks/usePageTitle";
 import { generateRosterPdf } from "./NewPDF";
@@ -34,7 +34,7 @@ import {
   getShiftLatestData,
   IEmployee,
   IShift,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 

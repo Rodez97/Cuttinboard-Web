@@ -10,11 +10,8 @@ import {
   useCuttinboard,
   useDirectMessageChat,
   useFindDMRecipient,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  ICuttinboardUser,
-  IEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { ICuttinboardUser, IEmployee } from "@rodez97/types-helpers";
 import imgAvatar from "../../assets/images/avatar.webp";
 
 export interface NewDMByEmailRef {

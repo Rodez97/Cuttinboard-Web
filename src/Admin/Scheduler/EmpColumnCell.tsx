@@ -10,7 +10,7 @@ import {
   IEmployee,
   IShift,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { InfoCircleFilled } from "@ant-design/icons";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";

@@ -9,10 +9,7 @@ import {
 } from "./GroupHeadingAvatar";
 import AttachmentElement from "./AttachmentElement";
 import { ImageMessage } from "./MessageElements";
-import {
-  IMessage,
-  parseMediaFromText,
-} from "@cuttinboard-solutions/types-helpers";
+import { IMessage, parseMediaFromText } from "@rodez97/types-helpers";
 import MessageMenu from "./MessageMenu";
 
 interface MessageBubbleProps {

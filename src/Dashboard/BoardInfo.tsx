@@ -10,7 +10,7 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useGBoard } from "@cuttinboard-solutions/cuttinboard-library";
+import { useGBoard } from "@rodez97/cuttinboard-library";
 
 function BoardInfo({ onEdit, ...props }: ModalProps & { onEdit: () => void }) {
   const { selectedBoard, deleteBoard } = useGBoard();

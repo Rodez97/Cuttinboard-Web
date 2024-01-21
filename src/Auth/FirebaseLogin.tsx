@@ -6,11 +6,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 // third party
 import { recordError } from "../utils/utils";
 import { Alert, Button, Form, Input, Typography } from "antd/es";
-import {
-  AUTH,
-  Colors,
-  useCuttinboardRaw,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { AUTH, Colors, useCuttinboardRaw } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { AuthError, signInWithEmailAndPassword } from "firebase/auth";
 

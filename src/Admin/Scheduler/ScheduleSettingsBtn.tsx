@@ -2,7 +2,7 @@ import { SettingOutlined } from "@ant-design/icons";
 import {
   useDisclose,
   useLocationPermissions,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { Button } from "antd/es";
 import React, { lazy } from "react";
 import { useTranslation } from "react-i18next";

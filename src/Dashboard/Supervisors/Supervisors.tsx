@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { PageHeader } from "@ant-design/pro-layout";
 import { UserInfoAvatar } from "../../shared";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
-import { IOrganizationEmployee } from "@cuttinboard-solutions/types-helpers";
+import { Colors } from "@rodez97/cuttinboard-library";
+import { IOrganizationEmployee } from "@rodez97/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 
 export default ({ supervisors }: { supervisors: IOrganizationEmployee[] }) => {

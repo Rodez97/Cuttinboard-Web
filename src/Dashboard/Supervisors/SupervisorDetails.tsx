@@ -9,14 +9,8 @@ import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { recordError } from "../../utils/utils";
 import { useOwner } from "../OwnerPortal";
 import { LoadingPage } from "../../shared";
-import {
-  FIRESTORE,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  ILocation,
-  IOrganizationEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+import { FIRESTORE, useCuttinboard } from "@rodez97/cuttinboard-library";
+import { ILocation, IOrganizationEmployee } from "@rodez97/types-helpers";
 
 const AssignLocations = lazy(() => import("./AssignLocations"));
 const SupervisorLocations = lazy(() => import("./SupervisorLocations"));

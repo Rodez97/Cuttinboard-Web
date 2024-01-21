@@ -10,10 +10,7 @@ import { useSendEmailVerification } from "react-firebase-hooks/auth";
 import { Alert, Button, Modal, Typography } from "antd/es";
 import mdiEmailSealOutline from "@mdi/svg/svg/email-seal-outline.svg";
 import Icon, { SendOutlined } from "@ant-design/icons";
-import {
-  AUTH,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { AUTH, useCuttinboard } from "@rodez97/cuttinboard-library";
 import { FIREBASE_CONFIG } from "../../firebase";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 

@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import type { ILocationAddress } from "@cuttinboard-solutions/types-helpers";
+import type { ILocationAddress } from "@rodez97/types-helpers";
 
 export const gmValidationSchema = yup.object().shape({
   name: yup.string().required(),

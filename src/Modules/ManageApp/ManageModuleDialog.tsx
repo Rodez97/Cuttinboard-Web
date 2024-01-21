@@ -20,18 +20,15 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import isEmpty from "lodash-es/isEmpty";
-import {
-  useBoard,
-  useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { useBoard, useDisclose } from "@rodez97/cuttinboard-library";
+import { useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import Select from "react-select";
 import {
   IBoard,
   POSITIONS,
   PrivacyLevel,
   privacyLevelToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { trimObject } from "../../utils/utils";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 

@@ -6,7 +6,7 @@ import { Suspense, useState } from "react";
 import mdiDrag from "@mdi/svg/svg/drag.svg";
 import { recordError } from "../../utils/utils";
 import { reorder } from "../../utils/reorder";
-import type { ITask } from "@cuttinboard-solutions/types-helpers";
+import type { ITask } from "@rodez97/types-helpers";
 import type { DropResult } from "react-beautiful-dnd";
 import { lazily } from "react-lazily";
 

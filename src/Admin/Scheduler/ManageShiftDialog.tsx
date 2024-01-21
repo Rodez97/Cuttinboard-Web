@@ -7,7 +7,7 @@ import {
   IShift,
   getShiftDayjsDate,
   getShiftLatestData,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import ShiftEditor, { ShiftFormDataType } from "./ShiftEditorFormik";
 import isoWeek from "dayjs/plugin/isoWeek";
 dayjs.extend(isoWeek);

@@ -4,7 +4,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import {
   ScheduleProvider,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { useTranslation } from "react-i18next";
 import { lazy } from "react";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";

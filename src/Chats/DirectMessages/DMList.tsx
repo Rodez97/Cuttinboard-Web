@@ -13,15 +13,11 @@ import {
   useDisclose,
   useCuttinboard,
   getDirectMessageRecipient,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import orderBy from "lodash-es/orderBy";
 import { useNavigate } from "react-router-dom";
-import {
-  IDirectMessage,
-  IEmployee,
-  Sender,
-} from "@cuttinboard-solutions/types-helpers";
+import { IDirectMessage, IEmployee, Sender } from "@rodez97/types-helpers";
 import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 interface IDMItem {

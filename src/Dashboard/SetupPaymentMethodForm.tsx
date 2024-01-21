@@ -1,10 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import {
-  FUNCTIONS,
-  useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { FUNCTIONS, useDisclose } from "@rodez97/cuttinboard-library";
 import SetupForm from "./SetupForm";
 import { Button, Modal, Result, Spin } from "antd/es";
 import { useDashboard } from "./DashboardProvider";

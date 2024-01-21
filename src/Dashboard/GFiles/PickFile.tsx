@@ -18,8 +18,8 @@ import {
   STORAGE,
   useFiles,
   useGBoard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { ICuttinboard_File } from "@rodez97/types-helpers";
 
 const { Dragger } = Upload;
 

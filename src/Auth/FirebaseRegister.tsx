@@ -4,10 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { recordError, TrimRule } from "../utils/utils";
 import { Alert, Button, Checkbox, Form, Input, Typography } from "antd/es";
-import {
-  Colors,
-  useRegister,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { Colors, useRegister } from "@rodez97/cuttinboard-library";
 import { useMemo } from "react";
 import { AuthError } from "firebase/auth";
 import useSignUpLocalTracker from "../hooks/useSignUpLocalTracker";

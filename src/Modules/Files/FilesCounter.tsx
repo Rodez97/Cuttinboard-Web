@@ -2,9 +2,9 @@
 import { jsx } from "@emotion/react";
 import fileSize from "filesize";
 import { Progress, Space, Typography } from "antd/es";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import { useMemo } from "react";
-import { getLocationUsage } from "@cuttinboard-solutions/types-helpers";
+import { getLocationUsage } from "@rodez97/types-helpers";
 
 export default function FilesCounter() {
   const { location } = useCuttinboardLocation();

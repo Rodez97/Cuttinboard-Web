@@ -4,7 +4,7 @@ import React from "react";
 import Linkify from "linkify-react";
 import { Card, Tooltip, Typography } from "antd/es";
 import { StickyNote } from "../../shared";
-import { INote } from "@cuttinboard-solutions/types-helpers";
+import { INote } from "@rodez97/types-helpers";
 
 interface NoteCardProps {
   note: INote;

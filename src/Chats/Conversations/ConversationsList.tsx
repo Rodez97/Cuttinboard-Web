@@ -7,10 +7,10 @@ import Icon from "@ant-design/icons";
 import { Input, Spin, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
 import Forum from "@mdi/svg/svg/forum.svg";
-import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
+import { useConversations } from "@rodez97/cuttinboard-library";
 import ConversationListItem from "./ConversationListItem";
 import { useNavigate } from "react-router-dom";
-import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { IConversation } from "@rodez97/types-helpers";
 import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 export default () => {

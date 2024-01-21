@@ -7,8 +7,8 @@ import {
   useConversations,
   useCuttinboard,
   useDirectMessageChat,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { IMessage } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { IMessage } from "@rodez97/types-helpers";
 import { useTranslation } from "react-i18next";
 
 export function GroupHeadingAvatarMB({ message }: { message: IMessage }) {

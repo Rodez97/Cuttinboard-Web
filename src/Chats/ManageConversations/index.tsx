@@ -7,7 +7,7 @@ import {
   ConversationsProvider,
   useConversations,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { EmptyBoard } from "../../shared";
 import usePageTitle from "../../hooks/usePageTitle";
 import ConversationsMain from "./ConversationsMain";

@@ -1,4 +1,4 @@
-import type { AnalyticsEvents } from "@cuttinboard-solutions/cuttinboard-library";
+import type { AnalyticsEvents } from "@rodez97/cuttinboard-library";
 
 export function logAnalyticsEvent(
   eventName: AnalyticsEvents | string,

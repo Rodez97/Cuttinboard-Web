@@ -9,7 +9,7 @@ import {
   IShift,
   getShiftDayjsDate,
   getShiftIsoWeekday,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 dayjs.extend(isoWeek);
 
 export interface ManageShiftsProps {

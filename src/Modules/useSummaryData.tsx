@@ -7,14 +7,14 @@ import {
   recurringTaskDocConverter,
   useCuttinboardLocation,
   utensilConverter,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import {
   extractRecurringTasksArray,
   IRecurringTask,
   IRecurringTaskDoc,
   IUtensil,
   recurringTaskIsToday,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 
 // export type ScheduleTodaySummary = {
 //   percent: number;

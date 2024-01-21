@@ -4,10 +4,7 @@ import { Modal } from "antd/es";
 import { useTranslation } from "react-i18next";
 import UserInfoElement from "./UserInfoElement";
 import CuttinboardAvatar from "../atoms/Avatar";
-import {
-  ICuttinboardUser,
-  getEmployeeFullName,
-} from "@cuttinboard-solutions/types-helpers";
+import { ICuttinboardUser, getEmployeeFullName } from "@rodez97/types-helpers";
 
 function UserInfoAvatar({
   employee,

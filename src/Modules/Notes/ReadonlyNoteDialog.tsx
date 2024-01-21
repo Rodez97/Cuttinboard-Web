@@ -12,11 +12,8 @@ import Linkify from "linkify-react";
 import { useTranslation } from "react-i18next";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import dayjs from "dayjs";
-import {
-  useDisclose,
-  useNotes,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { INote } from "@cuttinboard-solutions/types-helpers";
+import { useDisclose, useNotes } from "@rodez97/cuttinboard-library";
+import { INote } from "@rodez97/types-helpers";
 
 export const useReadonlyNote = () => {
   const readonlyNoteDialogRef = useRef<ReadonlyNoteDialogRef>(null);

@@ -25,17 +25,14 @@ import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import isEmpty from "lodash-es/isEmpty";
-import {
-  useDisclose,
-  useRecurringTasks,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useDisclose, useRecurringTasks } from "@rodez97/cuttinboard-library";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import {
   IRecurringTask,
   IRecurringTaskDoc,
   RecurrenceObject,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(utc);
 dayjs.extend(timezone);

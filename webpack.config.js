@@ -140,7 +140,7 @@ const webpackConfig = () => {
         },
         {
           test: /\.webp$/i,
-          use: ["file-loader", "webp-loader"],
+          use: ["file-loader", "image-webpack-loader"],
         },
         {
           test: /\.jsx$/,

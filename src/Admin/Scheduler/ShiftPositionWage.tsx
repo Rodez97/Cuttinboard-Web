@@ -1,12 +1,9 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import {
-  IEmployee,
-  getEmployeeHourlyWage,
-} from "@cuttinboard-solutions/types-helpers";
+import { IEmployee, getEmployeeHourlyWage } from "@rodez97/types-helpers";
 import { Tag, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
-import { useLocationPermissions } from "@cuttinboard-solutions/cuttinboard-library";
+import { useLocationPermissions } from "@rodez97/cuttinboard-library";
 
 function ShiftPositionWage({
   employee,

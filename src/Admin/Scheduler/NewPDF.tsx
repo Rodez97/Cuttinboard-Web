@@ -4,7 +4,7 @@ import {
   getEmployeeShiftsSummary,
   minutesToTextDuration,
   parseWeekId,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import groupBy from "lodash-es/groupBy";
 import upperFirst from "lodash-es/upperFirst";
 import dayjs from "dayjs";
@@ -17,8 +17,8 @@ import {
   getEmployeeFullName,
   getShiftDayjsDate,
   getShiftIsoWeekday,
-} from "@cuttinboard-solutions/types-helpers";
-import type { IEmployee, IShift } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
+import type { IEmployee, IShift } from "@rodez97/types-helpers";
 
 // Lazy load pdf tools
 const getPdfTools = async () => {

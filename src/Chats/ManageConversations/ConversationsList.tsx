@@ -22,12 +22,12 @@ import dayjs from "dayjs";
 import ConversationMenu from "./ConversationMenu";
 import { useManageMembers } from "./ConvManageMembers";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
-import { useConversations } from "@cuttinboard-solutions/cuttinboard-library";
+import { useConversations } from "@rodez97/cuttinboard-library";
 import {
   IConversation,
   PrivacyLevel,
   privacyLevelToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import { useMediaQuery } from "@react-hook/media-query";
 dayjs.extend(LocalizedFormat);

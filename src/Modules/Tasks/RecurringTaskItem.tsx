@@ -2,7 +2,7 @@
 import {
   IRecurringTask,
   recurringTaskIsCompleted,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { jsx } from "@emotion/react";
 import { Checkbox, Typography } from "antd/es";
 import { useMemo } from "react";

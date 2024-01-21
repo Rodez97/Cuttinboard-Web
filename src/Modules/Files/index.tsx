@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import filesImage from "../../assets/images/drawer.png";
 import { NotFound } from "../../shared";
 import FilesMain from "./FilesMain";
-import { BoardProvider } from "@cuttinboard-solutions/cuttinboard-library";
+import { BoardProvider } from "@rodez97/cuttinboard-library";
 import usePageTitle from "../../hooks/usePageTitle";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import { useDrawerSider } from "../../shared/organisms/useDrawerSider";

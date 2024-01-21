@@ -3,7 +3,7 @@ import {
   FIRESTORE,
   FUNCTIONS,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Button, Form, Input, Modal, Typography, message } from "antd/es";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";

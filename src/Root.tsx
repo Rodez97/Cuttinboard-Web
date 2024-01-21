@@ -5,7 +5,7 @@ import { recordError } from "./utils/utils";
 
 const App = lazy(() => import("./App"));
 const CuttinboardProvider = lazy(() =>
-  import("@cuttinboard-solutions/cuttinboard-library").then((module) => ({
+  import("@rodez97/cuttinboard-library").then((module) => ({
     default: module.CuttinboardProvider,
   }))
 );

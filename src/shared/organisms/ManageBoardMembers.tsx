@@ -21,13 +21,13 @@ import { recordError } from "../../utils/utils";
 import {
   useCuttinboardLocation,
   useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import {
   checkEmployeePositions,
   IEmployee,
   PrivacyLevel,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 
 type ManageBoardMembersProps = {
   readonly?: boolean;

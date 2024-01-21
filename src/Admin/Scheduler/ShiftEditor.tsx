@@ -25,8 +25,8 @@ import capitalize from "lodash-es/capitalize";
 import {
   checkForOverlappingShiftsARRAY,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
+import { useSchedule } from "@rodez97/cuttinboard-library";
 import { Timestamp } from "firebase/firestore";
 import {
   IEmployee,
@@ -36,7 +36,7 @@ import {
   Shift,
   WEEKFORMAT,
   getEmployeeHourlyWage,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import { recordError } from "../../utils/utils";
 import PresetShiftsButtons from "./PresetShiftsBtns";
@@ -302,7 +302,7 @@ const ShiftEditor = ({
                 />
               </Form.Item>
 
-              <Form.Item<ShiftFormDataType["timeRange"]>
+              <Form.Item
                 name={["timeRange", "end"]}
                 css={{ width: "100%" }}
                 trigger="onSelect"

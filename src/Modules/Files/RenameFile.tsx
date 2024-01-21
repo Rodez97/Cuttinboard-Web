@@ -1,8 +1,5 @@
-import {
-  useDisclose,
-  useFiles,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
+import { useDisclose, useFiles } from "@rodez97/cuttinboard-library";
+import { ICuttinboard_File } from "@rodez97/types-helpers";
 import { Form, Input, Modal } from "antd/es";
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";

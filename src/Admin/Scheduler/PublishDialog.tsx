@@ -3,7 +3,7 @@ import {
   useCuttinboardLocation,
   useSchedule,
   useUpdatesCount,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import {
   Descriptions,

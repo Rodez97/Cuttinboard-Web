@@ -23,7 +23,7 @@ import {
 import moment from "moment";
 import compact from "lodash-es/compact";
 import isEqual from "lodash-es/isEqual";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 type ScheduleFormData = {

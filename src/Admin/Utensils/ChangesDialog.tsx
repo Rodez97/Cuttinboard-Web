@@ -5,11 +5,11 @@ import {
   ArrowUpOutlined,
   MinusOutlined,
 } from "@ant-design/icons";
-import { Colors } from "@cuttinboard-solutions/cuttinboard-library";
+import { Colors } from "@rodez97/cuttinboard-library";
 import { Avatar, Drawer, Empty, List, Space, Typography } from "antd/es";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
-import { IUtensil } from "@cuttinboard-solutions/types-helpers";
+import { IUtensil } from "@rodez97/types-helpers";
 import orderBy from "lodash-es/orderBy";
 
 interface ChangesDialogProps {

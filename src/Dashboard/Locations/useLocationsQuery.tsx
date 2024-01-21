@@ -2,8 +2,8 @@ import {
   FIRESTORE,
   listReducer,
   locationConverter,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { ILocation } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { ILocation } from "@rodez97/types-helpers";
 import {
   QueryConstraint,
   collection,

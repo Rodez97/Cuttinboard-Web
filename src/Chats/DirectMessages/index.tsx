@@ -9,12 +9,12 @@ import usePageTitle from "../../hooks/usePageTitle";
 import {
   DirectMessagesProvider,
   useDirectMessageChat,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import ActiveDM from "./ActiveDM";
 import { Route, Routes, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
-import { IEmployee } from "@cuttinboard-solutions/types-helpers";
+import { IEmployee } from "@rodez97/types-helpers";
 import { useDrawerSider } from "../../shared/organisms/useDrawerSider";
 
 export default ({ employees }: { employees?: IEmployee[] }) => {

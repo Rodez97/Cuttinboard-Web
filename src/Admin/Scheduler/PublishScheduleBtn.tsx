@@ -1,8 +1,5 @@
 import { UploadOutlined } from "@ant-design/icons";
-import {
-  useDisclose,
-  useUpdatesCount,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useDisclose, useUpdatesCount } from "@rodez97/cuttinboard-library";
 import { Button, Tooltip } from "antd/es";
 import React, { lazy } from "react";
 import { useTranslation } from "react-i18next";

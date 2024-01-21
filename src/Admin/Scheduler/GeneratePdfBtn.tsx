@@ -1,14 +1,14 @@
 import {
   useCuttinboardLocation,
   useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { message } from "antd/es";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 import { generateSchedulePdf } from "./NewPDF";
 import { recordError } from "../../utils/utils";
-import { getTotalWageData } from "@cuttinboard-solutions/types-helpers";
+import { getTotalWageData } from "@rodez97/types-helpers";
 
 function useGeneratePdfBtn() {
   const { t } = useTranslation();

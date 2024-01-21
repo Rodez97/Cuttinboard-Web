@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import TasksSummary from "./TasksSummary";
 import { useSummaryData } from "./useSummaryData";
 import usePageTitle from "../hooks/usePageTitle";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import { useNavigate } from "react-router-dom";
 
 export default function Summary() {

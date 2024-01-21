@@ -10,10 +10,7 @@ import {
 import { Button, List } from "antd/es";
 import { useTranslation } from "react-i18next";
 import CuttinboardAvatar from "../atoms/Avatar";
-import {
-  ICuttinboardUser,
-  getEmployeeFullName,
-} from "@cuttinboard-solutions/types-helpers";
+import { ICuttinboardUser, getEmployeeFullName } from "@rodez97/types-helpers";
 
 function UserInfoElement({ employee }: { employee: ICuttinboardUser }) {
   const { t } = useTranslation();

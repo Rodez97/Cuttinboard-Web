@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { MinusCircleOutlined } from "@ant-design/icons";
-import { useCuttinboardLocation } from "@cuttinboard-solutions/cuttinboard-library";
-import { POSITIONS } from "@cuttinboard-solutions/types-helpers";
+import { useCuttinboardLocation } from "@rodez97/cuttinboard-library";
+import { POSITIONS } from "@rodez97/types-helpers";
 import { jsx } from "@emotion/react";
 import {
   Button,

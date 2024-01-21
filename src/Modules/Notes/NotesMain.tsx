@@ -31,7 +31,7 @@ import {
   useBoard,
   useDisclose,
   useNotes,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import ReadonlyNoteDialog, { useReadonlyNote } from "./ReadonlyNoteDialog";
 import ErrorPage from "../../shared/molecules/PageError";
 import NoItems from "../../shared/atoms/NoItems";

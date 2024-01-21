@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import NewDMByEmployee from "./NewDMByEmployee";
 import NewDMByEmail, { NewDMByEmailRef } from "./NewDMByEmail";
 import { useTranslation } from "react-i18next";
-import { IEmployee } from "@cuttinboard-solutions/types-helpers";
+import { IEmployee } from "@rodez97/types-helpers";
 
 export default ({
   onClose,

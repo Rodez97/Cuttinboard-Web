@@ -11,7 +11,7 @@ import {
   STORAGE,
   useCuttinboard,
   useMessages,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import EmojiPicker from "./EmojiPicker";
 import throttle from "lodash-es/throttle";
 import { InputAttachmentElement } from "./InputAttachmentElement";

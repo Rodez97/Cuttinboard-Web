@@ -12,11 +12,8 @@ import {
 } from "@ant-design/icons";
 import { deleteDoc, doc } from "firebase/firestore";
 import { recordError } from "../../utils/utils";
-import { FIRESTORE } from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  ILocation,
-  IOrganizationEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+import { FIRESTORE } from "@rodez97/cuttinboard-library";
+import { ILocation, IOrganizationEmployee } from "@rodez97/types-helpers";
 import imgAvatar from "../../assets/images/avatar.webp";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 

@@ -24,7 +24,7 @@ import {
   useConversations,
   useCuttinboardLocation,
   useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import EmployeesSelectDialog from "../../shared/organisms/EmployeesSelectDialog";
 import {
   IConversation,
@@ -32,7 +32,7 @@ import {
   POSITIONS,
   PrivacyLevel,
   privacyLevelToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export interface ManageConvDialogRef {

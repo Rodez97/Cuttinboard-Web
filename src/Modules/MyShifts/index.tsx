@@ -18,11 +18,11 @@ import {
   Colors,
   MyShiftsProvider,
   useMyShifts,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { GrayPageHeader, PageError } from "../../shared";
 import usePageTitle from "../../hooks/usePageTitle";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
-import { WEEKFORMAT } from "@cuttinboard-solutions/types-helpers";
+import { WEEKFORMAT } from "@rodez97/types-helpers";
 import MyAvailability from "./MyAvailability";
 import React, { ReactNode, useMemo, useState } from "react";
 import advancedFormat from "dayjs/plugin/advancedFormat";

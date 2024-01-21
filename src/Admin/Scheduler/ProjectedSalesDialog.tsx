@@ -5,7 +5,7 @@ import styled from "@emotion/styled";
 import { Button, Descriptions, InputNumber, Modal } from "antd/es";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import { useSchedule } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 const ProjectedSalesTable = styled(Descriptions)`

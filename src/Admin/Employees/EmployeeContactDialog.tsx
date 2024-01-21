@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { IEmployee } from "@cuttinboard-solutions/types-helpers";
+import { IEmployee } from "@rodez97/types-helpers";
 import { jsx } from "@emotion/react";
 import { Divider, List, Modal, ModalProps, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";

@@ -8,7 +8,7 @@ import {
   useLocationPermissions,
   useSchedule,
   useWageData,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { useMediaQuery } from "@react-hook/media-query";
 
 function ScheduleSummaryElement() {

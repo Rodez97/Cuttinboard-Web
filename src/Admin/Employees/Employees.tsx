@@ -21,12 +21,12 @@ import {
   useCuttinboardLocation,
   useDisclose,
   useEmployees,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import {
   getLocationUsage,
   RoleAccessLevels,
   roleToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import EmptyExtended from "./../../shared/molecules/EmptyExtended";
 import NoItems from "../../shared/atoms/NoItems";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";

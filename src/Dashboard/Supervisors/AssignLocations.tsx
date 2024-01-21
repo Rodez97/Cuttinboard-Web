@@ -1,12 +1,6 @@
 /** @jsx jsx */
-import {
-  FIRESTORE,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  ILocation,
-  IOrganizationEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+import { FIRESTORE, useCuttinboard } from "@rodez97/cuttinboard-library";
+import { ILocation, IOrganizationEmployee } from "@rodez97/types-helpers";
 import { jsx } from "@emotion/react";
 import { Alert, Button, Layout, Space } from "antd/es";
 import { arrayUnion, doc, writeBatch } from "firebase/firestore";

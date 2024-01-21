@@ -6,11 +6,8 @@ import {
   cuttinboardUserConverter,
   FIRESTORE,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  ICuttinboardUser,
-  Organization,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { ICuttinboardUser, Organization } from "@rodez97/types-helpers";
 
 type DashboardDataHook = [
   ICuttinboardUser | undefined,

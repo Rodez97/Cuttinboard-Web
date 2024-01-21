@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@rodez97/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Divider, Space } from "antd/es";
 import { where } from "firebase/firestore";

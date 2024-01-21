@@ -3,8 +3,8 @@ import {
   FIRESTORE,
   locationConverter,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { ILocation } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { ILocation } from "@rodez97/types-helpers";
 import { jsx } from "@emotion/react";
 import { Layout } from "antd/es";
 import { collection, query, where } from "firebase/firestore";

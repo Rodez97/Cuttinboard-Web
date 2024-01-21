@@ -10,13 +10,13 @@ import { nanoid } from "nanoid";
 import {
   useChecklist,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import ErrorPage from "../../shared/molecules/PageError";
 import {
   getChecklistsSummary,
   IChecklist,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import EmptyExtended from "../../shared/molecules/EmptyExtended";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import PageHeaderButtons from "../../shared/molecules/PageHeaderButtons";

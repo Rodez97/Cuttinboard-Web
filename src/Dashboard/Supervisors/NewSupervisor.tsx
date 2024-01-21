@@ -17,15 +17,9 @@ import { useNavigate } from "react-router-dom";
 import LocationsPicker from "./LocationsPicker";
 import { useHttpsCallable } from "react-firebase-hooks/functions";
 import { recordError, trimObject } from "../../utils/utils";
-import {
-  FUNCTIONS,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { FUNCTIONS, useCuttinboard } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
-import {
-  ILocation,
-  IOrganizationEmployee,
-} from "@cuttinboard-solutions/types-helpers";
+import { ILocation, IOrganizationEmployee } from "@rodez97/types-helpers";
 
 const { Step } = Steps;
 

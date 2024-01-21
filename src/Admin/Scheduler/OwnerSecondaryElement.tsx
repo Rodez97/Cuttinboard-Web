@@ -4,8 +4,8 @@ import {
   getEmployeeShiftsSummary,
   minutesToTextDuration,
   useEmployeeWageData,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import type { IShift } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import type { IShift } from "@rodez97/types-helpers";
 
 const OwnerSecondaryElement = ({
   employeeId,

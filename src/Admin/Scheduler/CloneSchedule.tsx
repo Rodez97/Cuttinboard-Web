@@ -9,15 +9,9 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import WeekNavigator from "./WeekNavigator";
 import { recordError } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
-import {
-  useEmployees,
-  useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useEmployees, useSchedule } from "@rodez97/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
-import {
-  getEmployeeFullName,
-  WEEKFORMAT,
-} from "@cuttinboard-solutions/types-helpers";
+import { getEmployeeFullName, WEEKFORMAT } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 dayjs.extend(advancedFormat);

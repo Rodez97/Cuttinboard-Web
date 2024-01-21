@@ -34,15 +34,9 @@ import {
   getFileIconByType,
 } from "../../Modules/Files/FileTypeIcons";
 import usePageTitle from "../../hooks/usePageTitle";
-import {
-  STORAGE,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { STORAGE, useCuttinboard } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
-import {
-  MAX_DOCUMENTS,
-  MAX_FILE_SIZE,
-} from "@cuttinboard-solutions/types-helpers";
+import { MAX_DOCUMENTS, MAX_FILE_SIZE } from "@rodez97/types-helpers";
 import { GrayPageHeader } from "../../shared";
 
 const { Dragger } = Upload;

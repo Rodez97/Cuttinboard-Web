@@ -1,4 +1,4 @@
-import { useSchedule } from "@cuttinboard-solutions/cuttinboard-library";
+import { useSchedule } from "@rodez97/cuttinboard-library";
 import dayjs from "dayjs";
 import React from "react";
 import isoWeek from "dayjs/plugin/isoWeek";

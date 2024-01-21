@@ -18,11 +18,8 @@ import {
   useBoard,
   useCuttinboardLocation,
   useFiles,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  getLocationUsage,
-  ICuttinboard_File,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { getLocationUsage, ICuttinboard_File } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 const { Dragger } = Upload;

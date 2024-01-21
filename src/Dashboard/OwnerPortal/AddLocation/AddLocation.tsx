@@ -18,7 +18,7 @@ import {
   FIRESTORE,
   FUNCTIONS,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import {
   AddLocationContent,
   AddLocationHeader,

@@ -8,12 +8,9 @@ import {
   Colors,
   useCuttinboard,
   useDirectMessageChat,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
-import {
-  IEmployee,
-  getEmployeeFullName,
-} from "@cuttinboard-solutions/types-helpers";
+import { IEmployee, getEmployeeFullName } from "@rodez97/types-helpers";
 
 type Props = {
   onCreatingChange: (status: boolean) => void;

@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import FilesCounter from "./FilesCounter";
 import ManageBoard, { useManageBoard } from "../ManageBoard";
-import { useGBoard } from "@cuttinboard-solutions/cuttinboard-library";
+import { useGBoard } from "@rodez97/cuttinboard-library";
 import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 export default () => {

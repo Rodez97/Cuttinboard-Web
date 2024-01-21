@@ -33,7 +33,7 @@ import {
   useDisclose,
   useLocationPermissions,
   useSchedule,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import ShowLegend from "./ShowLegend";
 import usePageTitle from "../../hooks/usePageTitle";
 import { PositionSelect } from "../../shared/molecules/PositionSelect";
@@ -44,7 +44,7 @@ import {
   IEmployee,
   IShift,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import useGeneratePdfBtn from "./GeneratePdfBtn";
 import PublishScheduleBtn from "./PublishScheduleBtn";
 import ThisWeekTag from "./ThisWeekTag";

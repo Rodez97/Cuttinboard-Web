@@ -1,7 +1,4 @@
-import {
-  AUTH,
-  useCuttinboardRaw,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { AUTH, useCuttinboardRaw } from "@rodez97/cuttinboard-library";
 import React, { lazy, Suspense } from "react";
 import { PageError } from "./shared";
 import useTrackPageAnalytics from "./utils/TrackPageAnalytics";

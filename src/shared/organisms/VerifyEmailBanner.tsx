@@ -7,10 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useCountdown, useSessionstorageState } from "rooks";
 import { recordError } from "../../utils/utils";
 import { FIREBASE_CONFIG } from "../../firebase";
-import {
-  AUTH,
-  useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { AUTH, useCuttinboard } from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";
 
 const initialCounterTime = new Date();

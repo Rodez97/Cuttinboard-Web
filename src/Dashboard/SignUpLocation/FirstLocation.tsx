@@ -19,7 +19,7 @@ import {
   FIRESTORE,
   FUNCTIONS,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";

@@ -3,6 +3,7 @@ import { MoreOutlined } from "@ant-design/icons";
 import { jsx } from "@emotion/react";
 import { useMediaQuery } from "@react-hook/media-query";
 import { Button, Dropdown, MenuProps, Tooltip } from "antd";
+import { BaseButtonProps } from "antd/es/button/button";
 import React from "react";
 
 type ItemProps = {
@@ -14,14 +15,7 @@ type ItemProps = {
   disabled?: boolean;
   key: string;
   onClick?: React.MouseEventHandler<HTMLElement>;
-  type?:
-    | "link"
-    | "text"
-    | "default"
-    | "ghost"
-    | "primary"
-    | "dashed"
-    | undefined;
+  type?: BaseButtonProps["type"];
   loading?: boolean;
 }[];
 

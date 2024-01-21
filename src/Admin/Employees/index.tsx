@@ -4,7 +4,7 @@ import usePageTitle from "../../hooks/usePageTitle";
 import EmployeeDocuments from "./EmployeeDocuments";
 import Employees from "./Employees";
 import EmpSettings from "./EmpSettings";
-import { useLocationPermissions } from "@cuttinboard-solutions/cuttinboard-library";
+import { useLocationPermissions } from "@rodez97/cuttinboard-library";
 
 export default function EmployeesRoot() {
   usePageTitle("Employees");

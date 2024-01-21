@@ -4,11 +4,8 @@ import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import {
   useCuttinboardLocation,
   useUtensils,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import {
-  IUtensil,
-  RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { IUtensil, RoleAccessLevels } from "@rodez97/types-helpers";
 import { Button, Input, Layout, List, Space } from "antd/es";
 import { useTranslation } from "react-i18next";
 import { GrayPageHeader, LoadingPage, SplitButton } from "../../shared";

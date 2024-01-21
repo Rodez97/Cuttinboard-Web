@@ -49,10 +49,10 @@ import {
   useDisclose,
   useFiles,
   useFilesData,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import dayjs from "dayjs";
 import ErrorPage from "../../shared/molecules/PageError";
-import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
+import { ICuttinboard_File } from "@rodez97/types-helpers";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 dayjs.extend(LocalizedFormat);
 

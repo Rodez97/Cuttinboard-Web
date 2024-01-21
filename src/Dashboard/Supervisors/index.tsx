@@ -2,8 +2,8 @@ import {
   FIRESTORE,
   orgEmployeeConverter,
   useCuttinboard,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { RoleAccessLevels } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { RoleAccessLevels } from "@rodez97/types-helpers";
 import { collection, query, where } from "firebase/firestore";
 import React, { lazy, Suspense } from "react";
 import { useCollectionData } from "react-firebase-hooks/firestore";

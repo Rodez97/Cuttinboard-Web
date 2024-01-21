@@ -6,11 +6,8 @@ import {
   FormOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import {
-  getFileUrl,
-  useFiles,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { ICuttinboard_File } from "@cuttinboard-solutions/types-helpers";
+import { getFileUrl, useFiles } from "@rodez97/cuttinboard-library";
+import { ICuttinboard_File } from "@rodez97/types-helpers";
 import { Button, Dropdown, message, Modal } from "antd/es";
 import axios from "axios";
 import fileDownload from "js-file-download";

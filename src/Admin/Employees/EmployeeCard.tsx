@@ -20,13 +20,13 @@ import {
   useDisclose,
   useEmployees,
   useLocationPermissions,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import {
   CompareRoles,
   getEmployeeFullName,
   IEmployee,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 import styled from "@emotion/styled";
 

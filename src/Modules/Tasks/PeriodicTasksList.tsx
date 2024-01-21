@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useRecurringTasks } from "@cuttinboard-solutions/cuttinboard-library";
+import { useRecurringTasks } from "@rodez97/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Button, Card, Drawer, DrawerProps, Empty } from "antd/es";
 import dayjs from "dayjs";
@@ -10,7 +10,7 @@ import {
   extractRecurringTasksArray,
   getNextOccurrence,
   IRecurringTask,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import ManagePeriodicTask, {
   ManagePeriodicTaskRef,

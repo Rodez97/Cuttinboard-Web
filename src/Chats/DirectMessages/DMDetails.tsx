@@ -2,7 +2,7 @@
 import { jsx } from "@emotion/react";
 import { Alert, Modal, ModalProps, Typography } from "antd/es";
 import { useTranslation } from "react-i18next";
-import { useDirectMessageChat } from "@cuttinboard-solutions/cuttinboard-library";
+import { useDirectMessageChat } from "@rodez97/cuttinboard-library";
 import CuttinboardAvatar from "../../shared/atoms/Avatar";
 
 export default (props: ModalProps) => {

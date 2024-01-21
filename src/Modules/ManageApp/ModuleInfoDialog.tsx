@@ -14,17 +14,14 @@ import {
   TagOutlined,
   TagsOutlined,
 } from "@ant-design/icons";
-import {
-  useBoard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useBoard, useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import { useNavigate } from "react-router-dom";
 import {
   getEmployeeFullName,
   PrivacyLevel,
   privacyLevelToString,
   RoleAccessLevels,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 
 function ModuleInfoDialog({
   onEdit,

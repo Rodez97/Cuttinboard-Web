@@ -25,7 +25,7 @@ import { GrayPageHeader } from "../../shared";
 import {
   useCuttinboardLocation,
   useEmployees,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { Timestamp } from "firebase/firestore";
 import {
   EmployeeLocationInfo,
@@ -35,7 +35,7 @@ import {
   POSITIONS,
   RoleAccessLevels,
   roleToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import PermissionsChecker from "./PermissionsChecker";
 import imgAvatar from "../../assets/images/avatar.webp";
 import { logAnalyticsEvent } from "../../utils/analyticsHelpers";

@@ -21,14 +21,14 @@ import {
 import {
   useAddEmployee,
   useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 import {
   ManagerPermissions,
   POSITIONS,
   RoleAccessLevels,
   roleToString,
-} from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/types-helpers";
 import PermissionsChecker from "./PermissionsChecker";
 import { compact } from "lodash-es";
 

@@ -1,7 +1,7 @@
 import React, { lazy, useLayoutEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { PageError } from "./shared";
-import { useCuttinboard } from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard } from "@rodez97/cuttinboard-library";
 
 const RootLoading = lazy(() => import("./shared/molecules/RootLoading"));
 

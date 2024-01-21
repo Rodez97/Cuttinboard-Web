@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useDeleteAccount } from "@cuttinboard-solutions/cuttinboard-library";
+import { useDeleteAccount } from "@rodez97/cuttinboard-library";
 import { jsx } from "@emotion/react";
 import { Alert, Form, Input, Modal } from "antd/es";
 import { useMemo } from "react";

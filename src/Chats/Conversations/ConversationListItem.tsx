@@ -1,6 +1,6 @@
 import { MessageOutlined } from "@ant-design/icons";
-import { useNotifications } from "@cuttinboard-solutions/cuttinboard-library";
-import { IConversation } from "@cuttinboard-solutions/types-helpers";
+import { useNotifications } from "@rodez97/cuttinboard-library";
+import { IConversation } from "@rodez97/types-helpers";
 import { Badge } from "antd/es";
 import React, { useMemo } from "react";
 

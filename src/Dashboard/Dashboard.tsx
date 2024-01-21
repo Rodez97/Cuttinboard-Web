@@ -28,10 +28,7 @@ import mdiAccount from "@mdi/svg/svg/account-cog.svg";
 import mdiMyDocuments from "@mdi/svg/svg/folder-account.svg";
 import mdiBilling from "@mdi/svg/svg/account-credit-card.svg";
 import Forum from "@mdi/svg/svg/forum.svg";
-import {
-  useCuttinboard,
-  useNotifications,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useCuttinboard, useNotifications } from "@rodez97/cuttinboard-library";
 import VerifyEmailBanner from "../shared/organisms/VerifyEmailBanner";
 import { useMediaQuery } from "@react-hook/media-query";
 dayjs.extend(relativeTime);

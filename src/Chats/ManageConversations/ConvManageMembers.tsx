@@ -5,7 +5,7 @@ import {
   useConversations,
   useCuttinboardLocation,
   useDisclose,
-} from "@cuttinboard-solutions/cuttinboard-library";
+} from "@rodez97/cuttinboard-library";
 import { Button, Divider, List, Modal, Tag, Typography } from "antd/es";
 import React, {
   useCallback,
@@ -15,7 +15,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { BoardMemberItem, EmployeeMultiSelect } from "../../shared";
-import { IEmployee, PrivacyLevel } from "@cuttinboard-solutions/types-helpers";
+import { IEmployee, PrivacyLevel } from "@rodez97/types-helpers";
 
 export interface ConvManageMembersDialogRef {
   openDialog: (conversationId: string) => void;

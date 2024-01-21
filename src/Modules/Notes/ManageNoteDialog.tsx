@@ -3,8 +3,8 @@ import {
   useCuttinboard,
   useDisclose,
   useNotes,
-} from "@cuttinboard-solutions/cuttinboard-library";
-import { IBoard, INote } from "@cuttinboard-solutions/types-helpers";
+} from "@rodez97/cuttinboard-library";
+import { IBoard, INote } from "@rodez97/types-helpers";
 import { Button, Form, Input, Modal } from "antd/es";
 import { Timestamp } from "firebase/firestore";
 import { nanoid } from "nanoid";

@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { matchSorter } from "match-sorter";
 import { useOwner } from "../OwnerPortal";
 import differenceBy from "lodash-es/differenceBy";
-import { ILocation } from "@cuttinboard-solutions/types-helpers";
+import { ILocation } from "@rodez97/types-helpers";
 
 export default ({
   selectedLocations,

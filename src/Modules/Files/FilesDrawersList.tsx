@@ -5,10 +5,7 @@ import {
   GlobalOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import {
-  useBoard,
-  useCuttinboardLocation,
-} from "@cuttinboard-solutions/cuttinboard-library";
+import { useBoard, useCuttinboardLocation } from "@rodez97/cuttinboard-library";
 import { Button, Input, Menu, MenuProps, Spin } from "antd/es";
 import orderBy from "lodash-es/orderBy";
 import { matchSorter } from "match-sorter";
@@ -19,7 +16,7 @@ import FilesCounter from "./FilesCounter";
 import ManageModuleDialog, {
   useManageModule,
 } from "../ManageApp/ManageModuleDialog";
-import { RoleAccessLevels } from "@cuttinboard-solutions/types-helpers";
+import { RoleAccessLevels } from "@rodez97/types-helpers";
 import { useDrawerSiderContext } from "../../shared/organisms/useDrawerSider";
 
 export default () => {

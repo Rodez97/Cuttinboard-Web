@@ -24,7 +24,7 @@ import DeleteLocationDialog, {
   DeleteLocationDialogRef,
 } from "./DeleteLocationDialog";
 import { useOwner } from ".";
-import { ILocation } from "@cuttinboard-solutions/types-helpers";
+import { ILocation } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
 export default () => {
