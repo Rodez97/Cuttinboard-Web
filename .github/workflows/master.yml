@@ -1,0 +1,60 @@
+name: Deploy Cloud Functions
+
+on:
+  push:
+    branches:
+      - master
+    # Optionally configure to run only for specific files. For example:
+    # paths:
+    # - "website/**"
+env:
+  PROJECT_ID: cuttinboard-2021 # The ID of your Firebase/GCP project
+  # GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      # Environment variables
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_STRIPE_SECRET_KEY: "${{ secrets.STRIPE_SECRET_KEY }}"
+          envkey_STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          envkey_API_KEY: ${{ secrets.API_KEY }}
+          envkey_TRANSACTIONAL_EMAILS_API_KEY: ${{ secrets.TRANSACTIONAL_EMAILS_API_KEY }}
+          envkey_ONE_SIGNAL_APP_KEY: ${{ secrets.ONE_SIGNAL_APP_KEY }}
+          envkey_ONE_SIGNAL_USER_AUTH_KEY: ${{ secrets.ONE_SIGNAL_USER_AUTH_KEY }}
+          envkey_ONE_SIGNAL_APP_ID: ${{ vars.ONE_SIGNAL_APP_ID }}
+          envkey_STRIPE_PRICE_ID: ${{ vars.STRIPE_PRICE_ID }}
+          envkey_SCHEDULE_CHANNEL_ID: ${{ vars.SCHEDULE_CHANNEL_ID }}
+          envkey_MESSAGE_BOARDS_CHANNEL_ID: ${{ vars.MESSAGE_BOARDS_CHANNEL_ID }}
+          envkey_DIRECT_MESSAGES_CHANNEL_ID: ${{ vars.DIRECT_MESSAGES_CHANNEL_ID }}
+          envkey_SERVICE_ACCOUNT_PROJECT_ID: "${{ secrets.SERVICE_ACCOUNT_PROJECT_ID }}"
+          envkey_SERVICE_ACCOUNT_CLIENT_EMAIL: "${{ secrets.SERVICE_ACCOUNT_CLIENT_EMAIL }}"
+          envkey_SERVICE_ACCOUNT_PRIVATE_KEY: "${{ secrets.SERVICE_ACCOUNT_PRIVATE_KEY }}"
+          envkey_DATABASE_URL: ${{ vars.DATABASE_URL }}
+          envkey_STORAGE_BUCKET: ${{ vars.STORAGE_BUCKET }}
+          directory: functions
+      - name: Use Node 16.x
+        uses: actions/setup-node@master
+        with:
+          node-version: 16.x
+      - name: Authenticate with private NPM package
+        run: |
+          cd functions
+          touch .npmrc
+          echo registry=https://registry.npmjs.org/ >> .npmrc
+          echo @rodez97:registry=https://npm.pkg.github.com/ >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }} >> .npmrc
+          cat .npmrc
+      - name: Install dependencies
+        run: cd functions && npm install
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions

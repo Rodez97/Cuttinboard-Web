@@ -1,0 +1,65 @@
+name: Deploy Web App to Firebase Hosting in dev branch
+
+on:
+  push:
+    branches:
+      - dev
+    # Optionally configure to run only for specific files. For example:
+    # paths:
+    # - "website/**"
+env:
+  PROJECT_ID: cuttinboard-2021 # The ID of your Firebase/GCP project
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+  # FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      # Create Credentials file
+      - name: Create credentials file
+        run: |
+          touch gcp-sa.json
+          echo $GCP_SA_KEY > gcp-sa.json
+          cat .npmrc
+      # Environment variables
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_STRIPE_PRODUCT_ID: ${{ vars.STRIPE_PRODUCT_ID }}
+          envkey_STRIPE_PRICE_ID: ${{ vars.STRIPE_PRICE_ID }}
+          envkey_RECAPTCHA3_SITE_KEY: ${{ secrets.RECAPTCHA3_SITE_KEY }}
+          envkey_TRANSLATIONS_SA_CLIENT_EMAIL: ${{ secrets.TRANSLATIONS_SA_CLIENT_EMAIL }}
+          envkey_TRANSLATIONS_SA_PRIVATE_KEY: ${{ secrets.TRANSLATIONS_SA_PRIVATE_KEY }}
+          envkey_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          envkey_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          envkey_FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          envkey_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          envkey_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          envkey_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          envkey_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          envkey_FIREBASE_MEASUREMENT_ID: ${{ secrets.FIREBASE_MEASUREMENT_ID }}
+          envkey_GOOGLE_APPLICATION_CREDENTIALS: "gcp-sa.json"
+      - name: Use Node 20.x
+        uses: actions/setup-node@master
+        with:
+          node-version: 20.x
+      - name: Authenticate with private NPM package
+        run: |
+          touch .npmrc
+          echo registry=https://registry.npmjs.org/ >> .npmrc
+          echo @rodez97:registry=https://npm.pkg.github.com/ >> .npmrc
+          echo //npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }} >> .npmrc
+          cat .npmrc
+      - name: Install dependencies
+        run: cd functions && npm install
+      # Build the app
+      - name: Build
+        run: npm run build:all
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: hosting:channel:deploy preview --expires 7d
