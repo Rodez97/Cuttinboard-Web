@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx } from "@emotion/react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { nanoid } from "nanoid";
 import { useTranslation } from "react-i18next";
 import Tasklist from "../../shared/organisms/Tasklist";
@@ -8,7 +8,6 @@ import {
   Button,
   Collapse,
   Input,
-  message,
   Modal,
   Tag,
   Tooltip,
@@ -19,12 +18,8 @@ import {
   DeleteOutlined,
   ExclamationCircleOutlined,
   PlusCircleOutlined,
-  PrinterOutlined,
 } from "@ant-design/icons";
 import { GrayPageHeader } from "../../shared";
-import { GeneratePDF } from "./GenerateTasksPDF";
-import React from "react";
-import { useReactToPrint } from "react-to-print";
 import { getTasksArray, IChecklist, ITask } from "@rodez97/types-helpers";
 import { logAnalyticsEvent } from "utils/analyticsHelpers";
 
@@ -74,10 +69,6 @@ export default ({
     "1",
   ]);
   const tasksArray = useMemo(() => getTasksArray(section), [section]);
-  const elementToPrint = useRef<HTMLDivElement>(null);
-  const handlePrintTasks = useReactToPrint({
-    content: () => elementToPrint.current,
-  });
 
   const handleAddTask = (name: string = newTaskName) => {
     if (name && canManage) {
@@ -134,22 +125,6 @@ export default ({
     logAnalyticsEvent("checklist_renamed", { newName });
   };
 
-  // Prints a list of tasks, only the name, with the logo and the name of the checklist, in the format of a ticket
-  const handlePrint = async () => {
-    if (tasksArray.length === 0) {
-      message.error(t("There are no tasks to print"));
-      return;
-    }
-
-    try {
-      handlePrintTasks();
-
-      logAnalyticsEvent("checklist_printed");
-    } catch (error) {
-      alert(error);
-    }
-  };
-
   const reorderItem = async (
     element: ITask,
     sourceIndex: number,
@@ -164,94 +139,79 @@ export default ({
   };
 
   return (
-    <React.Fragment>
-      <GeneratePDF
-        sectionName={section.name}
-        tasksArray={tasksArray}
-        sectionId={sectionId}
-        ref={elementToPrint}
-      />
-      <GrayPageHeader
-        className="task-block-header"
-        title={
-          <Typography.Title
-            level={4}
-            editable={canManage ? { onChange: updateChecklistName } : false}
-            ellipsis={{
-              tooltip: section.name,
-            }}
-          >
-            {section.name}
-          </Typography.Title>
-        }
-        extra={
-          canManage && [
-            <Tooltip key="delete" title={t("Delete")}>
-              <Button
-                danger
-                type="link"
-                onClick={handleDeleteTodoCard}
-                icon={<DeleteOutlined />}
-              />
-            </Tooltip>,
-            <Tooltip title={t("Print Task block")} key="print">
-              <Button
-                type="link"
-                icon={<PrinterOutlined />}
-                onClick={handlePrint}
-              />
-            </Tooltip>,
-          ]
-        }
-      >
-        <Collapse
-          ghost
-          activeKey={isDragging ? undefined : activeKey}
-          onChange={setActiveKey}
+    <GrayPageHeader
+      className="task-block-header"
+      title={
+        <Typography.Title
+          level={4}
+          editable={canManage ? { onChange: updateChecklistName } : false}
+          ellipsis={{
+            tooltip: section.name,
+          }}
         >
-          <Collapse.Panel
-            header={t("Tasks")}
-            key="1"
-            extra={
-              <Tag
-                key="tasksSummary"
-                icon={<CheckCircleOutlined />}
-                color={getSummary.color}
-              >
-                {getSummary.text}
-              </Tag>
-            }
-          >
-            {canManage && (
-              <Input
-                placeholder={t("Add a task")}
-                value={newTaskName}
-                onChange={(e) => setNewTaskName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.code === "Enter") {
-                    e.preventDefault();
-                    handleAddTask();
-                    e.stopPropagation();
-                  }
-                }}
-                addonAfter={
-                  <PlusCircleOutlined onClick={() => handleAddTask()} />
-                }
-                hidden={!canManage}
-                css={{ marginBottom: 20 }}
-              />
-            )}
-            <Tasklist
-              tasks={tasksArray}
-              canRemove={canManage}
-              onRemove={handleRemoveTask}
-              onChange={handleTaskChange}
-              onTaskNameChange={handleTaskNameChange}
-              onReorder={reorderItem}
+          {section.name}
+        </Typography.Title>
+      }
+      extra={
+        canManage && (
+          <Tooltip key="delete" title={t("Delete")}>
+            <Button
+              danger
+              type="link"
+              onClick={handleDeleteTodoCard}
+              icon={<DeleteOutlined />}
             />
-          </Collapse.Panel>
-        </Collapse>
-      </GrayPageHeader>
-    </React.Fragment>
+          </Tooltip>
+        )
+      }
+    >
+      <Collapse
+        ghost
+        activeKey={isDragging ? undefined : activeKey}
+        onChange={setActiveKey}
+      >
+        <Collapse.Panel
+          header={t("Tasks")}
+          key="1"
+          extra={
+            <Tag
+              key="tasksSummary"
+              icon={<CheckCircleOutlined />}
+              color={getSummary.color}
+            >
+              {getSummary.text}
+            </Tag>
+          }
+        >
+          {canManage && (
+            <Input
+              placeholder={t("Add a task")}
+              value={newTaskName}
+              onChange={(e) => setNewTaskName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.code === "Enter") {
+                  e.preventDefault();
+                  handleAddTask();
+                  e.stopPropagation();
+                }
+              }}
+              addonAfter={
+                <PlusCircleOutlined onClick={() => handleAddTask()} />
+              }
+              hidden={!canManage}
+              css={{ marginBottom: 20 }}
+            />
+          )}
+          <Tasklist
+            tasks={tasksArray}
+            canRemove={canManage}
+            onRemove={handleRemoveTask}
+            onChange={handleTaskChange}
+            onTaskNameChange={handleTaskNameChange}
+            onReorder={reorderItem}
+          />
+        </Collapse.Panel>
+      </Collapse>
+    </GrayPageHeader>
   );
 };

@@ -5,11 +5,7 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { Divider, Layout, Table, TableColumnsType, Tag } from "antd/es";
 import { Button, Space, Typography } from "antd/es";
-import {
-  FilePdfOutlined,
-  LeftCircleOutlined,
-  RightCircleOutlined,
-} from "@ant-design/icons";
+import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import "./RosterView.scss";
 import groupBy from "lodash-es/groupBy";
 import upperFirst from "lodash-es/upperFirst";
@@ -25,7 +21,6 @@ import {
 } from "@rodez97/cuttinboard-library";
 import isoWeek from "dayjs/plugin/isoWeek";
 import usePageTitle from "../../hooks/usePageTitle";
-import { generateRosterPdf } from "./NewPDF";
 import ErrorPage from "../../shared/molecules/PageError";
 import {
   getEmployeeFullName,
@@ -35,7 +30,6 @@ import {
   IEmployee,
   IShift,
 } from "@rodez97/types-helpers";
-import { logAnalyticsEvent } from "utils/analyticsHelpers";
 dayjs.extend(isoWeek);
 
 export type RosterData = {
@@ -49,7 +43,7 @@ function RosterView() {
   const { employeeShifts, weekDays, weekId, loading, error } = useSchedule();
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const { t } = useTranslation();
-  const { location, employees: getEmployees } = useCuttinboardLocation();
+  const { employees: getEmployees } = useCuttinboardLocation();
   const wageData = useWageData();
   const checkPermission = useLocationPermissions();
 
@@ -219,19 +213,6 @@ function RosterView() {
     return `${firstDayWeek} - ${lastDayWeek}`.toUpperCase();
   }, [weekId]);
 
-  const generatePDF = async () => {
-    const amRoster = dataSource["am"] ?? [];
-    const pmRoster = dataSource["pm"] ?? [];
-    await generateRosterPdf(
-      amRoster,
-      pmRoster,
-      weekId,
-      weekDays[selectedDateIndex],
-      location.name
-    );
-    logAnalyticsEvent("schedule_roster_pdf_generated");
-  };
-
   if (loading) {
     return <LoadingPage />;
   }
@@ -246,15 +227,6 @@ function RosterView() {
         onBack={() => navigate(-1)}
         title={t("Roster")}
         subTitle={currentWeekText}
-        extra={
-          <Button
-            onClick={generatePDF}
-            icon={<FilePdfOutlined />}
-            type="dashed"
-          >
-            {t("Generate PDF")}
-          </Button>
-        }
       />
       <Layout.Content>
         <div css={{ display: "flex", flexDirection: "column", padding: 20 }}>
