@@ -3,6 +3,7 @@ name: Deploy Web App to Firebase Hosting in dev branch
 on:
   push:
     branches:
+      - master
       - dev
     # Optionally configure to run only for specific files. For example:
     # paths:
