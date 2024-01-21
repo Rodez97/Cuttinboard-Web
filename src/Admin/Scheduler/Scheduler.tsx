@@ -15,7 +15,6 @@ import ShiftCell from "./ShiftCell";
 import { Input, Layout, Select } from "antd/es";
 import TableFooter from "./TableFooter";
 import {
-  FilePdfOutlined,
   FundProjectionScreenOutlined,
   InfoCircleOutlined,
   ScheduleOutlined,
@@ -45,7 +44,6 @@ import {
   IShift,
   RoleAccessLevels,
 } from "@rodez97/types-helpers";
-import useGeneratePdfBtn from "./GeneratePdfBtn";
 import PublishScheduleBtn from "./PublishScheduleBtn";
 import ThisWeekTag from "./ThisWeekTag";
 import PageHeaderButtons from "../../shared/molecules/PageHeaderButtons";
@@ -75,7 +73,6 @@ function Scheduler() {
   const manageShiftDialogRef = useRef<IManageShiftDialogRef>(null);
   const [projectedSalesOpen, setProjectedSalesOpen] = useState(false);
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false);
-  const { generatePdf, generatingPDF } = useGeneratePdfBtn();
   const checkPermission = useLocationPermissions();
   const [isSettingsOpen, openSettings, closeSettings] = useDisclose(false);
 
@@ -159,14 +156,6 @@ function Scheduler() {
                 icon: <FundProjectionScreenOutlined />,
                 onClick: () => setProjectedSalesOpen(true),
                 label: t("Projected Sales"),
-                type: "dashed",
-              },
-              {
-                key: "generatePdf",
-                icon: <FilePdfOutlined />,
-                onClick: generatePdf,
-                label: t("Generate PDF"),
-                loading: generatingPDF,
                 type: "dashed",
               },
               {
