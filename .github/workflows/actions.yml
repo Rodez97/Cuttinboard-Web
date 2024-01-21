@@ -55,7 +55,7 @@ jobs:
           echo //npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }} >> .npmrc
           cat .npmrc
       - name: Install dependencies
-        run: cd functions && npm install
+        run: npm install
       # Build the app
       - name: Build
         run: npm run build:all
