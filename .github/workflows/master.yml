@@ -3,7 +3,7 @@ name: Deploy Web App to Firebase Hosting in dev branch
 on:
   push:
     branches:
-      - dev
+      - master
     # Optionally configure to run only for specific files. For example:
     # paths:
     # - "website/**"
@@ -59,7 +59,19 @@ jobs:
       # Build the app
       - name: Build
         run: npm run build:all
-      - name: Deploy to Firebase
+      - name: Deploy Firestore Rules
         uses: w9jds/firebase-action@master
         with:
-          args: hosting:channel:deploy preview --expires 7d
+          args: deploy --only firestore:rules
+      - name: Deploy Database Rules
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only database:rules
+      - name: Deploy Storage Rules
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only storage
+      - name: Deploy to Firebase Hosting
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting
