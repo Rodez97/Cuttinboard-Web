@@ -69,3 +69,7 @@ node_modules/
 .env
 
 .cuttinboard-translations-SA.json
+
+.npmrc
+
+package-lock.json
