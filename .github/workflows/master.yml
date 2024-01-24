@@ -59,18 +59,6 @@ jobs:
       # Build the app
       - name: Build
         run: npm run build:all
-      # - name: Deploy Firestore Rules
-      #   uses: w9jds/firebase-action@master
-      #   with:
-      #     args: deploy --only firestore:rules
-      # - name: Deploy Database Rules
-      #   uses: w9jds/firebase-action@master
-      #   with:
-      #     args: deploy --only database:rules
-      # - name: Deploy Storage Rules
-      #   uses: w9jds/firebase-action@master
-      #   with:
-      #     args: deploy --only storage
       - name: Deploy to Firebase Hosting
         uses: w9jds/firebase-action@master
         with:
